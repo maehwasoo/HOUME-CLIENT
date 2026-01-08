@@ -1,5 +1,0 @@
-echo "🐕 Husky pre-commit 실행"
-
-pnpm lint-staged
-
-echo "🎉 lint-staged 완료!"
