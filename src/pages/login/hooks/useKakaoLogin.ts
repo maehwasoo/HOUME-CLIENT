@@ -23,12 +23,17 @@ import { useUserStore } from '@/store/useUserStore';
 import { getKakaoLogin } from '../apis/kakaoLogin';
 
 import type { LoginApiResponse } from '../types/auth';
+import type { AuthEnvironment } from '../types/environment';
 
 export const useKakaoLoginMutation = () => {
   const navigate = useNavigate();
   const setAccessToken = useUserStore((state) => state.setAccessToken);
 
-  return useMutation<LoginApiResponse, Error, { code: string; env: string }>({
+  return useMutation<
+    LoginApiResponse,
+    Error,
+    { code: string; env: AuthEnvironment }
+  >({
     mutationFn: ({ code, env }) => getKakaoLogin(code, env),
     onSuccess: (response) => {
       const accessToken = response.accessToken;

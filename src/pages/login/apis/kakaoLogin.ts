@@ -4,6 +4,7 @@ import { API_ENDPOINT } from '@constants/apiEndpoints';
 import axiosInstance from '@shared/apis/axiosInstance';
 
 import type { KakaoLoginResponse, LoginApiResponse } from '../types/auth';
+import type { AuthEnvironment } from '../types/environment';
 import type { BaseResponse } from '@shared/types/apis';
 
 /**
@@ -16,14 +17,14 @@ import type { BaseResponse } from '@shared/types/apis';
  * 환경 정보를 백엔드 `/oauth/kakao/callback` API로 전달하는 역할을 합니다.
  *
  * @param code - 카카오 인증 서버에서 받은 인가 코드 (URL 파라미터에서 파싱)
- * @param env - 환경 정보 ('local' 또는 'dev')
+ * @param env - 환경 정보 ('local' | 'preview' | 'prod')
  * @returns Promise<LoginApiResponse> - 사용자 정보와 액세스 토큰
  *
  * @example
  * ```typescript
  * // KakaoCallback 컴포넌트에서:
  * const code = new URL(window.location.href).searchParams.get('code');
- * const env = window.location.hostname === 'localhost' ? 'local' : 'dev';
+ * const env = window.location.hostname === 'localhost' ? 'local' : 'prod';
  * const response = await getKakaoLogin(code, env);
  * console.log(response.data.user); // 사용자 정보
  * console.log(response.accessToken); // 액세스 토큰
@@ -32,7 +33,7 @@ import type { BaseResponse } from '@shared/types/apis';
 
 export const getKakaoLogin = async (
   code: string,
-  env: string
+  env: AuthEnvironment
 ): Promise<LoginApiResponse> => {
   // AxiosInstance를 사용해서 서버에 요청 (code와 env 쿼리 파라미터 전달)
   const response = await axiosInstance.get<BaseResponse<KakaoLoginResponse>>(
