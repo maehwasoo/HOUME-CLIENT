@@ -6,11 +6,11 @@
  *
  * 전체 로그인 흐름:
  * 1. 사용자가 카카오 로그인 버튼 클릭
- * 2. 프론트엔드가 백엔드 `/oauth/kakao?env=local|preview|prod`로 리다이렉트
+ * 2. 프론트엔드가 백엔드 `/oauth/kakao?env=local|preview|dev`로 리다이렉트
  * 3. 백엔드가 `env`를 기반으로 redirect_uri 계산
  *    - local: http://localhost:5173/oauth/kakao/callback
  *    - preview: http://preview.houme.kr/oauth/kakao/callback
- *    - prod: https://www.houme.kr/oauth/kakao/callback
+ *    - dev: https://www.houme.kr/oauth/kakao/callback
  * 4. 백엔드가 카카오 인증 서버로 리다이렉트 (redirect_uri 포함)
  * 5. 카카오 인증 완료 후 프론트엔드 `/oauth/kakao/callback?code=인가코드`로 리다이렉트
  * 6. 이 컴포넌트가 렌더링되고 인가 코드(code)를 파싱
@@ -47,7 +47,7 @@ const KakaoCallback = () => {
     const url = new URL(window.location.href);
     const code = url.searchParams.get('code');
 
-    // 환경 감지: hostname 기반으로 local/preview/prod 결정
+    // 환경 감지: hostname 기반으로 local/preview/dev 결정
     const hostname = window.location.hostname;
     const env = getAuthEnvironment(hostname);
 

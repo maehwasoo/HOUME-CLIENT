@@ -9,5 +9,5 @@ export const getAuthEnvironment = (hostname: string): AuthEnvironment => {
     return 'preview';
   }
 
-  return 'prod';
+  return 'dev';
 };

@@ -17,14 +17,14 @@ import type { BaseResponse } from '@shared/types/apis';
  * 환경 정보를 백엔드 `/oauth/kakao/callback` API로 전달하는 역할을 합니다.
  *
  * @param code - 카카오 인증 서버에서 받은 인가 코드 (URL 파라미터에서 파싱)
- * @param env - 환경 정보 ('local' | 'preview' | 'prod')
+ * @param env - 환경 정보 ('local' | 'preview' | 'dev')
  * @returns Promise<LoginApiResponse> - 사용자 정보와 액세스 토큰
  *
  * @example
  * ```typescript
  * // KakaoCallback 컴포넌트에서:
  * const code = new URL(window.location.href).searchParams.get('code');
- * const env = window.location.hostname === 'localhost' ? 'local' : 'prod';
+ * const env = window.location.hostname === 'localhost' ? 'local' : 'dev';
  * const response = await getKakaoLogin(code, env);
  * console.log(response.data.user); // 사용자 정보
  * console.log(response.accessToken); // 액세스 토큰
