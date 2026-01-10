@@ -1,1 +1,1 @@
-export type AuthEnvironment = 'local' | 'preview' | 'prod';
+export type AuthEnvironment = 'local' | 'preview' | 'dev';
