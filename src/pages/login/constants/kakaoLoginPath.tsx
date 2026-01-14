@@ -15,7 +15,7 @@
  * - 백엔드가 카카오 인증 URL을 생성하고 리다이렉트 처리
  *
  * @see src/pages/login/LoginPage.tsx
- * @see src/pages/login/apis/kakaoLogin.ts
+ * @see src/pages/login/apis/kakaoOAuthCallback.ts
  */
 const clientId = import.meta.env.VITE_KAKAO_CLIENT_ID;
 const redirectUrl = import.meta.env.VITE_KAKAO_REDIRECT_URI;
