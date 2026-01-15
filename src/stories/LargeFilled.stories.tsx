@@ -3,7 +3,7 @@ import LargeFilled from '@components/button/largeFilledButton/LargeFilledButton'
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta: Meta<typeof LargeFilled> = {
-  title: 'Button/LargeFilled',
+  title: 'shared/button/LargeFilled',
   component: LargeFilled,
   tags: ['autodocs'],
   parameters: {

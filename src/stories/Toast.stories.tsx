@@ -1,11 +1,11 @@
 import { TOAST_TYPE } from '@/shared/types/toast';
 
-import Toast from '../shared/components/toast/Toast';
+import Toast from '@shared/components/toast/Toast';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta = {
-  title: 'shared/components/toast/Toast',
+  title: 'shared/toast/Toast',
   component: Toast,
   tags: ['autodocs'],
   argTypes: {
@@ -31,9 +31,9 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Success: Story = {
+export const Info: Story = {
   args: {
-    text: '작업이 성공적으로 완료되었습니다!',
+    text: '정보 토스트 예시입니다',
     type: TOAST_TYPE.INFO,
   },
 };
@@ -57,7 +57,7 @@ export const CustomMargin: Story = {
         code: `toast(
     <Toast
       text="하단 여백이 변경된 토스트 예시"
-      type={TOAST_TYPE.Warning}
+      type={TOAST_TYPE.WARNING}
     />,
     {
       style: { marginBottom: '5rem', ...toastStyle },

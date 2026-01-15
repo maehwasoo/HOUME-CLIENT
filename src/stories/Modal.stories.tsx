@@ -1,13 +1,14 @@
-import Modal from '@/shared/components/overlay/modal/CreditModal';
+import CreditModal from '@/shared/components/overlay/modal/CreditModal';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta = {
-  title: 'shared/components/overlay/Modal',
-  component: Modal,
+  title: 'shared/overlay/CreditModal',
+  component: CreditModal,
   argTypes: {
     title: { control: 'text' },
     onClose: { action: 'onClose' },
+    onCreditAction: { action: 'onCreditAction' },
   },
   parameters: {
     layout: 'padded',
@@ -19,7 +20,7 @@ const meta = {
       },
     },
   },
-} satisfies Meta<typeof Modal>;
+} satisfies Meta<typeof CreditModal>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;

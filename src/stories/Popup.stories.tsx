@@ -1,11 +1,14 @@
-import Popup from '../shared/components/overlay/popup/Popup';
+import Popup from '@shared/components/overlay/popup/Popup';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta = {
-  title: 'shared/components/overlay/popup',
+  title: 'shared/overlay/Popup',
   component: Popup,
   tags: ['autodocs'],
+  args: {
+    onClose: () => {},
+  },
   argTypes: {
     title: { control: 'text', description: '팝업 제목 텍스트' },
     detail: { control: 'text', description: '팝업 상세 텍스트' },
@@ -27,17 +30,15 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    onClose: () => {},
     title: '지금 나가면\n무료 토큰 1개가 사라져요!',
     detail:
       '조금만 더 입력하면 이미지를 받을 수 있어요.\n나가면 입력한 내용과 함께 토큰도 소진돼요.',
   },
 };
 
-export const Closed: Story = {
+export const WithoutDetail: Story = {
   args: {
-    onClose: () => {},
-    title: '팝업이 닫힌 상태',
+    title: '상세 설명 없는 팝업',
     detail: '',
   },
 };

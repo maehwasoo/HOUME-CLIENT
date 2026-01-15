@@ -3,7 +3,7 @@ import SmallFilled from '@components/button/smallFilledButton/SmallFilledButton'
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta: Meta<typeof SmallFilled> = {
-  title: 'Button/SmallFilled',
+  title: 'shared/button/SmallFilled',
   component: SmallFilled,
   tags: ['autodocs'],
   parameters: {

@@ -6,7 +6,7 @@ function HelloWorld() {
 }
 
 const meta = {
-  title: '예시/HelloWorld',
+  title: 'example/HelloWorld',
   component: HelloWorld,
   parameters: {
     docs: {

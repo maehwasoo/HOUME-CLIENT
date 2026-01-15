@@ -3,7 +3,7 @@ import ChargeButton from '@components/button/chargeButton/ChargeButton';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta: Meta<typeof ChargeButton> = {
-  title: 'Button/ChargeButton',
+  title: 'shared/button/ChargeButton',
   component: ChargeButton,
   tags: ['autodocs'],
   parameters: {

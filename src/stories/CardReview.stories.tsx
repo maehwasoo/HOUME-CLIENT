@@ -3,7 +3,7 @@ import { CardReview } from '@shared/components/cardReview/CardReview';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta: Meta<typeof CardReview> = {
-  title: 'Components/CardReview',
+  title: 'shared/card/CardReview',
   component: CardReview,
   tags: ['autodocs'],
   argTypes: {
