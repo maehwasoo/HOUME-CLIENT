@@ -7,8 +7,8 @@
 
 ## 글로벌 테마 & Reset
 
-- `src/shared/styles/global.css.ts`가 `createGlobalTheme`로 레이아웃 변수를 만들고 `globalStyle`로 `html/body/#root` 레벨의 모바일 퍼스트 레이아웃, 스크롤 숨김, 폰트 스무딩을 설정해요.
-- `reset.css.ts`는 현대적인 CSS Reset을 Vanilla Extract로 구현해 모든 요소의 margin/padding 제거, `box-sizing: border-box`, rem 기준 62.5% 설정, 리스트/링크/폼 요소 초기화를 수행해요.
+- `src/shared/styles/global.css.ts`가 `createGlobalTheme`로 레이아웃 변수를 만들고(`layoutVars.minWidth=375px`, `layoutVars.maxWidth=440px`, `layoutVars.height=100dvh`) `globalStyle`로 `html/body/#root` 레벨의 모바일 퍼스트 고정 레이아웃, 스크롤 숨김, 폰트 스무딩을 설정해요.
+- `reset.css.ts`는 현대적인 CSS Reset을 Vanilla Extract로 구현해 모든 요소의 margin/padding 제거, `box-sizing: border-box`, rem 기준 62.5% 설정(1rem=10px), 리스트/링크/폼 요소 초기화를 수행해요.
 - `fontFace.css.ts`와 `fontStyle.ts`는 Pretendard 폰트를 선언하고, `fontStyle(key)` 헬퍼로 각 컴포넌트에서 일관된 타이포그래피를 주입하게 해요.
 
 ## 디자이너 토큰
