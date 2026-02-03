@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 
 import { useQueryClient } from '@tanstack/react-query';
-import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 
 import FilterChip from '@/pages/generate/components/filterChip/FilterChip';
@@ -11,7 +10,6 @@ import {
   useActiveImageId,
   useGeneratedCategoriesQuery,
   useGeneratedProductsQuery,
-  useSheetSnapState,
 } from '@/pages/generate/hooks/useFurnitureCuration';
 import { useCurationCacheStore } from '@/pages/generate/stores/useCurationCacheStore';
 import { useCurationStore } from '@/pages/generate/stores/useCurationStore';
@@ -20,17 +18,11 @@ import { useGetJjymListQuery } from '@/pages/mypage/hooks/useSaveItemList';
 import { ROUTES } from '@/routes/paths';
 import { QUERY_KEY } from '@/shared/constants/queryKey';
 import { useSavedItemsStore } from '@/store/useSavedItemsStore';
-import { useUserStore } from '@/store/useUserStore';
 
 import { getGeneratedImageProducts } from '@pages/generate/apis/furniture';
-import {
-  buildDetectedCodeToCategoryId,
-  pickHotspotIdByCategory,
-} from '@pages/generate/utils/hotspotCategoryResolver';
 
 import CardProductItem from './CardProductItem';
 import * as styles from './CurationSheet.css';
-import { CurationSheetWrapper } from './CurationSheetWrapper';
 
 import type { FurnitureProductsInfoResponse } from '@pages/generate/types/furniture';
 
@@ -51,27 +43,20 @@ interface CurationSheetProps {
 }
 
 /**
- * 결과 페이지 하단 큐레이션 시트
- * - 감지된 가구 카테고리/상품을 표시하고 바텀시트 스냅 상태와 연동
+ * 결과 페이지 인라인 큐레이션 섹션
+ * - 감지된 가구 카테고리/상품을 고정 영역에 표시
  * - 그룹 기반 진입 시 groupId를 통해 캐시·프리패치 범위를 확정
  */
 export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
-  // 전역상태 사용
-  const displayName = useUserStore((state) => state.userName ?? '사용자');
   const activeImageId = useActiveImageId();
   const imageState = useActiveImageCurationState();
   const selectedCategoryId = imageState?.selectedCategoryId ?? null;
   const selectCategory = useCurationStore((state) => state.selectCategory);
-  const selectHotspot = useCurationStore((state) => state.selectHotspot);
-  const hotspots = useMemo(
-    () => imageState?.hotspots ?? [],
-    [imageState?.hotspots]
-  );
   const detectedObjects = useMemo(
     () => imageState?.detectedObjects ?? [],
     [imageState?.detectedObjects]
   );
-  const { snapState, setSnapState } = useSheetSnapState();
+  const hasDetectionCodes = detectedObjects.length > 0;
 
   const navigate = useNavigate();
   const { variant } = useABTest();
@@ -98,11 +83,6 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
     groupId !== null ? (state.groups[groupId]?.products ?? null) : null
   );
   const productsData = productsQuery.data?.products;
-  const headerName = productsQuery.data?.userName ?? displayName;
-  const detectedCodeToCategoryId = useMemo(
-    () => buildDetectedCodeToCategoryId(categories, detectedObjects),
-    [categories, detectedObjects]
-  );
 
   const normalizedProducts = useMemo(() => {
     return (productsData ?? []).map((product, index) => {
@@ -116,6 +96,11 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
         ? byProductId
         : index + 1;
 
+      const originalPrice = Number(product.furnitureProductOriginalPrice);
+      const discountPrice = Number(product.furnitureProductDiscountPrice);
+      const discountRate = Number(product.furnitureProductDiscountRate);
+      const saveCount = Number(product.furnitureProductSaveCount);
+
       return {
         id: recommendId,
         isRecommendId: Boolean(recommendId),
@@ -125,6 +110,23 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
         furnitureProductImageUrl:
           product.furnitureProductImageUrl || product.baseFurnitureImageUrl,
         furnitureProductSiteUrl: product.furnitureProductSiteUrl,
+        furnitureProductOriginalPrice: Number.isFinite(originalPrice)
+          ? originalPrice
+          : undefined,
+        furnitureProductDiscountPrice: Number.isFinite(discountPrice)
+          ? discountPrice
+          : undefined,
+        furnitureProductDiscountRate: Number.isFinite(discountRate)
+          ? discountRate
+          : undefined,
+        furnitureProductColorHexes: Array.isArray(
+          product.furnitureProductColorHexes
+        )
+          ? product.furnitureProductColorHexes
+          : undefined,
+        furnitureProductSaveCount: Number.isFinite(saveCount)
+          ? saveCount
+          : undefined,
       };
     });
   }, [productsData]);
@@ -138,16 +140,6 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
     const ids = jjymItems.map((item) => item.id);
     setSavedProductIds(ids);
   }, [jjymItems, setSavedProductIds]);
-
-  useEffect(() => {
-    if (
-      activeImageId === null &&
-      snapState !== 'collapsed' &&
-      snapState !== 'hidden'
-    ) {
-      setSnapState('collapsed');
-    }
-  }, [activeImageId, snapState, setSnapState]);
 
   // 카테고리 사전 로딩 이후, 각 카테고리별 상품을 백그라운드에서 프리패치
   // - 요구사항: 객체 추론 직후 요청 가능한 값(상품 리스트)을 미리 로딩
@@ -199,30 +191,19 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
             variables.categoryId
           );
         },
-        staleTime: 30 * 1000,
+        staleTime: 5 * 60 * 1000,
       });
     });
   }, [queryClient, activeImageId, categories, groupId, groupProductCache]);
 
   /**
-   * 카테고리 선택 시 핫스팟 동기화 및 시트 펼침
+   * 카테고리 선택
    */
   const handleCategorySelect = (categoryId: number) => {
     if (activeImageId === null) return;
     if (selectedCategoryId === categoryId) return;
     logResultImgClickCurationSheetFilter(variant);
     selectCategory(activeImageId, categoryId);
-    const hotspotId =
-      pickHotspotIdByCategory(
-        categoryId,
-        hotspots,
-        categories,
-        detectedCodeToCategoryId
-      ) ?? null;
-    selectHotspot(activeImageId, hotspotId);
-    if (snapState === 'collapsed') {
-      setSnapState('mid');
-    }
   };
 
   // const LoadingDots = () => (
@@ -271,8 +252,11 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
     if (activeImageId === null) {
       return renderStatus(
         '가구 추천을 보려면 생성된 이미지를 먼저 선택해 주세요',
-        '결과 이미지에서 핫스팟을 선택하면 추천이 표시돼요'
+        '상단 가구 필터에서 원하는 가구를 선택해 주세요'
       );
+    }
+    if (!hasDetectionCodes) {
+      return renderStatus('가구를 분석 중이에요', '잠시만 기다려 주세요');
     }
     if (categoriesQuery.isLoading) {
       return renderStatus(
@@ -292,7 +276,7 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
     if (categories.length === 0) {
       return renderStatus(
         '감지된 가구가 없어 추천을 제공할 수 없어요',
-        '다른 이미지를 생성하거나 핫스팟을 다시 선택해 주세요'
+        '다른 이미지를 선택하거나 새로 생성해 보세요'
       );
     }
     if (!selectedCategoryId) {
@@ -336,62 +320,30 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
   };
 
   return (
-    <CurationSheetWrapper
-      snapState={snapState}
-      onSnapStateChange={setSnapState}
-      onCollapsed={() => {
-        if (activeImageId === null) return;
-        // 시트 완전히 닫힌 뒤에만 선택 상태 해제해 목록이 사라지는 시점을 늦춤
-        selectCategory(activeImageId, null);
-        selectHotspot(activeImageId, null);
-      }}
-    >
-      {(snapState) => (
-        <>
-          <div className={styles.filterSection}>
-            {categories.length === 0 ? (
-              // 추론 중에는 세 번째 길이(long) 스켈레톤 칩 하나만 노출
-              <span
-                className={clsx(
-                  styles.filterSkeletonChip,
-                  styles.filterSkeletonChipWidth[FILTER_SKELETON_WIDTH]
-                )}
-                aria-hidden
-              />
-            ) : (
-              categories.map((category) => (
-                <FilterChip
-                  key={category.id}
-                  // 접힘 상태에서는 칩을 항상 비선택(회색)으로 표시
-                  isSelected={
-                    (snapState === 'expanded' || snapState === 'mid') &&
-                    selectedCategoryId === category.id
-                  }
-                  onClick={() => handleCategorySelect(category.id)}
-                >
-                  {category.categoryName}
-                </FilterChip>
-              ))
-            )}
-          </div>
-          <div
-            className={clsx(
-              styles.scrollContentBase,
-              styles.scrollContentArea[
-                snapState === 'expanded' ? 'expanded' : 'mid'
-              ]
-            )}
-          >
-            <p className={styles.headerText}>
-              {headerName}님의 취향에 딱 맞는 가구 추천
-            </p>
-            {/* 그리드 영역 */}
-            <div className={styles.curationSection}>
-              {renderProductSection()}
-            </div>
-          </div>
-        </>
-      )}
-    </CurationSheetWrapper>
+    <section className={styles.container}>
+      <h2 className={styles.title}>이 공간의 가구 큐레이션</h2>
+
+      <div className={styles.filterSection}>
+        {categories.length === 0 ? (
+          // 감지/로딩 중에는 세 번째 길이(long) 스켈레톤 칩 하나만 노출
+          <span
+            className={`${styles.filterSkeletonChip} ${styles.filterSkeletonChipWidth[FILTER_SKELETON_WIDTH]}`}
+            aria-hidden
+          />
+        ) : (
+          categories.map((category) => (
+            <FilterChip
+              key={category.id}
+              isSelected={selectedCategoryId === category.id}
+              onClick={() => handleCategorySelect(category.id)}
+            >
+              {category.categoryName}
+            </FilterChip>
+          ))
+        )}
+      </div>
+
+      <div className={styles.content}>{renderProductSection()}</div>
+    </section>
   );
 };

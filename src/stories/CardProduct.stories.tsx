@@ -19,6 +19,12 @@ const meta: Meta<typeof CardProduct> = {
     linkHref: { control: 'text' },
     linkLabel: { control: 'text' },
     disabled: { control: 'boolean' },
+    enableWholeCardLink: { control: 'boolean' },
+    originalPrice: { control: 'number' },
+    discountRate: { control: 'number' },
+    discountPrice: { control: 'number' },
+    saveCount: { control: 'number' },
+    colorHexes: { control: 'object' },
   },
   parameters: {
     docs: {
@@ -73,6 +79,12 @@ export const Large: Story = {
     isSaved: true,
     linkHref: 'https://example.com',
     linkLabel: '공식 사이트',
+    enableWholeCardLink: true,
+    originalPrice: 129000,
+    discountRate: 20,
+    discountPrice: 99000,
+    saveCount: 1234,
+    colorHexes: ['#FFFFFF', '#000000', '#A696FF', '#E7EAEF'],
   },
   render: (args) => <CardProductStory {...args} />,
 };

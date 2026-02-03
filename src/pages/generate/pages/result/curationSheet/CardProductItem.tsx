@@ -8,12 +8,35 @@ import {
   logResultImgClickCurationSheetBtnGoSite,
   logResultImgClickCurationSheetBtnSave,
   logResultImgClickCurationSheetCard,
+  logResultImgClickCurationSheetCardImage,
+  logResultImgClickCurationSheetCardTitle,
 } from '@/pages/generate/utils/analytics';
 import CardProduct from '@/shared/components/card/cardProduct/CardProduct';
 import { useToast } from '@/shared/components/toast/useToast';
 import { SESSION_STORAGE_KEYS } from '@/shared/constants/bottomSheet';
 import { TOAST_TYPE } from '@/shared/types/toast';
 import { useSavedItemsStore } from '@/store/useSavedItemsStore';
+
+const buildCurationOutboundUrl = (url: string) => {
+  const utmQuery = import.meta.env.VITE_CURATION_OUTBOUND_UTM_QUERY;
+  if (!utmQuery) return url;
+
+  try {
+    const parsed = new URL(url);
+    const normalized = utmQuery.startsWith('?') ? utmQuery.slice(1) : utmQuery;
+    const params = new URLSearchParams(normalized);
+
+    params.forEach((value, key) => {
+      if (!parsed.searchParams.has(key)) {
+        parsed.searchParams.set(key, value);
+      }
+    });
+
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+};
 
 interface CardProductItemProps {
   product: {
@@ -23,6 +46,11 @@ interface CardProductItemProps {
     furnitureProductMallName: string;
     furnitureProductImageUrl: string;
     furnitureProductSiteUrl: string;
+    furnitureProductOriginalPrice?: number;
+    furnitureProductDiscountPrice?: number;
+    furnitureProductDiscountRate?: number;
+    furnitureProductColorHexes?: string[];
+    furnitureProductSaveCount?: number;
   };
   onGotoMypage: () => void;
 }
@@ -102,14 +130,28 @@ const CardProductItem = memo(
         title={product.furnitureProductName}
         brand={product.furnitureProductMallName}
         imageUrl={product.furnitureProductImageUrl}
-        linkHref={product.furnitureProductSiteUrl}
+        linkHref={buildCurationOutboundUrl(product.furnitureProductSiteUrl)}
         isSaved={isSaved}
         onToggleSave={handleToggle}
         disabled={isMutating || !hasRecommendId}
+        enableWholeCardLink={true}
+        originalPrice={product.furnitureProductOriginalPrice}
+        discountPrice={product.furnitureProductDiscountPrice}
+        discountRate={product.furnitureProductDiscountRate}
+        colorHexes={product.furnitureProductColorHexes}
+        saveCount={product.furnitureProductSaveCount}
         onLinkClick={() => {
           logResultImgClickCurationSheetBtnGoSite(variant);
         }}
-        onCardClick={() => {
+        onCardClick={(area) => {
+          if (area === 'image') {
+            logResultImgClickCurationSheetCardImage(variant);
+            return;
+          }
+          if (area === 'title') {
+            logResultImgClickCurationSheetCardTitle(variant);
+            return;
+          }
           logResultImgClickCurationSheetCard(variant);
         }}
       />

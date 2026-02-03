@@ -1,11 +1,5 @@
 import { useEffect } from 'react';
 
-import { useABTest } from '@/pages/generate/hooks/useABTest';
-import { useOpenCurationSheet } from '@/pages/generate/hooks/useFurnitureCuration';
-import { logResultImgClickBtnTag } from '@/pages/generate/utils/analytics';
-
-import Tag from '@shared/assets/icons/tagIcon.svg?react';
-
 import DetectionHotspots from './DetectionHotspots';
 import * as styles from './GeneratedImg.css.ts';
 
@@ -30,7 +24,6 @@ interface GeneratedImgBProps {
   onCurrentImgIdChange?: (currentImgId: number) => void;
   shouldInferHotspots?: boolean;
   detectionCache?: Record<number, DetectionCacheEntry> | null;
-  groupId?: number | null;
 }
 
 const GeneratedImgB = ({
@@ -38,7 +31,6 @@ const GeneratedImgB = ({
   onCurrentImgIdChange,
   shouldInferHotspots = true,
   detectionCache,
-  groupId,
 }: GeneratedImgBProps) => {
   const result = propResult;
 
@@ -51,8 +43,6 @@ const GeneratedImgB = ({
   }
 
   const imageId = image?.imageId ?? 0;
-  const openSheet = useOpenCurationSheet();
-  const { variant } = useABTest();
 
   // currentImgId를 부모에게 전달하는 useEffect
   useEffect(() => {
@@ -81,18 +71,7 @@ const GeneratedImgB = ({
         // 결과 페이지 플래그로 추론 on/off 제어
         shouldInferHotspots={shouldInferHotspots}
         cachedDetection={cachedDetection}
-        groupId={groupId}
       />
-      <button
-        type="button"
-        className={styles.tagBtn}
-        onClick={() => {
-          logResultImgClickBtnTag(variant);
-          openSheet('expanded');
-        }}
-      >
-        <Tag />
-      </button>
     </div>
   );
 };

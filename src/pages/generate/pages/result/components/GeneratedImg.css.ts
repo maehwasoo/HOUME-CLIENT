@@ -82,8 +82,8 @@ export const slidePrevBtn = style({
   justifyContent: 'center',
   left: '1.2rem',
   bottom: '50%',
-  width: '2.4rem',
-  height: '2.4rem',
+  width: '3.6rem',
+  height: '3.6rem',
   backgroundColor: colorVars.color.gray999_30,
   borderRadius: '99.9rem',
   zIndex: 1,
@@ -104,8 +104,8 @@ export const slideNextBtn = style({
   justifyContent: 'center',
   right: '1.2rem',
   bottom: '50%',
-  width: '2.4rem',
-  height: '2.4rem',
+  width: '3.6rem',
+  height: '3.6rem',
   backgroundColor: colorVars.color.gray999_30,
   borderRadius: '99.9rem',
   zIndex: 1,
@@ -167,22 +167,4 @@ export const moreBtn = style({
   borderRadius: '99.9rem',
   ...fontStyle('body_m_14'),
   color: colorVars.color.gray000,
-});
-
-export const tagBtn = style({
-  position: 'absolute',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  right: '1.2rem',
-  bottom: '2.4rem',
-  width: '2.8rem',
-  height: '2.8rem',
-  backgroundColor: colorVars.color.gray999_30,
-  borderRadius: '99.9rem',
-  zIndex: 1,
-
-  ':active': {
-    backgroundColor: colorVars.color.gray999_50,
-  },
 });

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 
 import { overlay } from 'overlay-kit';
 import { useNavigate } from 'react-router-dom';
@@ -10,12 +10,7 @@ import 'swiper/css/pagination';
 
 import { useABTest } from '@/pages/generate/hooks/useABTest';
 import {
-  useOpenCurationSheet,
-  useSheetSnapState,
-} from '@/pages/generate/hooks/useFurnitureCuration';
-import {
   logResultImgClickBtnMoreImg,
-  logResultImgClickBtnTag,
   logResultImgClickMoreModalBack,
   logResultImgClickMoreModalMakeNew,
   logResultImgSwipeSlideLeft,
@@ -31,12 +26,10 @@ import SlideNext from '@shared/assets/icons/nextAbled.svg?react';
 import SlideNextDisabled from '@shared/assets/icons/nextDisabled.svg?react';
 import SlidePrev from '@shared/assets/icons/prevAbled.svg?react';
 import SlidePrevDisabled from '@shared/assets/icons/prevDisabled.svg?react';
-import Tag from '@shared/assets/icons/tagIcon.svg?react';
 
 import DetectionHotspots from './DetectionHotspots';
 import * as styles from './GeneratedImg.css.ts';
 
-import type { CurationSnapState } from '@pages/generate/stores/useCurationStore';
 import type { DetectionCacheEntry } from '@pages/generate/stores/useDetectionCacheStore';
 import type {
   GenerateImageData,
@@ -61,7 +54,6 @@ interface GeneratedImgAProps {
   userProfile?: MyPageUserData | null;
   detectionCache?: Record<number, DetectionCacheEntry> | null;
   isSlideCountLoading?: boolean;
-  groupId?: number | null;
 }
 
 /**
@@ -77,17 +69,12 @@ const GeneratedImgA = ({
   userProfile,
   detectionCache,
   isSlideCountLoading = false,
-  groupId,
 }: GeneratedImgAProps) => {
   const navigate = useNavigate();
   const [swiper, setSwiper] = useState<SwiperType | null>(null);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [currentImgId, setCurrentImgId] = useState(0);
-  const openSheet = useOpenCurationSheet();
-  const { snapState, setSnapState } = useSheetSnapState();
   const { variant } = useABTest();
-  const prevSnapStateRef = useRef<CurationSnapState>('collapsed');
-  const isSheetHiddenByImageMoreRef = useRef(false);
 
   // 마이페이지 사용자 정보 (크레딧 정보 포함)
   const { data: fetchedUserData } = useMyPageUser({
@@ -128,37 +115,9 @@ const GeneratedImgA = ({
 
   const lastImage = images[images.length - 1];
   const totalSlideCount = lastImage ? images.length + 1 : images.length;
-  const isImageMoreSlide =
-    Boolean(lastImage) && currentSlideIndex === totalSlideCount - 1;
-
-  const restoreSheetSnapState = useCallback(() => {
-    const targetState =
-      prevSnapStateRef.current && prevSnapStateRef.current !== 'hidden'
-        ? prevSnapStateRef.current
-        : 'collapsed';
-    setSnapState(targetState);
-  }, [setSnapState]);
-
-  useEffect(() => {
-    if (!isImageMoreSlide) {
-      if (isSheetHiddenByImageMoreRef.current) {
-        isSheetHiddenByImageMoreRef.current = false;
-        restoreSheetSnapState();
-      }
-      return;
-    }
-
-    if (snapState !== 'hidden') {
-      if (!isSheetHiddenByImageMoreRef.current) {
-        prevSnapStateRef.current = snapState;
-      }
-      setSnapState('hidden');
-    }
-    isSheetHiddenByImageMoreRef.current = true;
-  }, [isImageMoreSlide, snapState, restoreSheetSnapState, setSnapState]);
 
   /**
-   * 더보기 모달을 열고 바텀시트 상태를 함께 관리
+   * 더보기 모달 오픈
    */
   const handleOpenModal = () => {
     logResultImgClickBtnMoreImg(variant);
@@ -166,17 +125,8 @@ const GeneratedImgA = ({
       (
         { unmount } // @toss/overlay-kit 사용
       ) => {
-        const closeModal = (
-          afterClose?: () => void,
-          options?: { restoreSnap?: boolean }
-        ) => {
-          const shouldRestore = options?.restoreSnap ?? true;
+        const closeModal = (afterClose?: () => void) => {
           unmount();
-          if (shouldRestore) {
-            restoreSheetSnapState();
-          } else {
-            setSnapState('collapsed');
-          }
           afterClose?.();
         };
 
@@ -197,9 +147,8 @@ const GeneratedImgA = ({
             }}
             onConfirm={() => {
               logResultImgClickMoreModalMakeNew(variant);
-              closeModal(
-                () => navigate(ROUTES.GENERATE_START, { replace: true }),
-                { restoreSnap: false }
+              closeModal(() =>
+                navigate(ROUTES.GENERATE_START, { replace: true })
               );
             }}
             onClose={() => {
@@ -271,7 +220,6 @@ const GeneratedImgA = ({
                 // 결과 페이지 플래그로 추론 on/off 제어
                 shouldInferHotspots={shouldInferHotspots}
                 cachedDetection={cachedDetection}
-                groupId={groupId}
               />
             </SwiperSlide>
           );
@@ -309,16 +257,6 @@ const GeneratedImgA = ({
           ) : (
             <SlideNext />
           )}
-        </button>
-        <button
-          type="button"
-          className={styles.tagBtn}
-          onClick={() => {
-            logResultImgClickBtnTag(variant);
-            openSheet('expanded');
-          }}
-        >
-          <Tag />
         </button>
       </Swiper>
     </div>

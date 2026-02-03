@@ -234,6 +234,44 @@ export const logResultImgClickCurationSheetCard = (
 };
 
 /**
+ * ResultImg 큐레이션 카드 이미지 클릭 이벤트
+ *
+ * 이벤트 코드: resultImg_click_curationSheetCardImage
+ * - Page: resultImg
+ * - Action: click
+ * - Component: curationSheet
+ * - Function: CardImage
+ *
+ * 카드 이미지 영역 클릭 시 전송 (외부 링크 이동)
+ */
+export const logResultImgClickCurationSheetCardImage = (
+  variant: ImageGenerationVariant
+) => {
+  logAnalyticsEvent('resultImg_click_curationSheetCardImage', {
+    ab_variant: variant,
+  });
+};
+
+/**
+ * ResultImg 큐레이션 카드 타이틀 클릭 이벤트
+ *
+ * 이벤트 코드: resultImg_click_curationSheetCardTitle
+ * - Page: resultImg
+ * - Action: click
+ * - Component: curationSheet
+ * - Function: CardTitle
+ *
+ * 카드 타이틀/텍스트 영역 클릭 시 전송 (외부 링크 이동)
+ */
+export const logResultImgClickCurationSheetCardTitle = (
+  variant: ImageGenerationVariant
+) => {
+  logAnalyticsEvent('resultImg_click_curationSheetCardTitle', {
+    ab_variant: variant,
+  });
+};
+
+/**
  * 이미지 생성 시작 페이지 CTA 버튼 클릭 이벤트
  *
  * 이벤트 코드: generateStart_click_btnCTA

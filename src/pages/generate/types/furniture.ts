@@ -23,6 +23,12 @@ export interface FurnitureProductInfo {
   furnitureProductMallName: string;
   furnitureProductId: string;
   similarity: number;
+  // optional fields: cardProduct/large/maximal UI
+  furnitureProductOriginalPrice?: number;
+  furnitureProductDiscountPrice?: number;
+  furnitureProductDiscountRate?: number;
+  furnitureProductColorHexes?: string[];
+  furnitureProductSaveCount?: number;
 }
 
 // 생성 이미지 추천 상품 응답 래퍼 정의

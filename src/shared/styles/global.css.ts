@@ -28,6 +28,7 @@ export const layoutVars = createGlobalTheme(':root', {
   minWidth: '375px',
   maxWidth: '440px',
   height: '100dvh',
+  titleNavBarHeight: '4.8rem',
 });
 
 /* ===== 앱 루트 컨테이너 ===== */
