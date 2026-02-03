@@ -1,5 +1,7 @@
 import CardImage from '@/shared/components/card/cardImage/CardImage';
 
+import CardImageUrl from '@assets/images/cardExImg.svg?url';
+
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta: Meta<typeof CardImage> = {
@@ -8,7 +10,7 @@ const meta: Meta<typeof CardImage> = {
   args: {
     selectOrder: 1,
     disabled: false,
-    src: '/images/example.png',
+    src: CardImageUrl,
   },
   argTypes: {
     selectOrder: {

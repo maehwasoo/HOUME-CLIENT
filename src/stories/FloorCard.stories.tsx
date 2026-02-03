@@ -1,12 +1,14 @@
 import FloorCard from '@/shared/components/card/floorCard/FloorCard';
 
+import CardImageUrl from '@assets/images/cardExImg.svg?url';
+
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta: Meta<typeof FloorCard> = {
   title: 'shared/card/FloorCard',
   component: FloorCard,
   args: {
-    src: '/images/example.png',
+    src: CardImageUrl,
   },
   argTypes: {
     src: {
