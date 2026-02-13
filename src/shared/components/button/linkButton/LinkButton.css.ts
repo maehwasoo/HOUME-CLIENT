@@ -6,7 +6,7 @@ import { colorVars } from '@styles/tokens/color.css';
 
 export const linkButton = recipe({
   base: {
-    height: '3rem',
+    height: '2.6rem',
     padding: '0.6rem',
     display: 'flex',
     alignItems: 'center',
@@ -25,14 +25,13 @@ export const linkButton = recipe({
     type: {
       withText: {
         width: 'fit-content',
-        minWidth: '6.5rem',
-        gap: '0.3rem',
+        gap: '0.2rem',
         whiteSpace: 'nowrap',
-        ...fontStyle('caption_r_12'),
+        ...fontStyle('caption_r_11'),
         color: colorVars.color.gray700,
       },
       onlyIcon: {
-        width: '3rem',
+        width: '2.6rem',
       },
     },
   },

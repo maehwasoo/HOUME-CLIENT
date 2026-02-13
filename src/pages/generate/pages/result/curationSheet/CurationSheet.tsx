@@ -317,7 +317,7 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
         '다른 이미지를 선택하거나 새로 생성해 보세요'
       );
     }
-    if (!selectedCategoryId) {
+    if (selectedCategoryId === null) {
       return renderStatus(
         '추천받을 가구 카테고리를 선택해 주세요',
         '상단 필터에서 원하는 가구를 골라 주세요'

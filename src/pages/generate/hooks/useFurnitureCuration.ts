@@ -171,10 +171,8 @@ export const useGeneratedCategoriesQuery = (
   ]);
 
   useEffect(() => {
-    // 카테고리 자동 선택 제거
-    // - 기본값은 선택 해제 상태 유지
-    // - 현재 선택이 더 이상 유효하지 않다면 null 로 초기화
-    if (!imageId) return;
+    // Default category select (no analytics)
+    if (imageId === null) return;
     if (!query.data) {
       if (selectedCategoryId !== null) selectCategory(imageId, null);
       return;
@@ -185,12 +183,15 @@ export const useGeneratedCategoriesQuery = (
       if (selectedCategoryId !== null) selectCategory(imageId, null);
       return;
     }
+
     const exists = categories.some((item) => item.id === selectedCategoryId);
-    if (!exists && selectedCategoryId !== null) {
-      // 이전 선택이 유효하지 않으면 선택 해제
-      selectCategory(imageId, null);
-    }
-    // 자동으로 첫 카테고리를 선택하지 않음
+    if (selectedCategoryId !== null && exists) return;
+
+    const defaultCategoryId = categories[0]?.id ?? null;
+    if (defaultCategoryId === null) return;
+    if (defaultCategoryId === selectedCategoryId) return;
+
+    selectCategory(imageId, defaultCategoryId);
   }, [imageId, query.data, selectCategory, selectedCategoryId]);
 
   return query;
