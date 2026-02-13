@@ -1,4 +1,4 @@
-import { globalStyle, style } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
 // import { zIndex } from '@/shared/styles/tokens/zIndex';
@@ -75,55 +75,25 @@ export const slideNumSkeleton = style({
   animation: `${animationTokens.skeletonWave} 1.6s ease-in-out infinite`,
 });
 
-export const slideBtnCircle = style({
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: '2.4rem',
-  height: '2.4rem',
-  borderRadius: '1.2rem',
-  backgroundColor: colorVars.color.gray999,
-  pointerEvents: 'none',
-  transition: 'opacity 0.2s ease-in-out',
-});
-
-export const slideBtnIcon = style({
-  position: 'relative',
-  zIndex: 1,
-  width: '1.2rem',
-  height: '1.2rem',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-});
-
-globalStyle(`${slideBtnIcon} > svg`, {
-  width: '1.2rem',
-  height: '1.2rem',
-});
-
 export const slidePrevBtn = style({
   position: 'absolute',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  left: '0.6rem',
-  top: 'calc(50% + 0.8rem)',
-  transform: 'translateY(-50%)',
+  left: '1.2rem',
+  bottom: '50%',
   width: '3.6rem',
   height: '3.6rem',
+  backgroundColor: colorVars.color.gray999_30,
   borderRadius: '99.9rem',
-  padding: 0,
-  border: 'none',
-  background: 'transparent',
-  appearance: 'none',
-  WebkitTapHighlightColor: 'transparent',
   zIndex: 1,
-  selectors: {
-    '&:disabled': {
-      cursor: 'default',
-    },
+
+  ':active': {
+    backgroundColor: colorVars.color.gray999_50,
+  },
+
+  ':disabled': {
+    backgroundColor: colorVars.color.gray999_04,
   },
 });
 
@@ -132,47 +102,21 @@ export const slideNextBtn = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  right: '0.6rem',
-  top: 'calc(50% + 0.8rem)',
-  transform: 'translateY(-50%)',
+  right: '1.2rem',
+  bottom: '50%',
   width: '3.6rem',
   height: '3.6rem',
+  backgroundColor: colorVars.color.gray999_30,
   borderRadius: '99.9rem',
-  padding: 0,
-  border: 'none',
-  background: 'transparent',
-  appearance: 'none',
-  WebkitTapHighlightColor: 'transparent',
   zIndex: 1,
-  selectors: {
-    '&:disabled': {
-      cursor: 'default',
-    },
+
+  ':active': {
+    backgroundColor: colorVars.color.gray999_50,
   },
-});
 
-globalStyle(`${slidePrevBtn} ${slideBtnCircle}`, {
-  opacity: 0.3,
-});
-
-globalStyle(`${slidePrevBtn}:active:not(:disabled) ${slideBtnCircle}`, {
-  opacity: 0.5,
-});
-
-globalStyle(`${slidePrevBtn}:disabled ${slideBtnCircle}`, {
-  opacity: 0.04,
-});
-
-globalStyle(`${slideNextBtn} ${slideBtnCircle}`, {
-  opacity: 0.3,
-});
-
-globalStyle(`${slideNextBtn}:active:not(:disabled) ${slideBtnCircle}`, {
-  opacity: 0.5,
-});
-
-globalStyle(`${slideNextBtn}:disabled ${slideBtnCircle}`, {
-  opacity: 0.04,
+  ':disabled': {
+    backgroundColor: colorVars.color.gray999_04,
+  },
 });
 
 export const imgAreaBlurred = recipe({

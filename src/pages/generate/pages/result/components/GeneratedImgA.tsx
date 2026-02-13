@@ -201,10 +201,7 @@ const GeneratedImgA = ({
           className={styles.slidePrevBtn}
           disabled={!swiper || currentSlideIndex === 0}
         >
-          <span className={styles.slideBtnCircle} aria-hidden />
-          <span className={styles.slideBtnIcon} aria-hidden>
-            {currentSlideIndex === 0 ? <SlidePrevDisabled /> : <SlidePrev />}
-          </span>
+          {currentSlideIndex === 0 ? <SlidePrevDisabled /> : <SlidePrev />}
         </button>
         {images.map((image, index) => {
           const cachedDetection =
@@ -255,14 +252,11 @@ const GeneratedImgA = ({
           className={styles.slideNextBtn}
           disabled={!swiper || currentSlideIndex === totalSlideCount - 1}
         >
-          <span className={styles.slideBtnCircle} aria-hidden />
-          <span className={styles.slideBtnIcon} aria-hidden>
-            {currentSlideIndex === totalSlideCount - 1 ? (
-              <SlideNextDisabled />
-            ) : (
-              <SlideNext />
-            )}
-          </span>
+          {currentSlideIndex === totalSlideCount - 1 ? (
+            <SlideNextDisabled />
+          ) : (
+            <SlideNext />
+          )}
         </button>
       </Swiper>
     </div>

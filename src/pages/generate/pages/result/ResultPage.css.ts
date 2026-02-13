@@ -11,13 +11,17 @@ export const wrapper = style({
   display: 'flex',
   flexDirection: 'column',
   width: '100%',
-  minHeight: `calc(100dvh - ${layoutVars.titleNavBarHeight})`, // TitleNavBar height
+  height: `calc(100dvh - ${layoutVars.titleNavBarHeight})`, // TitleNavBar height
+  overflow: 'hidden',
 });
 
 export const resultSection = style({
   display: 'flex',
   flexDirection: 'column',
   width: '100%',
+  height: '100%',
+  minHeight: 0,
+  overflow: 'hidden',
 });
 
 export const imgArea = recipe({

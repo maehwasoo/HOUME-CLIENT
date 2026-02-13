@@ -1,6 +1,7 @@
 import React from 'react';
 
-import SaveIcon from '@assets/icons/icnHeartGray.svg?react';
+import SaveOnIcon from '@assets/icons/icnHeartColor.svg?react';
+import SaveOffIcon from '@assets/icons/icnHeartGray.svg?react';
 
 import * as styles from './SaveButton.css';
 
@@ -15,12 +16,10 @@ const SaveButton = ({ isSelected, onClick, ...props }: SaveButtonProps) => {
       type="button"
       onClick={onClick}
       aria-pressed={isSelected}
-      className={`${styles.buttonWrapper} ${
-        isSelected ? styles.selected : styles.unselected
-      }`}
+      className={styles.buttonWrapper}
       {...props}
     >
-      <SaveIcon />
+      {isSelected ? <SaveOnIcon /> : <SaveOffIcon />}
     </button>
   );
 };

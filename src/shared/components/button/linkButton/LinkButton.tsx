@@ -11,8 +11,6 @@ const LinkButton = ({
   typeVariant = 'withText',
   ...props
 }: LinkButtonProps) => {
-  const isWithText = typeVariant === 'withText';
-
   return (
     <a
       {...props}
@@ -22,20 +20,8 @@ const LinkButton = ({
         type: typeVariant,
       })}
     >
-      {isWithText ? (
-        <span className={styles.linkContent}>
-          <span className={styles.linkIconWrapper}>
-            <LinkIcon />
-          </span>
-          {children ? (
-            <span className={styles.linkLabel}>{children}</span>
-          ) : null}
-        </span>
-      ) : (
-        <span className={styles.linkIconWrapper}>
-          <LinkIcon />
-        </span>
-      )}
+      <LinkIcon />
+      {children}
     </a>
   );
 };

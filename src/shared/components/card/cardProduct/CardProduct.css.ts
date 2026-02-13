@@ -72,12 +72,7 @@ export const cardImage = recipe({
 export const skeleton = style({
   position: 'absolute',
   inset: 0,
-  background: `linear-gradient(
-    90deg,
-    ${colorVars.color.gray200} 8%,
-    ${colorVars.color.gray100} 18%,
-    ${colorVars.color.gray200} 33%
-  )`,
+  background: 'linear-gradient(90deg, #ececec 8%, #f0f0f0 18%, #ececec 33%)',
   backgroundSize: '200% 100%',
   animation: `${animationTokens.skeletonWave} 2s linear infinite`,
 });
@@ -144,7 +139,6 @@ export const infoSection = style({
   display: 'flex',
   flexDirection: 'column',
   paddingTop: '1.2rem',
-  paddingBottom: '2rem',
   gap: '0.8rem',
 });
 
@@ -157,23 +151,15 @@ export const colorRow = style({
 export const colorChip = style({
   width: '1.4rem',
   height: '1.4rem',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  flex: '0 0 1.4rem',
-});
-
-export const colorChipInner = style({
-  width: '1.2rem',
-  height: '1.2rem',
   borderRadius: '50%',
-  border: `0.5px solid ${colorVars.color.gray999_30}`,
+  border: `1px solid ${colorVars.color.gray999_30}`,
   boxSizing: 'border-box',
 });
 
 export const colorChipCount = style({
   ...fontStyle('caption_r_11'),
   color: colorVars.color.gray500,
+  marginLeft: '0.2rem',
 });
 
 export const productInfo = style({
