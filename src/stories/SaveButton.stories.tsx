@@ -11,6 +11,7 @@ const meta: Meta<typeof SaveButton> = {
   argTypes: {
     isSelected: { control: 'boolean' },
     onClick: { action: 'toggle' },
+    className: { control: 'text' },
   },
 };
 
@@ -49,4 +50,19 @@ export const Selected: Story = {
     isSelected: true,
   },
   render: (args) => <RenderButton {...args} />,
+};
+
+export const WithClassName: Story = {
+  args: {
+    isSelected: false,
+    className: 'sb-savebutton-outline',
+  },
+  render: (args) => (
+    <>
+      <style>
+        {`.sb-savebutton-outline { outline: 2px solid #ff0000; outline-offset: 2px; }`}
+      </style>
+      <RenderButton {...args} />
+    </>
+  ),
 };
