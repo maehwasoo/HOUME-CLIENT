@@ -31,6 +31,7 @@
 ### Operations
 
 - [ONNX Runtime(Web) 도입 기록](./operations/onnx-runtime-web.md)
+- [Microsoft Clarity (Prod/Preview split)](./operations/microsoft-clarity.md)
 
 ## 작성/유지 규칙(간단)
 
