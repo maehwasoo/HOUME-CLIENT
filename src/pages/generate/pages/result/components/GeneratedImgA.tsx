@@ -115,6 +115,8 @@ const GeneratedImgA = ({
 
   const lastImage = images[images.length - 1];
   const totalSlideCount = lastImage ? images.length + 1 : images.length;
+  const isPrevDisabled = !swiper || currentSlideIndex === 0;
+  const isNextDisabled = !swiper || currentSlideIndex === totalSlideCount - 1;
 
   /**
    * 더보기 모달 오픈
@@ -199,9 +201,9 @@ const GeneratedImgA = ({
           type="button"
           onClick={() => swiper?.slidePrev()}
           className={styles.slidePrevBtn}
-          disabled={!swiper || currentSlideIndex === 0}
+          disabled={isPrevDisabled}
         >
-          {currentSlideIndex === 0 ? <SlidePrevDisabled /> : <SlidePrev />}
+          {isPrevDisabled ? <SlidePrevDisabled /> : <SlidePrev />}
         </button>
         {images.map((image, index) => {
           const cachedDetection =
@@ -250,13 +252,9 @@ const GeneratedImgA = ({
           type="button"
           onClick={() => swiper?.slideNext()}
           className={styles.slideNextBtn}
-          disabled={!swiper || currentSlideIndex === totalSlideCount - 1}
+          disabled={isNextDisabled}
         >
-          {currentSlideIndex === totalSlideCount - 1 ? (
-            <SlideNextDisabled />
-          ) : (
-            <SlideNext />
-          )}
+          {isNextDisabled ? <SlideNextDisabled /> : <SlideNext />}
         </button>
       </Swiper>
     </div>
