@@ -13,7 +13,7 @@ import {
 } from '@/pages/generate/hooks/useFurnitureCuration';
 import { useCurationCacheStore } from '@/pages/generate/stores/useCurationCacheStore';
 import { useCurationStore } from '@/pages/generate/stores/useCurationStore';
-import { logResultImgClickCurationSheetFilter } from '@/pages/generate/utils/analytics';
+import { logResultImgClickCurationSectionFilter } from '@/pages/generate/utils/analytics';
 import { useGetJjymListQuery } from '@/pages/mypage/hooks/useSaveItemList';
 import { ROUTES } from '@/routes/paths';
 import { QUERY_KEY } from '@/shared/constants/queryKey';
@@ -22,7 +22,7 @@ import { useSavedItemsStore } from '@/store/useSavedItemsStore';
 import { getGeneratedImageProducts } from '@pages/generate/apis/furniture';
 
 import CardProductItem from './CardProductItem';
-import * as styles from './CurationSheet.css';
+import * as styles from './CurationSection.css';
 
 import type { FurnitureProductsInfoResponse } from '@pages/generate/types/furniture';
 
@@ -38,7 +38,41 @@ type ProductPrefetchQueryKey = [
   },
 ];
 
-interface CurationSheetProps {
+const RESULT_CARD_UI_FALLBACK = {
+  productName: '상품명 준비중',
+  mallName: '브랜드 준비중',
+  originalPrice: 0,
+  discountPrice: 0,
+  discountRate: 0,
+  colorHexes: ['#E7EBF0', '#D7DFE8', '#C3CFDD', '#AEBED0'],
+  saveCount: 0,
+} as const;
+
+const normalizeText = (value: unknown, fallback: string) => {
+  if (typeof value !== 'string') return fallback;
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : fallback;
+};
+
+const toFiniteNumber = (value: unknown) => {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+};
+
+const normalizeColorHexes = (value: unknown) => {
+  if (!Array.isArray(value)) return [...RESULT_CARD_UI_FALLBACK.colorHexes];
+
+  const normalized = value
+    .filter((hex): hex is string => typeof hex === 'string')
+    .map((hex) => hex.trim())
+    .filter((hex) => /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(hex));
+
+  return normalized.length > 0
+    ? normalized
+    : [...RESULT_CARD_UI_FALLBACK.colorHexes];
+};
+
+interface CurationSectionProps {
   groupId?: number | null;
 }
 
@@ -47,7 +81,7 @@ interface CurationSheetProps {
  * - 감지된 가구 카테고리/상품을 고정 영역에 표시
  * - 그룹 기반 진입 시 groupId를 통해 캐시·프리패치 범위를 확정
  */
-export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
+export const CurationSection = ({ groupId = null }: CurationSectionProps) => {
   const activeImageId = useActiveImageId();
   const imageState = useActiveImageCurationState();
   const selectedCategoryId = imageState?.selectedCategoryId ?? null;
@@ -96,37 +130,41 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
         ? byProductId
         : index + 1;
 
-      const originalPrice = Number(product.furnitureProductOriginalPrice);
-      const discountPrice = Number(product.furnitureProductDiscountPrice);
-      const discountRate = Number(product.furnitureProductDiscountRate);
-      const saveCount = Number(product.furnitureProductSaveCount);
+      const originalPrice = toFiniteNumber(
+        product.furnitureProductOriginalPrice
+      );
+      const discountPrice = toFiniteNumber(
+        product.furnitureProductDiscountPrice
+      );
+      const discountRate = toFiniteNumber(product.furnitureProductDiscountRate);
+      const saveCount = toFiniteNumber(product.furnitureProductSaveCount);
 
       return {
         id: recommendId,
         isRecommendId: Boolean(recommendId),
         furnitureProductId: safeProductId,
-        furnitureProductName: product.furnitureProductName,
-        furnitureProductMallName: product.furnitureProductMallName,
+        furnitureProductName: normalizeText(
+          product.furnitureProductName,
+          RESULT_CARD_UI_FALLBACK.productName
+        ),
+        furnitureProductMallName: normalizeText(
+          product.furnitureProductMallName,
+          RESULT_CARD_UI_FALLBACK.mallName
+        ),
         furnitureProductImageUrl:
           product.furnitureProductImageUrl || product.baseFurnitureImageUrl,
         furnitureProductSiteUrl: product.furnitureProductSiteUrl,
-        furnitureProductOriginalPrice: Number.isFinite(originalPrice)
-          ? originalPrice
-          : undefined,
-        furnitureProductDiscountPrice: Number.isFinite(discountPrice)
-          ? discountPrice
-          : undefined,
-        furnitureProductDiscountRate: Number.isFinite(discountRate)
-          ? discountRate
-          : undefined,
-        furnitureProductColorHexes: Array.isArray(
+        furnitureProductOriginalPrice:
+          originalPrice ?? RESULT_CARD_UI_FALLBACK.originalPrice,
+        furnitureProductDiscountPrice:
+          discountPrice ?? RESULT_CARD_UI_FALLBACK.discountPrice,
+        furnitureProductDiscountRate:
+          discountRate ?? RESULT_CARD_UI_FALLBACK.discountRate,
+        furnitureProductColorHexes: normalizeColorHexes(
           product.furnitureProductColorHexes
-        )
-          ? product.furnitureProductColorHexes
-          : undefined,
-        furnitureProductSaveCount: Number.isFinite(saveCount)
-          ? saveCount
-          : undefined,
+        ),
+        furnitureProductSaveCount:
+          saveCount ?? RESULT_CARD_UI_FALLBACK.saveCount,
       };
     });
   }, [productsData]);
@@ -202,7 +240,7 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
   const handleCategorySelect = (categoryId: number) => {
     if (activeImageId === null) return;
     if (selectedCategoryId === categoryId) return;
-    logResultImgClickCurationSheetFilter(variant);
+    logResultImgClickCurationSectionFilter(variant);
     selectCategory(activeImageId, categoryId);
   };
 

@@ -7,13 +7,10 @@ import { colorVars } from '@styles/tokens/color.css';
 
 export const container = style({
   width: '100%',
-  flex: '1 1 auto',
-  minHeight: 0,
   display: 'flex',
   flexDirection: 'column',
   padding: '2rem 2rem 0',
   backgroundColor: colorVars.color.gray000,
-  overflow: 'hidden',
 });
 
 export const title = style({
@@ -63,13 +60,11 @@ export const filterSkeletonChipWidth = styleVariants({
 });
 
 export const content = style({
-  flex: 1,
-  minHeight: 0,
+  width: '100%',
   display: 'flex',
   flexDirection: 'column',
-  overflowY: 'auto',
   marginTop: '0.8rem',
-  overscrollBehavior: 'contain',
+  paddingBottom: '2.4rem',
 
   selectors: {
     '&::-webkit-scrollbar': {
@@ -84,16 +79,14 @@ export const gridbox = style({
   width: '100%',
   height: 'fit-content',
   display: 'grid',
-  gridTemplateColumns: 'repeat(2, 16.4rem)',
+  gridTemplateColumns: 'repeat(2, minmax(16.4rem, 1fr))',
   columnGap: '0.7rem',
   rowGap: 0,
-  justifyContent: 'space-between',
-  justifyItems: 'start',
 });
 
 export const statusContainer = style({
   width: '100%',
-  height: '100%',
+  minHeight: '22rem',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',

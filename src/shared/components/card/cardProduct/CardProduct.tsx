@@ -166,9 +166,13 @@ const CardProduct = ({
                 <span
                   key={`${hex}-${index}`}
                   className={styles.colorChip}
-                  style={{ backgroundColor: hex }}
                   aria-hidden
-                />
+                >
+                  <span
+                    className={styles.colorChipInner}
+                    style={{ backgroundColor: hex }}
+                  />
+                </span>
               ))}
               {extraColorCount > 0 && (
                 <span className={styles.colorChipCount}>
