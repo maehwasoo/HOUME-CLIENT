@@ -139,7 +139,7 @@ export const infoSection = style({
   display: 'flex',
   flexDirection: 'column',
   paddingTop: '1.2rem',
-  paddingBottom: '2.4rem',
+  paddingBottom: '2rem',
   gap: '0.8rem',
 });
 
@@ -166,6 +166,7 @@ export const productInfo = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '0.4rem',
+  padding: '0.2rem',
 });
 
 export const brandTextLarge = style({
@@ -177,9 +178,9 @@ export const brandTextLarge = style({
 });
 
 export const productTextLarge = style({
-  ...fontStyle('body_r_14'),
+  ...fontStyle('body_r_13'),
   color: colorVars.color.gray900,
-  maxHeight: '4.1rem',
+  maxHeight: '3.6rem',
   display: '-webkit-box',
   WebkitLineClamp: 2,
   WebkitBoxOrient: 'vertical',
