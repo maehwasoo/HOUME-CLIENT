@@ -6,7 +6,13 @@ import { ROUTES } from '@/routes/paths';
 import DislikeButton from '@/shared/components/button/likeButton/DislikeButton';
 import LikeButton from '@/shared/components/button/likeButton/LikeButton';
 import Loading from '@/shared/components/loading/Loading';
+import { useToast } from '@/shared/components/toast/useToast';
+import {
+  ERROR_CODES,
+  FALLBACK_TRIGGER_CODES,
+} from '@/shared/constants/apiErrorCode';
 import { useErrorHandler } from '@/shared/hooks/useErrorHandler';
+import { TOAST_TYPE } from '@/shared/types/toast';
 
 import {
   useStackData,
@@ -54,6 +60,7 @@ const isValidGenerateImageRequest = (
 const LoadingPage = () => {
   const navigate = useNavigate();
   const { handleError } = useErrorHandler('generate');
+  const { notify } = useToast();
 
   // Zustand store: 이미지 생성 완료 상태 및 결과 데이터
   const { isApiCompleted, navigationData, resetGenerate } = useGenerateStore();
@@ -135,13 +142,10 @@ const LoadingPage = () => {
         const errorCode = error?.response?.data?.code;
         const errorStatus = error?.response?.status;
 
-        // 429 에러 또는 42900/42901 코드: 폴백 API로 전환
-        // 40900: 새로고침 후 일반 이미지 요청 API 요청 시 반환되는 에러코드
+        // rate limit 또는 이미지 생성 관련 에러: 폴백 API로 전환
         if (
-          errorStatus === 429 ||
-          errorCode === 42900 ||
-          errorCode === 42901 ||
-          errorCode === 40900
+          errorStatus === ERROR_CODES.HTTP_RATE_LIMITED ||
+          FALLBACK_TRIGGER_CODES.has(errorCode)
         ) {
           setIsNormalEntry(false); // 폴백 API 활성화
         }
@@ -239,7 +243,10 @@ const LoadingPage = () => {
         }, ANIMATION_DURATION);
       },
       onError: () => {
-        alert(isLike ? '좋아요 실패' : '싫어요 실패');
+        notify({
+          text: '잠시 오류가 발생했어요. 다시 시도해주세요.',
+          type: TOAST_TYPE.WARNING,
+        });
         setSelected(null);
         setIsVoting(false);
       },

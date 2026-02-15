@@ -65,8 +65,6 @@ export const useKakaoLoginMutation = () => {
 
       navigate(ROUTES.HOME);
     },
-    onError: () => {
-      // 오류 처리는 KakaoCallback 컴포넌트에서 useErrorHandler로 처리
-    },
+    // 오류 처리는 KakaoCallback 컴포넌트에서 useErrorHandler로 처리
   });
 };

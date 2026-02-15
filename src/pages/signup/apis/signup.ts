@@ -3,8 +3,10 @@ import { useNavigate } from 'react-router-dom';
 
 import { ROUTES } from '@/routes/paths';
 import axiosInstance from '@/shared/apis/axiosInstance';
+import { useToast } from '@/shared/components/toast/useToast';
 import { RESPONSE_MESSAGE, HTTP_STATUS } from '@/shared/constants/response';
 import type { BaseResponse } from '@/shared/types/apis';
+import { TOAST_TYPE } from '@/shared/types/toast';
 import { useUserStore } from '@/store/useUserStore';
 
 import { API_ENDPOINT } from '@constants/apiEndpoints';
@@ -36,6 +38,7 @@ export const postSignup = async (
 /* 회원가입 TanStack Query 훅 */
 export const usePostSignupMutation = () => {
   const navigate = useNavigate();
+  const { notify } = useToast();
   const setUserName = useUserStore((state) => state.setUserName);
   const setAccessToken = useUserStore((state) => state.setAccessToken);
 
@@ -49,7 +52,11 @@ export const usePostSignupMutation = () => {
       navigate(ROUTES.GENERATE_START);
     },
     onError: (error) => {
-      console.error('[usePostSignupMutation] 회원가입 실패:', error); // 에러는 useErrorHandler에서 처리
+      console.error('[usePostSignupMutation] 회원가입 실패:', error);
+      notify({
+        text: '회원가입에 실패했어요. 다시 시도해주세요.',
+        type: TOAST_TYPE.WARNING,
+      });
     },
   });
 };
