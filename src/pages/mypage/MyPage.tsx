@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 
+import { ErrorBoundary } from 'react-error-boundary';
 import { useNavigate } from 'react-router-dom';
 
 import { ROUTES } from '@/routes/paths';
+import FeatureErrorFallback from '@/shared/components/errorFallback/FeatureErrorFallback';
 import Loading from '@/shared/components/loading/Loading';
 import TitleNavBar from '@/shared/components/navBar/TitleNavBar';
 import { useErrorHandler } from '@/shared/hooks/useErrorHandler';
@@ -75,19 +77,21 @@ const MyPage = () => {
         onBackClick={() => navigate(ROUTES.HOME)}
       />
 
-      <ProfileSection
-        userName={profileName}
-        credit={profileCredit}
-        maxCredit={5}
-      />
+      <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+        <ProfileSection
+          userName={profileName}
+          credit={profileCredit}
+          maxCredit={5}
+        />
 
-      <TabNavBar activeTab={activeTab} onTabChange={setActiveTab} />
+        <TabNavBar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {activeTab === 'savedItems' ? (
-        <SavedItemsSection />
-      ) : (
-        <GeneratedImagesSection userProfile={userData} />
-      )}
+        {activeTab === 'savedItems' ? (
+          <SavedItemsSection />
+        ) : (
+          <GeneratedImagesSection userProfile={userData} />
+        )}
+      </ErrorBoundary>
 
       {isUserLoading && <Loading />}
     </div>

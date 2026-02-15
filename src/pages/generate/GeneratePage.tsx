@@ -1,3 +1,4 @@
+import { ErrorBoundary } from 'react-error-boundary';
 import {
   Outlet,
   useLocation,
@@ -6,6 +7,7 @@ import {
   useMatch,
 } from 'react-router-dom';
 
+import FeatureErrorFallback from '@/shared/components/errorFallback/FeatureErrorFallback';
 import TitleNavBar from '@/shared/components/navBar/TitleNavBar';
 import { getCanHistoryGoBack } from '@/shared/utils/history';
 
@@ -50,7 +52,9 @@ const GeneratePage = () => {
         isLoginBtn={false}
         onBackClick={handleBackClick}
       />
-      <Outlet />
+      <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+        <Outlet />
+      </ErrorBoundary>
     </main>
   );
 };

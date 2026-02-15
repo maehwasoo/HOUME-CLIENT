@@ -55,6 +55,9 @@ importers:
       react-dom:
         specifier: ^19.2.0
         version: 19.2.0(react@19.2.0)
+      react-error-boundary:
+        specifier: ^6.1.0
+        version: 6.1.0(react@19.2.0)
       react-helmet-async:
         specifier: ^2.0.5
         version: 2.0.5(react@19.2.0)
@@ -5539,6 +5542,14 @@ packages:
     peerDependencies:
       react: ^19.2.0
 
+  react-error-boundary@6.1.0:
+    resolution:
+      {
+        integrity: sha512-02k9WQ/mUhdbXir0tC1NiMesGzRPaCsJEWU/4bcFrbY1YMZOtHShtZP6zw0SJrBWA/31H0KT9/FgdL8+sPKgHA==,
+      }
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0
+
   react-fast-compare@3.2.2:
     resolution:
       {
@@ -10474,6 +10485,10 @@ snapshots:
     dependencies:
       react: 19.2.0
       scheduler: 0.27.0
+
+  react-error-boundary@6.1.0(react@19.2.0):
+    dependencies:
+      react: 19.2.0
 
   react-fast-compare@3.2.2: {}
 

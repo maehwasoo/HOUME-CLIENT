@@ -3,9 +3,11 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { OverlayProvider } from 'overlay-kit';
 import { createRoot } from 'react-dom/client';
+import { ErrorBoundary } from 'react-error-boundary';
 import { HelmetProvider } from 'react-helmet-async';
 import { ToastContainer } from 'react-toastify';
 
+import AppErrorFallback from '@/shared/components/errorFallback/AppErrorFallback';
 import { initClarity } from '@/shared/config/clarity.ts';
 import {
   getSentryReactErrorHandlerOptions,
@@ -41,14 +43,16 @@ if (!rootElement) {
 
 createRoot(rootElement, getSentryReactErrorHandlerOptions()).render(
   // <StrictMode>
-  <HelmetProvider>
-    <QueryClientProvider client={queryClient}>
-      <OverlayProvider>
-        <App />
-        <ToastContainer {...toastConfig} />
-        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
-      </OverlayProvider>
-    </QueryClientProvider>
-  </HelmetProvider>
+  <ErrorBoundary FallbackComponent={AppErrorFallback}>
+    <HelmetProvider>
+      <QueryClientProvider client={queryClient}>
+        <OverlayProvider>
+          <App />
+          <ToastContainer {...toastConfig} />
+          {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+        </OverlayProvider>
+      </QueryClientProvider>
+    </HelmetProvider>
+  </ErrorBoundary>
   // </StrictMode>
 );
