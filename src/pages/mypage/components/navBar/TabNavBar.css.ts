@@ -7,6 +7,7 @@ import { colorVars } from '@styles/tokens/color.css';
 
 export const tabNavBar = style({
   display: 'flex',
+  width: '100%',
   justifyContent: 'center',
   alignItems: 'center',
 });

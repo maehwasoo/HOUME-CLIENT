@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import TitleNavBar from '@/shared/components/navBar/TitleNavBar';
 import Popup from '@/shared/components/overlay/popup/Popup';
 
+import * as styles from './FunnelLayout.css';
 import {
   logSelectHouseInfoClickModalContinue,
   logSelectHouseInfoClickModalExit,
@@ -40,14 +41,14 @@ const FunnelLayout = ({ children, currentStep }: FunnelLayoutProps) => {
   };
 
   return (
-    <div>
+    <div className={styles.wrapper}>
       <TitleNavBar
         title="스타일링 이미지 생성"
         isBackIcon={true}
         isLoginBtn={false}
         onBackClick={currentStep === 'HouseInfo' ? handleBackClick : undefined}
       />
-      <div>{children}</div>
+      <div className={styles.content}>{children}</div>
     </div>
   );
 };

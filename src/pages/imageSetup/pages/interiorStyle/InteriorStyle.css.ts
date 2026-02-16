@@ -7,6 +7,7 @@ export const container = style({
   position: 'relative',
   flexDirection: 'column',
   alignItems: 'center',
+  flex: 1,
   width: '100%',
   marginBottom: '9.6rem',
 });

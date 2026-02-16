@@ -38,7 +38,7 @@ export const layoutVars = createGlobalTheme(':root', {
  * 하위 컴포넌트들이 플렉스 아이템으로 배치됨
  */
 globalStyle('#root', {
-  height: '100%',
+  flex: 1,
   display: 'flex',
   flexDirection: 'column',
 });

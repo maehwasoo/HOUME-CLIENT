@@ -1,4 +1,5 @@
 // Step 3
+import { useMoodBoardQuery } from '@/pages/imageSetup/apis/interiorStyle';
 import { FUNNELHEADER_IMAGES } from '@/pages/imageSetup/constants/headerImages';
 import { useInteriorStyle } from '@/pages/imageSetup/hooks/useInteriorStyle';
 import {
@@ -6,6 +7,8 @@ import {
   logSelectMoodboardClickBtnCTAInactive,
 } from '@/pages/imageSetup/utils/analytics';
 import CtaButton from '@/shared/components/button/ctaButton/CtaButton';
+import InlineError from '@/shared/components/inlineError/InlineError';
+import Loading from '@/shared/components/loading/Loading';
 
 import * as styles from './InteriorStyle.css';
 import MoodBoard from './MoodBoard';
@@ -24,6 +27,14 @@ interface InteriorStyleProps {
 const InteriorStyle = ({ context, onNext }: InteriorStyleProps) => {
   const { selectedImages, handleImageSelect, handleNext, isDataComplete } =
     useInteriorStyle(context, onNext);
+
+  const {
+    data: moodBoardData,
+    isPending,
+    isError,
+    refetch,
+  } = useMoodBoardQuery();
+  const images = moodBoardData?.moodBoardResponseList || [];
 
   // CTA 버튼 클릭 핸들러
   const handleCtaButtonClick = () => {
@@ -46,15 +57,27 @@ const InteriorStyle = ({ context, onNext }: InteriorStyleProps) => {
         image={FUNNELHEADER_IMAGES[3]}
       />
 
-      <MoodBoard
-        selectedImages={selectedImages}
-        onImageSelect={handleImageSelect}
-      />
-      <div className={styles.buttonWrapper}>
-        <CtaButton isActive={isDataComplete} onClick={handleCtaButtonClick}>
-          주요 활동 선택하기
-        </CtaButton>
-      </div>
+      {isError ? (
+        <InlineError
+          onRetry={refetch}
+          message="무드보드를 불러올 수 없습니다"
+        />
+      ) : isPending ? (
+        <Loading />
+      ) : (
+        <>
+          <MoodBoard
+            images={images}
+            selectedImages={selectedImages}
+            onImageSelect={handleImageSelect}
+          />
+          <div className={styles.buttonWrapper}>
+            <CtaButton isActive={isDataComplete} onClick={handleCtaButtonClick}>
+              주요 활동 선택하기
+            </CtaButton>
+          </div>
+        </>
+      )}
     </div>
   );
 };

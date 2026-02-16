@@ -45,7 +45,7 @@ const GeneratePage = () => {
   };
 
   return (
-    <main>
+    <main style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
       <TitleNavBar
         title={title}
         isBackIcon={!!isBackIcon}

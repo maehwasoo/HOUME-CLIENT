@@ -361,25 +361,27 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
     <section className={styles.container}>
       <h2 className={styles.title}>이 공간의 가구 큐레이션</h2>
 
-      <div className={styles.filterSection}>
-        {categories.length === 0 ? (
-          // 감지/로딩 중에는 세 번째 길이(long) 스켈레톤 칩 하나만 노출
-          <span
-            className={`${styles.filterSkeletonChip} ${styles.filterSkeletonChipWidth[FILTER_SKELETON_WIDTH]}`}
-            aria-hidden
-          />
-        ) : (
-          categories.map((category) => (
-            <FilterChip
-              key={category.id}
-              isSelected={selectedCategoryId === category.id}
-              onClick={() => handleCategorySelect(category.id)}
-            >
-              {category.categoryName}
-            </FilterChip>
-          ))
-        )}
-      </div>
+      {!categoriesQuery.isError && (
+        <div className={styles.filterSection}>
+          {categories.length === 0 ? (
+            // 감지/로딩 중에는 세 번째 길이(long) 스켈레톤 칩 하나만 노출
+            <span
+              className={`${styles.filterSkeletonChip} ${styles.filterSkeletonChipWidth[FILTER_SKELETON_WIDTH]}`}
+              aria-hidden
+            />
+          ) : (
+            categories.map((category) => (
+              <FilterChip
+                key={category.id}
+                isSelected={selectedCategoryId === category.id}
+                onClick={() => handleCategorySelect(category.id)}
+              >
+                {category.categoryName}
+              </FilterChip>
+            ))
+          )}
+        </div>
+      )}
 
       <div className={styles.content}>{renderProductSection()}</div>
     </section>

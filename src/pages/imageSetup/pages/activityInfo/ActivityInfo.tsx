@@ -3,6 +3,7 @@ import { FUNNELHEADER_IMAGES } from '@/pages/imageSetup/constants/headerImages';
 import { useActivityInfo } from '@/pages/imageSetup/hooks/activityInfo/useActivityInfo';
 import { useCreditCheck } from '@/pages/imageSetup/hooks/useCreditCheck';
 import CtaButton from '@/shared/components/button/ctaButton/CtaButton';
+import InlineError from '@/shared/components/inlineError/InlineError';
 import Loading from '@/shared/components/loading/Loading';
 
 import * as styles from './ActivityInfo.css';
@@ -21,7 +22,8 @@ const ActivityInfo = ({ context }: ActivityInfoProps) => {
   const {
     data: activityOptionsData,
     isPending,
-    error,
+    isError,
+    refetch,
   } = useActivityOptionsQuery();
 
   // console.log(activityOptionsData);
@@ -47,30 +49,8 @@ const ActivityInfo = ({ context }: ActivityInfoProps) => {
     }
   };
 
-  // 에러 처리
-  if (error) {
-    return <div>데이터를 불러올 수 없습니다.</div>;
-  }
-
-  // pending / 데이터가 없는 경우
-  if (isPending || !activityOptionsData || !categorySelections) {
-    return <Loading />;
-  }
-
-  const activityTypeOptions = activityOptionsData.activities;
-  const bedOptions = activityOptionsData.categories[0];
-  const sofaOptions = activityOptionsData.categories[1];
-  const storageOptions = activityOptionsData.categories[2];
-  const tableOptions = activityOptionsData.categories[3];
-  const selectiveOptions = activityOptionsData.categories[4];
-
-  // 선택된 가구 총 개수 계산
-  const totalSelectedFurniture =
-    categorySelections.bed.selectedValues.length +
-    categorySelections.sofa.selectedValues.length +
-    categorySelections.storage.selectedValues.length +
-    categorySelections.table.selectedValues.length +
-    categorySelections.selective.selectedValues.length;
+  const isReady =
+    !isError && !isPending && activityOptionsData && categorySelections;
 
   return (
     <div className={styles.container}>
@@ -81,115 +61,127 @@ const ActivityInfo = ({ context }: ActivityInfoProps) => {
         image={FUNNELHEADER_IMAGES[4]}
       />
 
-      <div className={styles.contents}>
-        <div>
-          <HeadingText
-            title="주요 활동"
-            subtitle="선택한 활동에 최적화된 동선을 알려드려요."
-          />
-          <div className={styles.activityButton}>
-            <ButtonGroup<string>
-              options={activityTypeOptions}
-              selectedValues={activitySelection.selectedValues}
-              onSelectionChange={activitySelection.handleActivityChange}
-              keyExtractor={(option) => option.code}
-              selectionMode="single"
-              buttonSize="large"
-              layout="grid-2"
+      {isError ? (
+        <InlineError onRetry={refetch} />
+      ) : !isReady ? (
+        <Loading />
+      ) : (
+        <div className={styles.contents}>
+          <div>
+            <HeadingText
+              title="주요 활동"
+              subtitle="선택한 활동에 최적화된 동선을 알려드려요."
             />
-          </div>
-          {selectedActivityLabel && (
-            <div className={styles.caption}>
-              <Caption
-                code={selectedActivityLabel}
-                option={getRequiredFurnitureLabels()}
+            <div className={styles.activityButton}>
+              <ButtonGroup<string>
+                options={activityOptionsData.activities}
+                selectedValues={activitySelection.selectedValues}
+                onSelectionChange={activitySelection.handleActivityChange}
+                keyExtractor={(option) => option.code}
+                selectionMode="single"
+                buttonSize="large"
+                layout="grid-2"
               />
             </div>
-          )}
+            {selectedActivityLabel && (
+              <div className={styles.caption}>
+                <Caption
+                  code={selectedActivityLabel}
+                  option={getRequiredFurnitureLabels()}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className={styles.furnitures}>
+            <HeadingText
+              title="가구"
+              subtitle={`선택한 가구들로 이미지를 생성해드려요. (${
+                categorySelections.bed.selectedValues.length +
+                categorySelections.sofa.selectedValues.length +
+                categorySelections.storage.selectedValues.length +
+                categorySelections.table.selectedValues.length +
+                categorySelections.selective.selectedValues.length
+              }/6)`}
+            />
+            <ButtonGroup<number>
+              title={activityOptionsData.categories[0].nameKr}
+              titleSize="small"
+              hasBorder={true}
+              options={activityOptionsData.categories[0].furnitures}
+              selectedValues={categorySelections.bed.selectedValues}
+              onSelectionChange={categorySelections.bed.handleChange}
+              keyExtractor={(option) => option.id!}
+              selectionMode="single"
+              buttonSize="xsmall"
+              layout="grid-4"
+              buttonStatuses={categorySelections.bed.furnitureStatus}
+            />
+
+            <ButtonGroup<number>
+              title={activityOptionsData.categories[1].nameKr}
+              titleSize="small"
+              hasBorder={true}
+              options={activityOptionsData.categories[1].furnitures}
+              selectedValues={categorySelections.sofa.selectedValues}
+              onSelectionChange={categorySelections.sofa.handleChange}
+              keyExtractor={(option) => option.id!}
+              selectionMode="single"
+              buttonSize="medium"
+              layout="grid-2"
+              buttonStatuses={categorySelections.sofa.furnitureStatus}
+            />
+
+            <ButtonGroup<number>
+              title={activityOptionsData.categories[2].nameKr}
+              titleSize="small"
+              options={activityOptionsData.categories[2].furnitures}
+              selectedValues={categorySelections.storage.selectedValues}
+              onSelectionChange={categorySelections.storage.handleChange}
+              keyExtractor={(option) => option.id!}
+              selectionMode="multiple"
+              buttonSize="large"
+              layout="grid-2"
+              buttonStatuses={categorySelections.storage.furnitureStatus}
+            />
+
+            <ButtonGroup<number>
+              title={activityOptionsData.categories[3].nameKr}
+              titleSize="small"
+              options={activityOptionsData.categories[3].furnitures}
+              selectedValues={categorySelections.table.selectedValues}
+              onSelectionChange={categorySelections.table.handleChange}
+              keyExtractor={(option) => option.id!}
+              selectionMode="multiple"
+              buttonSize="small"
+              layout="grid-3"
+              buttonStatuses={categorySelections.table.furnitureStatus}
+            />
+
+            <ButtonGroup<number>
+              title={activityOptionsData.categories[4].nameKr}
+              titleSize="small"
+              options={activityOptionsData.categories[4].furnitures}
+              selectedValues={categorySelections.selective.selectedValues}
+              onSelectionChange={categorySelections.selective.handleChange}
+              keyExtractor={(option) => option.id!}
+              selectionMode="multiple"
+              buttonSize="large"
+              layout="grid-2"
+              buttonStatuses={categorySelections.selective.furnitureStatus}
+            />
+          </div>
+
+          <div>
+            <CtaButton
+              isActive={isFormCompleted && (!isCreditChecked || hasCredit)}
+              onClick={handleImageGeneration}
+            >
+              이미지 생성하기
+            </CtaButton>
+          </div>
         </div>
-
-        <div className={styles.furnitures}>
-          <HeadingText
-            title="가구"
-            subtitle={`선택한 가구들로 이미지를 생성해드려요. (${totalSelectedFurniture}/6)`}
-          />
-          <ButtonGroup<number>
-            title={bedOptions.nameKr}
-            titleSize="small"
-            hasBorder={true}
-            options={bedOptions.furnitures}
-            selectedValues={categorySelections.bed.selectedValues}
-            onSelectionChange={categorySelections.bed.handleChange}
-            keyExtractor={(option) => option.id!}
-            selectionMode="single"
-            buttonSize="xsmall"
-            layout="grid-4"
-            buttonStatuses={categorySelections.bed.furnitureStatus}
-          />
-
-          <ButtonGroup<number>
-            title={sofaOptions.nameKr}
-            titleSize="small"
-            hasBorder={true}
-            options={sofaOptions.furnitures}
-            selectedValues={categorySelections.sofa.selectedValues}
-            onSelectionChange={categorySelections.sofa.handleChange}
-            keyExtractor={(option) => option.id!}
-            selectionMode="single"
-            buttonSize="medium"
-            layout="grid-2"
-            buttonStatuses={categorySelections.sofa.furnitureStatus}
-          />
-
-          <ButtonGroup<number>
-            title={storageOptions.nameKr}
-            titleSize="small"
-            options={storageOptions.furnitures}
-            selectedValues={categorySelections.storage.selectedValues}
-            onSelectionChange={categorySelections.storage.handleChange}
-            keyExtractor={(option) => option.id!}
-            selectionMode="multiple"
-            buttonSize="large"
-            layout="grid-2"
-            buttonStatuses={categorySelections.storage.furnitureStatus}
-          />
-
-          <ButtonGroup<number>
-            title={tableOptions.nameKr}
-            titleSize="small"
-            options={tableOptions.furnitures}
-            selectedValues={categorySelections.table.selectedValues}
-            onSelectionChange={categorySelections.table.handleChange}
-            keyExtractor={(option) => option.id!}
-            selectionMode="multiple"
-            buttonSize="small"
-            layout="grid-3"
-            buttonStatuses={categorySelections.table.furnitureStatus}
-          />
-
-          <ButtonGroup<number>
-            title={selectiveOptions.nameKr}
-            titleSize="small"
-            options={selectiveOptions.furnitures}
-            selectedValues={categorySelections.selective.selectedValues}
-            onSelectionChange={categorySelections.selective.handleChange}
-            keyExtractor={(option) => option.id!}
-            selectionMode="multiple"
-            buttonSize="large"
-            layout="grid-2"
-            buttonStatuses={categorySelections.selective.furnitureStatus}
-          />
-        </div>
-
-        <div>
-          <CtaButton
-            isActive={isFormCompleted && (!isCreditChecked || hasCredit)}
-            onClick={handleImageGeneration}
-          >
-            이미지 생성하기
-          </CtaButton>
-        </div>
-      </div>
+      )}
     </div>
   );
 };

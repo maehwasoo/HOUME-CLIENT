@@ -29,7 +29,7 @@ const GeneratedImagesSection = ({
   userProfile,
 }: GeneratedImagesSectionProps) => {
   const navigate = useNavigate();
-  const { data: imagesData, isLoading, isError } = useMyPageImagesQuery();
+  const { data: imagesData, isPending, isError } = useMyPageImagesQuery();
   const { prefetchDetection } = useDetectionPrefetch();
   const prefetchedImageIdsRef = useRef<Set<number>>(new Set<number>());
   const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>(
@@ -132,7 +132,7 @@ const GeneratedImagesSection = ({
   );
 
   // 로딩 중
-  if (isLoading) {
+  if (isPending) {
     return <Loading />;
   }
 

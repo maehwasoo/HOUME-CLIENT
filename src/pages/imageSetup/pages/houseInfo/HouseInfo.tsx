@@ -7,6 +7,8 @@ import { useHouseInfo } from '@/pages/imageSetup/hooks/useHouseInfo';
 import type { CompletedHouseInfo } from '@/pages/imageSetup/types/funnel/houseInfo';
 import type { ImageSetupSteps } from '@/pages/imageSetup/types/funnel/steps';
 import CtaButton from '@/shared/components/button/ctaButton/CtaButton';
+import InlineError from '@/shared/components/inlineError/InlineError';
+import Loading from '@/shared/components/loading/Loading';
 
 import * as styles from './HouseInfo.css';
 import ButtonGroup from '../../components/buttonGroup/ButtonGroup';
@@ -32,7 +34,12 @@ const HouseInfo = ({ context, onNext }: HouseInfoProps) => {
     hasError,
   } = useHouseInfo(context);
 
-  const { data: housingOptions } = useHousingOptionsQuery();
+  const {
+    data: housingOptions,
+    isPending: isOptionsPending,
+    isError: isOptionsError,
+    refetch: refetchOptions,
+  } = useHousingOptionsQuery();
 
   const houseTypeOptions = housingOptions?.houseTypes || [];
   const roomTypeOptions = housingOptions?.roomTypes || [];
@@ -73,64 +80,76 @@ const HouseInfo = ({ context, onNext }: HouseInfoProps) => {
         image={FUNNELHEADER_IMAGES[1]}
       />
 
-      <div className={styles.contents}>
-        <ButtonGroup
-          title="주거 형태"
-          titleSize="large"
-          options={houseTypeOptions}
-          selectedValues={formData.houseType ? [formData.houseType] : []}
-          onSelectionChange={(values) =>
-            setFormData((prev) => ({
-              ...prev,
-              houseType: values[0] || undefined,
-            }))
-          }
-          selectionMode="single"
-          buttonSize="large"
-          layout="grid-2"
-          errors={errors.houseType}
+      {isOptionsError ? (
+        <InlineError
+          onRetry={refetchOptions}
+          message="주거 옵션을 불러올 수 없습니다"
         />
+      ) : isOptionsPending ? (
+        <Loading />
+      ) : (
+        <div className={styles.contents}>
+          <ButtonGroup
+            title="주거 형태"
+            titleSize="large"
+            options={houseTypeOptions}
+            selectedValues={formData.houseType ? [formData.houseType] : []}
+            onSelectionChange={(values) =>
+              setFormData((prev) => ({
+                ...prev,
+                houseType: values[0] || undefined,
+              }))
+            }
+            selectionMode="single"
+            buttonSize="large"
+            layout="grid-2"
+            errors={errors.houseType}
+          />
 
-        <ButtonGroup
-          title="구조"
-          titleSize="large"
-          options={roomTypeOptions}
-          selectedValues={formData.roomType ? [formData.roomType] : []}
-          onSelectionChange={(values) =>
-            setFormData((prev) => ({
-              ...prev,
-              roomType: values[0] || undefined,
-            }))
-          }
-          selectionMode="single"
-          buttonSize="large"
-          layout="grid-2"
-          errors={errors.roomType}
-        />
+          <ButtonGroup
+            title="구조"
+            titleSize="large"
+            options={roomTypeOptions}
+            selectedValues={formData.roomType ? [formData.roomType] : []}
+            onSelectionChange={(values) =>
+              setFormData((prev) => ({
+                ...prev,
+                roomType: values[0] || undefined,
+              }))
+            }
+            selectionMode="single"
+            buttonSize="large"
+            layout="grid-2"
+            errors={errors.roomType}
+          />
 
-        <ButtonGroup
-          title="평형"
-          titleSize="large"
-          options={areaTypeOptions}
-          selectedValues={formData.areaType ? [formData.areaType] : []}
-          onSelectionChange={(values) =>
-            setFormData((prev) => ({
-              ...prev,
-              areaType: values[0] || undefined,
-            }))
-          }
-          selectionMode="single"
-          buttonSize="large"
-          layout="grid-2"
-          errors={errors.areaType}
-        />
+          <ButtonGroup
+            title="평형"
+            titleSize="large"
+            options={areaTypeOptions}
+            selectedValues={formData.areaType ? [formData.areaType] : []}
+            onSelectionChange={(values) =>
+              setFormData((prev) => ({
+                ...prev,
+                areaType: values[0] || undefined,
+              }))
+            }
+            selectionMode="single"
+            buttonSize="large"
+            layout="grid-2"
+            errors={errors.areaType}
+          />
 
-        <div>
-          <CtaButton isActive={isFormCompleted} onClick={handleCtaButtonClick}>
-            집 구조 선택하기
-          </CtaButton>
+          <div>
+            <CtaButton
+              isActive={isFormCompleted}
+              onClick={handleCtaButtonClick}
+            >
+              집 구조 선택하기
+            </CtaButton>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

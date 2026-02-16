@@ -56,15 +56,27 @@ const FloorPlanList = ({
     // Submit CTA 버튼 클릭 시 GA 이벤트 전송
     logSelectFloorPlanClickBtnCTASubmit();
 
-    postAddress({ sigungu: region, roadName: address });
+    postAddress(
+      { sigungu: region, roadName: address },
+      {
+        onSuccess: () => {
+          notify({
+            text: '주소가 성공적으로 제출되었어요',
+            type: TOAST_TYPE.INFO,
+            options: {
+              autoClose: 3000,
+            },
+          });
+        },
+        onError: () => {
+          notify({
+            text: '주소 등록 중 오류가 발생했어요',
+            type: TOAST_TYPE.WARNING,
+          });
+        },
+      }
+    );
     handleCloseSheet();
-    notify({
-      text: '주소가 성공적으로 제출되었어요',
-      type: TOAST_TYPE.INFO,
-      options: {
-        autoClose: 3000,
-      },
-    });
   };
 
   const handleImageClick = (id: number) => {
