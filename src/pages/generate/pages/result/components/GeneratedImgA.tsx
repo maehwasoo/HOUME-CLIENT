@@ -21,8 +21,8 @@ import type { MyPageUserData } from '@/pages/mypage/types/apis/MyPage';
 import { ROUTES } from '@/routes/paths.ts';
 import GeneralModal from '@/shared/components/overlay/modal/GeneralModal';
 
+import SlideNext from '@shared/assets/icons/ArrowRightS.svg?react';
 import LockIcon from '@shared/assets/icons/lockIcon.svg?react';
-import SlideNext from '@shared/assets/icons/nextAbled.svg?react';
 import SlideNextDisabled from '@shared/assets/icons/nextDisabled.svg?react';
 import SlidePrev from '@shared/assets/icons/prevAbled.svg?react';
 import SlidePrevDisabled from '@shared/assets/icons/prevDisabled.svg?react';
@@ -203,7 +203,9 @@ const GeneratedImgA = ({
           className={styles.slidePrevBtn}
           disabled={isPrevDisabled}
         >
-          {isPrevDisabled ? <SlidePrevDisabled /> : <SlidePrev />}
+          <span className={styles.slideNavIconFrame}>
+            {isPrevDisabled ? <SlidePrevDisabled /> : <SlidePrev />}
+          </span>
         </button>
         {images.map((image, index) => {
           const cachedDetection =
@@ -254,7 +256,9 @@ const GeneratedImgA = ({
           className={styles.slideNextBtn}
           disabled={isNextDisabled}
         >
-          {isNextDisabled ? <SlideNextDisabled /> : <SlideNext />}
+          <span className={styles.slideNavIconFrame}>
+            {isNextDisabled ? <SlideNextDisabled /> : <SlideNext />}
+          </span>
         </button>
       </Swiper>
     </div>

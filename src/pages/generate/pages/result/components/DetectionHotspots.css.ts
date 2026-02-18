@@ -8,17 +8,17 @@ import { zIndex } from '@shared/styles/tokens/zIndex';
 export const container = style({
   position: 'relative',
   width: '100%',
-  minHeight: '26rem',
-  aspectRatio: '3 / 2',
-  overflow: 'hidden',
 });
 
 export const image = recipe({
   base: {
     width: '100%',
-    height: '100%',
-    objectFit: 'cover',
+    height: 'auto',
+    maxHeight: '26rem',
+    objectFit: 'contain',
     objectPosition: 'center',
+    display: 'block',
+    margin: '0 auto',
     transition: 'transform 0.2s ease-out, opacity 0.3s ease-in-out',
   },
   variants: {

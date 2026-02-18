@@ -9,9 +9,6 @@ import { colorVars } from '@styles/tokens/color.css';
 
 export const container = style({
   width: '100%',
-  minHeight: '26rem',
-  aspectRatio: '3 / 2',
-  overflow: 'hidden',
   position: 'relative',
 });
 
@@ -23,9 +20,12 @@ export const swiperSlide = style({
 export const imgArea = recipe({
   base: {
     width: '100%',
-    aspectRatio: '3 / 2',
-    objectFit: 'cover', // 비율 유지하며 영역 완전히 채움
+    height: 'auto',
+    maxHeight: '26rem',
+    objectFit: 'contain', // 비율 유지하며 이미지 전체 표시
     objectPosition: 'center', // 이미지 중앙 부분 표시
+    display: 'block',
+    margin: '0 auto',
   },
   variants: {
     mirrored: {
@@ -80,21 +80,15 @@ export const slidePrevBtn = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  left: '1.2rem',
-  bottom: '50%',
+  left: '0.6rem',
+  top: '50%',
+  transform: 'translateY(-50%)',
   width: '3.6rem',
   height: '3.6rem',
-  backgroundColor: colorVars.color.gray999_30,
-  borderRadius: '99.9rem',
+  backgroundColor: 'transparent',
+  border: 'none',
+  padding: 0,
   zIndex: 1,
-
-  ':active': {
-    backgroundColor: colorVars.color.gray999_50,
-  },
-
-  ':disabled': {
-    backgroundColor: colorVars.color.gray999_04,
-  },
 });
 
 export const slideNextBtn = style({
@@ -102,31 +96,54 @@ export const slideNextBtn = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  right: '1.2rem',
-  bottom: '50%',
+  right: '0.6rem',
+  top: '50%',
+  transform: 'translateY(-50%)',
   width: '3.6rem',
   height: '3.6rem',
-  backgroundColor: colorVars.color.gray999_30,
-  borderRadius: '99.9rem',
+  backgroundColor: 'transparent',
+  border: 'none',
+  padding: 0,
   zIndex: 1,
+});
 
-  ':active': {
-    backgroundColor: colorVars.color.gray999_50,
-  },
+export const slideNavIconFrame = style({
+  width: '2.4rem',
+  height: '2.4rem',
+  borderRadius: '1.2rem',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: colorVars.color.gray999_30,
 
-  ':disabled': {
-    backgroundColor: colorVars.color.gray999_04,
+  selectors: {
+    [`${slidePrevBtn}:active &`]: {
+      backgroundColor: colorVars.color.gray999_50,
+    },
+    [`${slideNextBtn}:active &`]: {
+      backgroundColor: colorVars.color.gray999_50,
+    },
+
+    [`${slidePrevBtn}:disabled &`]: {
+      backgroundColor: colorVars.color.gray999_04,
+    },
+    [`${slideNextBtn}:disabled &`]: {
+      backgroundColor: colorVars.color.gray999_04,
+    },
   },
 });
 
 export const imgAreaBlurred = recipe({
   base: {
     width: '100%',
-    aspectRatio: '3 / 2',
-    objectFit: 'cover',
+    height: 'auto',
+    maxHeight: '26rem',
+    objectFit: 'contain',
     objectPosition: 'center',
     filter: 'blur(15px)',
     backgroundColor: 'lightgray',
+    display: 'block',
+    margin: '0 auto',
   },
   variants: {
     mirrored: {
