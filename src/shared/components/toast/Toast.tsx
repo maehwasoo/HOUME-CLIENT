@@ -12,6 +12,7 @@ interface ToastProps {
   text: string;
   type: ToastType;
   onClick?: () => void;
+  actionLabel?: string;
   closeToast?: ToastContentProps['closeToast'];
   // react-toastify의 ToastContentProps로부터 closeToast 함수 가져옴 -> Toast 컴포넌트에서 closeToast 받아서 사용
   // 타입은 optional이지만 toast() 함수로 컴포넌트 렌더링 시 react-toastify는 무조건 closeToast 주입(그렇게 설계됨)
@@ -24,7 +25,13 @@ const ICON_MAP: Record<ToastType, JSX.Element> = {
   [TOAST_TYPE.WARNING]: <WarningIcon />,
 };
 
-const Toast = ({ text, type, onClick, closeToast }: ToastProps) => {
+const Toast = ({
+  text,
+  type,
+  onClick,
+  actionLabel = '보러가기',
+  closeToast,
+}: ToastProps) => {
   const handleActionClick = () => {
     if (onClick) {
       onClick();
@@ -35,7 +42,11 @@ const Toast = ({ text, type, onClick, closeToast }: ToastProps) => {
   };
 
   return (
-    <div className={styles.container}>
+    <div
+      className={styles.container({
+        type: type === TOAST_TYPE.NAVIGATE ? 'navigate' : undefined,
+      })}
+    >
       {ICON_MAP[type]}
       <span
         className={styles.text({
@@ -50,7 +61,7 @@ const Toast = ({ text, type, onClick, closeToast }: ToastProps) => {
           className={styles.action}
           onClick={handleActionClick}
         >
-          보러가기
+          {actionLabel}
         </button>
       )}
     </div>

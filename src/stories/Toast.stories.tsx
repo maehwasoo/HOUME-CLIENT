@@ -45,6 +45,16 @@ export const Warning: Story = {
   },
 };
 
+export const Navigate: Story = {
+  argTypes: {
+    onClick: { action: 'navigate' },
+  },
+  args: {
+    text: '상품을 찜했어요! 찜한 가구로 이동할까요?',
+    type: TOAST_TYPE.NAVIGATE,
+  },
+};
+
 export const CustomMargin: Story = {
   args: {
     text: '하단 여백이 변경된 토스트 예시',
