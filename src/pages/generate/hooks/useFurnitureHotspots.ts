@@ -15,6 +15,7 @@ import {
   logFurniturePipelineEvent,
   reportFurniturePipelineWarning,
 } from '@pages/generate/utils/furniturePipelineMonitor';
+import { runSerializedInferenceTask } from '@pages/generate/utils/inferenceTaskScheduler';
 
 import {
   buildHotspotsPipeline,
@@ -130,7 +131,7 @@ export function useFurnitureHotspots(
     runInference,
     isLoading,
     error: modelError,
-  } = useONNXModel(OBJ365_MODEL_PATH);
+  } = useONNXModel(OBJ365_MODEL_PATH, { enabled });
   const prefetchedDetections = options?.prefetchedDetections ?? null;
   const onInferenceComplete = options?.onInferenceComplete;
   const inferenceCompleteRef =
@@ -265,21 +266,23 @@ export function useFurnitureHotspots(
       imageEl: HTMLImageElement,
       event: 'inference-start' | 'cors-inference-start'
     ) => {
-      const naturalWidth = imageEl.naturalWidth || imageEl.width;
-      const naturalHeight = imageEl.naturalHeight || imageEl.height;
-      logHotspotEvent(event, {
-        naturalWidth,
-        naturalHeight,
+      await runSerializedInferenceTask(async () => {
+        const naturalWidth = imageEl.naturalWidth || imageEl.width;
+        const naturalHeight = imageEl.naturalHeight || imageEl.height;
+        logHotspotEvent(event, {
+          naturalWidth,
+          naturalHeight,
+        });
+        updateRenderMetrics();
+        const result = await runInference(imageEl);
+        logHotspotEvent('raw-detections', {
+          totalDetections: result.detections.length,
+          samples: result.detections.slice(0, 5),
+        });
+        const processed = processDetections(imageEl, result);
+        inferenceCompleteRef.current?.(result, processed.hotspots);
+        hasRunRef.current = true;
       });
-      updateRenderMetrics();
-      const result = await runInference(imageEl);
-      logHotspotEvent('raw-detections', {
-        totalDetections: result.detections.length,
-        samples: result.detections.slice(0, 5),
-      });
-      const processed = processDetections(imageEl, result);
-      inferenceCompleteRef.current?.(result, processed.hotspots);
-      hasRunRef.current = true;
     };
 
     const isAbortError = (value: unknown) =>
@@ -321,7 +324,9 @@ export function useFurnitureHotspots(
         const controller = new AbortController();
         corsAbortRef.current = controller;
         try {
-          const corsImg = await loadCorsImage(imageUrl, controller.signal);
+          const corsImg = await runSerializedInferenceTask(async () =>
+            loadCorsImage(imageUrl, controller.signal)
+          );
           if (corsImg) {
             try {
               await executeInference(corsImg, 'cors-inference-start');

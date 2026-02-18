@@ -13,12 +13,17 @@ import type {
 // 생성 이미지 카테고리 조회 API 호출
 export const getGeneratedImageCategories = async (
   imageId: number,
-  detectedObjects: FurnitureCategoryCode[]
+  detectedObjects?: FurnitureCategoryCode[]
 ) => {
+  const query =
+    detectedObjects && detectedObjects.length > 0
+      ? { detectedObjects }
+      : undefined;
+
   return request<FurnitureCategoriesResponse>({
     method: HTTPMethod.GET,
     url: API_ENDPOINT.GENERATE.CURATION_CATEGORIES(imageId),
-    query: { detectedObjects },
+    ...(query ? { query } : {}),
   });
 };
 

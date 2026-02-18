@@ -107,6 +107,7 @@
 <br />
 
 ## Architecture
+
 <img width="4096" height="3138" alt="image" src="https://github.com/user-attachments/assets/566bd2ae-815a-4783-a29b-79d05a813095" />
 
 ```

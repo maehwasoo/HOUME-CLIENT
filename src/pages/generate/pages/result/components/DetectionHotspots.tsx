@@ -64,7 +64,6 @@ const DetectionHotspots = ({
   const setImageDetection = useCurationStore(
     (state) => state.setImageDetection
   );
-  const resetImageState = useCurationStore((state) => state.resetImageState);
   const lastSyncedHotspotsRef = useRef<FurnitureHotspot[] | null>(null);
   const lastDetectionsRef = useRef<ProcessedDetections | null>(null);
   const { prefetchedDetections, saveEntry } = useDetectionCache(
@@ -123,7 +122,6 @@ const DetectionHotspots = ({
     if (imageId === null) return;
     if (!shouldInferHotspots) {
       lastSyncedHotspotsRef.current = null;
-      resetImageState(imageId);
       return;
     }
     if (isSameHotspotArray(lastSyncedHotspotsRef.current, hotspots)) {
@@ -149,14 +147,7 @@ const DetectionHotspots = ({
       });
       lastDetectionsRef.current = null;
     }
-  }, [
-    imageId,
-    hotspots,
-    setImageDetection,
-    resetImageState,
-    shouldInferHotspots,
-    saveEntry,
-  ]);
+  }, [imageId, hotspots, setImageDetection, shouldInferHotspots, saveEntry]);
 
   useEffect(() => {
     lastSyncedHotspotsRef.current = null;

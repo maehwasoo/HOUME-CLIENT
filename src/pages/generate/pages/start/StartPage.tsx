@@ -1,5 +1,3 @@
-import { useEffect } from 'react';
-
 import { useNavigate } from 'react-router-dom';
 
 import { useABTest } from '@/pages/generate/hooks/useABTest';
@@ -10,8 +8,7 @@ import TitleNavBar from '@/shared/components/navBar/TitleNavBar';
 import { useUserStore } from '@/store/useUserStore';
 
 import SignupImage from '@assets/icons/loginAfter.png';
-import { OBJ365_MODEL_PATH } from '@pages/generate/constants/detection';
-import { preloadONNXModel } from '@pages/generate/hooks/useOnnxModel';
+import { useStartPageModelPreload } from '@pages/generate/hooks/useStartPageModelPreload';
 
 import * as styles from './StartPage.css.ts';
 
@@ -21,12 +18,7 @@ const StartPage = () => {
   const navigate = useNavigate();
   const { variant } = useABTest();
 
-  useEffect(() => {
-    // 이미지 생성 플로우 진입 시 모델 선로딩
-    preloadONNXModel(OBJ365_MODEL_PATH).catch(() => {
-      // console.warn('[StartPage] preload model failed');
-    });
-  }, []);
+  useStartPageModelPreload();
 
   const handleGoToImageSetup = () => {
     // 이미지 생성 시작 페이지 CTA 버튼 클릭 시 GA 이벤트 전송
