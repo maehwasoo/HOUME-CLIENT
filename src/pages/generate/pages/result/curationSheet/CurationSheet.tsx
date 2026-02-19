@@ -27,8 +27,8 @@ import * as styles from './CurationSheet.css';
 
 import type { FurnitureProductsInfoResponse } from '@pages/generate/types/furniture';
 
-// 카테고리 스켈레톤 칩 길이 프리셋 중 세 번째(long)만 사용
-const FILTER_SKELETON_WIDTH = 'long' as const;
+const FILTER_SKELETON_CHIP_COUNT = 4;
+const PRODUCT_SKELETON_CARD_COUNT = 4;
 const SECTION_SWITCH_EPSILON_PX = 1;
 // 프리패치 쿼리키 튜플 정의
 type ProductPrefetchQueryKey = [
@@ -363,6 +363,28 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
     </div>
   );
 
+  const renderProductSkeletonGrid = (keyPrefix: string) => (
+    <div className={styles.gridbox}>
+      {Array.from({ length: PRODUCT_SKELETON_CARD_COUNT }, (_, index) => (
+        <div
+          key={`${keyPrefix}-${index}`}
+          className={styles.productSkeletonCard}
+          aria-hidden
+        >
+          <div className={styles.productSkeletonImage} />
+          <div className={styles.productSkeletonInfo}>
+            <div className={styles.productSkeletonBrand} />
+            <div className={styles.productSkeletonName} />
+            <div className={styles.productSkeletonPriceGroup}>
+              <div className={styles.productSkeletonOldPrice} />
+              <div className={styles.productSkeletonCurrentPrice} />
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
   /**
    * 카테고리/상품 로딩 상태에 따라 섹션을 분기 렌더링
    */
@@ -373,16 +395,11 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
         '상단 가구 필터에서 원하는 가구를 선택해 주세요'
       );
     }
-    if (shouldShowDetectionPending(detectedObjectsCount)) {
-      return renderStatus('가구를 분석 중이에요', '잠시만 기다려 주세요');
-    }
-    if (categoriesQuery.isLoading) {
-      return renderStatus(
-        '감지된 가구를 분석 중이에요',
-        '잠시만 기다려 주세요',
-        undefined,
-        true
-      );
+    if (
+      shouldShowDetectionPending(detectedObjectsCount) ||
+      categoriesQuery.isLoading
+    ) {
+      return renderProductSkeletonGrid('detecting');
     }
     if (categoriesQuery.isError) {
       return renderStatus(
@@ -398,12 +415,7 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
       );
     }
     if (isInitialProductsLoading) {
-      return renderStatus(
-        '상품을 불러오는 중이에요',
-        '곧 추천을 보여드릴게요',
-        undefined,
-        true
-      );
+      return renderProductSkeletonGrid('initial-products');
     }
 
     return (
@@ -413,7 +425,9 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
           const normalizedProducts =
             normalizedProductsByCategory[category.id] ?? [];
 
-          let sectionContent: ReactNode = null;
+          let sectionContent: ReactNode = renderProductSkeletonGrid(
+            `category-${category.id}`
+          );
 
           if (categoryQuery) {
             if (categoryQuery.isError) {
@@ -424,15 +438,6 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
                   onClick: () => categoryQuery.refetch(),
                 }
               );
-            } else if (categoryQuery.isLoading) {
-              sectionContent =
-                selectedCategoryId === category.id
-                  ? renderCategoryStatus(
-                      '상품을 불러오는 중이에요',
-                      undefined,
-                      true
-                    )
-                  : null;
             } else if (!categoryQuery.isLoading) {
               sectionContent =
                 normalizedProducts.length === 0 ? (
@@ -476,30 +481,30 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
 
       {!categoriesQuery.isError && (
         <div className={styles.filterSection}>
-          {categories.length === 0 ? (
-            // 감지/로딩 중에는 세 번째 길이(long) 스켈레톤 칩 하나만 노출
-            <span
-              className={`${styles.filterSkeletonChip} ${styles.filterSkeletonChipWidth[FILTER_SKELETON_WIDTH]}`}
-              aria-hidden
-            />
-          ) : (
-            categories.map((category) => (
-              <span
-                key={category.id}
-                ref={(element) => {
-                  chipRefs.current[category.id] = element;
-                }}
-                className={styles.filterChipAnchor}
-              >
-                <FilterChip
-                  isSelected={selectedCategoryId === category.id}
-                  onClick={() => handleCategorySelect(category.id)}
+          {categories.length === 0
+            ? Array.from({ length: FILTER_SKELETON_CHIP_COUNT }, (_, index) => (
+                <span
+                  key={`filter-skeleton-${index}`}
+                  className={styles.filterSkeletonChip}
+                  aria-hidden
+                />
+              ))
+            : categories.map((category) => (
+                <span
+                  key={category.id}
+                  ref={(element) => {
+                    chipRefs.current[category.id] = element;
+                  }}
+                  className={styles.filterChipAnchor}
                 >
-                  {category.categoryName}
-                </FilterChip>
-              </span>
-            ))
-          )}
+                  <FilterChip
+                    isSelected={selectedCategoryId === category.id}
+                    onClick={() => handleCategorySelect(category.id)}
+                  >
+                    {category.categoryName}
+                  </FilterChip>
+                </span>
+              ))}
         </div>
       )}
 

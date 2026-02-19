@@ -1,9 +1,21 @@
-import { style, styleVariants } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 
 import { fontStyle } from '@/shared/styles/fontStyle';
 import { animationTokens } from '@/shared/styles/tokens/animation.css';
 
 import { colorVars } from '@styles/tokens/color.css';
+
+const skeletonBlock = {
+  borderRadius: '0.4rem',
+  background: `linear-gradient(
+    90deg,
+    ${colorVars.color.gray200} 0%,
+    ${colorVars.color.gray100} 50%,
+    ${colorVars.color.gray200} 100%
+  )`,
+  backgroundSize: '200% 100%',
+  animation: `${animationTokens.skeletonWave} 1.6s ease-in-out infinite`,
+} as const;
 
 export const container = style({
   width: '100%',
@@ -47,6 +59,7 @@ export const filterChipAnchor = style({
 // 카테고리 칩 스켈레톤 공통 스타일 정의
 export const filterSkeletonChip = style({
   height: '3.6rem',
+  width: '6.9rem',
   borderRadius: '999px',
   background: `linear-gradient(
     90deg,
@@ -57,14 +70,6 @@ export const filterSkeletonChip = style({
   backgroundSize: '200% 100%',
   animation: `${animationTokens.skeletonWave} 1.6s ease-in-out infinite`,
   flexShrink: 0,
-});
-
-// 스켈레톤 칩의 가변 너비를 프리셋으로 제공
-export const filterSkeletonChipWidth = styleVariants({
-  short: { width: '5.6rem' },
-  medium: { width: '6.8rem' },
-  long: { width: '8.8rem' },
-  wide: { width: '10.4rem' },
 });
 
 export const content = style({
@@ -101,8 +106,64 @@ export const gridbox = style({
   height: 'fit-content',
   display: 'grid',
   gridTemplateColumns: 'repeat(2, minmax(16.4rem, 1fr))',
-  columnGap: '0.7rem',
+  columnGap: '1.1rem',
   rowGap: 0,
+});
+
+export const productSkeletonCard = style({
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  paddingBottom: '2rem',
+});
+
+export const productSkeletonImage = style({
+  ...skeletonBlock,
+  width: '100%',
+  aspectRatio: '1 / 1',
+  borderRadius: '0.8rem',
+});
+
+export const productSkeletonInfo = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.4rem',
+  padding: '0.6rem 0.2rem 0',
+});
+
+export const productSkeletonBrand = style({
+  ...skeletonBlock,
+  width: '100%',
+  height: '1.1rem',
+  borderRadius: '0.2rem',
+});
+
+export const productSkeletonName = style({
+  ...skeletonBlock,
+  width: '100%',
+  height: '3.6rem',
+  borderRadius: '0.2rem',
+});
+
+export const productSkeletonPriceGroup = style({
+  width: '8.3rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.3rem',
+});
+
+export const productSkeletonOldPrice = style({
+  ...skeletonBlock,
+  width: '100%',
+  height: '1.2rem',
+  borderRadius: '0.2rem',
+});
+
+export const productSkeletonCurrentPrice = style({
+  ...skeletonBlock,
+  width: '100%',
+  height: '1.7rem',
+  borderRadius: '0.2rem',
 });
 
 export const statusContainer = style({
