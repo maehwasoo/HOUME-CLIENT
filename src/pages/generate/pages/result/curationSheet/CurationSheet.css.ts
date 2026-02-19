@@ -39,6 +39,11 @@ export const filterSection = style({
   msOverflowStyle: 'none', // IE and Edge
 });
 
+export const filterChipAnchor = style({
+  display: 'inline-flex',
+  flexShrink: 0,
+});
+
 // 카테고리 칩 스켈레톤 공통 스타일 정의
 export const filterSkeletonChip = style({
   height: '3.6rem',
@@ -80,6 +85,17 @@ export const content = style({
   msOverflowStyle: 'none', // IE and Edge
 });
 
+export const sectionList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: 0,
+  paddingBottom: '2.4rem',
+});
+
+export const categorySection = style({
+  width: '100%',
+});
+
 export const gridbox = style({
   width: '100%',
   height: 'fit-content',
@@ -97,6 +113,18 @@ export const statusContainer = style({
   alignItems: 'center',
   justifyContent: 'center',
   paddingBottom: '4.5rem',
+  gap: '0.8rem',
+  textAlign: 'center',
+  color: colorVars.color.gray500,
+});
+
+export const sectionStatusContainer = style({
+  width: '100%',
+  minHeight: '10rem',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
   gap: '0.8rem',
   textAlign: 'center',
   color: colorVars.color.gray500,

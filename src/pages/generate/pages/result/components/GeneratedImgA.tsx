@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import { overlay } from 'overlay-kit';
-import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import 'swiper/css';
@@ -10,19 +9,23 @@ import 'swiper/css/pagination';
 
 import { useABTest } from '@/pages/generate/hooks/useABTest';
 import {
+  useFactorPreferenceMutation,
+  useFactorsQuery,
+  useDeleteResultPreferenceMutation,
+  useResultPreferenceMutation,
+} from '@/pages/generate/hooks/useGenerate';
+import {
   logResultImgClickBtnMoreImg,
   logResultImgClickMoreModalBack,
-  logResultImgClickMoreModalMakeNew,
   logResultImgSwipeSlideLeft,
   logResultImgSwipeSlideRight,
 } from '@/pages/generate/utils/analytics';
-import { useMyPageUser } from '@/pages/mypage/hooks/useMypage';
-import type { MyPageUserData } from '@/pages/mypage/types/apis/MyPage';
-import { ROUTES } from '@/routes/paths.ts';
-import GeneralModal from '@/shared/components/overlay/modal/GeneralModal';
+import DislikeButton from '@/shared/components/button/likeButton/DislikeButton';
+import LikeButton from '@/shared/components/button/likeButton/LikeButton';
+import CommunityComingSoonModal from '@/shared/components/overlay/modal/CommunityComingSoonModal';
 
-import SlideNext from '@shared/assets/icons/ArrowRightS.svg?react';
-import LockIcon from '@shared/assets/icons/lockIcon.svg?react';
+import generateResultLockedPreview from '@assets/images/generateResultLockedPreview.png';
+import SlideNext from '@shared/assets/icons/nextAbled.svg?react';
 import SlideNextDisabled from '@shared/assets/icons/nextDisabled.svg?react';
 import SlidePrev from '@shared/assets/icons/prevAbled.svg?react';
 import SlidePrevDisabled from '@shared/assets/icons/prevDisabled.svg?react';
@@ -35,6 +38,7 @@ import type {
   GenerateImageData,
   GenerateImageAResponse,
   GenerateImageBResponse,
+  ResultPageLikeState,
 } from '@pages/generate/types/generate';
 import type { Swiper as SwiperType } from 'swiper';
 
@@ -48,10 +52,9 @@ interface GeneratedImgAProps {
     | UnifiedGenerateImageResult
     | GenerateImageAResponse['data']
     | GenerateImageBResponse['data'];
-  onSlideChange?: (currentIndex: number, totalCount: number) => void;
+  onSlideChange?: (currentIndex: number) => void;
   onCurrentImgIdChange?: (currentImgId: number) => void;
   shouldInferHotspots?: boolean;
-  userProfile?: MyPageUserData | null;
   detectionCache?: Record<number, DetectionCacheEntry> | null;
   isSlideCountLoading?: boolean;
 }
@@ -66,27 +69,38 @@ const GeneratedImgA = ({
   onSlideChange,
   onCurrentImgIdChange,
   shouldInferHotspots = true,
-  userProfile,
   detectionCache,
   isSlideCountLoading = false,
 }: GeneratedImgAProps) => {
-  const navigate = useNavigate();
   const [swiper, setSwiper] = useState<SwiperType | null>(null);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [currentImgId, setCurrentImgId] = useState(0);
+  const [lockedPreference, setLockedPreference] =
+    useState<ResultPageLikeState>(null);
+  const [selectedFactorId, setSelectedFactorId] = useState<number | null>(null);
+  const [isPreferenceSubmitting, setIsPreferenceSubmitting] = useState(false);
+  const [isFactorSubmitting, setIsFactorSubmitting] = useState(false);
+  const factorRequestSeqRef = useRef(0);
+  const lockedPreferenceRef = useRef<ResultPageLikeState>(lockedPreference);
   const { variant } = useABTest();
-
-  // 마이페이지 사용자 정보 (크레딧 정보 포함)
-  const { data: fetchedUserData } = useMyPageUser({
-    enabled: !userProfile,
+  const { mutate: sendPreference } = useResultPreferenceMutation();
+  const { mutate: deletePreference } = useDeleteResultPreferenceMutation();
+  const { mutate: sendFactorPreference } = useFactorPreferenceMutation();
+  const { data: likeFactorsData = [] } = useFactorsQuery(true, {
+    enabled: lockedPreference === 'like',
   });
-  const creditCount =
-    userProfile?.CreditCount ?? fetchedUserData?.CreditCount ?? 0;
+  const { data: dislikeFactorsData = [] } = useFactorsQuery(false, {
+    enabled: lockedPreference === 'dislike',
+  });
 
   // currentImgId가 변경될 때마다 부모에게 전달
   useEffect(() => {
     onCurrentImgIdChange?.(currentImgId);
   }, [currentImgId, onCurrentImgIdChange]);
+
+  useEffect(() => {
+    lockedPreferenceRef.current = lockedPreference;
+  }, [lockedPreference]);
 
   // 부모로부터 받은 데이터 사용 (필수 prop)
   const result = propResult;
@@ -117,150 +131,308 @@ const GeneratedImgA = ({
   const totalSlideCount = lastImage ? images.length + 1 : images.length;
   const isPrevDisabled = !swiper || currentSlideIndex === 0;
   const isNextDisabled = !swiper || currentSlideIndex === totalSlideCount - 1;
+  const isLockedSlide = lastImage
+    ? currentSlideIndex === totalSlideCount - 1
+    : false;
+
+  const submitPreference = (
+    imageId: number,
+    finalState: Exclude<ResultPageLikeState, null>
+  ) => {
+    sendPreference(
+      { imageId, isLike: finalState === 'like' },
+      {
+        onSuccess: () => {
+          setLockedPreference(finalState);
+          setSelectedFactorId(null);
+        },
+        onSettled: () => setIsPreferenceSubmitting(false),
+      }
+    );
+  };
+
+  const handleLockedPreference = (isLike: boolean) => {
+    const imageId = lastImage?.imageId;
+    if (!imageId || isPreferenceSubmitting || isFactorSubmitting) return;
+
+    const nextState: ResultPageLikeState = isLike ? 'like' : 'dislike';
+    const finalState: ResultPageLikeState =
+      lockedPreference === nextState ? null : nextState;
+
+    setIsPreferenceSubmitting(true);
+
+    if (finalState === null) {
+      deletePreference(imageId, {
+        onSuccess: () => {
+          setLockedPreference(null);
+          setSelectedFactorId(null);
+        },
+        onSettled: () => setIsPreferenceSubmitting(false),
+      });
+      return;
+    }
+
+    if (lockedPreference !== null && lockedPreference !== finalState) {
+      if (selectedFactorId !== null) {
+        const previousFactorId = selectedFactorId;
+        setSelectedFactorId(null);
+        sendFactorPreference(
+          {
+            imageId,
+            factorId: previousFactorId,
+          },
+          {
+            onSettled: () => {
+              submitPreference(imageId, finalState);
+            },
+          }
+        );
+        return;
+      }
+    }
+
+    submitPreference(imageId, finalState);
+  };
+
+  const handleFactorClick = (factorId: number) => {
+    const imageId = lastImage?.imageId;
+    if (!imageId || isFactorSubmitting || isPreferenceSubmitting) return;
+
+    const isSelected = selectedFactorId === factorId;
+    const expectedPreference = lockedPreference;
+    const requestSeq = factorRequestSeqRef.current + 1;
+    factorRequestSeqRef.current = requestSeq;
+    setIsFactorSubmitting(true);
+
+    sendFactorPreference(
+      { imageId, factorId },
+      {
+        onSuccess: () => {
+          if (factorRequestSeqRef.current !== requestSeq) return;
+          if (lockedPreferenceRef.current !== expectedPreference) return;
+          setSelectedFactorId(isSelected ? null : factorId);
+        },
+        onSettled: () => {
+          if (factorRequestSeqRef.current !== requestSeq) return;
+          setIsFactorSubmitting(false);
+        },
+      }
+    );
+  };
 
   /**
    * 더보기 모달 오픈
    */
   const handleOpenModal = () => {
     logResultImgClickBtnMoreImg(variant);
-    overlay.open(
-      (
-        { unmount } // @toss/overlay-kit 사용
-      ) => {
-        const closeModal = (afterClose?: () => void) => {
-          unmount();
-          afterClose?.();
-        };
+    overlay.open(({ unmount }) => {
+      const closeModal = () => {
+        logResultImgClickMoreModalBack(variant);
+        unmount();
+      };
 
-        return (
-          <GeneralModal
-            title="더 다양한 이미지가 궁금하신가요?"
-            content={`새로운 취향과 정보를 반영해 다시 생성해보세요!\n이미지를 생성할 때마다 크레딧이 1개 소진돼요.`}
-            cancelText="돌아가기"
-            confirmText="이미지 새로 만들기"
-            cancelVariant="default"
-            confirmVariant="primary"
-            showCreditChip={true}
-            creditCount={creditCount}
-            maxCredit={5}
-            onCancel={() => {
-              logResultImgClickMoreModalBack(variant);
-              closeModal();
-            }}
-            onConfirm={() => {
-              logResultImgClickMoreModalMakeNew(variant);
-              closeModal(() =>
-                navigate(ROUTES.GENERATE_START, { replace: true })
-              );
-            }}
-            onClose={() => {
-              logResultImgClickMoreModalBack(variant);
-              closeModal();
-            }}
-          />
-        );
-      }
-    );
+      return <CommunityComingSoonModal onClose={closeModal} />;
+    });
   };
 
   return (
     <div className={styles.container}>
-      <Swiper
-        slidesPerView={1}
-        onSlideChange={(swiper) => {
-          const prevIndex = currentSlideIndex;
-          const newIndex = swiper.activeIndex;
-          setCurrentSlideIndex(newIndex);
-          onSlideChange?.(newIndex, totalSlideCount);
+      <div className={styles.sliderArea}>
+        <Swiper
+          slidesPerView={1}
+          onSlideChange={(swiper) => {
+            const prevIndex = currentSlideIndex;
+            const newIndex = swiper.activeIndex;
+            setCurrentSlideIndex(newIndex);
+            onSlideChange?.(newIndex);
 
-          // 슬라이드 스와이프 이벤트 전송
-          if (newIndex > prevIndex) {
-            logResultImgSwipeSlideRight(variant);
-          } else if (newIndex < prevIndex) {
-            logResultImgSwipeSlideLeft(variant);
-          }
-        }}
-        onSwiper={setSwiper}
-      >
-        <div className={styles.slideNum} aria-live="polite">
-          {isSlideCountLoading ? (
-            <div
-              className={styles.slideNumSkeleton}
-              aria-hidden="true"
-              role="presentation"
-            />
-          ) : (
-            <>
-              <span>{currentSlideIndex + 1}</span>
-              <span>/</span>
-              <span>{totalSlideCount}</span>
-            </>
-          )}
-        </div>
-        <button
-          type="button"
-          onClick={() => swiper?.slidePrev()}
-          className={styles.slidePrevBtn}
-          disabled={isPrevDisabled}
+            // 슬라이드 스와이프 이벤트 전송
+            if (newIndex > prevIndex) {
+              logResultImgSwipeSlideRight(variant);
+            } else if (newIndex < prevIndex) {
+              logResultImgSwipeSlideLeft(variant);
+            }
+          }}
+          onSwiper={setSwiper}
         >
-          <span className={styles.slideNavIconFrame}>
-            {isPrevDisabled ? <SlidePrevDisabled /> : <SlidePrev />}
-          </span>
-        </button>
-        {images.map((image, index) => {
-          const cachedDetection =
-            image.imageId && detectionCache
-              ? (detectionCache[image.imageId] ?? null)
-              : null;
-          return (
-            <SwiperSlide
-              key={`${image.imageId}-${index}`}
-              className={styles.swiperSlide}
-            >
-              <DetectionHotspots
-                imageId={image.imageId}
-                imageUrl={image.imageUrl}
-                mirrored={image.isMirror}
-                // 결과 페이지 플래그로 추론 on/off 제어
-                shouldInferHotspots={shouldInferHotspots}
-                cachedDetection={cachedDetection}
+          <div className={styles.slideNum} aria-live="polite">
+            {isSlideCountLoading ? (
+              <div
+                className={styles.slideNumSkeleton}
+                aria-hidden="true"
+                role="presentation"
               />
-            </SwiperSlide>
-          );
-        })}
-        {lastImage && (
-          <SwiperSlide key="blurred-last-image" className={styles.swiperSlide}>
-            <img
-              crossOrigin="anonymous"
-              src={lastImage.imageUrl}
-              alt="이미지 더보기"
-              className={styles.imgAreaBlurred({
-                mirrored: lastImage.isMirror,
-              })}
-            />
-            <div className={styles.lockWrapper}>
-              <LockIcon />
-              <button
-                type="button"
-                className={styles.moreBtn}
-                onClick={handleOpenModal}
+            ) : (
+              <>
+                <span>{currentSlideIndex + 1}</span>
+                <span>/</span>
+                <span>{totalSlideCount}</span>
+              </>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={() => swiper?.slidePrev()}
+            className={styles.slidePrevBtn}
+            disabled={isPrevDisabled}
+          >
+            {isPrevDisabled ? <SlidePrevDisabled /> : <SlidePrev />}
+          </button>
+          {images.map((image, index) => {
+            const cachedDetection =
+              image.imageId && detectionCache
+                ? (detectionCache[image.imageId] ?? null)
+                : null;
+            return (
+              <SwiperSlide
+                key={`${image.imageId}-${index}`}
+                className={styles.swiperSlide}
               >
-                이미지 더보기
-              </button>
-            </div>
-          </SwiperSlide>
-        )}
-        <button
-          type="button"
-          onClick={() => swiper?.slideNext()}
-          className={styles.slideNextBtn}
-          disabled={isNextDisabled}
-        >
-          <span className={styles.slideNavIconFrame}>
+                <DetectionHotspots
+                  imageId={image.imageId}
+                  imageUrl={image.imageUrl}
+                  mirrored={image.isMirror}
+                  // 결과 페이지 플래그로 추론 on/off 제어
+                  shouldInferHotspots={shouldInferHotspots}
+                  cachedDetection={cachedDetection}
+                />
+              </SwiperSlide>
+            );
+          })}
+          {lastImage && (
+            <SwiperSlide key="locked-preview" className={styles.swiperSlide}>
+              <img
+                src={generateResultLockedPreview}
+                alt=""
+                className={styles.lockedPreviewImg}
+              />
+              <div className={styles.lockWrapper}>
+                <div className={styles.lockTextBox}>
+                  <p>나와 취향이 비슷한</p>
+                  <p>유저들이 만든 이미지도 궁금하신가요?</p>
+                </div>
+                <button
+                  type="button"
+                  className={styles.moreBtn}
+                  onClick={handleOpenModal}
+                >
+                  이미지 더보기
+                </button>
+              </div>
+            </SwiperSlide>
+          )}
+          <button
+            type="button"
+            onClick={() => swiper?.slideNext()}
+            className={styles.slideNextBtn}
+            disabled={isNextDisabled}
+          >
             {isNextDisabled ? <SlideNextDisabled /> : <SlideNext />}
-          </span>
-        </button>
-      </Swiper>
+          </button>
+        </Swiper>
+      </div>
+      {isLockedSlide && (
+        <section className={styles.feedbackSection}>
+          <div className={styles.feedbackBox}>
+            <p className={styles.feedbackTitle}>
+              생성된 이미지가 만족스러우신가요?
+            </p>
+            <div className={styles.feedbackButtonGroup}>
+              <LikeButton
+                typeVariant="onlyIcon"
+                isSelected={lockedPreference === 'like'}
+                disabled={isPreferenceSubmitting || isFactorSubmitting}
+                onClick={() => handleLockedPreference(true)}
+                aria-label="이미지 좋아요 버튼"
+              />
+              <DislikeButton
+                typeVariant="onlyIcon"
+                isSelected={lockedPreference === 'dislike'}
+                disabled={isPreferenceSubmitting || isFactorSubmitting}
+                onClick={() => handleLockedPreference(false)}
+                aria-label="이미지 싫어요 버튼"
+              />
+            </div>
+            {lockedPreference === 'like' && likeFactorsData.length > 0 && (
+              <div className={styles.feedbackTagGroup}>
+                <div className={styles.feedbackTagRow}>
+                  {likeFactorsData.slice(0, 2).map((factor) => (
+                    <button
+                      type="button"
+                      key={factor.id}
+                      className={`${styles.feedbackTagButton} ${
+                        selectedFactorId === factor.id
+                          ? styles.feedbackTagButtonSelected
+                          : ''
+                      }`}
+                      onClick={() => handleFactorClick(factor.id)}
+                      disabled={isFactorSubmitting || isPreferenceSubmitting}
+                    >
+                      {factor.text}
+                    </button>
+                  ))}
+                </div>
+                <div className={styles.feedbackTagRow}>
+                  {likeFactorsData.slice(2, 4).map((factor) => (
+                    <button
+                      type="button"
+                      key={factor.id}
+                      className={`${styles.feedbackTagButton} ${
+                        selectedFactorId === factor.id
+                          ? styles.feedbackTagButtonSelected
+                          : ''
+                      }`}
+                      onClick={() => handleFactorClick(factor.id)}
+                      disabled={isFactorSubmitting || isPreferenceSubmitting}
+                    >
+                      {factor.text}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            {lockedPreference === 'dislike' &&
+              dislikeFactorsData.length > 0 && (
+                <div className={styles.feedbackTagGroup}>
+                  <div className={styles.feedbackTagRow}>
+                    {dislikeFactorsData.slice(0, 2).map((factor) => (
+                      <button
+                        type="button"
+                        key={factor.id}
+                        className={`${styles.feedbackTagButton} ${
+                          selectedFactorId === factor.id
+                            ? styles.feedbackTagButtonSelected
+                            : ''
+                        }`}
+                        onClick={() => handleFactorClick(factor.id)}
+                        disabled={isFactorSubmitting || isPreferenceSubmitting}
+                      >
+                        {factor.text}
+                      </button>
+                    ))}
+                  </div>
+                  <div className={styles.feedbackTagRow}>
+                    {dislikeFactorsData.slice(2, 4).map((factor) => (
+                      <button
+                        type="button"
+                        key={factor.id}
+                        className={`${styles.feedbackTagButton} ${
+                          selectedFactorId === factor.id
+                            ? styles.feedbackTagButtonSelected
+                            : ''
+                        }`}
+                        onClick={() => handleFactorClick(factor.id)}
+                        disabled={isFactorSubmitting || isPreferenceSubmitting}
+                      >
+                        {factor.text}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+          </div>
+        </section>
+      )}
     </div>
   );
 };

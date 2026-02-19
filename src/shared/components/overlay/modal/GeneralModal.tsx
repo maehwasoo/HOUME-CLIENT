@@ -1,4 +1,4 @@
-import * as styles from './GeneralModal.css';
+import * as styles from './GeneralModal.css.ts';
 import CreditChip from '../../creditChip/CreditChip';
 
 type ButtonVariant = 'default' | 'primary';

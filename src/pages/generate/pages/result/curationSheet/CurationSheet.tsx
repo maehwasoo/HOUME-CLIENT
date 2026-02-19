@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
 
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
 import FilterChip from '@/pages/generate/components/filterChip/FilterChip';
@@ -9,7 +9,6 @@ import {
   useActiveImageCurationState,
   useActiveImageId,
   useGeneratedCategoriesQuery,
-  useGeneratedProductsQuery,
 } from '@/pages/generate/hooks/useFurnitureCuration';
 import { useCurationCacheStore } from '@/pages/generate/stores/useCurationCacheStore';
 import { useCurationStore } from '@/pages/generate/stores/useCurationStore';
@@ -25,10 +24,14 @@ import { shouldShowDetectionPending } from '@pages/generate/constants/curationDe
 import CardProductItem from './CardProductItem';
 import * as styles from './CurationSheet.css';
 
-import type { FurnitureProductsInfoResponse } from '@pages/generate/types/furniture';
+import type {
+  FurnitureProductInfo,
+  FurnitureProductsInfoResponse,
+} from '@pages/generate/types/furniture';
 
 // 카테고리 스켈레톤 칩 길이 프리셋 중 세 번째(long)만 사용
 const FILTER_SKELETON_WIDTH = 'long' as const;
+const SECTION_SWITCH_EPSILON_PX = 1;
 // 프리패치 쿼리키 튜플 정의
 type ProductPrefetchQueryKey = [
   string,
@@ -73,6 +76,65 @@ const normalizeColorHexes = (value: unknown) => {
     : [...RESULT_CARD_UI_FALLBACK.colorHexes];
 };
 
+interface NormalizedProduct {
+  id?: number;
+  furnitureProductId: number;
+  furnitureProductName: string;
+  furnitureProductMallName: string;
+  furnitureProductImageUrl: string;
+  furnitureProductSiteUrl: string;
+  furnitureProductOriginalPrice?: number;
+  furnitureProductDiscountPrice?: number;
+  furnitureProductDiscountRate?: number;
+  furnitureProductColorHexes?: string[];
+  furnitureProductSaveCount?: number;
+}
+
+const normalizeProducts = (
+  products: FurnitureProductInfo[]
+): NormalizedProduct[] =>
+  products.map((product, index) => {
+    const byRecommend = product.id;
+    const recommendId =
+      typeof byRecommend === 'number' && Number.isFinite(byRecommend)
+        ? byRecommend
+        : undefined;
+    const byProductId = Number(product.furnitureProductId);
+    const safeProductId =
+      Number.isFinite(byProductId) && byProductId > 0 ? byProductId : index + 1;
+
+    const originalPrice = toFiniteNumber(product.furnitureProductOriginalPrice);
+    const discountPrice = toFiniteNumber(product.furnitureProductDiscountPrice);
+    const discountRate = toFiniteNumber(product.furnitureProductDiscountRate);
+    const saveCount = toFiniteNumber(product.furnitureProductSaveCount);
+
+    return {
+      id: recommendId,
+      furnitureProductId: safeProductId,
+      furnitureProductName: normalizeText(
+        product.furnitureProductName,
+        RESULT_CARD_UI_FALLBACK.productName
+      ),
+      furnitureProductMallName: normalizeText(
+        product.furnitureProductMallName,
+        RESULT_CARD_UI_FALLBACK.mallName
+      ),
+      furnitureProductImageUrl:
+        product.furnitureProductImageUrl || product.baseFurnitureImageUrl,
+      furnitureProductSiteUrl: product.furnitureProductSiteUrl,
+      furnitureProductOriginalPrice:
+        originalPrice ?? RESULT_CARD_UI_FALLBACK.originalPrice,
+      furnitureProductDiscountPrice:
+        discountPrice ?? RESULT_CARD_UI_FALLBACK.discountPrice,
+      furnitureProductDiscountRate:
+        discountRate ?? RESULT_CARD_UI_FALLBACK.discountRate,
+      furnitureProductColorHexes: normalizeColorHexes(
+        product.furnitureProductColorHexes
+      ),
+      furnitureProductSaveCount: saveCount ?? RESULT_CARD_UI_FALLBACK.saveCount,
+    };
+  });
+
 interface CurationSheetProps {
   groupId?: number | null;
 }
@@ -100,11 +162,6 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
     groupId,
     activeImageId ?? null
   );
-  const productsQuery = useGeneratedProductsQuery(
-    groupId,
-    activeImageId ?? null,
-    selectedCategoryId
-  );
 
   const categories = useMemo(
     () => categoriesQuery.data?.categories ?? [],
@@ -113,58 +170,56 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
   const groupProductCache = useCurationCacheStore((state) =>
     groupId !== null ? (state.groups[groupId]?.products ?? null) : null
   );
-  const productsData = productsQuery.data?.products;
-
-  const normalizedProducts = useMemo(() => {
-    return (productsData ?? []).map((product, index) => {
-      const byRecommend = product.id;
-      const recommendId =
-        typeof byRecommend === 'number' && Number.isFinite(byRecommend)
-          ? byRecommend
+  const categoryProductQueries = useQueries({
+    queries: categories.map((category) => {
+      const initialData =
+        groupId !== null
+          ? groupProductCache?.[category.id]?.response
           : undefined;
-      const byProductId = Number(product.furnitureProductId);
-      const safeProductId = Number.isFinite(byProductId)
-        ? byProductId
-        : index + 1;
-
-      const originalPrice = toFiniteNumber(
-        product.furnitureProductOriginalPrice
-      );
-      const discountPrice = toFiniteNumber(
-        product.furnitureProductDiscountPrice
-      );
-      const discountRate = toFiniteNumber(product.furnitureProductDiscountRate);
-      const saveCount = toFiniteNumber(product.furnitureProductSaveCount);
 
       return {
-        id: recommendId,
-        isRecommendId: Boolean(recommendId),
-        furnitureProductId: safeProductId,
-        furnitureProductName: normalizeText(
-          product.furnitureProductName,
-          RESULT_CARD_UI_FALLBACK.productName
-        ),
-        furnitureProductMallName: normalizeText(
-          product.furnitureProductMallName,
-          RESULT_CARD_UI_FALLBACK.mallName
-        ),
-        furnitureProductImageUrl:
-          product.furnitureProductImageUrl || product.baseFurnitureImageUrl,
-        furnitureProductSiteUrl: product.furnitureProductSiteUrl,
-        furnitureProductOriginalPrice:
-          originalPrice ?? RESULT_CARD_UI_FALLBACK.originalPrice,
-        furnitureProductDiscountPrice:
-          discountPrice ?? RESULT_CARD_UI_FALLBACK.discountPrice,
-        furnitureProductDiscountRate:
-          discountRate ?? RESULT_CARD_UI_FALLBACK.discountRate,
-        furnitureProductColorHexes: normalizeColorHexes(
-          product.furnitureProductColorHexes
-        ),
-        furnitureProductSaveCount:
-          saveCount ?? RESULT_CARD_UI_FALLBACK.saveCount,
+        queryKey: [
+          groupId !== null
+            ? QUERY_KEY.GENERATE_FURNITURE_PRODUCTS_GROUP
+            : QUERY_KEY.GENERATE_FURNITURE_PRODUCTS,
+          {
+            groupId,
+            imageId: activeImageId,
+            categoryId: category.id,
+          },
+        ] as const,
+        queryFn: () => getGeneratedImageProducts(activeImageId!, category.id),
+        enabled: activeImageId !== null,
+        staleTime: 5 * 60 * 1000,
+        gcTime: 30 * 60 * 1000,
+        ...(initialData ? { initialData } : {}),
       };
-    });
-  }, [productsData]);
+    }),
+  });
+
+  const normalizedProductsByCategory = useMemo(() => {
+    return categories.reduce<Record<number, NormalizedProduct[]>>(
+      (acc, category, index) => {
+        const response = categoryProductQueries[index]?.data as
+          | FurnitureProductsInfoResponse
+          | undefined;
+        const products = response?.products ?? [];
+        acc[category.id] = normalizeProducts(products);
+        return acc;
+      },
+      {}
+    );
+  }, [categories, categoryProductQueries]);
+
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const sectionRefs = useRef<Record<number, HTMLElement | null>>({});
+  const chipRefs = useRef<Record<number, HTMLSpanElement | null>>({});
+  const selectedCategoryIdRef = useRef<number | null>(selectedCategoryId);
+  const scrollFrameRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    selectedCategoryIdRef.current = selectedCategoryId;
+  }, [selectedCategoryId]);
 
   // 서버 찜 목록 불러오기
   const { data: jjymItems = [] } = useGetJjymListQuery();
@@ -231,14 +286,99 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
     });
   }, [queryClient, activeImageId, categories, groupId, groupProductCache]);
 
+  useEffect(() => {
+    const activeCategoryId = selectedCategoryId;
+    if (activeCategoryId === null) return;
+
+    chipRefs.current[activeCategoryId]?.scrollIntoView({
+      block: 'nearest',
+      inline: 'center',
+    });
+  }, [selectedCategoryId]);
+
+  const syncSelectedCategoryByScroll = useCallback(() => {
+    if (activeImageId === null) return;
+    if (categories.length === 0) return;
+    const scrollContainer = contentRef.current;
+    if (!scrollContainer) return;
+
+    const currentScrollTop = scrollContainer.scrollTop;
+    const anchorThreshold = currentScrollTop + SECTION_SWITCH_EPSILON_PX;
+    const containerTop = scrollContainer.getBoundingClientRect().top;
+    let nextCategoryId: number | null = categories[0]?.id ?? null;
+
+    categories.forEach((category) => {
+      const section = sectionRefs.current[category.id];
+      if (!section) return;
+      const sectionTopFromScrollStart =
+        section.getBoundingClientRect().top - containerTop + currentScrollTop;
+      if (sectionTopFromScrollStart <= anchorThreshold) {
+        nextCategoryId = category.id;
+      }
+    });
+
+    if (nextCategoryId === null) return;
+    if (selectedCategoryIdRef.current === nextCategoryId) return;
+    selectCategory(activeImageId, nextCategoryId);
+  }, [activeImageId, categories, selectCategory]);
+
+  useEffect(() => {
+    if (activeImageId === null) return;
+    if (categories.length === 0) return;
+    const scrollContainer = contentRef.current;
+    if (!scrollContainer) return;
+
+    syncSelectedCategoryByScroll();
+
+    const handleScroll = () => {
+      if (scrollFrameRef.current !== null) return;
+      scrollFrameRef.current = window.requestAnimationFrame(() => {
+        scrollFrameRef.current = null;
+        syncSelectedCategoryByScroll();
+      });
+    };
+
+    scrollContainer.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      scrollContainer.removeEventListener('scroll', handleScroll);
+      if (scrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
+        scrollFrameRef.current = null;
+      }
+    };
+  }, [activeImageId, categories, syncSelectedCategoryByScroll]);
+
+  const scrollToCategorySection = useCallback(
+    (categoryId: number, behavior: ScrollBehavior = 'smooth') => {
+      const scrollContainer = contentRef.current;
+      const section = sectionRefs.current[categoryId];
+      if (!scrollContainer || !section) return;
+
+      const containerTop = scrollContainer.getBoundingClientRect().top;
+      const sectionTopFromScrollStart =
+        section.getBoundingClientRect().top -
+        containerTop +
+        scrollContainer.scrollTop;
+      const targetTop = Math.max(sectionTopFromScrollStart, 0);
+      scrollContainer.scrollTo({
+        top: targetTop,
+        behavior,
+      });
+    },
+    []
+  );
+
   /**
    * 카테고리 선택
    */
   const handleCategorySelect = (categoryId: number) => {
     if (activeImageId === null) return;
-    if (selectedCategoryId === categoryId) return;
-    logResultImgClickCurationSheetFilter(variant);
-    selectCategory(activeImageId, categoryId);
+    if (selectedCategoryId !== categoryId) {
+      logResultImgClickCurationSheetFilter(variant);
+      selectCategory(activeImageId, categoryId);
+    }
+    scrollToCategorySection(categoryId);
   };
 
   // const LoadingDots = () => (
@@ -268,6 +408,31 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
         {/* {isLoading && <LoadingDots />} */}
       </p>
       {description && <p className={styles.statusSubMessage}>{description}</p>}
+      {action && (
+        <button
+          type="button"
+          className={styles.statusButton}
+          onClick={action.onClick}
+        >
+          {action.label}
+        </button>
+      )}
+    </div>
+  );
+
+  const renderCategoryStatus = (
+    message: string,
+    action?: { label: string; onClick: () => void },
+    isLoading?: boolean
+  ) => (
+    <div className={styles.sectionStatusContainer}>
+      <p
+        className={
+          isLoading ? styles.statusMessageShimmer : styles.statusMessage
+        }
+      >
+        {message}
+      </p>
       {action && (
         <button
           type="button"
@@ -314,42 +479,62 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
         '다른 이미지를 선택하거나 새로 생성해 보세요'
       );
     }
-    if (selectedCategoryId === null) {
-      return renderStatus(
-        '추천받을 가구 카테고리를 선택해 주세요',
-        '상단 필터에서 원하는 가구를 골라 주세요'
-      );
-    }
-    if (productsQuery.isLoading) {
-      return renderStatus(
-        '선택한 가구에 맞는 상품을 찾는 중이에요',
-        '곧 추천을 보여드릴게요',
-        undefined,
-        true
-      );
-    }
-    if (productsQuery.isError) {
-      return renderStatus(
-        '추천 상품을 불러오지 못했어요',
-        '잠시 후 다시 시도해 주세요',
-        { label: '다시 불러오기', onClick: () => productsQuery.refetch() }
-      );
-    }
-    if (normalizedProducts.length === 0) {
-      return renderStatus(
-        '선택한 카테고리에 맞는 상품이 없어요',
-        '다른 카테고리를 선택해 보세요'
-      );
-    }
+
     return (
-      <div className={styles.gridbox}>
-        {normalizedProducts.map((product) => (
-          <CardProductItem
-            key={product.furnitureProductId}
-            product={product}
-            onGotoMypage={handleGotoMypage}
-          />
-        ))}
+      <div className={styles.sectionList}>
+        {categories.map((category, index) => {
+          const categoryQuery = categoryProductQueries[index];
+          const normalizedProducts =
+            normalizedProductsByCategory[category.id] ?? [];
+
+          let sectionContent: ReactNode = renderCategoryStatus(
+            '상품을 불러오는 중이에요',
+            undefined,
+            true
+          );
+
+          if (categoryQuery) {
+            if (categoryQuery.isError) {
+              sectionContent = renderCategoryStatus(
+                `${category.categoryName} 상품을 불러오지 못했어요`,
+                {
+                  label: '다시 불러오기',
+                  onClick: () => categoryQuery.refetch(),
+                }
+              );
+            } else if (!categoryQuery.isLoading) {
+              sectionContent =
+                normalizedProducts.length === 0 ? (
+                  renderCategoryStatus(
+                    `${category.categoryName} 카테고리 상품이 없어요`
+                  )
+                ) : (
+                  <div className={styles.gridbox}>
+                    {normalizedProducts.map((product) => (
+                      <CardProductItem
+                        key={`${category.id}-${product.furnitureProductId}`}
+                        product={product}
+                        onGotoMypage={handleGotoMypage}
+                      />
+                    ))}
+                  </div>
+                );
+            }
+          }
+
+          return (
+            <section
+              key={category.id}
+              ref={(element) => {
+                sectionRefs.current[category.id] = element;
+              }}
+              className={styles.categorySection}
+              data-category-id={category.id}
+            >
+              {sectionContent}
+            </section>
+          );
+        })}
       </div>
     );
   };
@@ -368,19 +553,28 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
             />
           ) : (
             categories.map((category) => (
-              <FilterChip
+              <span
                 key={category.id}
-                isSelected={selectedCategoryId === category.id}
-                onClick={() => handleCategorySelect(category.id)}
+                ref={(element) => {
+                  chipRefs.current[category.id] = element;
+                }}
+                className={styles.filterChipAnchor}
               >
-                {category.categoryName}
-              </FilterChip>
+                <FilterChip
+                  isSelected={selectedCategoryId === category.id}
+                  onClick={() => handleCategorySelect(category.id)}
+                >
+                  {category.categoryName}
+                </FilterChip>
+              </span>
             ))
           )}
         </div>
       )}
 
-      <div className={styles.content}>{renderProductSection()}</div>
+      <div className={styles.content} ref={contentRef}>
+        {renderProductSection()}
+      </div>
     </section>
   );
 };
