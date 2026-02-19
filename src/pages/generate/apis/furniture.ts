@@ -3,11 +3,12 @@ import { HTTPMethod, request } from '@/shared/apis/request';
 
 import { API_ENDPOINT } from '@constants/apiEndpoints';
 
+import { normalizeFurnitureProductsResponse } from './furnitureProductsResponseNormalizer';
+
 import type { FurnitureCategoryCode } from '@pages/generate/constants/furnitureCategoryMapping';
 import type {
   FurnitureAndActivityResponse,
   FurnitureCategoriesResponse,
-  FurnitureProductsInfoResponse,
 } from '@pages/generate/types/furniture';
 
 // 생성 이미지 카테고리 조회 API 호출
@@ -32,10 +33,12 @@ export const getGeneratedImageProducts = async (
   imageId: number,
   categoryId: number
 ) => {
-  return request<FurnitureProductsInfoResponse>({
+  const response = await request<unknown>({
     method: HTTPMethod.GET,
     url: API_ENDPOINT.GENERATE.CURATION_PRODUCTS(imageId, categoryId),
   });
+
+  return normalizeFurnitureProductsResponse(response);
 };
 
 // 대시보드 활동 및 가구 목록 조회 API 호출
