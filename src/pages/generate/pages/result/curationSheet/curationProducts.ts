@@ -1,12 +1,30 @@
 import type { FurnitureProductInfo } from '@pages/generate/types/furniture';
 
+const COLOR_NAME_TO_HEX_MAP: Record<string, string> = {
+  화이트: '#FFFFFF',
+  브라운: '#A52A2A',
+  블루: '#0000FF',
+  블랙: '#000000',
+  베이지: '#F5F5DC',
+  그린: '#008000',
+  핑크: '#FFC0CB',
+  옐로우: '#FFFF00',
+  레드: '#FF0000',
+  골드: '#FFD700',
+  그레이: '#808080',
+  실버: '#C0C0C0',
+  오렌지: '#FFA500',
+  바이올렛: '#EE82EE',
+  네이비: '#000080',
+};
+
 export const RESULT_CARD_UI_FALLBACK = {
   productName: '상품명 준비중',
   mallName: '브랜드 준비중',
   originalPrice: 0,
   discountPrice: 0,
   discountRate: 0,
-  colorHexes: ['#E7EBF0', '#D7DFE8', '#C3CFDD', '#AEBED0'],
+  colorHexes: Object.values(COLOR_NAME_TO_HEX_MAP),
   saveCount: 0,
 } as const;
 
@@ -57,9 +75,13 @@ const normalizeColorHexes = (value: unknown) => {
   if (!Array.isArray(value)) return [];
 
   return value
-    .filter((hex): hex is string => typeof hex === 'string')
-    .map((hex) => hex.trim())
-    .filter((hex) => /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(hex));
+    .filter((color): color is string => typeof color === 'string')
+    .map((color) => color.trim())
+    .map((color) => {
+      if (/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(color)) return color;
+      return COLOR_NAME_TO_HEX_MAP[color] ?? null;
+    })
+    .filter((color): color is string => Boolean(color));
 };
 
 const pickColorHexes = (product: FurnitureProductInfo) => {

@@ -71,6 +71,27 @@ describe('normalizeProductsForCard', () => {
     expect(products[1]?.furnitureProductColorHexes).toEqual(['#222222']);
   });
 
+  it('maps korean color names to hex values', () => {
+    const products = normalizeProductsForCard([
+      {
+        baseFurnitureImageUrl: '',
+        furnitureProductImageUrl: '',
+        furnitureProductSiteUrl: 'https://shop/item',
+        furnitureProductName: 'sofa',
+        furnitureProductMallName: 'mall',
+        furnitureProductId: 1,
+        similarity: 0,
+        clientColors: ['화이트', '네이비', '골드'],
+      },
+    ]);
+
+    expect(products[0]?.furnitureProductColorHexes).toEqual([
+      '#FFFFFF',
+      '#000080',
+      '#FFD700',
+    ]);
+  });
+
   it('uses fallback values when ids or optional fields are absent', () => {
     const products = normalizeProductsForCard([
       {
