@@ -89,17 +89,10 @@ export const slidePrevBtn = style({
   bottom: '50%',
   width: '3.6rem',
   height: '3.6rem',
-  backgroundColor: colorVars.color.gray999_30,
-  borderRadius: '99.9rem',
+  backgroundColor: 'transparent',
+  border: 'none',
+  padding: 0,
   zIndex: 1,
-
-  ':active': {
-    backgroundColor: colorVars.color.gray999_50,
-  },
-
-  ':disabled': {
-    backgroundColor: colorVars.color.gray999_04,
-  },
 });
 
 export const slideNextBtn = style({
@@ -111,17 +104,40 @@ export const slideNextBtn = style({
   bottom: '50%',
   width: '3.6rem',
   height: '3.6rem',
-  backgroundColor: colorVars.color.gray999_30,
-  borderRadius: '99.9rem',
+  backgroundColor: 'transparent',
+  border: 'none',
+  padding: 0,
   zIndex: 1,
+});
 
-  ':active': {
-    backgroundColor: colorVars.color.gray999_50,
-  },
+export const slideNavIconFrame = style({
+  width: '2.4rem',
+  height: '2.4rem',
+  borderRadius: '1.2rem',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  backgroundColor: colorVars.color.gray999_30,
 
-  ':disabled': {
-    backgroundColor: colorVars.color.gray999_04,
+  selectors: {
+    [`${slidePrevBtn}:active &`]: {
+      backgroundColor: colorVars.color.gray999_50,
+    },
+    [`${slideNextBtn}:active &`]: {
+      backgroundColor: colorVars.color.gray999_50,
+    },
+    [`${slidePrevBtn}:disabled &`]: {
+      backgroundColor: colorVars.color.gray999_04,
+    },
+    [`${slideNextBtn}:disabled &`]: {
+      backgroundColor: colorVars.color.gray999_04,
+    },
   },
+});
+
+globalStyle(`${slideNavIconFrame} > svg`, {
+  width: '1.2rem',
+  height: '1.2rem',
 });
 
 export const imgAreaBlurred = recipe({

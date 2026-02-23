@@ -276,7 +276,9 @@ const GeneratedImgA = ({
             className={styles.slidePrevBtn}
             disabled={isPrevDisabled}
           >
-            {isPrevDisabled ? <SlidePrevDisabled /> : <SlidePrev />}
+            <span className={styles.slideNavIconFrame}>
+              {isPrevDisabled ? <SlidePrevDisabled /> : <SlidePrev />}
+            </span>
           </button>
           {images.map((image, index) => {
             const cachedDetection =
@@ -327,7 +329,9 @@ const GeneratedImgA = ({
             className={styles.slideNextBtn}
             disabled={isNextDisabled}
           >
-            {isNextDisabled ? <SlideNextDisabled /> : <SlideNext />}
+            <span className={styles.slideNavIconFrame}>
+              {isNextDisabled ? <SlideNextDisabled /> : <SlideNext />}
+            </span>
           </button>
         </Swiper>
       </div>
