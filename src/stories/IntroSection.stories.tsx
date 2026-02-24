@@ -1,4 +1,4 @@
-import IntroSection from '@/pages/home/components/introSection/IntroSection';
+import IntroSection from '@pages/home/components/introSection/IntroSection';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

@@ -1,8 +1,7 @@
 import { style } from '@vanilla-extract/css';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-import { animationTokens } from '@/shared/styles/tokens/animation.css';
-
+import { fontStyle } from '@styles/fontStyle';
+import { animationTokens } from '@styles/tokens/animation.css';
 import { colorVars } from '@styles/tokens/color.css';
 
 // 스켈레톤 공통 shimmer 블록
@@ -22,55 +21,55 @@ const skeletonBlock = {
 // ─── 이미지 영역 ───
 export const imgContainer = style({
   position: 'relative',
+  flexShrink: 0,
+  backgroundColor: colorVars.color.gray100,
   width: '100%',
   height: '26rem',
-  backgroundColor: colorVars.color.gray100,
   overflow: 'hidden',
-  flexShrink: 0,
 });
 
 export const pageIndicator = style({
   position: 'absolute',
   top: '1.2rem',
   right: '1.2rem',
-  width: '3.4rem',
-  height: '2rem',
-  borderRadius: '999px',
-  backgroundColor: colorVars.color.gray999_30,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  color: colorVars.color.gray000,
-  ...fontStyle('caption_r_11'),
   gap: '0.1rem',
+  borderRadius: '999px',
+  backgroundColor: colorVars.color.gray999_30,
+  width: '3.4rem',
+  height: '2rem',
+  ...fontStyle('caption_r_11'),
+  color: colorVars.color.gray000,
 });
 
 export const pagination = style({
   position: 'absolute',
   top: '50%',
-  transform: 'translateY(-50%)',
-  left: '0.6rem',
   right: '0.6rem',
+  left: '0.6rem',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
+  transform: 'translateY(-50%)',
 });
 
 export const navBtn = style({
-  width: '3.6rem',
-  height: '3.6rem',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  width: '3.6rem',
+  height: '3.6rem',
 });
 
 export const navIconFrame = style({
-  width: '2.4rem',
-  height: '2.4rem',
-  borderRadius: '1.2rem',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  borderRadius: '1.2rem',
+  width: '2.4rem',
+  height: '2.4rem',
 });
 
 export const navIconFrameLeft = style({
@@ -85,12 +84,12 @@ export const navIconFrameRight = style({
 
 export const listContainer = style({
   display: 'flex',
-  flexDirection: 'column',
   flex: '1 1 auto',
-  minHeight: 0,
+  flexDirection: 'column',
   padding: '2rem 1.6rem 0',
-  overflowY: 'auto',
+  minHeight: 0,
   overflowX: 'hidden',
+  overflowY: 'auto',
 
   selectors: {
     '&::-webkit-scrollbar': {
@@ -108,45 +107,45 @@ export const titleSkeleton = style({
 
 export const filterSection = style({
   display: 'flex',
-  gap: '0.4rem',
-  padding: '0.8rem 0',
-  marginTop: '0.8rem',
   alignItems: 'center',
+  gap: '0.4rem',
+  marginTop: '0.8rem',
+  padding: '0.8rem 0',
 });
 
 export const filterChipSkeleton = style({
   ...skeletonBlock,
+  flexShrink: 0,
+  borderRadius: '999px',
   width: '6.9rem',
   height: '3.6rem',
-  borderRadius: '999px',
-  flexShrink: 0,
 });
 
 // ─── 상품 카드 그리드 ───
 
 export const gridBox = style({
-  width: '100%',
   display: 'grid',
   gridTemplateColumns: 'repeat(2, 1fr)',
-  columnGap: '1.1rem',
-  rowGap: 0,
   justifyContent: 'space-between',
   justifyItems: 'start',
-  paddingBottom: '2rem',
+  rowGap: 0,
+  columnGap: '1.1rem',
   marginTop: '0.8rem',
+  paddingBottom: '2rem',
+  width: '100%',
 });
 
 export const cardWrapper = style({
-  width: '100%',
   display: 'flex',
   flexDirection: 'column',
+  width: '100%',
 });
 
 export const cardImgSkeleton = style({
   ...skeletonBlock,
-  width: '100%',
   aspectRatio: '1 / 1',
   borderRadius: '0.8rem',
+  width: '100%',
 });
 
 export const cardInfoWrapper = style({

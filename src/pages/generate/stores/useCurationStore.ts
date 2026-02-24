@@ -1,10 +1,9 @@
 // 가구 큐레이션 전역 상태 스토어 정의
 import { create } from 'zustand';
 
-import { logFurniturePipelineEvent } from '@pages/generate/utils/furniturePipelineMonitor';
-
-import type { FurnitureCategoryCode } from '@pages/generate/constants/furnitureCategoryMapping';
-import type { FurnitureHotspot } from '@pages/generate/hooks/useFurnitureHotspots';
+import type { FurnitureCategoryCode } from '@shared/detection/furnitureCategoryMapping';
+import type { FurnitureHotspot } from '@shared/detection/hooks/useFurnitureHotspots';
+import { logFurniturePipelineEvent } from '@shared/detection/utils/furniturePipelineMonitor';
 
 // 바텀시트 스냅 상태 타입 정의
 export type CurationSnapState = 'collapsed' | 'mid' | 'expanded' | 'hidden';

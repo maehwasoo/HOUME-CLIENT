@@ -1,32 +1,44 @@
 import { useState, useEffect, useMemo } from 'react';
 
-import { useLocation, useSearchParams, Navigate } from 'react-router-dom';
+import { ErrorBoundary } from 'react-error-boundary';
+import {
+  useLocation,
+  useNavigate,
+  useSearchParams,
+  Navigate,
+} from 'react-router-dom';
 
-import { useMyPageImageDetail } from '@/pages/mypage/hooks/useMypage';
-import type {
-  MyPageImageDetail,
-  MyPageImageHistory,
-} from '@/pages/mypage/types/apis/MyPage';
-import { createImageDetailPlaceholder } from '@/pages/mypage/utils/resultNavigation';
-import InlineError from '@/shared/components/inlineError/InlineError';
-
-import Loading from '@components/loading/Loading';
+import { useGetResultDataQuery } from '@pages/generate/apis/queries/useGetResultDataQuery';
 import { IS_CLIENT_DETECTION_ENABLED } from '@pages/generate/constants/curationDetectionMode';
 import { useABTest } from '@pages/generate/hooks/useABTest';
-import { useGetResultDataQuery } from '@pages/generate/hooks/useGenerate';
 import { useCurationStore } from '@pages/generate/stores/useCurationStore';
-
-import GeneratedImgA from './components/GeneratedImgA.tsx';
-import GeneratedImgB from './components/GeneratedImgB.tsx';
-import { CurationSheet } from './curationSheet/CurationSheet';
-import * as styles from './ResultPage.css.ts';
-
-import type { DetectionCacheEntry } from '@pages/generate/stores/useDetectionCacheStore';
 import type {
   GenerateImageAResponse,
   GenerateImageBResponse,
   GenerateImageData,
 } from '@pages/generate/types/generate';
+import { useMyPageImageDetailQuery } from '@pages/mypage/apis/queries/useMyPageImageDetailQuery';
+import type {
+  MyPageImageDetail,
+  MyPageImageHistory,
+} from '@pages/mypage/types/apis/MyPage';
+import { createImageDetailPlaceholder } from '@pages/mypage/utils/resultNavigation';
+
+import { ROUTES } from '@routes/paths';
+
+import type { DetectionCacheEntry } from '@shared/detection/stores/useDetectionCacheStore';
+
+import FeatureErrorFallback from '@components/errorFallback/FeatureErrorFallback';
+import InlineError from '@components/inlineError/InlineError';
+import Loading from '@components/loading/Loading';
+import TitleNavBar from '@components/navBar/TitleNavBar';
+
+import { getCanHistoryGoBack } from '@utils/history';
+
+import GeneratedImgA from './components/GeneratedImgA';
+import GeneratedImgB from './components/GeneratedImgB';
+import CurationSheet from './curationSheet/CurationSheet';
+import * as styles from './ResultPage.css';
 
 // 통일된 타입 정의
 type UnifiedGenerateImageResult = {
@@ -53,11 +65,11 @@ const toGenerateImageData = (
 /**
  * 결과(Result) 페이지
  * - 전달된 state 또는 houseId 기반으로 생성 결과를 결정
- * - 좋아요/싫어요 + factor 선택 상태를 이미지별로 관리
  * - A/B 테스트 플래그에 따라 단일/다중 결과 컴포넌트 분기
  */
 const ResultPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { isMultipleImages } = useABTest();
   const [currentImgId, setCurrentImgId] = useState(0);
@@ -88,11 +100,11 @@ const ResultPage = () => {
       [initialImageId]: forwardedDetection,
     };
   }, [forwardedDetection, initialImageId]);
+
   // 2차: query parameter에서 houseId 가져와서 API 호출 (직접 접근 시)
   const rawHouseId = searchParams.get('houseId');
   const from = searchParams.get('from');
   const isFromMypage = from === 'mypage';
-  // houseId 파싱 및 검증: 양의 정수 문자열만 허용
   const trimmedHouseId = rawHouseId?.trim() ?? null;
   const parsedHouseId =
     trimmedHouseId !== null &&
@@ -114,13 +126,13 @@ const ResultPage = () => {
   // 마이페이지에서 온 경우와 일반 생성 플로우에서 온 경우 구분
   const {
     data: apiResult,
-    isLoading,
+    isLoading: isPending,
     isError: isResultError,
   } = useGetResultDataQuery(parsedHouseId ?? 0, {
     enabled: shouldFetchExternalResult,
   });
 
-  const mypageDetailQuery = useMyPageImageDetail(parsedHouseId ?? 0, {
+  const mypageDetailQuery = useMyPageImageDetailQuery(parsedHouseId ?? 0, {
     enabled: shouldFetchMypageDetail,
     placeholderData: detailPlaceholder ? () => detailPlaceholder : undefined,
   });
@@ -172,6 +184,7 @@ const ResultPage = () => {
     mypageHistories,
   ]);
   const result = resolvedResult;
+
   const resultImageCount =
     result &&
     'imageInfoResponses' in result &&
@@ -183,11 +196,6 @@ const ResultPage = () => {
     isMultipleImages &&
     totalSlideCount > 0 &&
     currentSlideIndex === totalSlideCount - 1;
-
-  // currentImgId가 변경될 때마다 로그 출력
-  // useEffect(() => {
-  //   console.log('currentImgId 변경됨:', currentImgId);
-  // }, [currentImgId]);
 
   useEffect(() => {
     // 유효한 이미지 id일 때만 큐레이션 활성화 상태 갱신
@@ -212,54 +220,97 @@ const ResultPage = () => {
     setCurrentSlideIndex(currentIndex);
   };
 
+  // 뒤로가기 로직 (GeneratePage에서 이관)
+  const handleBackClick = () => {
+    if (isFromMypage) {
+      if (getCanHistoryGoBack()) {
+        navigate(-1);
+      } else {
+        navigate(ROUTES.MYPAGE, { replace: true });
+      }
+    } else {
+      navigate(ROUTES.HOME);
+    }
+  };
+
   // 로딩 중이면 로딩 표시
-  if (!result && (isLoading || mypageLoading)) {
-    return <Loading />;
+  if (!result && (isPending || mypageLoading)) {
+    return (
+      <main className={styles.pageLayout}>
+        <TitleNavBar
+          title="스타일링 이미지 생성"
+          isBackIcon={true}
+          isLoginBtn={false}
+          onBackClick={handleBackClick}
+        />
+        <Loading />
+      </main>
+    );
   }
 
   // API 에러 시 인라인 에러 표시
   if (isResultError && !result) {
-    return <InlineError message="결과를 불러올 수 없습니다" />;
+    return (
+      <main className={styles.pageLayout}>
+        <TitleNavBar
+          title="스타일링 이미지 생성"
+          isBackIcon={true}
+          isLoginBtn={false}
+          onBackClick={handleBackClick}
+        />
+        <InlineError message="결과를 불러올 수 없습니다" />
+      </main>
+    );
   }
 
   // 데이터 없으면 홈으로 리다이렉션
   if (!result) {
     console.error('Result data is missing');
-    return <Navigate to="/" replace />;
+    return <Navigate to={ROUTES.HOME} replace />;
   }
 
   return (
-    <div className={styles.wrapper}>
-      <section className={styles.resultSection}>
-        {/* A/B 테스트에 따라 다른 컴포넌트 렌더링 */}
-        {isMultipleImages ? (
-          <GeneratedImgA
-            result={result}
-            onSlideChange={handleSlideChange}
-            onCurrentImgIdChange={setCurrentImgId}
-            shouldInferHotspots={IS_CLIENT_DETECTION_ENABLED}
-            detectionCache={forwardedDetectionMap ?? undefined}
-            isSlideCountLoading={isSlideCountLoading}
-          />
-        ) : (
-          <GeneratedImgB
-            result={result}
-            onCurrentImgIdChange={setCurrentImgId}
-            shouldInferHotspots={IS_CLIENT_DETECTION_ENABLED}
-            detectionCache={forwardedDetectionMap ?? undefined}
-          />
-        )}
-        <div
-          className={
-            isLockedSlide
-              ? styles.curationSheetHidden
-              : styles.curationSheetVisible
-          }
-        >
-          <CurationSheet groupId={groupId} />
+    <main className={styles.pageLayout}>
+      <TitleNavBar
+        title="스타일링 이미지 생성"
+        isBackIcon={true}
+        isLoginBtn={false}
+        onBackClick={handleBackClick}
+      />
+      <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+        <div className={styles.wrapper}>
+          <section className={styles.resultSection}>
+            {/* A/B 테스트에 따라 다른 컴포넌트 렌더링 */}
+            {isMultipleImages ? (
+              <GeneratedImgA
+                result={result}
+                onSlideChange={handleSlideChange}
+                onCurrentImgIdChange={setCurrentImgId}
+                shouldInferHotspots={IS_CLIENT_DETECTION_ENABLED}
+                detectionCache={forwardedDetectionMap ?? undefined}
+                isSlideCountLoading={isSlideCountLoading}
+              />
+            ) : (
+              <GeneratedImgB
+                result={result}
+                onCurrentImgIdChange={setCurrentImgId}
+                shouldInferHotspots={IS_CLIENT_DETECTION_ENABLED}
+                detectionCache={forwardedDetectionMap ?? undefined}
+              />
+            )}
+            <div
+              className={
+                isLockedSlide
+                  ? styles.curationSheetHidden
+                  : styles.curationSheetVisible
+              }
+            >
+              <CurationSheet groupId={groupId} />
+            </div>
+          </section>
         </div>
-      </section>
-    </div>
+      </ErrorBoundary>
+    </main>
   );
 };
 

@@ -1,6 +1,6 @@
-import FloorCard from '@/shared/components/card/floorCard/FloorCard';
-
 import CardImageUrl from '@assets/images/cardExImg.svg?url';
+
+import FloorCard from '@components/card/floorCard/FloorCard';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

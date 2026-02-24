@@ -1,16 +1,15 @@
 import { styleVariants } from '@vanilla-extract/css';
 import { style } from '@vanilla-extract/css';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-
+import { fontStyle } from '@styles/fontStyle';
 import { colorVars } from '@styles/tokens/color.css';
 
 export const imageArea = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: '2rem',
   alignItems: 'center',
   justifyContent: 'center',
+  gap: '2rem',
   pointerEvents: 'none', // 드래그 중 이미지 영역 클릭 방지
 });
 
@@ -20,27 +19,27 @@ export const infoText = style({
 });
 
 export const imageContainer = style({
+  borderRadius: '16px',
   width: '22rem',
   height: '33rem',
-  borderRadius: '16px',
   overflow: 'hidden',
 });
 
 export const imageVariants = styleVariants({
   normal: {
+    transform: 'none',
+    transition: 'transform 0.3s ease-in-out',
+    pointerEvents: 'none',
     width: '100%',
     height: '100%',
-    transition: 'transform 0.3s ease-in-out',
-    transform: 'none',
-    pointerEvents: 'none',
     userSelect: 'none',
   },
   flipped: {
+    transform: 'scaleX(-1)',
+    transition: 'transform 0.3s ease-in-out',
+    pointerEvents: 'none',
     width: '100%',
     height: '100%',
-    transition: 'transform 0.3s ease-in-out',
-    transform: 'scaleX(-1)',
-    pointerEvents: 'none',
     userSelect: 'none',
   },
 });

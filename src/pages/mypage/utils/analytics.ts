@@ -1,6 +1,6 @@
 // MyPage 페이지 관련 Firebase Analytics 이벤트
 
-import { logAnalyticsEvent } from '@/shared/utils/analytics';
+import { logAnalyticsEvent } from '@utils/analytics';
 
 /**
  * MyPage 탭 Img 클릭 이벤트

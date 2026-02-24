@@ -1,14 +1,15 @@
 import { useCallback, useState } from 'react';
 
-import { useMyPageUser } from '@/pages/mypage/hooks/useMypage';
-import { useToast } from '@/shared/components/toast/useToast';
+import { useMyPageUserQuery } from '@pages/mypage/apis/queries/useMyPageUserQuery';
+
+import { useToast } from '@components/toast/useToast';
 
 import { TOAST_TYPE } from '../types/toast';
 
 interface CreditGuardReturn {
   checkCredit: () => Promise<boolean>;
   hasEnoughCredit: boolean | undefined;
-  isLoading: boolean;
+  isPending: boolean;
   isChecking: boolean;
   creditCount: number | undefined;
 }
@@ -26,7 +27,7 @@ export const useCreditGuard = (
   requiredCredits: number = 1
 ): CreditGuardReturn => {
   // 사용자 데이터 조회 (실시간으로 API 호출)
-  const { data: userData, isLoading, refetch } = useMyPageUser();
+  const { data: userData, isPending, refetch } = useMyPageUserQuery();
 
   // 토스트 알림 훅
   const { notify } = useToast();
@@ -93,7 +94,7 @@ export const useCreditGuard = (
   return {
     checkCredit,
     hasEnoughCredit,
-    isLoading,
+    isPending,
     isChecking,
     creditCount,
   };

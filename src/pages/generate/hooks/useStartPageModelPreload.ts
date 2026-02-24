@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 
 import { IS_CLIENT_DETECTION_ENABLED } from '@pages/generate/constants/curationDetectionMode';
-import { OBJ365_MODEL_PATH } from '@pages/generate/constants/detection';
 
-import { preloadONNXModel } from './useOnnxModel';
+import { OBJ365_MODEL_PATH } from '@shared/detection/constants';
+import { preloadONNXModel } from '@shared/detection/hooks/useOnnxModel';
 
 const useStartPageModelPreloadClient = () => {
   useEffect(() => {

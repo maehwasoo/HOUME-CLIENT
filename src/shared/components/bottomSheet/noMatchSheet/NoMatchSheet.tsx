@@ -1,12 +1,12 @@
 import { useCallback, useState } from 'react';
 
-import { useUserStore } from '@/store/useUserStore';
+import { useUserStore } from '@store/useUserStore';
 
 import CtaButton from '@components/button/ctaButton/CtaButton';
 import TextField from '@components/textField/TextField';
 
 import * as styles from './NoMatchSheet.css';
-import { BottomSheetWrapper } from '../BottomSheetWrapper';
+import BottomSheetWrapper from '../BottomSheetWrapper';
 
 interface NoMatchSheetProps {
   isOpen: boolean;
@@ -15,7 +15,7 @@ interface NoMatchSheetProps {
   onSubmit: (region: string, address: string) => void;
 }
 
-export const NoMatchSheet = ({
+const NoMatchSheet = ({
   isOpen,
   onClose,
   onExited,

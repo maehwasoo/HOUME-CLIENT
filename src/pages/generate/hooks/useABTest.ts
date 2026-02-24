@@ -8,10 +8,13 @@
 
 import { useEffect, useState } from 'react';
 
-import { logABTestAssignment, setABTestGroup } from '@/shared/utils/analytics';
-import { useUserStore } from '@/store/useUserStore';
+import { useUserStore } from '@store/useUserStore';
 
-export type ImageGenerationVariant = 'single' | 'multiple';
+import type { ImageGenerationVariant } from '@shared/types/abTest';
+
+import { logABTestAssignment, setABTestGroup } from '@utils/analytics';
+
+export type { ImageGenerationVariant };
 
 /**
  * 개발 모드에서 A/B 그룹을 고정하기 위한 값

@@ -1,17 +1,16 @@
 import { style } from '@vanilla-extract/css';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-
+import { fontStyle } from '@styles/fontStyle';
 import { colorVars } from '@styles/tokens/color.css';
 
 export const contentWrapper = style({
+  position: 'relative',
   display: 'flex',
   flexDirection: 'column',
-  position: 'relative',
   alignItems: 'center',
+  paddingTop: '4rem',
   width: '100%',
   height: '100dvh',
-  paddingTop: '4rem',
 });
 
 export const textSection = style({
@@ -30,24 +29,24 @@ export const headerText = style({
 
 export const bodyText = style({
   ...fontStyle('body_r_14'),
-  color: colorVars.color.gray600,
   textAlign: 'center',
+  color: colorVars.color.gray600,
 });
 
 export const imgSection = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  width: '100%',
   marginBottom: '2rem',
+  width: '100%',
 });
 
 export const buttonSection = style({
-  display: 'flex',
   position: 'absolute',
   bottom: '0',
+  display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  width: '100%',
   padding: '2rem',
+  width: '100%',
 });

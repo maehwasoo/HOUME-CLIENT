@@ -3,24 +3,24 @@ import { recipe } from '@vanilla-extract/recipes';
 
 export const stepsWrapper = style({
   display: 'flex',
-  justifyContent: 'space-between',
   alignItems: 'center',
+  justifyContent: 'space-between',
 });
 
 export const step = style({
-  width: '19.4rem',
-  height: '2rem',
-  flexShrink: 0,
   display: 'flex',
+  flexShrink: 0,
   alignItems: 'center',
   justifyContent: 'center',
+  width: '19.4rem',
+  height: '2rem',
 });
 
 export const icon = recipe({
   base: {
+    display: 'block',
     width: '100%',
     height: '100%',
-    display: 'block',
   },
   variants: {
     variant: {

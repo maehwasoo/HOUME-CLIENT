@@ -1,4 +1,4 @@
-import FlipButton from '@/shared/components/button/flipButton/FlipButton';
+import FlipButton from '@components/button/flipButton/FlipButton';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

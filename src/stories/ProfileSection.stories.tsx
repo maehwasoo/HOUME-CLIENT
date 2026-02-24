@@ -1,4 +1,4 @@
-import ProfileSection from '@/pages/mypage/components/section/profile/ProfileSection';
+import ProfileSection from '@pages/mypage/components/section/profile/ProfileSection';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

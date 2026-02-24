@@ -1,14 +1,13 @@
 import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-
+import { fontStyle } from '@styles/fontStyle';
 import { colorVars } from '@styles/tokens/color.css';
 
 export const buttonWrapper = style({
   display: 'flex',
-  justifyContent: 'center',
   alignItems: 'center',
+  justifyContent: 'center',
   width: '100%',
 });
 
@@ -17,17 +16,17 @@ export const CtaButton = recipe({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '100%',
-    minWidth: '12.1rem',
-    height: '5.6rem',
-    padding: '1.7rem 0',
     gap: '0.8rem',
-    borderRadius: '999px',
-    ...fontStyle('title_m_16'),
-    color: colorVars.color.gray000,
     transition: 'all 0.2s ease-in-out',
     border: 'none',
+    borderRadius: '999px',
+    padding: '1.7rem 0',
+    width: '100%',
+    ...fontStyle('title_m_16'),
+    minWidth: '12.1rem',
+    height: '5.6rem',
     whiteSpace: 'nowrap',
+    color: colorVars.color.gray000,
   },
   variants: {
     state: {
@@ -46,10 +45,10 @@ export const CtaButton = recipe({
     type: {
       default: {},
       kakao: {
-        fontFamily: `"Apple SD Gothic Neo", sans-serif`,
         backgroundColor: '#FEE500',
-        color: '#000000D9',
         padding: '1.8rem 0',
+        color: '#000000D9',
+        fontFamily: `"Apple SD Gothic Neo", sans-serif`,
 
         ':active': {
           backgroundColor: '#FEE500',
@@ -101,6 +100,6 @@ export const kakaoIcon = style({
 });
 
 export const kakaoText = style({
-  lineHeight: 1,
   alignSelf: 'flex-end',
+  lineHeight: 1,
 });

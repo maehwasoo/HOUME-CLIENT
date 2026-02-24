@@ -1,4 +1,4 @@
-import * as styles from './TitleStep.css.ts';
+import * as styles from './TitleStep.css';
 
 interface TitleStepProps {
   stepNumber: number;

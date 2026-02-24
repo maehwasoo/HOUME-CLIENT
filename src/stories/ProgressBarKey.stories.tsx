@@ -1,4 +1,4 @@
-import ProgressBarKey from '@/shared/components/progressBarKey/ProgressBarKey';
+import ProgressBarKey from '@components/progressBarKey/ProgressBarKey';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

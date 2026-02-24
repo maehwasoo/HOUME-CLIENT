@@ -1,8 +1,8 @@
-import DragHandleIcon from '@/shared/assets/icons/dragHandle.svg?react';
+import DragHandleIcon from '@assets/icons/dragHandle.svg?react';
 
-import * as styles from './DragHandle.css.ts';
+import * as styles from './DragHandle.css';
 
-export const DragHandle = () => {
+const DragHandle = () => {
   return (
     <div className={styles.wrapper}>
       <div className={styles.dragHandle}>
@@ -11,3 +11,5 @@ export const DragHandle = () => {
     </div>
   );
 };
+
+export default DragHandle;

@@ -1,6 +1,6 @@
 import { MemoryRouter } from 'react-router-dom';
 
-import FunnelLayout from '@/pages/imageSetup/components/layout/FunnelLayout';
+import FunnelLayout from '@pages/imageSetup/components/layout/FunnelLayout';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

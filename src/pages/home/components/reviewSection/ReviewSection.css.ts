@@ -1,20 +1,20 @@
 import { style } from '@vanilla-extract/css';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-import { colorVars } from '@/shared/styles/tokens/color.css';
+import { fontStyle } from '@styles/fontStyle';
+import { colorVars } from '@styles/tokens/color.css';
 
 export const wrapper = style({
-  minWidth: '37.5rem',
   width: '100%',
+  minWidth: '37.5rem',
 });
 
 export const container = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  padding: '3.2rem 3rem',
   gap: '2.4rem',
   backgroundColor: colorVars.color.primary_light2,
+  padding: '3.2rem 3rem',
 });
 
 export const footerContainer = style({
@@ -22,15 +22,15 @@ export const footerContainer = style({
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  width: '100%',
-  marginBottom: '11.7rem',
   gap: '4rem',
+  marginBottom: '11.7rem',
   backgroundColor: colorVars.color.gray000,
+  width: '100%',
 });
 
 export const copy = style({
   ...fontStyle('body_r_14'),
-  color: colorVars.color.gray500,
-  textAlign: 'center',
   padding: '4rem 0',
+  textAlign: 'center',
+  color: colorVars.color.gray500,
 });

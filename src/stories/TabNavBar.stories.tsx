@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ComponentProps } from 'react';
 
-import TabNavBar from '@/pages/mypage/components/navBar/TabNavBar';
+import TabNavBar from '@pages/mypage/components/navBar/TabNavBar';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

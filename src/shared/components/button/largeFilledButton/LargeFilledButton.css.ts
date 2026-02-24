@@ -1,19 +1,18 @@
 import { recipe } from '@vanilla-extract/recipes';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-
+import { fontStyle } from '@styles/fontStyle';
 import { colorVars } from '@styles/tokens/color.css';
 
 export const largeFilled = recipe({
   base: {
-    width: '100%',
-    height: '4.8rem',
-    padding: '1rem 2rem',
     alignItems: 'center',
-    textAlign: 'center',
-    borderRadius: '8px',
     transition: 'all 0.2s ease-in-out',
     border: 'none',
+    borderRadius: '8px',
+    padding: '1rem 2rem',
+    width: '100%',
+    height: '4.8rem',
+    textAlign: 'center',
     ...fontStyle('body_r_14'),
   },
   variants: {
@@ -26,9 +25,9 @@ export const largeFilled = recipe({
       },
       disabled: {
         backgroundColor: colorVars.color.gray050,
-        color: colorVars.color.gray300,
         cursor: 'not-allowed',
         pointerEvents: 'none',
+        color: colorVars.color.gray300,
       },
       error: {
         backgroundColor: colorVars.color.error_light,
@@ -39,10 +38,10 @@ export const largeFilled = recipe({
     buttonSize: {
       xsmall: {
         // 너비 1/4 버튼
+        borderRadius: '6px',
+        padding: '0.7rem 0',
         minWidth: '7.4rem',
         height: '3.2rem',
-        padding: '0.7rem 0',
-        borderRadius: '6px',
         ...fontStyle('caption_r_12'),
       },
       small: {
@@ -52,10 +51,10 @@ export const largeFilled = recipe({
       },
       medium: {
         // '소파'에 사용되는 버튼
+        borderRadius: '6px',
+        padding: '0.7rem 0',
         minWidth: '15.45rem',
         height: '3.2rem',
-        padding: '0.7rem 0',
-        borderRadius: '6px',
         ...fontStyle('caption_r_12'),
       },
       large: {
@@ -69,7 +68,6 @@ export const largeFilled = recipe({
         color: colorVars.color.primary,
         ...fontStyle('body_m_14'),
       },
-      false: {},
     },
   },
   defaultVariants: {

@@ -1,4 +1,4 @@
-import ErrorMessage from '@components/button/ErrorButton/ErrorMessage';
+import ErrorMessage from '@components/button/errorMessage/ErrorMessage';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

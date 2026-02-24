@@ -1,16 +1,19 @@
 import { globalStyle, style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-import { animationTokens } from '@/shared/styles/tokens/animation.css';
-import { colorVars } from '@/shared/styles/tokens/color.css';
-import { zIndex } from '@/shared/styles/tokens/zIndex';
+import { fontStyle } from '@styles/fontStyle';
+import {
+  SKELETON_GRADIENT,
+  animationTokens,
+} from '@styles/tokens/animation.css';
+import { colorVars } from '@styles/tokens/color.css';
+import { zIndex } from '@styles/tokens/zIndex';
 
 export const wrapper = recipe({
   base: {
-    width: '100%',
     display: 'flex',
     flexDirection: 'column',
+    width: '100%',
   },
   variants: {
     size: {
@@ -33,12 +36,12 @@ export const clickable = style({
 
 export const imgSection = recipe({
   base: {
-    position: 'relative', // 내부 absolute(링크 버튼)의 기준
-    overflow: 'hidden', // 모서리 밖으로 이미지 안 튀어나오게
+    aspectRatio: '1 / 1', // 내부 absolute(링크 버튼)의 기준
+    position: 'relative', // 모서리 밖으로 이미지 안 튀어나오게
     border: `1px solid ${colorVars.color.gray200}`,
-    width: '100%',
-    aspectRatio: '1 / 1', // 이미지 영역만 정사각형
     background: 'transparent',
+    width: '100%', // 이미지 영역만 정사각형
+    overflow: 'hidden',
   },
   variants: {
     size: {
@@ -50,13 +53,13 @@ export const imgSection = recipe({
 
 export const cardImage = recipe({
   base: {
-    width: '100%',
-    height: '100%',
+    boxSizing: 'border-box',
+    display: 'block',
+    transition: 'opacity 0.3s ease-in-out',
     objectFit: 'cover',
     objectPosition: 'center',
-    display: 'block',
-    boxSizing: 'border-box',
-    transition: 'opacity 0.3s ease-in-out',
+    width: '100%',
+    height: '100%',
   },
   variants: {
     loaded: {
@@ -72,7 +75,7 @@ export const cardImage = recipe({
 export const skeleton = style({
   position: 'absolute',
   inset: 0,
-  background: 'linear-gradient(90deg, #ececec 8%, #f0f0f0 18%, #ececec 33%)',
+  background: SKELETON_GRADIENT,
   backgroundSize: '200% 100%',
   animation: `${animationTokens.skeletonWave} 2s linear infinite`,
 });
@@ -84,35 +87,35 @@ export const linkBtnContainer = recipe({
   },
   variants: {
     size: {
-      large: { left: '0.6rem', bottom: '0.6rem' },
-      small: { left: '0.8rem', bottom: '0.8rem' },
+      large: { bottom: '0.6rem', left: '0.6rem' },
+      small: { bottom: '0.8rem', left: '0.8rem' },
     },
   },
 });
 
 export const saveBtnOverlay = style({
   position: 'absolute',
+  zIndex: zIndex.button,
   top: '0.6rem',
   right: '0.6rem',
-  zIndex: zIndex.button,
 });
 
 export const bottomSection = style({
   display: 'flex',
   justifyContent: 'space-between',
+  gap: '0.4rem',
   padding: '0.6rem 0 2rem 0',
   width: '100%',
-  gap: '0.4rem',
 });
 
 export const textContainer = style({
   display: 'flex',
+  flex: '1 1 auto',
   flexDirection: 'column',
   gap: '0.6rem',
-  minWidth: '8rem',
   padding: '0.2rem',
   width: '100%',
-  flex: '1 1 auto', // 남은 공간 텍스트가 차기
+  minWidth: '8rem', // 남은 공간 텍스트가 차기
 });
 
 export const saveBtnContainer = style({
@@ -121,13 +124,13 @@ export const saveBtnContainer = style({
 
 export const productText = style({
   ...fontStyle('body_r_13'),
-  color: colorVars.color.gray999,
+  display: '-webkit-box',
   maxHeight: '3.6rem',
 
-  display: '-webkit-box',
-  WebkitLineClamp: 2, // 최대 2줄
-  WebkitBoxOrient: 'vertical',
   overflow: 'hidden',
+  color: colorVars.color.gray999, // 최대 2줄
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: 'vertical',
 });
 
 export const brandText = style({
@@ -138,9 +141,9 @@ export const brandText = style({
 export const infoSection = style({
   display: 'flex',
   flexDirection: 'column',
+  gap: '0.8rem',
   paddingTop: '1.2rem',
   paddingBottom: '2rem',
-  gap: '0.8rem',
 });
 
 export const colorRow = style({
@@ -150,11 +153,11 @@ export const colorRow = style({
 });
 
 export const colorChip = style({
+  boxSizing: 'border-box',
+  border: `0.5px solid ${colorVars.color.gray999_30}`,
+  borderRadius: '50%',
   width: '1.4rem',
   height: '1.4rem',
-  borderRadius: '50%',
-  border: `0.5px solid ${colorVars.color.gray999_30}`,
-  boxSizing: 'border-box',
 });
 
 export const colorChipCount = style({
@@ -171,20 +174,20 @@ export const productInfo = style({
 
 export const brandTextLarge = style({
   ...fontStyle('caption_r_11'),
-  color: colorVars.color.gray500,
   overflow: 'hidden',
   textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
+  color: colorVars.color.gray500,
 });
 
 export const productTextLarge = style({
   ...fontStyle('body_r_13'),
-  color: colorVars.color.gray900,
-  maxHeight: '3.6rem',
   display: '-webkit-box',
+  maxHeight: '3.6rem',
+  overflow: 'hidden',
+  color: colorVars.color.gray900,
   WebkitLineClamp: 2,
   WebkitBoxOrient: 'vertical',
-  overflow: 'hidden',
 });
 
 export const priceSection = style({
@@ -195,8 +198,8 @@ export const priceSection = style({
 
 export const originalPriceText = style({
   ...fontStyle('caption_r_11'),
-  color: colorVars.color.gray500,
   textDecoration: 'line-through',
+  color: colorVars.color.gray500,
 });
 
 export const discountRow = style({
@@ -222,11 +225,11 @@ export const saveCountRow = style({
 });
 
 export const saveCountIcon = style({
-  width: '1.4rem',
-  height: '1.4rem',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  width: '1.4rem',
+  height: '1.4rem',
 });
 
 globalStyle(`${saveCountIcon} svg`, {

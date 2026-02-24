@@ -1,7 +1,8 @@
 import { useEffect } from 'react';
 
-import { useMyPageUser } from '@/pages/mypage/hooks/useMypage';
-import { useUserStore } from '@/store/useUserStore';
+import { useMyPageUserQuery } from '@pages/mypage/apis/queries/useMyPageUserQuery';
+
+import { useUserStore } from '@store/useUserStore';
 
 /**
  * 사용자 정보를 전역 상태와 동기화하는 훅
@@ -13,7 +14,7 @@ export const useUserSync = () => {
   const setUserId = useUserStore((state) => state.setUserId);
   const isLoggedIn = !!accessToken;
 
-  const { data: userData } = useMyPageUser({
+  const { data: userData } = useMyPageUserQuery({
     enabled: isLoggedIn,
   });
 

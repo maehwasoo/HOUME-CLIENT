@@ -1,37 +1,34 @@
 import { style } from '@vanilla-extract/css';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
+import { fontStyle } from '@styles/fontStyle';
 
 export const container = style({
+  boxSizing: 'border-box',
   display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '0 2rem',
   width: '100%',
   maxWidth: '100%',
   height: '6.4rem',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  padding: '0 2rem',
-  boxSizing: 'border-box',
 });
 
 export const profileBox = style({
   display: 'flex',
+  flex: '0 1 auto',
   alignItems: 'center',
   gap: '1.6rem',
-  flex: '0 1 auto',
 });
 
 export const profileImage = style({
+  flexShrink: 0,
+  borderRadius: '50%',
   width: '4.8rem',
   height: '4.8rem',
-  justifyContent: 'center',
-  alignItems: 'center',
-  aspectRatio: '1/1',
-  borderRadius: '50%',
-  flexShrink: 0,
 });
 
 export const userName = style({
   ...fontStyle('heading_sb_18'),
-  whiteSpace: 'nowrap',
   flex: '0 0 auto',
+  whiteSpace: 'nowrap',
 });

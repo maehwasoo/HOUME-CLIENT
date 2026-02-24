@@ -1,4 +1,4 @@
-import * as styles from './CardImage.css.ts';
+import * as styles from './CardImage.css';
 
 const SkeletonCard = () => {
   return (

@@ -1,4 +1,4 @@
-import IcnCredit from '@/shared/assets/icons/icnCredit.svg?react';
+import IcnCredit from '@assets/icons/icnCredit.svg?react';
 
 import * as style from './CreditChip.css';
 

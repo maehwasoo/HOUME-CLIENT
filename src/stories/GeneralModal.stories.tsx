@@ -1,4 +1,4 @@
-import GeneralModal from '@/shared/components/overlay/modal/GeneralModal';
+import GeneralModal from '@components/overlay/modal/GeneralModal';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

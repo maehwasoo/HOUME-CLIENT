@@ -1,4 +1,4 @@
-import Loading from '@/shared/components/loading/Loading';
+import Loading from '@components/loading/Loading';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

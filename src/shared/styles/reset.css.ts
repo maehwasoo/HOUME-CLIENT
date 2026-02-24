@@ -20,9 +20,9 @@ import { globalStyle } from '@vanilla-extract/css';
  * 2. 기본 마진과 패딩 제거
  */
 globalStyle('*, *::before, *::after', {
+  boxSizing: 'border-box',
   margin: 0,
   padding: 0,
-  boxSizing: 'border-box',
 });
 
 /* ===== 루트 요소 설정 ===== */
@@ -31,9 +31,9 @@ globalStyle('*, *::before, *::after', {
  * 1rem = 10px (62.5% of 16px)
  */
 globalStyle('html', {
-  fontSize: '62.5%',
-  // 텍스트 크기 조정 방지 (모바일) - 표준 CSS 사용
   textSizeAdjust: '100%',
+  // 텍스트 크기 조정 방지 (모바일) - 표준 CSS 사용
+  fontSize: '62.5%',
 });
 
 /* ===== Body 기본값 ===== */
@@ -41,9 +41,9 @@ globalStyle('html', {
  * line-height 기본값 설정으로 가독성 향상
  */
 globalStyle('body', {
-  lineHeight: 1.5,
-  // 텍스트 렌더링 최적화
   textRendering: 'optimizeSpeed',
+  // 텍스트 렌더링 최적화
+  lineHeight: 1.5,
 });
 
 /* ===== 제목 요소 초기화 ===== */
@@ -53,9 +53,9 @@ globalStyle('body', {
  */
 globalStyle('h1, h2, h3, h4, h5, h6', {
   margin: 0,
-  fontWeight: 'inherit',
-  fontSize: 'inherit',
   lineHeight: 'inherit',
+  fontSize: 'inherit',
+  fontWeight: 'inherit',
 });
 
 /* ===== 텍스트 요소 초기화 ===== */
@@ -83,8 +83,8 @@ globalStyle('ul, ol', {
  * 부모 요소의 색상 상속
  */
 globalStyle('a', {
-  color: 'inherit',
   textDecoration: 'none',
+  color: 'inherit',
 });
 
 /* ===== 미디어 요소 ===== */
@@ -104,9 +104,9 @@ globalStyle('img, picture, video, canvas, svg', {
  * 모던 방식으로 이미지 선택 및 드래그 비활성화
  */
 globalStyle('img', {
-  userSelect: 'none', // 텍스트 선택 방지
+  pointerEvents: 'auto', // 텍스트 선택 방지
   // 접근성을 위한 설정
-  pointerEvents: 'auto', // 클릭/탭 이벤트는 허용
+  userSelect: 'none', // 클릭/탭 이벤트는 허용
   // 드래그 비활성화는 CSS 대신 JavaScript로 처리 권장
   // draggable="false" 속성을 HTML에서 사용하세요
 });
@@ -118,12 +118,12 @@ globalStyle('img', {
  */
 globalStyle('button', {
   all: 'unset',
-  cursor: 'pointer',
   boxSizing: 'border-box',
-  // 텍스트 선택 방지
-  userSelect: 'none',
-  // 모바일 터치 하이라이트는 outline: none으로 대체 가능
   outline: 'none',
+  // 텍스트 선택 방지
+  cursor: 'pointer',
+  // 모바일 터치 하이라이트는 outline: none으로 대체 가능
+  userSelect: 'none',
 });
 
 /**
@@ -132,11 +132,11 @@ globalStyle('button', {
  */
 globalStyle('input, textarea, select', {
   all: 'unset',
-  fontFamily: 'inherit',
-  fontSize: 'inherit',
-  color: 'inherit',
-  // 모바일에서 확대 방지
   touchAction: 'manipulation',
+  color: 'inherit',
+  fontFamily: 'inherit',
+  // 모바일에서 확대 방지
+  fontSize: 'inherit',
 });
 
 /**
@@ -160,9 +160,9 @@ globalStyle('table', {
  * hr 요소 스타일 초기화
  */
 globalStyle('hr', {
+  margin: 0,
   border: 0,
   borderTop: '1px solid',
-  margin: 0,
 });
 
 /**

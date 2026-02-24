@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 
 import HeartGrayXSIcon from '@assets/icons/icnHeartGrayXS.svg?react';
 import CardImage from '@assets/images/cardExImg.svg?url';
+
 import LinkButton from '@components/button/linkButton/LinkButton';
 import SaveButton from '@components/button/saveButton/SaveButton';
 

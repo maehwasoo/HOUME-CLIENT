@@ -1,20 +1,19 @@
 import { recipe } from '@vanilla-extract/recipes';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-
+import { fontStyle } from '@styles/fontStyle';
 import { colorVars } from '@styles/tokens/color.css';
 
 export const chargeButton = recipe({
   base: {
-    height: '2.8rem',
-    padding: '0rem 1.2rem',
     alignItems: 'center',
     gap: '0.8rem',
-    borderRadius: '999px',
-    ...fontStyle('caption_m_12'),
-    color: colorVars.color.primary,
     transition: 'all 0.2s ease-in-out',
     border: 'none',
+    borderRadius: '999px',
+    ...fontStyle('caption_m_12'),
+    padding: '0rem 1.2rem',
+    height: '2.8rem',
+    color: colorVars.color.primary,
   },
   variants: {
     state: {
@@ -26,8 +25,8 @@ export const chargeButton = recipe({
       },
       disabled: {
         backgroundColor: colorVars.color.gray300,
-        color: colorVars.color.gray000,
         cursor: 'not-allowed',
+        color: colorVars.color.gray000,
       },
     },
   },

@@ -2,15 +2,17 @@ import { useEffect, useRef } from 'react';
 
 import { useLocation, useNavigate } from 'react-router-dom';
 
-import { ROUTES } from '@/routes/paths';
-import CtaButton from '@/shared/components/button/ctaButton/CtaButton.tsx';
-import ErrorMessage from '@/shared/components/button/ErrorButton/ErrorMessage';
-import LargeFilled from '@/shared/components/button/largeFilledButton/LargeFilledButton.tsx';
-import TitleNavBar from '@/shared/components/navBar/TitleNavBar.tsx';
-import TextField from '@/shared/components/textField/TextField.tsx';
-import { ERROR_MESSAGES } from '@/shared/constants/clientErrorMessage.ts';
+import { ROUTES } from '@routes/paths';
 
-import { usePostSignupMutation } from './apis/signup';
+import CtaButton from '@components/button/ctaButton/CtaButton';
+import ErrorMessage from '@components/button/errorMessage/ErrorMessage';
+import LargeFilledButton from '@components/button/largeFilledButton/LargeFilledButton';
+import TitleNavBar from '@components/navBar/TitleNavBar';
+import TextField from '@components/textField/TextField';
+
+import { ERROR_MESSAGES } from '@constants/clientErrorMessage';
+
+import { usePostSignupMutation } from './apis/mutations/usePostSignupMutation';
 import useSignupForm from './hooks/useSignupForm';
 import * as styles from './SignupPage.css';
 import {
@@ -185,21 +187,21 @@ const SignupPage = () => {
         <div className={styles.fieldbox}>
           <h2 className={styles.fieldtitle}>성별</h2>
           <div className={styles.flexbox}>
-            <LargeFilled
+            <LargeFilledButton
               buttonSize="small"
               isSelected={gender?.value === 'MALE'}
               onClick={() => setGender({ value: 'MALE', label: '남성' })}
             >
               남성
-            </LargeFilled>
-            <LargeFilled
+            </LargeFilledButton>
+            <LargeFilledButton
               buttonSize="small"
               isSelected={gender?.value === 'FEMALE'}
               onClick={() => setGender({ value: 'FEMALE', label: '여성' })}
             >
               여성
-            </LargeFilled>
-            <LargeFilled
+            </LargeFilledButton>
+            <LargeFilledButton
               buttonSize="small"
               isSelected={gender?.value === 'NONBINARY'}
               onClick={() =>
@@ -207,7 +209,7 @@ const SignupPage = () => {
               }
             >
               논바이너리
-            </LargeFilled>
+            </LargeFilledButton>
           </div>
         </div>
       </div>

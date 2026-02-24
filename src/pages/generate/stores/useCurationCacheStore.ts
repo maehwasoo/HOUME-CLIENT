@@ -1,10 +1,11 @@
 import { create } from 'zustand';
 
-import type { FurnitureCategoryCode } from '@pages/generate/constants/furnitureCategoryMapping';
 import type {
   FurnitureCategoriesResponse,
   FurnitureProductsInfoResponse,
 } from '@pages/generate/types/furniture';
+
+import type { FurnitureCategoryCode } from '@shared/detection/furnitureCategoryMapping';
 
 // 카테고리 응답과 감지 객체 집합을 묶어 저장
 type CategoryCacheEntry = {

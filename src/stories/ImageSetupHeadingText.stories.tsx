@@ -1,4 +1,4 @@
-import HeadingText from '@/pages/imageSetup/components/headingText/HeadingText';
+import HeadingText from '@pages/imageSetup/components/headingText/HeadingText';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

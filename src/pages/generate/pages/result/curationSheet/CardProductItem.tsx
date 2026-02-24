@@ -2,20 +2,25 @@ import { memo, useRef } from 'react';
 
 import { useIsMutating } from '@tanstack/react-query';
 
-import { useABTest } from '@/pages/generate/hooks/useABTest';
-import { usePostJjymMutation } from '@/pages/generate/hooks/useSaveItem';
+import { useABTest } from '@pages/generate/hooks/useABTest';
 import {
   logResultImgClickCurationSheetBtnGoSite,
   logResultImgClickCurationSheetBtnSave,
   logResultImgClickCurationSheetCard,
   logResultImgClickCurationSheetCardImage,
   logResultImgClickCurationSheetCardTitle,
-} from '@/pages/generate/utils/analytics';
-import CardProduct from '@/shared/components/card/cardProduct/CardProduct';
-import { useToast } from '@/shared/components/toast/useToast';
-import { SESSION_STORAGE_KEYS } from '@/shared/constants/bottomSheet';
-import { TOAST_TYPE } from '@/shared/types/toast';
-import { useSavedItemsStore } from '@/store/useSavedItemsStore';
+} from '@pages/generate/utils/analytics';
+
+import { useSavedItemsStore } from '@store/useSavedItemsStore';
+
+import { TOAST_TYPE } from '@shared/types/toast';
+
+import { useJjymMutation } from '@apis/mutations/useJjymMutation';
+
+import CardProduct from '@components/card/cardProduct/CardProduct';
+import { useToast } from '@components/toast/useToast';
+
+import { SESSION_STORAGE_KEYS } from '@constants/bottomSheet';
 
 const buildCurationOutboundUrl = (url: string) => {
   const utmQuery = import.meta.env.VITE_CURATION_OUTBOUND_UTM_QUERY;
@@ -76,7 +81,7 @@ const CardProductItem = memo(
       shownAt: 0,
     }); // 최근 스낵바 노출 종류/시각(ms)
 
-    const { mutate: toggleJjym } = usePostJjymMutation();
+    const { mutate: toggleJjym } = useJjymMutation();
     const { notify } = useToast();
 
     const isMutating =

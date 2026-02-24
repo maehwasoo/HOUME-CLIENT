@@ -4,11 +4,11 @@ import Horizontal from '@assets/icons/horizontal.svg?react';
 
 import * as styles from './FlipButton.css';
 
-interface FlipProps extends React.ComponentProps<'button'> {
+interface FlipButtonProps extends React.ComponentProps<'button'> {
   isFlipped: boolean;
 }
 
-const Flip = ({ isFlipped, ...props }: FlipProps) => {
+const FlipButton = ({ isFlipped, ...props }: FlipButtonProps) => {
   return (
     <button
       type="button"
@@ -23,4 +23,4 @@ const Flip = ({ isFlipped, ...props }: FlipProps) => {
   );
 };
 
-export default Flip;
+export default FlipButton;

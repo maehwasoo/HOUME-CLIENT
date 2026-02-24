@@ -1,11 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 
-import emptyImage from '@/shared/assets/images/emptyImage.png';
-import CardHistory from '@/shared/components/card/cardHistory/CardHistory';
-import Loading from '@/shared/components/loading/Loading';
+import { ROUTES } from '@routes/paths';
+
+import emptyImage from '@assets/images/emptyImage.png';
+
+import CardHistory from '@components/card/cardHistory/CardHistory';
+import Loading from '@components/loading/Loading';
 
 import * as styles from './HistorySection.css';
-import { useMyPageImagesQuery } from '../../hooks/useMypage';
+import { useMyPageImagesQuery } from '../../apis/queries/useMyPageImagesQuery';
 
 /**
  * 마이페이지 결과 히스토리 섹션
@@ -17,12 +20,12 @@ const HistorySection = () => {
 
   // 생성 결과 상세로 이동
   const handleViewResult = (houseId: number) => {
-    navigate(`/generate/result?from=mypage&houseId=${houseId}`);
+    navigate(`${ROUTES.GENERATE_RESULT}?from=mypage&houseId=${houseId}`);
   };
 
   // 이미지 생성 플로우로 이동
   const handleCreateImage = () => {
-    navigate('/imageSetup');
+    navigate(ROUTES.IMAGE_SETUP);
   };
 
   // 로딩 상태

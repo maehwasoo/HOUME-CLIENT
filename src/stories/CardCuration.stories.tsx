@@ -1,4 +1,4 @@
-import CardCuration from '@/pages/mypage/components/card/cardCuration/CardCuration';
+import CardCuration from '@pages/mypage/components/card/cardCuration/CardCuration';
 
 import CardImageUrl from '@assets/images/cardExImg.svg?url';
 

@@ -1,7 +1,7 @@
 import {
   logMyPageClickTabFurniture,
   logMyPageClickTabImg,
-} from '@/pages/mypage/utils/analytics';
+} from '@pages/mypage/utils/analytics';
 
 import * as styles from './TabNavBar.css';
 

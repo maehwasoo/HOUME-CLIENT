@@ -1,8 +1,8 @@
 import { style } from '@vanilla-extract/css';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-import { animationTokens } from '@/shared/styles/tokens/animation.css';
-import { colorVars } from '@/shared/styles/tokens/color.css';
+import { fontStyle } from '@styles/fontStyle';
+import { animationTokens } from '@styles/tokens/animation.css';
+import { colorVars } from '@styles/tokens/color.css';
 
 export const container = style({
   background: colorVars.color.bg_grad,
@@ -11,14 +11,14 @@ export const container = style({
 export const textbox = style({
   display: 'flex',
   flexDirection: 'column',
-  justifyContent: 'center',
   alignItems: 'center',
+  justifyContent: 'center',
   gap: '0.8rem',
-  width: '100%',
-  textAlign: 'center',
-  ...fontStyle('title_m_16'),
   padding: '4rem 2rem 2rem 2rem',
+  width: '100%',
+  ...fontStyle('title_m_16'),
   animation: animationTokens.fadeInUpFast,
+  textAlign: 'center',
 });
 
 export const title = style({
@@ -32,10 +32,10 @@ export const content = style({
 });
 
 export const imgbox = style({
-  width: '100%',
   display: 'flex',
-  justifyContent: 'center',
   alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
 });
 
 export const loginImg = style({
@@ -47,14 +47,14 @@ export const loginImg = style({
 export const btnarea = style({
   position: 'fixed',
   bottom: '0',
-  width: '100%',
-  maxWidth: '430px',
   display: 'flex',
   flexDirection: 'column',
-  justifyContent: 'center',
   alignItems: 'center',
+  justifyContent: 'center',
   gap: '1rem',
   padding: '0 2rem 2rem 2rem',
+  width: '100%',
+  maxWidth: '430px',
 });
 
 export const aside = style({
@@ -63,7 +63,7 @@ export const aside = style({
 });
 
 export const link = style({
+  cursor: 'pointer',
   textDecoration: 'underline',
   textUnderlineOffset: '2px',
-  cursor: 'pointer',
 });

@@ -1,8 +1,8 @@
 import { overlay } from 'overlay-kit';
 import { useNavigate } from 'react-router-dom';
 
-import TitleNavBar from '@/shared/components/navBar/TitleNavBar';
-import Popup from '@/shared/components/overlay/popup/Popup';
+import TitleNavBar from '@components/navBar/TitleNavBar';
+import Popup from '@components/overlay/popup/Popup';
 
 import * as styles from './FunnelLayout.css';
 import {

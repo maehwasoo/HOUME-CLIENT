@@ -1,5 +1,6 @@
-import ProfileImage from '@/shared/assets/images/profileImg.svg?react';
-import CreditChip from '@/shared/components/creditChip/CreditChip';
+import ProfileImage from '@assets/images/profileImg.svg?react';
+
+import CreditChip from '@components/creditChip/CreditChip';
 
 import * as styles from './ProfileSection.css';
 

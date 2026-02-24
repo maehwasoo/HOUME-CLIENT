@@ -1,6 +1,6 @@
-import CardImage from '@/shared/components/card/cardImage/CardImage';
-
 import CardImageUrl from '@assets/images/cardExImg.svg?url';
+
+import CardImage from '@components/card/cardImage/CardImage';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

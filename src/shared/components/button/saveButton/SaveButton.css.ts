@@ -1,9 +1,9 @@
 import { style } from '@vanilla-extract/css';
 
 export const buttonWrapper = style({
-  width: '100%',
-  background: 'none',
-  border: 'none',
-  padding: 0,
   margin: 0,
+  border: 'none',
+  background: 'none',
+  padding: 0,
+  width: '100%',
 });

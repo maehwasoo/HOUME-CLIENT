@@ -1,5 +1,6 @@
-import { primeDetectionCacheEntry } from '@pages/generate/hooks/useDetectionCache';
-import { useDetectionCacheStore } from '@pages/generate/stores/useDetectionCacheStore';
+import { primeDetectionCacheEntry } from '@shared/detection/hooks/useDetectionCache';
+import { useDetectionCacheStore } from '@shared/detection/stores/useDetectionCacheStore';
+import type { DetectionCacheEntry } from '@shared/detection/stores/useDetectionCacheStore';
 
 import type {
   MyPageImageDetail,
@@ -7,7 +8,6 @@ import type {
   MyPageImageHistory,
   MyPageUserData,
 } from '../types/apis/MyPage';
-import type { DetectionCacheEntry } from '@pages/generate/stores/useDetectionCacheStore';
 
 interface BuildResultNavigationArgs {
   history: MyPageImageHistory;

@@ -1,5 +1,5 @@
-import ErrorMessage from '@/shared/components/button/ErrorButton/ErrorMessage';
-import LargeFilled from '@/shared/components/button/largeFilledButton/LargeFilledButton';
+import ErrorMessage from '@components/button/errorMessage/ErrorMessage';
+import LargeFilledButton from '@components/button/largeFilledButton/LargeFilledButton';
 
 import * as styles from './ButtonGroup.css';
 
@@ -100,7 +100,7 @@ const ButtonGroup = <T = string,>({
           const isActive = isButtonActive(option); // 버튼 활성화 상태 확인 (id 기반)
 
           return (
-            <LargeFilled
+            <LargeFilledButton
               key={String(option.code)}
               buttonSize={buttonSize}
               isSelected={isSelected}
@@ -108,7 +108,7 @@ const ButtonGroup = <T = string,>({
               onClick={() => handleButtonClick(option)}
             >
               {option.label}
-            </LargeFilled>
+            </LargeFilledButton>
           );
         })}
       </div>

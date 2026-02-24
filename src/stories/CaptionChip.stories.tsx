@@ -1,4 +1,4 @@
-import CaptionChip from '@/pages/imageSetup/components/caption/CaptionChip';
+import CaptionChip from '@pages/imageSetup/components/caption/CaptionChip';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

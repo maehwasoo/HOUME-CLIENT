@@ -2,14 +2,16 @@ import { useEffect, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { useMyPageUser } from '@/pages/mypage/hooks/useMypage';
-import { ROUTES } from '@/routes/paths';
-import CtaButton from '@/shared/components/button/ctaButton/CtaButton';
-import { useUserStore } from '@/store/useUserStore';
+import { useMyPageUserQuery } from '@pages/mypage/apis/queries/useMyPageUserQuery';
 
-import LogoNavBar from '@shared/components/navBar/LogoNavBar';
+import { ROUTES } from '@routes/paths';
 
-import { AnimatedSection } from './components/AnimatedSection';
+import { useUserStore } from '@store/useUserStore';
+
+import CtaButton from '@components/button/ctaButton/CtaButton';
+import LogoNavBar from '@components/navBar/LogoNavBar';
+
+import AnimatedSection from './components/AnimatedSection';
 import IntroSection from './components/introSection/IntroSection';
 import ReviewSection from './components/reviewSection/ReviewSection';
 import StepGuideSection from './components/stepGuideSection/StepGuideSection';
@@ -28,7 +30,7 @@ const HomePage = () => {
   const scrollDepth50Sent = useRef(false);
   const scrollDepth100Sent = useRef(false);
 
-  const { isLoading: isUserDataLoading } = useMyPageUser({
+  const { isLoading: isUserDataLoading } = useMyPageUserQuery({
     enabled: isLoggedIn,
   });
 

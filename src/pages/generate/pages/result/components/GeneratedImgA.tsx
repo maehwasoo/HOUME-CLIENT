@@ -7,39 +7,39 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-import { useABTest } from '@/pages/generate/hooks/useABTest';
-import {
-  useFactorPreferenceMutation,
-  useFactorsQuery,
-  useDeleteResultPreferenceMutation,
-  useResultPreferenceMutation,
-} from '@/pages/generate/hooks/useGenerate';
-import {
-  logResultImgClickBtnMoreImg,
-  logResultImgClickMoreModalBack,
-  logResultImgSwipeSlideLeft,
-  logResultImgSwipeSlideRight,
-} from '@/pages/generate/utils/analytics';
-import DislikeButton from '@/shared/components/button/likeButton/DislikeButton';
-import LikeButton from '@/shared/components/button/likeButton/LikeButton';
-import CommunityComingSoonModal from '@/shared/components/overlay/modal/CommunityComingSoonModal';
-
-import generateResultLockedPreview from '@assets/images/generateResultLockedPreview.png';
-import SlideNext from '@shared/assets/icons/nextAbled.svg?react';
-import SlideNextDisabled from '@shared/assets/icons/nextDisabled.svg?react';
-import SlidePrev from '@shared/assets/icons/prevAbled.svg?react';
-import SlidePrevDisabled from '@shared/assets/icons/prevDisabled.svg?react';
-
-import DetectionHotspots from './DetectionHotspots';
-import * as styles from './GeneratedImg.css.ts';
-
-import type { DetectionCacheEntry } from '@pages/generate/stores/useDetectionCacheStore';
+import { useDeleteResultPreferenceMutation } from '@pages/generate/apis/mutations/useDeleteResultPreferenceMutation';
+import { useFactorPreferenceMutation } from '@pages/generate/apis/mutations/useFactorPreferenceMutation';
+import { useResultPreferenceMutation } from '@pages/generate/apis/mutations/useResultPreferenceMutation';
+import { useFactorsQuery } from '@pages/generate/apis/queries/useFactorsQuery';
+import { useABTest } from '@pages/generate/hooks/useABTest';
 import type {
   GenerateImageData,
   GenerateImageAResponse,
   GenerateImageBResponse,
   ResultPageLikeState,
 } from '@pages/generate/types/generate';
+import {
+  logResultImgClickBtnMoreImg,
+  logResultImgClickMoreModalBack,
+  logResultImgSwipeSlideLeft,
+  logResultImgSwipeSlideRight,
+} from '@pages/generate/utils/analytics';
+
+import type { DetectionCacheEntry } from '@shared/detection/stores/useDetectionCacheStore';
+
+import SlideNext from '@assets/icons/nextAbled.svg?react';
+import SlideNextDisabled from '@assets/icons/nextDisabled.svg?react';
+import SlidePrev from '@assets/icons/prevAbled.svg?react';
+import SlidePrevDisabled from '@assets/icons/prevDisabled.svg?react';
+import generateResultLockedPreview from '@assets/images/generateResultLockedPreview.png';
+
+import DislikeButton from '@components/button/likeButton/DislikeButton';
+import LikeButton from '@components/button/likeButton/LikeButton';
+import CommunityComingSoonModal from '@components/overlay/modal/CommunityComingSoonModal';
+
+import DetectionHotspots from './DetectionHotspots';
+import * as styles from './GeneratedImg.css';
+
 import type { Swiper as SwiperType } from 'swiper';
 
 // 통일된 타입 정의

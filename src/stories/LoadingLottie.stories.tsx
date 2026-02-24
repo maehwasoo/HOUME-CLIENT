@@ -1,4 +1,4 @@
-import LoadingLottie from '@/shared/components/lottie/LoadingLottie';
+import LoadingLottie from '@components/lottie/LoadingLottie';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

@@ -3,42 +3,34 @@ import { useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { useQueries, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
-import FilterChip from '@/pages/generate/components/filterChip/FilterChip';
-import { useABTest } from '@/pages/generate/hooks/useABTest';
+import { useGeneratedCategoriesQuery } from '@pages/generate/apis/queries/useGeneratedCategoriesQuery';
+import { getGeneratedImageProducts } from '@pages/generate/apis/queries/useGeneratedProductsQuery';
+import FilterChip from '@pages/generate/components/filterChip/FilterChip';
+import { shouldShowDetectionPending } from '@pages/generate/constants/curationDetectionMode';
+import { useABTest } from '@pages/generate/hooks/useABTest';
 import {
   useActiveImageCurationState,
   useActiveImageId,
-  useGeneratedCategoriesQuery,
-} from '@/pages/generate/hooks/useFurnitureCuration';
-import { useCurationCacheStore } from '@/pages/generate/stores/useCurationCacheStore';
-import { useCurationStore } from '@/pages/generate/stores/useCurationStore';
-import { logResultImgClickCurationSheetFilter } from '@/pages/generate/utils/analytics';
-import { useGetJjymListQuery } from '@/pages/mypage/hooks/useSaveItemList';
-import { ROUTES } from '@/routes/paths';
-import { QUERY_KEY } from '@/shared/constants/queryKey';
-import { useSavedItemsStore } from '@/store/useSavedItemsStore';
+} from '@pages/generate/hooks/useCurationState';
+import { useCurationCacheStore } from '@pages/generate/stores/useCurationCacheStore';
+import { useCurationStore } from '@pages/generate/stores/useCurationStore';
+import type { FurnitureProductsInfoResponse } from '@pages/generate/types/furniture';
+import { logResultImgClickCurationSheetFilter } from '@pages/generate/utils/analytics';
+import { useGetJjymListQuery } from '@pages/mypage/apis/queries/useGetJjymListQuery';
 
-import { getGeneratedImageProducts } from '@pages/generate/apis/furniture';
-import { shouldShowDetectionPending } from '@pages/generate/constants/curationDetectionMode';
+import { ROUTES } from '@routes/paths';
+
+import { useSavedItemsStore } from '@store/useSavedItemsStore';
+
+import { queryKeys } from '@constants/queryKey';
 
 import CardProductItem from './CardProductItem';
 import { normalizeProductsForCard } from './curationProducts';
 import * as styles from './CurationSheet.css';
 
-import type { FurnitureProductsInfoResponse } from '@pages/generate/types/furniture';
-
 const FILTER_SKELETON_CHIP_COUNT = 4;
 const PRODUCT_SKELETON_CARD_COUNT = 4;
 const SECTION_SWITCH_EPSILON_PX = 1;
-// 프리패치 쿼리키 튜플 정의
-type ProductPrefetchQueryKey = [
-  string,
-  {
-    groupId: number | null;
-    imageId: number;
-    categoryId: number;
-  },
-];
 type NormalizedProductsByCategory = Record<
   number,
   ReturnType<typeof normalizeProductsForCard>
@@ -53,7 +45,7 @@ interface CurationSheetProps {
  * - 감지된 가구 카테고리/상품을 고정 영역에 표시
  * - 그룹 기반 진입 시 groupId를 통해 캐시·프리패치 범위를 확정
  */
-export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
+const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
   const activeImageId = useActiveImageId();
   const imageState = useActiveImageCurationState();
   const selectedCategoryId = imageState?.selectedCategoryId ?? null;
@@ -87,16 +79,19 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
           : undefined;
 
       return {
-        queryKey: [
+        // eslint-disable-next-line @tanstack/query/exhaustive-deps -- activeImageId는 queryKeys factory 인자에 포함됨
+        queryKey:
           groupId !== null
-            ? QUERY_KEY.GENERATE_FURNITURE_PRODUCTS_GROUP
-            : QUERY_KEY.GENERATE_FURNITURE_PRODUCTS,
-          {
-            groupId,
-            imageId: activeImageId,
-            categoryId: category.id,
-          },
-        ] as const,
+            ? queryKeys.furniture.productsGroup({
+                groupId,
+                imageId: activeImageId,
+                categoryId: category.id,
+              })
+            : queryKeys.furniture.products({
+                groupId,
+                imageId: activeImageId,
+                categoryId: category.id,
+              }),
         queryFn: () => getGeneratedImageProducts(activeImageId!, category.id),
         enabled: activeImageId !== null,
         staleTime: 5 * 60 * 1000,
@@ -171,16 +166,15 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
         return;
       }
       // 프리패치용 쿼리키를 그룹/이미지/카테고리 세트로 구성
-      const productQueryKey: ProductPrefetchQueryKey = [
+      const productQueryVars = {
+        groupId,
+        imageId: activeImageId,
+        categoryId: category.id,
+      };
+      const productQueryKey =
         groupId !== null
-          ? QUERY_KEY.GENERATE_FURNITURE_PRODUCTS_GROUP
-          : QUERY_KEY.GENERATE_FURNITURE_PRODUCTS,
-        {
-          groupId,
-          imageId: activeImageId,
-          categoryId: category.id,
-        },
-      ];
+          ? queryKeys.furniture.productsGroup(productQueryVars)
+          : queryKeys.furniture.products(productQueryVars);
       const cachedQuery =
         queryClient.getQueryData<FurnitureProductsInfoResponse>(
           productQueryKey
@@ -192,11 +186,10 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
       prefetchedRef.current.add(dedupeKey);
       void queryClient.prefetchQuery({
         queryKey: productQueryKey,
-        queryFn: ({ queryKey }) => {
-          const [, variables] = queryKey as ProductPrefetchQueryKey;
+        queryFn: () => {
           return getGeneratedImageProducts(
-            variables.imageId,
-            variables.categoryId
+            productQueryVars.imageId,
+            productQueryVars.categoryId
           );
         },
         staleTime: 5 * 60 * 1000,
@@ -514,3 +507,5 @@ export const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
     </section>
   );
 };
+
+export default CurationSheet;

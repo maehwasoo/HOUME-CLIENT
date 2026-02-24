@@ -1,8 +1,8 @@
-import { CardReview } from '@/shared/components/cardReview/CardReview';
+import CardReview from '@components/cardReview/CardReview';
 
 import * as styles from './ReviewSection.css';
 import { REVIEW_DATA } from '../../constants/reviewData';
-import { AnimatedSection } from '../AnimatedSection';
+import AnimatedSection from '../AnimatedSection';
 
 const ReviewSection = () => {
   return (

@@ -1,20 +1,23 @@
 import { useCallback, useEffect, useRef } from 'react';
 
-import { OBJ365_MODEL_PATH } from '@pages/generate/constants/detection';
-import { buildHotspotsPipeline } from '@pages/generate/hooks/furnitureHotspotPipeline';
-import { loadCorsImage } from '@pages/generate/hooks/useFurnitureHotspots';
-import { useONNXModel } from '@pages/generate/hooks/useOnnxModel';
-import { useDetectionCacheStore } from '@pages/generate/stores/useDetectionCacheStore';
-import { mapHotspotsToDetectedObjects } from '@pages/generate/utils/detectedObjectMapper';
 import { runSerializedInferenceTask } from '@pages/generate/utils/inferenceTaskScheduler';
+
+import { OBJ365_MODEL_PATH } from '@shared/detection/constants';
+import type { FurnitureCategoryCode } from '@shared/detection/furnitureCategoryMapping';
+import { buildHotspotsPipeline } from '@shared/detection/hooks/furnitureHotspotPipeline';
+import {
+  loadCorsImage,
+  type FurnitureHotspot,
+} from '@shared/detection/hooks/useFurnitureHotspots';
+import { useONNXModel } from '@shared/detection/hooks/useOnnxModel';
+import { useDetectionCacheStore } from '@shared/detection/stores/useDetectionCacheStore';
+import type { ProcessedDetections } from '@shared/detection/types';
+import { mapHotspotsToDetectedObjects } from '@shared/detection/utils/detectedObjectMapper';
 
 import type {
   DetectionPrefetchOptions,
   PrefetchTask,
 } from './detectionPrefetch.types';
-import type { FurnitureCategoryCode } from '@pages/generate/constants/furnitureCategoryMapping';
-import type { FurnitureHotspot } from '@pages/generate/hooks/useFurnitureHotspots';
-import type { ProcessedDetections } from '@pages/generate/types/detection';
 
 const PREFETCH_DELAY_MS = 120;
 const MAX_CONCURRENCY = 1;

@@ -3,19 +3,22 @@ import { useRef } from 'react';
 import { overlay } from 'overlay-kit';
 import { useNavigate } from 'react-router-dom';
 
-import { useDeleteUserMutation } from '@/pages/login/apis/deleteUser';
-import { useLogoutMutation } from '@/pages/login/apis/logout';
+import { useDeleteUserMutation } from '@pages/login/apis/mutations/useDeleteUserMutation';
+import { useLogoutMutation } from '@pages/login/apis/mutations/useLogoutMutation';
 import {
   logMyPageClickBtnLogout,
   logMyPageClickBtnSuccession,
   logMyPageClickSuccessionModalCancel,
   logMyPageClickSuccessionModalOut,
-} from '@/pages/mypage/utils/analytics';
-import { ROUTES } from '@/routes/paths';
-import TitleNavBar from '@/shared/components/navBar/TitleNavBar';
-import GeneralModal from '@/shared/components/overlay/modal/GeneralModal';
-import { useToast } from '@/shared/components/toast/useToast';
-import { TOAST_TYPE } from '@/shared/types/toast';
+} from '@pages/mypage/utils/analytics';
+
+import { ROUTES } from '@routes/paths';
+
+import { TOAST_TYPE } from '@shared/types/toast';
+
+import TitleNavBar from '@components/navBar/TitleNavBar';
+import GeneralModal from '@components/overlay/modal/GeneralModal';
+import { useToast } from '@components/toast/useToast';
 
 import * as styles from './SettingPage.css';
 

@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent } from 'react';
 
-import SmallFilledButton from '@/shared/components/button/smallFilledButton/SmallFilledButton';
+import SmallFilledButton from '@components/button/smallFilledButton/SmallFilledButton';
 
 import * as styles from './IntroSection.css';
 import {
