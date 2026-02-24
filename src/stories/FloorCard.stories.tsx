@@ -1,23 +1,23 @@
-import FloorPlanItem from '@/shared/components/card/floorCard/FloorCard';
+import FloorCard from '@/shared/components/card/floorCard/FloorCard';
+
+import CardImageUrl from '@assets/images/cardExImg.svg?url';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-const meta: Meta<typeof FloorPlanItem> = {
-  title: 'Components/FloorCard',
-  component: FloorPlanItem,
+const meta: Meta<typeof FloorCard> = {
+  title: 'shared/card/FloorCard',
+  component: FloorCard,
+  args: {
+    src: CardImageUrl,
+  },
   argTypes: {
     src: {
       control: 'text',
-      defaultValue: '/images/example.png',
     },
   },
 };
 
 export default meta;
-type Story = StoryObj<typeof FloorPlanItem>;
+type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  args: {
-    src: '/images/example.png',
-  },
-};
+export const Default: Story = {};

@@ -5,6 +5,7 @@ import { animationTokens } from '@/shared/styles/tokens/animation.css';
 export const container = style({
   display: 'flex',
   flexDirection: 'column',
+  flex: 1,
   width: '100%',
 });
 

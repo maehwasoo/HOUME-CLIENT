@@ -5,7 +5,7 @@ import FlipSheet from '@components/bottomSheet/flipSheet/FlipSheet';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta: Meta<typeof FlipSheet> = {
-  title: 'Sheet/FlipSheet',
+  title: 'shared/bottomSheet/FlipSheet',
   component: FlipSheet,
   tags: ['autodocs'],
   parameters: {

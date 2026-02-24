@@ -5,7 +5,7 @@ import TitleNavBar from '@/shared/components/navBar/TitleNavBar';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta: Meta<typeof TitleNavBar> = {
-  title: 'navbar/TitleNavBar',
+  title: 'shared/navBar/TitleNavBar',
   component: TitleNavBar,
   tags: ['autodocs'],
   decorators: [

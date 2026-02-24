@@ -3,7 +3,7 @@ import TitleStep from '@shared/components/titleStep/TitleStep';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta = {
-  title: 'Components/TitleStep',
+  title: 'shared/typography/TitleStep',
   component: TitleStep,
   parameters: {
     docs: {

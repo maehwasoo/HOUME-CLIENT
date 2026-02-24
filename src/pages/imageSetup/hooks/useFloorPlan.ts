@@ -13,7 +13,7 @@ export const useFloorPlan = (
   onNext: (data: CompletedFloorPlan) => void
 ) => {
   // FloorPlan 컴포넌트 렌더링 -> useFloorPlan 훅 실행 -> 서버가 사용자 선택 정보 기반으로 도면 반환
-  const { data, isLoading, error, isError } = useFloorPlanQuery();
+  const { data, isPending, error, isError, refetch } = useFloorPlanQuery();
   // console.log('도면 데이터: ', data);
 
   // Zustand store에서 저장된 데이터
@@ -70,9 +70,10 @@ export const useFloorPlan = (
   return {
     // API 데이터
     floorPlanList: data?.floorPlanList,
-    isLoading,
+    isPending,
     error,
     isError,
+    refetch,
 
     // 선택 상태
     selectedId,

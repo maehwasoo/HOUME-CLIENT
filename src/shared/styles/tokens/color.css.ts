@@ -6,6 +6,7 @@ export const colorVars = createGlobalTheme(':root', {
     gray999_50: 'rgba(0, 0, 0, 0.5)',
     gray999_04: 'rgba(0, 0, 0, 0.04)',
     gray999_30: 'rgba(0, 0, 0, 0.3)',
+    gray999_20: 'rgba(0, 0, 0, 0.2)',
     gray999: '#000000',
     gray900: '#1B1E22',
     gray800: '#31373F',

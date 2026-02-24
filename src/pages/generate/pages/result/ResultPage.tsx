@@ -6,21 +6,14 @@ import { useMyPageImageDetail } from '@/pages/mypage/hooks/useMypage';
 import type {
   MyPageImageDetail,
   MyPageImageHistory,
-  MyPageUserData,
 } from '@/pages/mypage/types/apis/MyPage';
 import { createImageDetailPlaceholder } from '@/pages/mypage/utils/resultNavigation';
-import DislikeButton from '@/shared/components/button/likeButton/DislikeButton';
-import LikeButton from '@/shared/components/button/likeButton/LikeButton';
+import InlineError from '@/shared/components/inlineError/InlineError';
 
 import Loading from '@components/loading/Loading';
+import { IS_CLIENT_DETECTION_ENABLED } from '@pages/generate/constants/curationDetectionMode';
 import { useABTest } from '@pages/generate/hooks/useABTest';
-import {
-  useResultPreferenceMutation,
-  useDeleteResultPreferenceMutation,
-  useFactorsQuery,
-  useFactorPreferenceMutation,
-  useGetResultDataQuery,
-} from '@pages/generate/hooks/useGenerate';
+import { useGetResultDataQuery } from '@pages/generate/hooks/useGenerate';
 import { useCurationStore } from '@pages/generate/stores/useCurationStore';
 
 import GeneratedImgA from './components/GeneratedImgA.tsx';
@@ -32,7 +25,6 @@ import type { DetectionCacheEntry } from '@pages/generate/stores/useDetectionCac
 import type {
   GenerateImageAResponse,
   GenerateImageBResponse,
-  ResultPageLikeState,
   GenerateImageData,
 } from '@pages/generate/types/generate';
 
@@ -68,16 +60,8 @@ const ResultPage = () => {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { isMultipleImages } = useABTest();
-  const [isLastSlide, setIsLastSlide] = useState(false);
   const [currentImgId, setCurrentImgId] = useState(0);
-  // 각 이미지별로 좋아요/싫어요 상태를 관리 (imageId를 키로 사용)
-  const [imageLikeStates, setImageLikeStates] = useState<{
-    [imageId: number]: ResultPageLikeState;
-  }>({});
-  // 각 이미지별로 factor 선택 상태를 관리 (imageId를 키로 사용)
-  const [imageFactorStates, setImageFactorStates] = useState<{
-    [imageId: number]: number | null;
-  }>({});
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const setActiveImage = useCurationStore((state) => state.setActiveImage);
   const resetCuration = useCurationStore((state) => state.resetAll);
   const activeImageIdInStore = useCurationStore((state) => state.activeImageId);
@@ -88,12 +72,10 @@ const ResultPage = () => {
       | UnifiedGenerateImageResult
       | GenerateImageAResponse['data']
       | GenerateImageBResponse['data'];
-    userProfile?: MyPageUserData | null;
     initialHistory?: MyPageImageHistory | null;
     cachedDetection?: DetectionCacheEntry | null;
   };
   const forwardedResult = locationState?.result ?? null;
-  const forwardedUserProfile = locationState?.userProfile ?? null;
   const initialHistory = locationState?.initialHistory ?? null;
   const forwardedDetection = locationState?.cachedDetection ?? null;
   const initialImageId = initialHistory?.imageId ?? null;
@@ -130,12 +112,13 @@ const ResultPage = () => {
       : null;
 
   // 마이페이지에서 온 경우와 일반 생성 플로우에서 온 경우 구분
-  const { data: apiResult, isLoading } = useGetResultDataQuery(
-    parsedHouseId ?? 0,
-    {
-      enabled: shouldFetchExternalResult,
-    }
-  );
+  const {
+    data: apiResult,
+    isLoading,
+    isError: isResultError,
+  } = useGetResultDataQuery(parsedHouseId ?? 0, {
+    enabled: shouldFetchExternalResult,
+  });
 
   const mypageDetailQuery = useMyPageImageDetail(parsedHouseId ?? 0, {
     enabled: shouldFetchMypageDetail,
@@ -189,76 +172,17 @@ const ResultPage = () => {
     mypageHistories,
   ]);
   const result = resolvedResult;
-
-  // 마이페이지 히스토리를 imageId로 빠르게 조회하기 위한 Map (O(1) 조회)
-  const historyById = useMemo<Map<number, MyPageImageDetail> | null>(
-    () =>
-      isFromMypage && mypageHistories
-        ? new Map(
-            mypageHistories.map((history: MyPageImageDetail) => [
-              history.imageId,
-              history,
-            ])
-          )
-        : null,
-    [isFromMypage, mypageHistories]
-  );
-
-  // 현재 슬라이드의 좋아요/싫어요 상태를 직접 계산
-  const currentLikeState = (() => {
-    // 1. 로컬 상태가 있으면 사용 (null도 포함)
-    if (imageLikeStates[currentImgId] !== undefined) {
-      return imageLikeStates[currentImgId];
-    }
-
-    // 2. 마이페이지 히스토리에서 찾기 (imageId로 매칭)
-    if (historyById) {
-      const currentHistory = historyById.get(currentImgId);
-      if (currentHistory && currentHistory.isLike !== undefined) {
-        // isLike가 null이면 null 반환, 그렇지 않으면 boolean 값에 따라 변환
-        return currentHistory.isLike === null
-          ? null
-          : currentHistory.isLike
-            ? 'like'
-            : 'dislike';
-      }
-    }
-
-    return null;
-  })();
-
-  // 현재 슬라이드의 선택된 factor ID를 직접 계산
-  const currentFactorId = (() => {
-    // 1. 로컬 상태가 있으면 사용 (null도 포함)
-    if (imageFactorStates[currentImgId] !== undefined) {
-      return imageFactorStates[currentImgId];
-    }
-
-    // 2. 마이페이지 히스토리에서 찾기 (imageId로 매칭)
-    if (historyById) {
-      const currentHistory = historyById.get(currentImgId);
-      if (currentHistory && currentHistory.factorId) {
-        return currentHistory.factorId;
-      }
-    }
-
-    return null;
-  })();
-
-  // result가 있을 때만 mutation hook들 호출
-  const { mutate: sendPreference } = useResultPreferenceMutation();
-  const { mutate: deletePreference } = useDeleteResultPreferenceMutation();
-  const { mutate: sendFactorPreference } = useFactorPreferenceMutation();
-
-  // 요인 문구 데이터 가져오기 (좋아요용) - 좋아요가 선택되었을 때만 호출
-  const { data: likeFactorsData } = useFactorsQuery(true, {
-    enabled: currentLikeState === 'like',
-  });
-
-  // 요인 문구 데이터 가져오기 (싫어요용) - 싫어요가 선택되었을 때만 호출
-  const { data: dislikeFactorsData } = useFactorsQuery(false, {
-    enabled: currentLikeState === 'dislike',
-  });
+  const resultImageCount =
+    result &&
+    'imageInfoResponses' in result &&
+    Array.isArray(result.imageInfoResponses)
+      ? result.imageInfoResponses.length
+      : 0;
+  const totalSlideCount = resultImageCount > 0 ? resultImageCount + 1 : 0;
+  const isLockedSlide =
+    isMultipleImages &&
+    totalSlideCount > 0 &&
+    currentSlideIndex === totalSlideCount - 1;
 
   // currentImgId가 변경될 때마다 로그 출력
   // useEffect(() => {
@@ -284,9 +208,18 @@ const ResultPage = () => {
     };
   }, [resetCuration]);
 
+  const handleSlideChange = (currentIndex: number) => {
+    setCurrentSlideIndex(currentIndex);
+  };
+
   // 로딩 중이면 로딩 표시
   if (!result && (isLoading || mypageLoading)) {
     return <Loading />;
+  }
+
+  // API 에러 시 인라인 에러 표시
+  if (isResultError && !result) {
+    return <InlineError message="결과를 불러올 수 없습니다" />;
   }
 
   // 데이터 없으면 홈으로 리다이렉션
@@ -294,127 +227,6 @@ const ResultPage = () => {
     console.error('Result data is missing');
     return <Navigate to="/" replace />;
   }
-
-  /**
-   * 좋아요/싫어요 토글 핸들러
-   * - 동일 버튼 재클릭 시 상태 해제
-   * - 상태 변경 시 factor 선택 초기화 및 API 연동
-   */
-  const handleVote = (isLike: boolean) => {
-    const imageId = currentImgId;
-
-    // currentLikeState를 사용하여 현재 상태 확인
-    const currentState = currentLikeState;
-    const newState = isLike ? 'like' : 'dislike';
-
-    // 같은 상태를 다시 클릭하면 취소 (null로 설정)
-    const finalState = currentState === newState ? null : newState;
-
-    // 좋아요/싫어요가 취소되면 factor 선택도 초기화
-    if (finalState === null) {
-      setImageFactorStates((prev) => ({
-        ...prev,
-        [imageId]: null,
-      }));
-      // 취소 요청 API 호출 (DELETE)
-      deletePreference(imageId, {
-        onSuccess: () => {
-          setImageLikeStates((prev) => ({
-            ...prev,
-            [imageId]: null,
-          }));
-        },
-        // onError: (error) => {
-        //   console.log('취소 API 실패:', error);
-        // },
-      });
-    } else {
-      // 좋아요/싫어요 상태가 바뀌었다면 현재 선택된 factor 취소
-      if (
-        currentState !== null &&
-        currentState !== newState &&
-        currentFactorId
-      ) {
-        // console.log(
-        //   '좋아요/싫어요 상태 변경으로 factor 취소:',
-        //   currentFactorId
-        // );
-        sendFactorPreference({ imageId, factorId: currentFactorId });
-        setImageFactorStates((prev) => ({
-          ...prev,
-          [imageId]: null,
-        }));
-      }
-
-      // 새로운 선택 요청 API 호출
-      const apiValue = finalState === 'like';
-      sendPreference(
-        { imageId, isLike: apiValue },
-        {
-          onSuccess: () => {
-            setImageLikeStates((prev) => ({
-              ...prev,
-              [imageId]: finalState,
-            }));
-          },
-          onError: () => {
-            // console.log('선택 API 실패:', error);
-          },
-        }
-      );
-    }
-  };
-
-  // 태그 버튼 클릭 핸들러 (좋아요/싫어요 상태 변경 시 factor 취소 및 선택)
-  /**
-   * factor(선호 요인) 선택 핸들러
-   * - 선택/해제에 따라 API 호출 및 로컬 상태 동기화
-   */
-  const handleFactorClick = (factorId: number) => {
-    const imageId = currentImgId;
-    const isSelected = currentFactorId === factorId;
-
-    if (isSelected) {
-      // 이미 선택된 factor를 다시 클릭하면 선택 해제
-      sendFactorPreference(
-        { imageId, factorId },
-        {
-          onSuccess: () => {
-            setImageFactorStates((prev) => ({
-              ...prev,
-              [imageId]: null,
-            }));
-          },
-          // onError: (error) => {
-          //   console.log('factor 취소 API 실패:', error);
-          // },
-        }
-      );
-    } else {
-      // 새로운 factor 선택
-      sendFactorPreference(
-        { imageId, factorId },
-        {
-          onSuccess: () => {
-            setImageFactorStates((prev) => ({
-              ...prev,
-              [imageId]: factorId,
-            }));
-          },
-          // onError: (error) => {
-          //   console.log('factor 선택 API 실패:', error);
-          // },
-        }
-      );
-    }
-  };
-
-  /**
-   * 슬라이드 변경 시 마지막 슬라이드 여부를 갱신
-   */
-  const handleSlideChange = (currentIndex: number, totalCount: number) => {
-    setIsLastSlide(currentIndex === totalCount - 1);
-  };
 
   return (
     <div className={styles.wrapper}>
@@ -425,119 +237,28 @@ const ResultPage = () => {
             result={result}
             onSlideChange={handleSlideChange}
             onCurrentImgIdChange={setCurrentImgId}
-            userProfile={forwardedUserProfile}
+            shouldInferHotspots={IS_CLIENT_DETECTION_ENABLED}
             detectionCache={forwardedDetectionMap ?? undefined}
             isSlideCountLoading={isSlideCountLoading}
-            groupId={groupId}
           />
         ) : (
           <GeneratedImgB
             result={result}
             onCurrentImgIdChange={setCurrentImgId}
+            shouldInferHotspots={IS_CLIENT_DETECTION_ENABLED}
             detectionCache={forwardedDetectionMap ?? undefined}
-            groupId={groupId}
           />
         )}
-
         <div
-          className={`${styles.buttonSection} ${isLastSlide ? styles.buttonSectionDisabled : ''}`}
+          className={
+            isLockedSlide
+              ? styles.curationSheetHidden
+              : styles.curationSheetVisible
+          }
         >
-          <div className={styles.buttonBox}>
-            <p className={styles.boxText}>이미지가 마음에 드셨나요?</p>
-            <div className={styles.buttonGroup}>
-              <LikeButton
-                onClick={() => handleVote(true)}
-                isSelected={currentLikeState === 'like'}
-                typeVariant={'onlyIcon'}
-                aria-label="이미지 좋아요 버튼"
-              />
-              <DislikeButton
-                onClick={() => handleVote(false)}
-                isSelected={currentLikeState === 'dislike'}
-                typeVariant={'onlyIcon'}
-                aria-label="이미지 싫어요 버튼"
-              />
-            </div>
-            {currentLikeState === 'like' &&
-              likeFactorsData &&
-              likeFactorsData.length > 0 && (
-                <div className={styles.tagGroup}>
-                  <div className={styles.tagFlexItem}>
-                    {likeFactorsData.slice(0, 2).map((factor) => (
-                      <button
-                        type="button"
-                        key={factor.id}
-                        className={`${styles.tagButton} ${
-                          currentFactorId === factor.id
-                            ? styles.tagButtonSelected
-                            : ''
-                        }`}
-                        onClick={() => handleFactorClick(factor.id)}
-                      >
-                        {factor.text}
-                      </button>
-                    ))}
-                  </div>
-                  <div className={styles.tagFlexItem}>
-                    {likeFactorsData.slice(2, 4).map((factor) => (
-                      <button
-                        type="button"
-                        key={factor.id}
-                        className={`${styles.tagButton} ${
-                          currentFactorId === factor.id
-                            ? styles.tagButtonSelected
-                            : ''
-                        }`}
-                        onClick={() => handleFactorClick(factor.id)}
-                      >
-                        {factor.text}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            {currentLikeState === 'dislike' &&
-              dislikeFactorsData &&
-              dislikeFactorsData.length > 0 && (
-                <div className={styles.tagGroup}>
-                  <div className={styles.tagFlexItem}>
-                    {dislikeFactorsData.slice(0, 2).map((factor) => (
-                      <button
-                        type="button"
-                        key={factor.id}
-                        className={`${styles.tagButton} ${
-                          currentFactorId === factor.id
-                            ? styles.tagButtonSelected
-                            : ''
-                        }`}
-                        onClick={() => handleFactorClick(factor.id)}
-                      >
-                        {factor.text}
-                      </button>
-                    ))}
-                  </div>
-                  <div className={styles.tagFlexItem}>
-                    {dislikeFactorsData.slice(2, 4).map((factor) => (
-                      <button
-                        type="button"
-                        key={factor.id}
-                        className={`${styles.tagButton} ${
-                          currentFactorId === factor.id
-                            ? styles.tagButtonSelected
-                            : ''
-                        }`}
-                        onClick={() => handleFactorClick(factor.id)}
-                      >
-                        {factor.text}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-          </div>
+          <CurationSheet groupId={groupId} />
         </div>
       </section>
-      <CurationSheet groupId={groupId} />
     </div>
   );
 };

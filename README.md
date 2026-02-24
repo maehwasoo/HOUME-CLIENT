@@ -108,6 +108,8 @@
 
 ## Architecture
 
+<img width="4096" height="3138" alt="image" src="https://github.com/user-attachments/assets/566bd2ae-815a-4783-a29b-79d05a813095" />
+
 ```
 src/
 ├── layout/              # 앱 전체에 적용되는 공통 레이아웃 컴포넌트
@@ -175,6 +177,7 @@ src/
 | `refactor` | 코드 리팩토링                                                                 |
 | `test`     | 테스트 코드, 리팩토링 테스트 코드 추가, 비즈니스 로직 변경 X                  |
 | `chore`    | 설정 변경사항 (빌드 스크립트, assets, 패키지 매니저 등), 프로덕션 코드 변경 X |
+| `deploy`   | 배포 관련                                                                     |
 | `design`   | CSS 등 사용자 UI 디자인 추가/수정                                             |
 | `comment`  | 주석 추가/수정                                                                |
 | `rename`   | 파일 및 폴더명 수정                                                           |

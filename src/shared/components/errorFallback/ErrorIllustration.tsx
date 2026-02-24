@@ -2,9 +2,9 @@ import Ghost1Img from '@assets/images/ghost1.png';
 import Ghost2Img from '@assets/images/ghost2.png';
 import HouseImg from '@assets/images/house.png';
 
-import * as styles from './ErrorImageGroup.css.ts';
+import * as styles from './ErrorIllustration.css.ts';
 
-export default function ErrorImageGroup() {
+export default function ErrorIllustration() {
   return (
     <div className={styles.wrapper}>
       <img src={HouseImg} className={styles.houseLayer} alt="" />

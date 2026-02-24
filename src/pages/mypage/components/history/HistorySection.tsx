@@ -13,7 +13,7 @@ import { useMyPageImagesQuery } from '../../hooks/useMypage';
  */
 const HistorySection = () => {
   const navigate = useNavigate();
-  const { data: imagesData, isLoading, isError } = useMyPageImagesQuery();
+  const { data: imagesData, isPending, isError } = useMyPageImagesQuery();
 
   // 생성 결과 상세로 이동
   const handleViewResult = (houseId: number) => {
@@ -26,7 +26,7 @@ const HistorySection = () => {
   };
 
   // 로딩 상태
-  if (isLoading) {
+  if (isPending) {
     return (
       <>
         <section className={styles.container}>

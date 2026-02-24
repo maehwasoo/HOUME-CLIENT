@@ -38,11 +38,5 @@ export const useFloorPlanQuery = () => {
 export const useUserAddressMutation = () => {
   return useMutation({
     mutationFn: (body: UserAddressRequest) => postAddress(body),
-    onSuccess: () => {
-      // console.log('주소 등록 성공!');
-    },
-    onError: () => {
-      // console.error('주소 등록 실패', error);
-    },
   });
 };

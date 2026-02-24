@@ -6,10 +6,11 @@ import { colorVars } from '@styles/tokens/color.css';
 export const filterChip = recipe({
   base: {
     height: '3.6rem',
-    padding: '0rem 1.4rem',
+    padding: '0 1.2rem',
     textAlign: 'center',
     borderRadius: '999px',
-    ...fontStyle('body_r_14'),
+    ...fontStyle('body_r_13'),
+    backgroundColor: colorVars.color.gray000,
     color: colorVars.color.gray500,
     border: `1px solid ${colorVars.color.gray300}`,
     transition:
@@ -18,10 +19,10 @@ export const filterChip = recipe({
   variants: {
     selected: {
       true: {
-        ...fontStyle('body_m_14'),
-        backgroundColor: colorVars.color.primary_light2,
-        color: colorVars.color.primary,
-        border: `1px solid ${colorVars.color.primary}`,
+        ...fontStyle('body_m_13'),
+        backgroundColor: colorVars.color.gray999,
+        color: colorVars.color.gray000,
+        borderColor: 'transparent',
       },
       false: {},
     },

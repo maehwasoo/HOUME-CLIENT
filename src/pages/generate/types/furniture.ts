@@ -21,8 +21,22 @@ export interface FurnitureProductInfo {
   furnitureProductSiteUrl: string;
   furnitureProductName: string;
   furnitureProductMallName: string;
-  furnitureProductId: string;
+  furnitureProductId?: string | number;
   similarity: number;
+  // optional fields: cardProduct/large/maximal UI
+  furnitureProductOriginalPrice?: number;
+  furnitureProductDiscountPrice?: number;
+  furnitureProductDiscountRate?: number;
+  furnitureProductColorHexes?: string[];
+  furnitureProductSaveCount?: number;
+  // server PR #417 fields
+  colors?: string[];
+  clientColors?: string[];
+  listPrice?: number;
+  discountRate?: number;
+  discountPrice?: number;
+  brandName?: string;
+  jjymCount?: number;
 }
 
 // 생성 이미지 추천 상품 응답 래퍼 정의

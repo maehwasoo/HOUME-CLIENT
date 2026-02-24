@@ -1,5 +1,8 @@
 import { useEffect, useRef } from 'react';
 
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import { ROUTES } from '@/routes/paths';
 import CtaButton from '@/shared/components/button/ctaButton/CtaButton.tsx';
 import ErrorMessage from '@/shared/components/button/ErrorButton/ErrorMessage';
 import LargeFilled from '@/shared/components/button/largeFilledButton/LargeFilledButton.tsx';
@@ -7,7 +10,7 @@ import TitleNavBar from '@/shared/components/navBar/TitleNavBar.tsx';
 import TextField from '@/shared/components/textField/TextField.tsx';
 import { ERROR_MESSAGES } from '@/shared/constants/clientErrorMessage.ts';
 
-import { useSignupMutation } from './apis/signup';
+import { usePostSignupMutation } from './apis/signup';
 import useSignupForm from './hooks/useSignupForm';
 import * as styles from './SignupPage.css';
 import {
@@ -15,7 +18,44 @@ import {
   logSignupFormViewError,
 } from './utils/analytics';
 
+interface SignupLocationState {
+  signupToken?: string | null;
+}
+
+// Type Guard: SignupLocationState 검증
+const isSignupLocationState = (
+  value: unknown
+): value is SignupLocationState => {
+  if (!value || typeof value !== 'object') return false;
+
+  const state = value as Record<string, unknown>;
+  if (!('signupToken' in state)) return false;
+
+  const signupToken = state.signupToken;
+  return signupToken == null || typeof signupToken === 'string';
+};
+
 const SignupPage = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const routeSignupToken = isSignupLocationState(location.state)
+    ? (location.state.signupToken ?? null)
+    : null;
+  const signupToken = routeSignupToken ?? sessionStorage.getItem('signupToken');
+
+  useEffect(() => {
+    if (routeSignupToken) {
+      sessionStorage.setItem('signupToken', routeSignupToken);
+    }
+  }, [routeSignupToken]);
+
+  useEffect(() => {
+    if (!signupToken) {
+      navigate(ROUTES.LOGIN, { replace: true });
+    }
+  }, [signupToken, navigate]);
+
   const {
     name,
     birthYear,
@@ -37,7 +77,7 @@ const SignupPage = () => {
     hasError,
   } = useSignupForm();
 
-  const { mutate: patchSignup } = useSignupMutation();
+  const { mutate: signUp } = usePostSignupMutation();
 
   const errorSentRef = useRef(false);
 
@@ -58,18 +98,21 @@ const SignupPage = () => {
     // CTA 버튼 클릭 시 GA 이벤트 전송
     logSignupFormClickBtnCTA();
 
-    if (!isFormValid || !gender) return;
+    if (!isFormValid || !gender || !signupToken) return;
 
     const formattedBirthday = `${birthYear}-${birthMonth}-${birthDay}`;
 
     // console.log(name, gender.value, formattedBirthday);
 
-    patchSignup({
+    signUp({
+      signupToken,
       name,
       gender: gender.value,
       birthday: formattedBirthday,
     });
   };
+
+  if (!signupToken) return null;
 
   return (
     <form onSubmit={handleSubmit}>
@@ -170,7 +213,7 @@ const SignupPage = () => {
       </div>
 
       <div className={styles.btnarea}>
-        <CtaButton isActive={isFormValid} type="submit">
+        <CtaButton isActive={isFormValid && !!signupToken} type="submit">
           회원가입 완료하기
         </CtaButton>
       </div>

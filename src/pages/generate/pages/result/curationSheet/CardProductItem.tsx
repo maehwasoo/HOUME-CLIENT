@@ -8,6 +8,8 @@ import {
   logResultImgClickCurationSheetBtnGoSite,
   logResultImgClickCurationSheetBtnSave,
   logResultImgClickCurationSheetCard,
+  logResultImgClickCurationSheetCardImage,
+  logResultImgClickCurationSheetCardTitle,
 } from '@/pages/generate/utils/analytics';
 import CardProduct from '@/shared/components/card/cardProduct/CardProduct';
 import { useToast } from '@/shared/components/toast/useToast';
@@ -15,14 +17,40 @@ import { SESSION_STORAGE_KEYS } from '@/shared/constants/bottomSheet';
 import { TOAST_TYPE } from '@/shared/types/toast';
 import { useSavedItemsStore } from '@/store/useSavedItemsStore';
 
+const buildCurationOutboundUrl = (url: string) => {
+  const utmQuery = import.meta.env.VITE_CURATION_OUTBOUND_UTM_QUERY;
+  if (!utmQuery) return url;
+
+  try {
+    const parsed = new URL(url);
+    const normalized = utmQuery.startsWith('?') ? utmQuery.slice(1) : utmQuery;
+    const params = new URLSearchParams(normalized);
+
+    params.forEach((value, key) => {
+      if (!parsed.searchParams.has(key)) {
+        parsed.searchParams.set(key, value);
+      }
+    });
+
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+};
+
 interface CardProductItemProps {
   product: {
     id?: number; // recommendFurnitureId
-    furnitureProductId: number;
+    furnitureProductId: number | string;
     furnitureProductName: string;
-    furnitureProductMallName: string;
+    furnitureProductBrandName: string;
     furnitureProductImageUrl: string;
     furnitureProductSiteUrl: string;
+    furnitureProductOriginalPrice?: number;
+    furnitureProductDiscountPrice?: number;
+    furnitureProductDiscountRate?: number;
+    furnitureProductColorHexes?: string[];
+    furnitureProductSaveCount?: number;
   };
   onGotoMypage: () => void;
 }
@@ -40,7 +68,13 @@ const CardProductItem = memo(
 
     const savedProductIds = useSavedItemsStore((s) => s.savedProductIds);
     const isSaved = hasRecommendId ? savedProductIds.has(recommendId) : false;
-    const toastCooldownRef = useRef(0); // 최근 스낵바 노출 시각(ms)
+    const toastCooldownRef = useRef<{
+      kind: 'favorite' | 'unfavorite' | null;
+      shownAt: number;
+    }>({
+      kind: null,
+      shownAt: 0,
+    }); // 최근 스낵바 노출 종류/시각(ms)
 
     const { mutate: toggleJjym } = usePostJjymMutation();
     const { notify } = useToast();
@@ -51,6 +85,8 @@ const CardProductItem = memo(
           mutation.options.mutationKey?.[0] === 'jjym' &&
           mutation.state.variables === (recommendId ?? undefined), // 이 카드 id만 추적
       }) > 0;
+    const isMutatingRef = useRef(false);
+    isMutatingRef.current = isMutating; // 토스트 액션 핸들러 최신 동기화
 
     const handleNavigateAndFocus = () => {
       if (recommendId === null) return;
@@ -60,6 +96,11 @@ const CardProductItem = memo(
       ); // 세션 스토리지에 잠시 저장
       sessionStorage.setItem(SESSION_STORAGE_KEYS.ACTIVE_TAB, 'savedItems'); // Tab 정보
       onGotoMypage();
+    };
+
+    const handleUndoUnfavorite = () => {
+      if (recommendId === null || isMutatingRef.current) return;
+      toggleJjym(recommendId);
     };
 
     const handleToggle = () => {
@@ -78,18 +119,39 @@ const CardProductItem = memo(
 
       toggleJjym(recommendId, {
         onSuccess: (data) => {
-          if (!wasSaved && data.favorited) {
-            const now = Date.now();
-            if (now - toastCooldownRef.current < TOAST_COOLDOWN_MS) {
-              return; // 연속 클릭 시 스낵바 중복 방지
-            }
-            toastCooldownRef.current = now;
-            // 스낵바 중복 노출 방지 가드
+          const showFavoriteToast = !wasSaved && data.favorited;
+          const showUnfavoriteToast = wasSaved && !data.favorited;
+
+          if (!showFavoriteToast && !showUnfavoriteToast) return;
+
+          const toastKind = showFavoriteToast ? 'favorite' : 'unfavorite';
+          const now = Date.now();
+          if (
+            toastCooldownRef.current.kind === toastKind &&
+            now - toastCooldownRef.current.shownAt < TOAST_COOLDOWN_MS
+          ) {
+            return; // 연속 클릭 시 스낵바 중복 방지
+          }
+          toastCooldownRef.current = {
+            kind: toastKind,
+            shownAt: now,
+          };
+
+          if (showFavoriteToast) {
             notify({
-              text: '상품을 찜했어요! 위시리스트로 이동할까요?',
+              text: '상품을 찜했어요! 찜한 가구로 이동할까요?',
               type: TOAST_TYPE.NAVIGATE,
               onClick: handleNavigateAndFocus,
-              options: { style: { marginBottom: '2rem' } },
+            });
+            return;
+          }
+
+          if (showUnfavoriteToast) {
+            notify({
+              text: '상품의 찜이 해제 되었어요',
+              type: TOAST_TYPE.NAVIGATE,
+              onClick: handleUndoUnfavorite,
+              actionLabel: '취소하기',
             });
           }
         },
@@ -100,16 +162,30 @@ const CardProductItem = memo(
       <CardProduct
         size="large"
         title={product.furnitureProductName}
-        brand={product.furnitureProductMallName}
+        brand={product.furnitureProductBrandName}
         imageUrl={product.furnitureProductImageUrl}
-        linkHref={product.furnitureProductSiteUrl}
+        linkHref={buildCurationOutboundUrl(product.furnitureProductSiteUrl)}
         isSaved={isSaved}
         onToggleSave={handleToggle}
         disabled={isMutating || !hasRecommendId}
+        enableWholeCardLink={true}
+        originalPrice={product.furnitureProductOriginalPrice}
+        discountPrice={product.furnitureProductDiscountPrice}
+        discountRate={product.furnitureProductDiscountRate}
+        colorHexes={product.furnitureProductColorHexes}
+        saveCount={product.furnitureProductSaveCount}
         onLinkClick={() => {
           logResultImgClickCurationSheetBtnGoSite(variant);
         }}
-        onCardClick={() => {
+        onCardClick={(area) => {
+          if (area === 'image') {
+            logResultImgClickCurationSheetCardImage(variant);
+            return;
+          }
+          if (area === 'title') {
+            logResultImgClickCurationSheetCardTitle(variant);
+            return;
+          }
           logResultImgClickCurationSheetCard(variant);
         }}
       />

@@ -3,7 +3,7 @@ import { DragHandle } from '@/shared/components/dragHandle/DragHandle';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta = {
-  title: 'Shared/DragHandle',
+  title: 'shared/dragHandle/DragHandle',
   component: DragHandle,
   parameters: {
     docs: {

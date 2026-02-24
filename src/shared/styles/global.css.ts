@@ -28,6 +28,7 @@ export const layoutVars = createGlobalTheme(':root', {
   minWidth: '375px',
   maxWidth: '440px',
   height: '100dvh',
+  titleNavBarHeight: '4.8rem',
 });
 
 /* ===== 앱 루트 컨테이너 ===== */
@@ -37,7 +38,7 @@ export const layoutVars = createGlobalTheme(':root', {
  * 하위 컴포넌트들이 플렉스 아이템으로 배치됨
  */
 globalStyle('#root', {
-  height: '100%',
+  flex: 1,
   display: 'flex',
   flexDirection: 'column',
 });

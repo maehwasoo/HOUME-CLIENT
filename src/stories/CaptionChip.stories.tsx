@@ -3,7 +3,7 @@ import CaptionChip from '@/pages/imageSetup/components/caption/CaptionChip';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta: Meta<typeof CaptionChip> = {
-  title: 'Caption/CaptionChip',
+  title: 'pages/imageSetup/CaptionChip',
   component: CaptionChip,
   tags: ['autodocs'],
   parameters: {

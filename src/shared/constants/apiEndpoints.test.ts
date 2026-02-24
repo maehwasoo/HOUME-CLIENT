@@ -190,7 +190,9 @@ describe('API_ENDPOINT 상수 테스트', () => {
       expect(v2Endpoints.length).toBeGreaterThan(0);
 
       // v2 엔드포인트 확인
-      expect(allEndpoints).toContain('/api/v2/generated-images/generate');
+      expect(allEndpoints).toContain(
+        '/api/v2/generated-images/generate/gemini'
+      );
     });
   });
 });

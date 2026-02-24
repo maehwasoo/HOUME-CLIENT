@@ -1,13 +1,14 @@
 import { style } from '@vanilla-extract/css';
 
 import { fontStyle } from '@/shared/styles/fontStyle';
+import { layoutVars } from '@/shared/styles/global.css';
 import { colorVars } from '@/shared/styles/tokens/color.css';
 import { zIndex } from '@/shared/styles/tokens/zIndex';
 
 export const container = style({
   display: 'flex',
   width: '100%',
-  height: '4.8rem',
+  height: layoutVars.titleNavBarHeight,
   justifyContent: 'space-between',
   alignItems: 'center',
   textAlign: 'center',
@@ -21,7 +22,7 @@ export const leftdiv = style({
   justifyContent: 'center',
   alignItems: 'center',
   width: '4.8rem',
-  height: '4.8rem',
+  height: layoutVars.titleNavBarHeight,
   padding: '1.2rem',
 });
 
@@ -45,7 +46,7 @@ export const rightdiv = style({
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  height: '4.8rem',
+  height: layoutVars.titleNavBarHeight,
   padding: '1.2rem 1.6rem',
   ...fontStyle('body_r_14'),
 });

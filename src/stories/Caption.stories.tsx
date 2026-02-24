@@ -3,7 +3,7 @@ import Caption from '@/pages/imageSetup/components/caption/Caption';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta: Meta<typeof Caption> = {
-  title: 'Caption/Caption',
+  title: 'pages/imageSetup/Caption',
   component: Caption,
   tags: ['autodocs'],
   parameters: {
@@ -20,8 +20,8 @@ const meta: Meta<typeof Caption> = {
       description: '선택된 코드 텍스트 (테두리 있는 칩으로 표시)',
     },
     option: {
-      control: 'text',
-      description: '옵션 텍스트 (기본 칩으로 표시)',
+      control: 'object',
+      description: '옵션 텍스트 배열 (기본 칩으로 표시)',
     },
   },
 };
@@ -32,27 +32,27 @@ type Story = StoryObj<typeof Caption>;
 export const Default: Story = {
   args: {
     code: 'A01',
-    option: '침실',
+    option: ['침실'],
   },
 };
 
 export const FloorPlan: Story = {
   args: {
     code: 'B02',
-    option: '거실과 침실이 분리된 구조',
+    option: ['거실과 침실이 분리된 구조'],
   },
 };
 
 export const InteriorStyle: Story = {
   args: {
     code: 'M01',
-    option: '모던한 스타일의 인테리어',
+    option: ['모던한 스타일의 인테리어'],
   },
 };
 
 export const LongTexts: Story = {
   args: {
     code: 'LONG_CODE',
-    option: '긴 텍스트 긴 텍스트 긴 텍스트 긴 텍스트 긴 텍스트 긴 텍스트 ',
+    option: ['긴 텍스트 긴 텍스트 긴 텍스트 긴 텍스트 긴 텍스트 긴 텍스트 '],
   },
 };

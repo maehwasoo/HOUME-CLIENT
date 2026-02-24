@@ -1,11 +1,11 @@
 import { TOAST_TYPE } from '@/shared/types/toast';
 
-import Toast from '../shared/components/toast/Toast';
+import Toast from '@shared/components/toast/Toast';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta = {
-  title: 'shared/components/toast/Toast',
+  title: 'shared/toast/Toast',
   component: Toast,
   tags: ['autodocs'],
   argTypes: {
@@ -31,9 +31,9 @@ export default meta;
 
 type Story = StoryObj<typeof meta>;
 
-export const Success: Story = {
+export const Info: Story = {
   args: {
-    text: '작업이 성공적으로 완료되었습니다!',
+    text: '정보 토스트 예시입니다',
     type: TOAST_TYPE.INFO,
   },
 };
@@ -42,6 +42,16 @@ export const Warning: Story = {
   args: {
     text: '결제는 아직 준비 중인 기능이에요',
     type: TOAST_TYPE.WARNING,
+  },
+};
+
+export const Navigate: Story = {
+  argTypes: {
+    onClick: { action: 'navigate' },
+  },
+  args: {
+    text: '상품을 찜했어요! 찜한 가구로 이동할까요?',
+    type: TOAST_TYPE.NAVIGATE,
   },
 };
 
@@ -57,7 +67,7 @@ export const CustomMargin: Story = {
         code: `toast(
     <Toast
       text="하단 여백이 변경된 토스트 예시"
-      type={TOAST_TYPE.Warning}
+      type={TOAST_TYPE.WARNING}
     />,
     {
       style: { marginBottom: '5rem', ...toastStyle },

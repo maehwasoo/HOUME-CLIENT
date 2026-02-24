@@ -12,7 +12,7 @@
  */
 
 import { getAnalytics, isSupported, type Analytics } from 'firebase/analytics';
-import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import { getRemoteConfig } from 'firebase/remote-config';
 
 /** Firebase 프로젝트 설정 (환경변수에서 가져옴) */
@@ -26,13 +26,19 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
+const hasFirebaseConfig = Boolean(firebaseConfig.projectId);
+
 /**
  * Firebase 앱 초기화 (중복 방지)
  * - getApps(): 이미 초기화된 앱이 있는지 확인
  * - 있으면 기존 앱 반환, 없으면 새로 초기화
  * - HMR(Hot Module Replacement) 환경에서 중복 초기화 방지
  */
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+const app: FirebaseApp | null = hasFirebaseConfig
+  ? getApps().length > 0
+    ? getApp()
+    : initializeApp(firebaseConfig)
+  : null;
 
 /** Firebase Analytics 인스턴스 (브라우저 환경에서만 초기화) */
 let analytics: Analytics | null = null;
@@ -53,6 +59,10 @@ const initAnalytics = async () => {
     import.meta.env.VITE_ENABLE_FIREBASE_ANALYTICS === 'true';
 
   if (!isAnalyticsEnabled) {
+    return null;
+  }
+
+  if (!app) {
     return null;
   }
 
@@ -90,7 +100,7 @@ initAnalytics();
  * - 매개변수: image_generation_variant
  * - 조건: generate_single_50 (50% 사용자에게 'single' 반환)
  */
-export const remoteConfig = getRemoteConfig(app);
+export const remoteConfig = app ? getRemoteConfig(app) : null;
 
 /**
  * Remote Config 설정
@@ -102,10 +112,12 @@ export const remoteConfig = getRemoteConfig(app);
  * 개발 시에는 더 짧은 간격으로 설정 가능:
  * - minimumFetchIntervalMillis: 60000 (1분)
  */
-remoteConfig.settings = {
-  minimumFetchIntervalMillis: 60000, // 1분 (개발 시 캐시 시간 단축)
-  fetchTimeoutMillis: 60000, // 60초
-};
+if (remoteConfig) {
+  remoteConfig.settings = {
+    minimumFetchIntervalMillis: 60000, // 1분 (개발 시 캐시 시간 단축)
+    fetchTimeoutMillis: 60000, // 60초
+  };
+}
 
 /**
  * Remote Config 기본값 설정
@@ -115,9 +127,11 @@ remoteConfig.settings = {
  * - Firebase Console에서 조건 generate_single_50 만족 시 'single' 반환
  * - 결과: 50% 사용자는 'multiple', 50% 사용자는 'single' 받음
  */
-remoteConfig.defaultConfig = {
-  image_generation_variant: 'multiple', // 'single' 또는 'multiple'
-};
+if (remoteConfig) {
+  remoteConfig.defaultConfig = {
+    image_generation_variant: 'multiple', // 'single' 또는 'multiple'
+  };
+}
 
 /** Firebase Analytics 인스턴스 export */
 export { analytics };

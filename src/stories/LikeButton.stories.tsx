@@ -3,7 +3,7 @@ import LikeButton from '@components/button/likeButton/LikeButton';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta: Meta<typeof LikeButton> = {
-  title: 'Button/LikeButton',
+  title: 'shared/button/LikeButton',
   component: LikeButton,
   tags: ['autodocs'],
   parameters: {

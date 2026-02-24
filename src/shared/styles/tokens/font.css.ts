@@ -62,6 +62,12 @@ export const fontVars = createGlobalTheme(':root', {
     lineHeight: '140%',
     letterSpacing: '-0.01em',
   },
+  body_m_13: {
+    size: '1.3rem',
+    weight: '500',
+    lineHeight: '150%',
+    letterSpacing: '-0.01em',
+  },
 
   // Caption
   caption_sb_12: {

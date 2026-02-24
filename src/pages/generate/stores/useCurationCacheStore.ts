@@ -8,6 +8,7 @@ import type {
 
 // 카테고리 응답과 감지 객체 집합을 묶어 저장
 type CategoryCacheEntry = {
+  imageId: number;
   response: FurnitureCategoriesResponse;
   detectedObjects: FurnitureCategoryCode[];
   detectionSignature: string;
@@ -16,6 +17,7 @@ type CategoryCacheEntry = {
 
 // 카테고리별 추천 상품 응답 저장
 type ProductCacheEntry = {
+  imageId: number;
   response: FurnitureProductsInfoResponse;
   updatedAt: number;
 };
@@ -34,12 +36,14 @@ interface CurationCacheStore {
   groups: Record<number, GroupCache>;
   saveCategories: (params: {
     groupId: number;
+    imageId: number;
     response: FurnitureCategoriesResponse;
     detectedObjects: FurnitureCategoryCode[];
     detectionSignature: string;
   }) => void;
   saveProducts: (params: {
     groupId: number;
+    imageId: number;
     categoryId: number;
     response: FurnitureProductsInfoResponse;
   }) => void;
@@ -53,6 +57,7 @@ export const useCurationCacheStore = create<CurationCacheStore>()((set) => ({
   groups: {},
   saveCategories: ({
     groupId,
+    imageId,
     response,
     detectedObjects,
     detectionSignature,
@@ -66,6 +71,7 @@ export const useCurationCacheStore = create<CurationCacheStore>()((set) => ({
           [groupId]: {
             ...prevGroup,
             categories: {
+              imageId,
               response,
               detectedObjects,
               detectionSignature,
@@ -76,7 +82,7 @@ export const useCurationCacheStore = create<CurationCacheStore>()((set) => ({
       };
     });
   },
-  saveProducts: ({ groupId, categoryId, response }) => {
+  saveProducts: ({ groupId, imageId, categoryId, response }) => {
     if (!groupId || !categoryId) return;
     set((state) => {
       const prevGroup = state.groups[groupId] ?? createDefaultGroup();
@@ -88,6 +94,7 @@ export const useCurationCacheStore = create<CurationCacheStore>()((set) => ({
             products: {
               ...prevGroup.products,
               [categoryId]: {
+                imageId,
                 response,
                 updatedAt: Date.now(),
               },

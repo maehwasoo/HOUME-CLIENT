@@ -1,25 +1,45 @@
-import { style, styleVariants } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 
 import { fontStyle } from '@/shared/styles/fontStyle';
 import { animationTokens } from '@/shared/styles/tokens/animation.css';
-import { zIndex } from '@/shared/styles/tokens/zIndex';
 
 import { colorVars } from '@styles/tokens/color.css';
+
+const skeletonBlock = {
+  borderRadius: '0.4rem',
+  background: `linear-gradient(
+    90deg,
+    ${colorVars.color.gray200} 0%,
+    ${colorVars.color.gray100} 50%,
+    ${colorVars.color.gray200} 100%
+  )`,
+  backgroundSize: '200% 100%',
+  animation: `${animationTokens.skeletonWave} 1.6s ease-in-out infinite`,
+} as const;
+
+export const container = style({
+  width: '100%',
+  flex: '1 1 auto',
+  minHeight: 0,
+  display: 'flex',
+  flexDirection: 'column',
+  padding: '2rem 2rem 0',
+  backgroundColor: colorVars.color.gray000,
+  overflow: 'hidden',
+});
+
+export const title = style({
+  ...fontStyle('title_m_16'),
+  color: colorVars.color.gray900,
+});
 
 export const filterSection = style({
   display: 'flex',
   gap: '0.4rem',
-  padding: '0.8rem 1.6rem',
-  margin: '0 -1.6rem',
+  marginTop: '0.8rem',
+  padding: '0.8rem 0',
   alignItems: 'center',
-  width: 'calc(100% + 3.2rem)',
-  minWidth: '34.3rem',
   backgroundColor: colorVars.color.gray000,
-  overflow: 'hidden',
-
-  position: 'sticky',
-  top: 0,
-  zIndex: zIndex.sticky,
 
   overflowX: 'auto',
   whiteSpace: 'nowrap',
@@ -31,9 +51,15 @@ export const filterSection = style({
   msOverflowStyle: 'none', // IE and Edge
 });
 
+export const filterChipAnchor = style({
+  display: 'inline-flex',
+  flexShrink: 0,
+});
+
 // 카테고리 칩 스켈레톤 공통 스타일 정의
 export const filterSkeletonChip = style({
   height: '3.6rem',
+  width: '6.9rem',
   borderRadius: '999px',
   background: `linear-gradient(
     90deg,
@@ -46,20 +72,14 @@ export const filterSkeletonChip = style({
   flexShrink: 0,
 });
 
-// 스켈레톤 칩의 가변 너비를 프리셋으로 제공
-export const filterSkeletonChipWidth = styleVariants({
-  short: { width: '5.6rem' },
-  medium: { width: '6.8rem' },
-  long: { width: '8.8rem' },
-  wide: { width: '10.4rem' },
-});
-
-export const scrollContentBase = style({
+export const content = style({
+  flex: 1,
+  minHeight: 0,
   display: 'flex',
   flexDirection: 'column',
   overflowY: 'auto',
-  maxHeight: '52rem',
-  overscrollBehavior: 'contain', // 내부 스크롤 - 상위 시트 간 드래그 간섭 완화
+  marginTop: '0.8rem',
+  overscrollBehavior: 'contain',
 
   selectors: {
     '&::-webkit-scrollbar': {
@@ -70,31 +90,80 @@ export const scrollContentBase = style({
   msOverflowStyle: 'none', // IE and Edge
 });
 
-export const scrollContentArea = styleVariants({
-  mid: { height: '29rem' },
-  expanded: { height: '52rem' },
-});
-
-export const headerText = style({
-  ...fontStyle('title_m_16'),
-  color: colorVars.color.gray900,
-  marginTop: '0.8rem',
-});
-
-export const curationSection = style({
+export const sectionList = style({
   display: 'flex',
-  gap: '1.2rem',
-  marginTop: '1.6rem',
-  flex: 1,
+  flexDirection: 'column',
+  gap: 0,
+  paddingBottom: '2.4rem',
+});
+
+export const categorySection = style({
+  width: '100%',
 });
 
 export const gridbox = style({
   width: '100%',
   height: 'fit-content',
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(16.6rem, 1fr))',
+  gridTemplateColumns: 'repeat(2, minmax(16.4rem, 1fr))',
   columnGap: '1.1rem',
-  justifyItems: 'center',
+  rowGap: 0,
+});
+
+export const productSkeletonCard = style({
+  width: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  paddingBottom: '2rem',
+});
+
+export const productSkeletonImage = style({
+  ...skeletonBlock,
+  width: '100%',
+  aspectRatio: '1 / 1',
+  borderRadius: '0.8rem',
+});
+
+export const productSkeletonInfo = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.4rem',
+  padding: '0.6rem 0.2rem 0',
+});
+
+export const productSkeletonBrand = style({
+  ...skeletonBlock,
+  width: '100%',
+  height: '1.1rem',
+  borderRadius: '0.2rem',
+});
+
+export const productSkeletonName = style({
+  ...skeletonBlock,
+  width: '100%',
+  height: '3.6rem',
+  borderRadius: '0.2rem',
+});
+
+export const productSkeletonPriceGroup = style({
+  width: '8.3rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.3rem',
+});
+
+export const productSkeletonOldPrice = style({
+  ...skeletonBlock,
+  width: '100%',
+  height: '1.2rem',
+  borderRadius: '0.2rem',
+});
+
+export const productSkeletonCurrentPrice = style({
+  ...skeletonBlock,
+  width: '100%',
+  height: '1.7rem',
+  borderRadius: '0.2rem',
 });
 
 export const statusContainer = style({
@@ -105,6 +174,18 @@ export const statusContainer = style({
   alignItems: 'center',
   justifyContent: 'center',
   paddingBottom: '4.5rem',
+  gap: '0.8rem',
+  textAlign: 'center',
+  color: colorVars.color.gray500,
+});
+
+export const sectionStatusContainer = style({
+  width: '100%',
+  minHeight: '10rem',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
   gap: '0.8rem',
   textAlign: 'center',
   color: colorVars.color.gray500,

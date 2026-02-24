@@ -5,6 +5,10 @@ import { useNavigate } from 'react-router-dom';
 
 import { ROUTES } from '@/routes/paths';
 import { queryClient } from '@/shared/apis/queryClient';
+import {
+  ERROR_CODES,
+  FALLBACK_TRIGGER_CODES,
+} from '@/shared/constants/apiErrorCode';
 import { QUERY_KEY } from '@/shared/constants/queryKey';
 
 import {
@@ -92,12 +96,6 @@ export const useResultPreferenceMutation = () => {
   return useMutation({
     mutationFn: ({ imageId, isLike }: { imageId: number; isLike: boolean }) =>
       postResultPreference(imageId, isLike),
-    onSuccess: () => {
-      // console.log('sendPreference 성공');
-    },
-    // onError: (error) => {
-    //   console.log('sendPreference 실패:', error);
-    // },
   });
 };
 
@@ -105,12 +103,6 @@ export const useResultPreferenceMutation = () => {
 export const useDeleteResultPreferenceMutation = () => {
   return useMutation({
     mutationFn: (imageId: number) => deleteResultPreference(imageId),
-    onSuccess: () => {
-      // console.log('deletePreference 성공');
-    },
-    // onError: (error) => {
-    //   console.log('deletePreference 실패:', error);
-    // },
   });
 };
 
@@ -213,10 +205,8 @@ export const useFallbackImage = (
       }
 
       if (
-        status === 429 ||
-        code === 40900 ||
-        code === 42900 ||
-        code === 42901
+        status === ERROR_CODES.HTTP_RATE_LIMITED ||
+        FALLBACK_TRIGGER_CODES.has(code)
       ) {
         // console.log(
         //   `폴백 API 대기 중 (${status || code}): 재시도 ${failureCount + 1}/10`
@@ -275,11 +265,5 @@ export const useFactorPreferenceMutation = () => {
       imageId: number;
       factorId: number;
     }) => postFactorPreference(imageId, factorId),
-    onSuccess: () => {
-      // console.log('sendFactorPreference 성공');
-    },
-    onError: () => {
-      // console.error('sendFactorPreference 실패:', error);
-    },
   });
 };

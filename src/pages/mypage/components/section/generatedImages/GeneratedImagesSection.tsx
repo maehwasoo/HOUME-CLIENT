@@ -29,7 +29,7 @@ const GeneratedImagesSection = ({
   userProfile,
 }: GeneratedImagesSectionProps) => {
   const navigate = useNavigate();
-  const { data: imagesData, isLoading, isError } = useMyPageImagesQuery();
+  const { data: imagesData, isPending, isError } = useMyPageImagesQuery();
   const { prefetchDetection } = useDetectionPrefetch();
   const prefetchedImageIdsRef = useRef<Set<number>>(new Set<number>());
   const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>(
@@ -61,11 +61,16 @@ const GeneratedImagesSection = ({
    * - 우선순위(immediate) 요청은 즉시 수행
    */
   const scheduleDetectionPrefetch = useCallback(
-    (imageId: number, imageUrl: string, options?: { immediate?: boolean }) => {
+    (
+      imageId: number,
+      imageUrl: string,
+      options?: { immediate?: boolean; persistAfterUnmount?: boolean }
+    ) => {
       if (!imageId || !imageUrl) return;
       const runTask = () => {
         prefetchDetection(imageId, imageUrl, {
           priority: options?.immediate ? 'immediate' : 'background',
+          persistAfterUnmount: options?.persistAfterUnmount ?? false,
         });
       };
       if (options?.immediate || typeof window === 'undefined') {
@@ -106,6 +111,7 @@ const GeneratedImagesSection = ({
     // 네비게이션 직후 우선순위 감지 프리페치 실행
     scheduleDetectionPrefetch(history.imageId, history.generatedImageUrl, {
       immediate: true,
+      persistAfterUnmount: true,
     });
   };
 
@@ -132,7 +138,7 @@ const GeneratedImagesSection = ({
   );
 
   // 로딩 중
-  if (isLoading) {
+  if (isPending) {
     return <Loading />;
   }
 

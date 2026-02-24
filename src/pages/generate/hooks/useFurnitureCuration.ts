@@ -10,6 +10,10 @@ import {
   getGeneratedImageCategories,
   getGeneratedImageProducts,
 } from '@pages/generate/apis/furniture';
+import {
+  getCategoryQueryDetectedObjects,
+  isCategoryQueryEnabled,
+} from '@pages/generate/constants/curationDetectionMode';
 import { useCurationCacheStore } from '@pages/generate/stores/useCurationCacheStore';
 import {
   useCurationStore,
@@ -107,7 +111,9 @@ export const useGeneratedCategoriesQuery = (
   );
   const canUseGroupInitialData =
     groupId !== null &&
+    imageId !== null &&
     groupCategoriesEntry !== null &&
+    groupCategoriesEntry.imageId === imageId &&
     groupCategoriesEntry.detectionSignature === detectionSignature;
 
   const categoriesQueryKey: CategoriesQueryKey = [
@@ -135,8 +141,11 @@ export const useGeneratedCategoriesQuery = (
     // queryKey에 이미지/감지값 전체를 직접 포함해 의존성 유지
     queryKey: categoriesQueryKey,
     queryFn: () =>
-      getGeneratedImageCategories(imageId!, normalizedDetectedObjects),
-    enabled: Boolean(imageId) && normalizedDetectedObjects.length > 0,
+      getGeneratedImageCategories(
+        imageId!,
+        getCategoryQueryDetectedObjects(normalizedDetectedObjects)
+      ),
+    enabled: isCategoryQueryEnabled(imageId, normalizedDetectedObjects.length),
     staleTime: 15 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     ...(initialCategoriesResponse
@@ -146,11 +155,13 @@ export const useGeneratedCategoriesQuery = (
 
   useEffect(() => {
     if (groupId === null) return;
+    if (imageId === null) return;
     if (!query.data) return;
     const existing =
       useCurationCacheStore.getState().groups[groupId]?.categories ?? null;
     if (
       existing &&
+      existing.imageId === imageId &&
       existing.detectionSignature === detectionSignature &&
       existing.response === query.data
     ) {
@@ -158,12 +169,14 @@ export const useGeneratedCategoriesQuery = (
     }
     saveGroupCategories({
       groupId,
+      imageId,
       response: query.data,
       detectedObjects: normalizedDetectedObjects,
       detectionSignature,
     });
   }, [
     groupId,
+    imageId,
     query.data,
     detectionSignature,
     normalizedDetectedObjects,
@@ -171,10 +184,8 @@ export const useGeneratedCategoriesQuery = (
   ]);
 
   useEffect(() => {
-    // 카테고리 자동 선택 제거
-    // - 기본값은 선택 해제 상태 유지
-    // - 현재 선택이 더 이상 유효하지 않다면 null 로 초기화
-    if (!imageId) return;
+    // Default category select (no analytics)
+    if (imageId === null) return;
     if (!query.data) {
       if (selectedCategoryId !== null) selectCategory(imageId, null);
       return;
@@ -185,12 +196,15 @@ export const useGeneratedCategoriesQuery = (
       if (selectedCategoryId !== null) selectCategory(imageId, null);
       return;
     }
+
     const exists = categories.some((item) => item.id === selectedCategoryId);
-    if (!exists && selectedCategoryId !== null) {
-      // 이전 선택이 유효하지 않으면 선택 해제
-      selectCategory(imageId, null);
-    }
-    // 자동으로 첫 카테고리를 선택하지 않음
+    if (selectedCategoryId !== null && exists) return;
+
+    const defaultCategoryId = categories[0]?.id ?? null;
+    if (defaultCategoryId === null) return;
+    if (defaultCategoryId === selectedCategoryId) return;
+
+    selectCategory(imageId, defaultCategoryId);
   }, [imageId, query.data, selectCategory, selectedCategoryId]);
 
   return query;
@@ -226,7 +240,10 @@ export const useGeneratedProductsQuery = (
   ];
 
   const initialProductsResponse =
-    groupId !== null && productCacheEntry
+    groupId !== null &&
+    imageId !== null &&
+    productCacheEntry &&
+    productCacheEntry.imageId === imageId
       ? productCacheEntry.response
       : undefined;
 
@@ -239,7 +256,7 @@ export const useGeneratedProductsQuery = (
     // queryKey에 그룹/이미지/카테고리 식별자를 직접 배치
     queryKey: productsQueryKey,
     queryFn: () => getGeneratedImageProducts(imageId!, categoryId!),
-    enabled: Boolean(imageId) && categoryId !== null,
+    enabled: imageId !== null && categoryId !== null,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
     ...(initialProductsResponse
@@ -248,19 +265,20 @@ export const useGeneratedProductsQuery = (
   });
 
   useEffect(() => {
-    if (groupId === null || categoryId === null) return;
+    if (groupId === null || imageId === null || categoryId === null) return;
     if (!query.data) return;
     const groupCache = useCurationCacheStore.getState().groups[groupId];
     const existing = groupCache?.products[categoryId] ?? null;
-    if (existing?.response === query.data) {
+    if (existing?.imageId === imageId && existing.response === query.data) {
       return;
     }
     saveGroupProducts({
       groupId,
+      imageId,
       categoryId,
       response: query.data,
     });
-  }, [groupId, categoryId, query.data, saveGroupProducts]);
+  }, [groupId, imageId, categoryId, query.data, saveGroupProducts]);
 
   return query;
 };

@@ -7,10 +7,11 @@ import { colorVars } from '@styles/tokens/color.css';
 export const contentWrapper = style({
   display: 'flex',
   flexDirection: 'column',
+  position: 'relative',
   alignItems: 'center',
-  justifyContent: 'center',
   width: '100%',
-  marginTop: '4rem',
+  height: '100dvh',
+  paddingTop: '4rem',
 });
 
 export const textSection = style({
@@ -43,6 +44,8 @@ export const imgSection = style({
 
 export const buttonSection = style({
   display: 'flex',
+  position: 'absolute',
+  bottom: '0',
   alignItems: 'center',
   justifyContent: 'center',
   width: '100%',

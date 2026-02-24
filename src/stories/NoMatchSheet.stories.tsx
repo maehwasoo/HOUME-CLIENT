@@ -5,7 +5,7 @@ import { NoMatchSheet } from '@/shared/components/bottomSheet/noMatchSheet/NoMat
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta: Meta<typeof NoMatchSheet> = {
-  title: 'Sheet/NoMatchSheet',
+  title: 'shared/bottomSheet/NoMatchSheet',
   component: NoMatchSheet,
   tags: ['autodocs'],
   parameters: {

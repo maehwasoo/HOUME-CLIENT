@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 
 import { queryClient } from '@/shared/apis/queryClient';
+import { useToast } from '@/shared/components/toast/useToast';
+import { TOAST_TYPE } from '@/shared/types/toast';
 
 import { useHousingSelectionMutation } from '../apis/houseInfo';
 import { useFunnelStore } from '../stores/useFunnelStore';
@@ -16,6 +18,7 @@ import type { ImageSetupSteps } from '../types/funnel/steps';
 export const useHouseInfo = (context: ImageSetupSteps['HouseInfo']) => {
   // 주거 옵션 선택 API
   const housingSelection = useHousingSelectionMutation();
+  const { notify } = useToast();
 
   // Zustand store에서 저장된 데이터
   const savedHouseInfo = useFunnelStore((state) => state.houseInfo);
@@ -127,6 +130,12 @@ export const useHouseInfo = (context: ImageSetupSteps['HouseInfo']) => {
           queryClient.invalidateQueries({ queryKey: ['floorPlan'] });
 
           onNext(completedData);
+        },
+        onError: () => {
+          notify({
+            text: '주거 정보 저장 중 오류가 발생했어요',
+            type: TOAST_TYPE.WARNING,
+          });
         },
       }
     );
