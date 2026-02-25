@@ -15,6 +15,7 @@ import {
   isFurnitureIndex,
   normalizeObj365Label,
 } from '@shared/detection/utils/obj365Furniture';
+import { isIOSLikeDevice } from '@shared/utils/platform';
 
 type OnnxModule = typeof import('onnxruntime-web');
 type InferenceSession = import('onnxruntime-web').InferenceSession;
@@ -125,34 +126,46 @@ const loadOnnxModel = async (
   modelPath: string,
   onProgress?: ProgressCallback
 ): Promise<ModelLoadResult> => {
+  const isIOS = isIOSLikeDevice();
+  const shouldUsePersistentCache = !isIOS;
+
   onProgress?.(10);
   const ort = await import('onnxruntime-web');
   onProgress?.(20);
   ort.env.wasm.wasmPaths = WASM_ASSET_BASE;
+  if (isIOS) {
+    ort.env.wasm.numThreads = 1;
+  }
   // onnxruntime 경고 숨길 때 배포 직전에 주석 해제하고 사용
   // ort.env.logLevel = 'error';
 
-  let arrayBuffer = await readModelFromPersistentCache(modelPath);
+  let arrayBuffer = shouldUsePersistentCache
+    ? await readModelFromPersistentCache(modelPath)
+    : null;
   if (arrayBuffer) {
     try {
       ensureModelBufferIsBinary(arrayBuffer);
       onProgress?.(40);
     } catch {
       arrayBuffer = null;
-      await deleteModelFromPersistentCache(modelPath);
+      if (shouldUsePersistentCache) {
+        await deleteModelFromPersistentCache(modelPath);
+      }
     }
   }
 
   if (!arrayBuffer) {
     onProgress?.(40);
     arrayBuffer = await fetchModelBinary(modelPath);
-    await writeModelToPersistentCache(modelPath, arrayBuffer);
+    if (shouldUsePersistentCache) {
+      await writeModelToPersistentCache(modelPath, arrayBuffer);
+    }
   }
 
   onProgress?.(70);
   const session = await ort.InferenceSession.create(arrayBuffer, {
     executionProviders: ['wasm'],
-    graphOptimizationLevel: 'all',
+    graphOptimizationLevel: isIOS ? 'basic' : 'all',
   });
   onProgress?.(95);
 
