@@ -35,60 +35,8 @@ type ModelCacheEntry = {
 
 type ProgressCallback = (value: number) => void;
 
-const MODEL_CACHE_STORAGE = 'houme-onnx-models-v1';
 const WASM_ASSET_BASE = 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/';
 const modelCache = new Map<string, ModelCacheEntry>();
-
-const hasCacheStorageSupport = () =>
-  typeof window !== 'undefined' && typeof caches !== 'undefined';
-
-const resolveModelCacheKey = (modelPath: string) => {
-  if (typeof window === 'undefined') return modelPath;
-  return new URL(modelPath, window.location.origin).toString();
-};
-
-const readModelFromPersistentCache = async (
-  modelPath: string
-): Promise<ArrayBuffer | null> => {
-  if (!hasCacheStorageSupport()) return null;
-  try {
-    const cache = await caches.open(MODEL_CACHE_STORAGE);
-    const cached = await cache.match(resolveModelCacheKey(modelPath));
-    if (!cached) return null;
-    return cached.arrayBuffer();
-  } catch {
-    return null;
-  }
-};
-
-const writeModelToPersistentCache = async (
-  modelPath: string,
-  buffer: ArrayBuffer
-) => {
-  if (!hasCacheStorageSupport()) return;
-  try {
-    const cache = await caches.open(MODEL_CACHE_STORAGE);
-    const request = new Request(resolveModelCacheKey(modelPath));
-    const response = new Response(buffer.slice(0), {
-      headers: {
-        'content-type': 'application/octet-stream',
-      },
-    });
-    await cache.put(request, response);
-  } catch {
-    // 캐시 저장 실패는 치명적이지 않으므로 무시
-  }
-};
-
-const deleteModelFromPersistentCache = async (modelPath: string) => {
-  if (!hasCacheStorageSupport()) return;
-  try {
-    const cache = await caches.open(MODEL_CACHE_STORAGE);
-    await cache.delete(resolveModelCacheKey(modelPath));
-  } catch {
-    // 삭제 실패도 치명적이지 않음
-  }
-};
 
 const ensureModelBufferIsBinary = (arrayBuffer: ArrayBuffer) => {
   const head = new Uint8Array(arrayBuffer.slice(0, 256));
@@ -99,7 +47,7 @@ const ensureModelBufferIsBinary = (arrayBuffer: ArrayBuffer) => {
 };
 
 const fetchModelBinary = async (modelPath: string): Promise<ArrayBuffer> => {
-  const response = await fetch(modelPath);
+  const response = await fetch(modelPath, { cache: 'force-cache' });
   if (!response.ok) {
     throw new Error(`모델 로드 실패: ${response.statusText}`);
   }
@@ -127,7 +75,6 @@ const loadOnnxModel = async (
   onProgress?: ProgressCallback
 ): Promise<ModelLoadResult> => {
   const isIOS = isIOSLikeDevice();
-  const shouldUsePersistentCache = !isIOS;
 
   onProgress?.(10);
   const ort = await import('onnxruntime-web');
@@ -139,33 +86,20 @@ const loadOnnxModel = async (
   // onnxruntime 경고 숨길 때 배포 직전에 주석 해제하고 사용
   // ort.env.logLevel = 'error';
 
-  let arrayBuffer = shouldUsePersistentCache
-    ? await readModelFromPersistentCache(modelPath)
-    : null;
-  if (arrayBuffer) {
-    try {
-      ensureModelBufferIsBinary(arrayBuffer);
-      onProgress?.(40);
-    } catch {
-      arrayBuffer = null;
-      if (shouldUsePersistentCache) {
-        await deleteModelFromPersistentCache(modelPath);
-      }
-    }
-  }
-
-  if (!arrayBuffer) {
-    onProgress?.(40);
-    arrayBuffer = await fetchModelBinary(modelPath);
-    if (shouldUsePersistentCache) {
-      await writeModelToPersistentCache(modelPath, arrayBuffer);
-    }
-  }
+  onProgress?.(40);
+  const arrayBuffer = await fetchModelBinary(modelPath);
 
   onProgress?.(70);
   const session = await ort.InferenceSession.create(arrayBuffer, {
     executionProviders: ['wasm'],
     graphOptimizationLevel: isIOS ? 'basic' : 'all',
+    ...(isIOS
+      ? {
+          executionMode: 'sequential',
+          enableCpuMemArena: false,
+          enableMemPattern: false,
+        }
+      : {}),
   });
   onProgress?.(95);
 
