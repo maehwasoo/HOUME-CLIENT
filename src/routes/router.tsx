@@ -8,26 +8,19 @@
 //    - 인증 실패 시 ROUTES.LOGIN 으로 리다이렉트
 // ------------------------------
 
-// TODO(지성): 컴포넌트 lazy load 적용하기
 import { createBrowserRouter } from 'react-router-dom';
 
-import RootLayout from '@/layout/RootLayout';
-import GeneratePage from '@/pages/generate/GeneratePage';
-import LoadingPage from '@/pages/generate/pages/loading/LoadingPage';
-import ResultPage from '@/pages/generate/pages/result/ResultPage';
-import StartPage from '@/pages/generate/pages/start/StartPage';
-import HomePage from '@/pages/home/HomePage';
-import { ImageSetup } from '@/pages/imageSetup/ImageSetup';
-import KakaoCallback from '@/pages/login/KakaoCallback';
-import LoginPage from '@/pages/login/LoginPage';
-import MyPage from '@/pages/mypage/MyPage';
-import PrivacyPolicy from '@/pages/mypage/pages/setting/PrivacyPolicyPage';
-import ServicePolicy from '@/pages/mypage/pages/setting/ServicePolicyPage';
-import Setting from '@/pages/mypage/pages/setting/SettingPage';
-import SignupPage from '@/pages/signup/SignupPage';
-import { ROUTES } from '@/routes/paths';
-import ProtectedRoute from '@/routes/ProtectedRoute';
-import RouteErrorFallback from '@/shared/components/errorFallback/RouteErrorFallback';
+import HomePage from '@pages/home/HomePage';
+import ImageSetupPage from '@pages/imageSetup/ImageSetupPage';
+import KakaoCallbackPage from '@pages/login/KakaoCallbackPage';
+import LoginPage from '@pages/login/LoginPage';
+
+import { ROUTES } from '@routes/paths';
+import ProtectedRoute from '@routes/ProtectedRoute';
+
+import RouteErrorFallback from '@components/errorFallback/RouteErrorFallback';
+
+import RootLayout from './RootLayout';
 
 // 공개 라우트 그룹 (인증 불필요)
 const publicRoutes = [
@@ -43,19 +36,32 @@ const publicRoutes = [
   },
   {
     path: ROUTES.SIGNUP,
-    element: <SignupPage />,
+    lazy: async () => {
+      const { default: SignupPage } = await import('@pages/signup/SignupPage');
+      return { Component: SignupPage };
+    },
   },
   {
     path: ROUTES.OAUTH,
-    element: <KakaoCallback />,
+    element: <KakaoCallbackPage />,
   },
   {
     path: ROUTES.SETTING_SERVICE,
-    element: <ServicePolicy />,
+    lazy: async () => {
+      const { default: ServicePolicyPage } = await import(
+        '@pages/mypage/pages/setting/ServicePolicyPage'
+      );
+      return { Component: ServicePolicyPage };
+    },
   },
   {
     path: ROUTES.SETTING_PRIVACY,
-    element: <PrivacyPolicy />,
+    lazy: async () => {
+      const { default: PrivacyPolicyPage } = await import(
+        '@pages/mypage/pages/setting/PrivacyPolicyPage'
+      );
+      return { Component: PrivacyPolicyPage };
+    },
   },
 ];
 
@@ -63,33 +69,50 @@ const publicRoutes = [
 const protectedRoutes = [
   {
     path: ROUTES.IMAGE_SETUP,
-    element: <ImageSetup />,
+    element: <ImageSetupPage />,
   },
   {
     path: ROUTES.GENERATE,
-    element: <GeneratePage />,
-    children: [
-      {
-        index: true,
-        element: <LoadingPage />,
-      },
-      {
-        path: 'result',
-        element: <ResultPage />,
-      },
-    ],
+    lazy: async () => {
+      const { default: LoadingPage } = await import(
+        '@pages/generate/pages/loading/LoadingPage'
+      );
+      return { Component: LoadingPage };
+    },
+  },
+  {
+    path: ROUTES.GENERATE_RESULT,
+    lazy: async () => {
+      const { default: ResultPage } = await import(
+        '@pages/generate/pages/result/ResultPage'
+      );
+      return { Component: ResultPage };
+    },
   },
   {
     path: ROUTES.MYPAGE,
-    element: <MyPage />,
+    lazy: async () => {
+      const { default: MyPage } = await import('@pages/mypage/MyPage');
+      return { Component: MyPage };
+    },
   },
   {
     path: ROUTES.SETTING,
-    element: <Setting />,
+    lazy: async () => {
+      const { default: SettingPage } = await import(
+        '@pages/mypage/pages/setting/SettingPage'
+      );
+      return { Component: SettingPage };
+    },
   },
   {
     path: ROUTES.GENERATE_START,
-    element: <StartPage />,
+    lazy: async () => {
+      const { default: StartPage } = await import(
+        '@pages/generate/pages/start/StartPage'
+      );
+      return { Component: StartPage };
+    },
   },
 ];
 
@@ -111,7 +134,7 @@ export const router = createBrowserRouter([
         path: '*',
         lazy: async () => {
           const { default: NotFoundPage } = await import(
-            '@/pages/notFound/NotFoundPage'
+            '@pages/notFound/NotFoundPage'
           );
           return { Component: NotFoundPage };
         },

@@ -1,17 +1,17 @@
 import { style } from '@vanilla-extract/css';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-import { animationTokens } from '@/shared/styles/tokens/animation.css';
-import { colorVars } from '@/shared/styles/tokens/color.css';
+import { fontStyle } from '@styles/fontStyle';
+import { animationTokens } from '@styles/tokens/animation.css';
+import { colorVars } from '@styles/tokens/color.css';
 
 export const container = style({
   display: 'flex',
   flexDirection: 'column',
-  width: '100%',
+  alignItems: 'center',
+  justifyContent: 'center',
   gap: '2.4rem',
   padding: '1.6rem 2rem 0 2rem',
-  justifyContent: 'center',
-  alignItems: 'center',
+  width: '100%',
   animation: animationTokens.fadeInUpFast,
 });
 
@@ -24,33 +24,33 @@ export const title = style({
 export const fieldbox = style({
   display: 'flex',
   flexDirection: 'column',
-  width: '100%',
-  justifyContent: 'center',
   alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
 });
 
 export const fieldtitle = style({
-  width: '100%',
-  ...fontStyle('title_sb_16'),
-  color: colorVars.color.gray800,
   marginBottom: '1.2rem',
+  ...fontStyle('title_sb_16'),
+  width: '100%',
+  color: colorVars.color.gray800,
 });
 
 export const flexbox = style({
   display: 'flex',
-  width: '100%',
-  gap: '0.7rem',
-  justifyContent: 'center',
   alignItems: 'center',
+  justifyContent: 'center',
+  gap: '0.7rem',
+  width: '100%',
 });
 
 export const btnarea = style({
   position: 'fixed',
   bottom: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '0 2rem 2rem 2rem',
   width: '100%',
   maxWidth: '440px',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: '0 2rem 2rem 2rem',
 });

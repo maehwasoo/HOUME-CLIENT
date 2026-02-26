@@ -1,6 +1,6 @@
 import * as styles from './LargeFilledButton.css';
 
-interface LargeFilledProps extends React.ComponentProps<'button'> {
+interface LargeFilledButtonProps extends React.ComponentProps<'button'> {
   children: React.ReactNode;
   isActive?: boolean;
   isError?: boolean;
@@ -8,7 +8,7 @@ interface LargeFilledProps extends React.ComponentProps<'button'> {
   isSelected?: boolean;
 }
 
-const LargeFilled = ({
+const LargeFilledButton = ({
   children,
   isActive = true,
   isError = false,
@@ -16,7 +16,7 @@ const LargeFilled = ({
   isSelected = false,
   onClick,
   ...props
-}: LargeFilledProps) => {
+}: LargeFilledButtonProps) => {
   return (
     <button
       type="button"
@@ -33,4 +33,4 @@ const LargeFilled = ({
   );
 };
 
-export default LargeFilled;
+export default LargeFilledButton;

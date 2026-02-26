@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import { useFloorPlanQuery } from '../apis/floorPlan';
+import { useFloorPlanQuery } from '../apis/queries/useFloorPlanQuery';
 import { useFunnelStore } from '../stores/useFunnelStore';
 
 import type {

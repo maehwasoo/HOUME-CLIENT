@@ -1,11 +1,11 @@
 import { style } from '@vanilla-extract/css';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-import { colorVars } from '@/shared/styles/tokens/color.css';
+import { fontStyle } from '@styles/fontStyle';
+import { colorVars } from '@styles/tokens/color.css';
 
 export const container = style({
-  width: '100%',
   padding: '2.4rem 2rem 0 2rem',
+  width: '100%',
 });
 
 export const section = style({
@@ -14,31 +14,31 @@ export const section = style({
 
 export const sectionTitle = style({
   ...fontStyle('title_sb_16'),
-  color: colorVars.color.gray800,
   marginBottom: '1.6rem',
+  color: colorVars.color.gray800,
 });
 
 export const buttonArea = style({
   display: 'block',
   margin: 0,
+  borderTop: `0.1rem solid ${colorVars.color.gray100}`,
   padding: 0,
   listStyle: 'none',
-  borderTop: `0.1rem solid ${colorVars.color.gray100}`,
 });
 
 export const buttonItem = style({
   display: 'block',
-  padding: '1.2rem 0',
   borderBottom: `0.1rem solid ${colorVars.color.gray100}`,
+  padding: '1.2rem 0',
 });
 
 export const settingButton = style({
   display: 'flex',
-  width: '100%',
-  padding: 0,
-  backgroundColor: 'transparent',
   border: 'none',
+  backgroundColor: 'transparent',
   cursor: 'pointer',
+  padding: 0,
+  width: '100%',
   textAlign: 'left',
 });
 

@@ -1,4 +1,4 @@
-import CreditChip from '@/shared/components/creditChip/CreditChip';
+import CreditChip from '@components/creditChip/CreditChip';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

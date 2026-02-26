@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { ComponentProps } from 'react';
 
-import CardProduct from '@/shared/components/card/cardProduct/CardProduct';
+import CardProduct from '@components/card/cardProduct/CardProduct';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

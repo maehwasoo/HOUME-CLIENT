@@ -1,39 +1,39 @@
 import { style } from '@vanilla-extract/css';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-import { colorVars } from '@/shared/styles/tokens/color.css';
-import { zIndex } from '@/shared/styles/tokens/zIndex';
+import { fontStyle } from '@styles/fontStyle';
+import { colorVars } from '@styles/tokens/color.css';
+import { zIndex } from '@styles/tokens/zIndex';
 
 export const backdrop = style({
   position: 'fixed',
+  zIndex: zIndex.backdrop,
   inset: 0,
   background: 'rgba(0, 0, 0, 0.08)',
-  zIndex: zIndex.backdrop,
 });
 
 export const container = style({
   position: 'fixed',
+  zIndex: zIndex.popup,
   top: '50%',
   left: '50%',
-  transform: 'translate(-50%, -50%)',
-  zIndex: zIndex.popup,
   display: 'flex',
   flexDirection: 'column',
-  width: '30rem',
+  transform: 'translate(-50%, -50%)',
+  border: 0,
   borderRadius: '20px',
   background: colorVars.color.gray000,
-  border: 0,
+  width: '30rem',
 });
 
 export const info = style({
   display: 'flex',
   flexDirection: 'column',
-  padding: '3.2rem 1.4rem',
-  justifyContent: 'center',
   alignItems: 'center',
+  justifyContent: 'center',
   gap: '1.2rem',
-  whiteSpace: 'pre-line',
+  padding: '3.2rem 1.4rem',
   textAlign: 'center',
+  whiteSpace: 'pre-line',
 });
 
 export const title = style({
@@ -54,10 +54,10 @@ export const buttonBox = style({
 
 export const exit = style({
   flex: 1,
-  padding: '1.2rem 0',
-  ...fontStyle('body_r_14'),
-  color: colorVars.color.gray700,
   borderRight: `1px solid ${colorVars.color.gray200}`,
+  ...fontStyle('body_r_14'),
+  padding: '1.2rem 0',
+  color: colorVars.color.gray700,
 });
 
 export const cancel = style({

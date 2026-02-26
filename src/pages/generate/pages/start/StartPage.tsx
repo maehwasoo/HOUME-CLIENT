@@ -1,16 +1,19 @@
 import { useNavigate } from 'react-router-dom';
 
-import { useABTest } from '@/pages/generate/hooks/useABTest';
-import { logGenerateStartClickBtnCTA } from '@/pages/generate/utils/analytics';
-import { ROUTES } from '@/routes/paths';
-import CtaButton from '@/shared/components/button/ctaButton/CtaButton';
-import TitleNavBar from '@/shared/components/navBar/TitleNavBar';
-import { useUserStore } from '@/store/useUserStore';
+import { useABTest } from '@pages/generate/hooks/useABTest';
+import { useStartPageModelPreload } from '@pages/generate/hooks/useStartPageModelPreload';
+import { logGenerateStartClickBtnCTA } from '@pages/generate/utils/analytics';
+
+import { ROUTES } from '@routes/paths';
+
+import { useUserStore } from '@store/useUserStore';
 
 import SignupImage from '@assets/icons/loginAfter.png';
-import { useStartPageModelPreload } from '@pages/generate/hooks/useStartPageModelPreload';
 
-import * as styles from './StartPage.css.ts';
+import CtaButton from '@components/button/ctaButton/CtaButton';
+import TitleNavBar from '@components/navBar/TitleNavBar';
+
+import * as styles from './StartPage.css';
 
 const StartPage = () => {
   // zustand에서 userName 가져오기
@@ -19,7 +22,6 @@ const StartPage = () => {
   const { variant } = useABTest();
 
   useStartPageModelPreload();
-
   const handleGoToImageSetup = () => {
     // 이미지 생성 시작 페이지 CTA 버튼 클릭 시 GA 이벤트 전송
     logGenerateStartClickBtnCTA(variant);

@@ -2,13 +2,15 @@ import { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import type { GenerateImageRequest } from '@/pages/generate/types/generate';
+import type { GenerateImageRequest } from '@pages/generate/types/generate';
 import {
   logSelectFurnitureClickBtnCTA,
   logSelectFurnitureClickBtnCTACreditError,
-} from '@/pages/imageSetup/utils/analytics';
-import { ROUTES } from '@/routes/paths';
-import { useCreditGuard } from '@/shared/hooks/useCreditGuard';
+} from '@pages/imageSetup/utils/analytics';
+
+import { ROUTES } from '@routes/paths';
+
+import { useCreditGuard } from '@hooks/useCreditGuard';
 
 import { useActivitySelection } from './useActivitySelection';
 import { useCategorySelection } from './useCategorySelection';

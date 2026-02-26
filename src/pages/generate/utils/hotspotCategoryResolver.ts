@@ -1,10 +1,10 @@
+import type { FurnitureCategoryResponse } from '@pages/generate/types/furniture';
+
 import {
   resolveFurnitureCode,
   type FurnitureCategoryCode,
-} from '@pages/generate/constants/furnitureCategoryMapping';
-
-import type { FurnitureHotspot } from '@pages/generate/hooks/useFurnitureHotspots';
-import type { FurnitureCategoryResponse } from '@pages/generate/types/furniture';
+} from '@shared/detection/furnitureCategoryMapping';
+import type { FurnitureHotspot } from '@shared/detection/hooks/useFurnitureHotspots';
 
 // 서버 카테고리명 → 내부 코드 역매핑 키워드 목록(한글 변경 시 이곳 업데이트)
 export const CATEGORY_NAME_KEYWORDS: Record<FurnitureCategoryCode, string[]> = {

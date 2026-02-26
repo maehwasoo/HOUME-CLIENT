@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 
-import SmallButton from '@/pages/mypage/components/button/smallButton/SmallButton';
-import { logMyPageClickBtnMakeImg } from '@/pages/mypage/utils/analytics';
-import { ROUTES } from '@/routes/paths';
-import emptyImage from '@/shared/assets/images/mypageEmptyImage.png';
+import SmallButton from '@pages/mypage/components/button/smallButton/SmallButton';
+import { logMyPageClickBtnMakeImg } from '@pages/mypage/utils/analytics';
+
+import { ROUTES } from '@routes/paths';
+
+import emptyImage from '@assets/images/mypageEmptyImage.png';
 
 import * as styles from './EmptyStateSection.css';
 

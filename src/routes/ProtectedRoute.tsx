@@ -6,8 +6,9 @@
 // 하위(children) 라우트를 한 번에 보호할 수 있습니다.
 import { Navigate, Outlet } from 'react-router-dom';
 
-import { ROUTES } from '@/routes/paths';
-import { useUserSync } from '@/shared/hooks/useUserSync';
+import { ROUTES } from '@routes/paths';
+
+import { useUserSync } from '@hooks/useUserSync';
 
 interface ProtectedRouteProps {
   isAuthenticated?: boolean; // 인증 여부(외부에서 전달 가능, 없으면 내부에서 accessToken으로 판단)

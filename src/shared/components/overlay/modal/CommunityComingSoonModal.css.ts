@@ -11,23 +11,23 @@ const fadeIn = keyframes({
 
 export const backdrop = style({
   position: 'fixed',
+  zIndex: zIndex.backdrop,
   inset: 0,
   background: colorVars.color.gray999_20,
-  zIndex: zIndex.backdrop,
   animation: `${fadeIn} 0.45s cubic-bezier(0.22, 1, 0.36, 1)`,
 });
 
 export const container = style({
-  backgroundColor: colorVars.color.gray000,
   position: 'fixed',
+  zIndex: zIndex.modal,
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  zIndex: zIndex.modal,
-  width: '30rem',
-  borderRadius: '20px',
-  animation: `${fadeIn} 0.45s cubic-bezier(0.22, 1, 0.36, 1)`,
   willChange: 'opacity',
+  borderRadius: '20px',
+  backgroundColor: colorVars.color.gray000,
+  width: '30rem',
+  animation: `${fadeIn} 0.45s cubic-bezier(0.22, 1, 0.36, 1)`,
 });
 
 export const contentArea = style({
@@ -41,8 +41,8 @@ export const headingText = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  textAlign: 'center',
   gap: '1.2rem',
+  textAlign: 'center',
 });
 
 export const title = style({
@@ -52,8 +52,8 @@ export const title = style({
 
 export const body = style({
   ...fontStyle('body_r_14'),
-  color: colorVars.color.gray700,
   whiteSpace: 'pre-line',
+  color: colorVars.color.gray700,
 });
 
 export const buttonArea = style({
@@ -61,11 +61,11 @@ export const buttonArea = style({
 });
 
 export const closeButton = style({
-  width: '100%',
-  height: '4.8rem',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  width: '100%',
+  height: '4.8rem',
   ...fontStyle('body_r_14'),
   color: colorVars.color.gray700,
 });

@@ -2,7 +2,7 @@ import { globalStyle, createGlobalTheme } from '@vanilla-extract/css';
 
 import { colorVars } from '@styles/tokens/color.css';
 import { fontVars } from '@styles/tokens/font.css';
-import '@styles/reset.css.ts';
+import '@styles/reset.css';
 import '@styles/fontFace.css';
 
 /**
@@ -38,8 +38,8 @@ export const layoutVars = createGlobalTheme(':root', {
  * 하위 컴포넌트들이 플렉스 아이템으로 배치됨
  */
 globalStyle('#root', {
-  flex: 1,
   display: 'flex',
+  flex: 1,
   flexDirection: 'column',
 });
 
@@ -50,9 +50,9 @@ globalStyle('#root', {
  * - 스크롤바 숨김으로 모바일 앱 같은 UI 구현
  */
 globalStyle('html', {
-  height: '100%',
-  scrollbarWidth: 'none', // Firefox 스크롤바 숨김
   backgroundColor: colorVars.color.gray100,
+  height: '100%', // Firefox 스크롤바 숨김
+  scrollbarWidth: 'none',
 });
 
 /**
@@ -83,28 +83,23 @@ globalStyle('html::-webkit-scrollbar', {
  * - 부드러운 스크롤 애니메이션
  */
 globalStyle('body', {
-  // 타이포그래피
-  fontFamily: fontVars.family.pretendard,
-  color: colorVars.color.gray999,
-  WebkitFontSmoothing: 'antialiased', // macOS/iOS 폰트 렌더링 최적화
-  MozOsxFontSmoothing: 'grayscale', // Firefox 폰트 렌더링 최적화
-  overflowWrap: 'break-word', // 긴 단어 자동 줄바꿈
-
-  // 레이아웃
-  minHeight: layoutVars.height,
-  minWidth: layoutVars.minWidth, // 최소 너비 제한
-  maxWidth: layoutVars.maxWidth, // 최대 너비 제한
-  marginLeft: 'auto', // 가로 중앙 정렬
-  marginRight: 'auto',
   display: 'flex',
   flexDirection: 'column',
-
-  // 시각적 효과
-  backgroundColor: colorVars.color.gray000,
-  boxShadow: 'none',
-  scrollBehavior: 'smooth', // 부드러운 스크롤
-  scrollbarWidth: 'none', // Firefox 스크롤바 숨김
   transition: 'box-shadow 0.3s ease',
+  marginRight: 'auto',
+  marginLeft: 'auto',
+  boxShadow: 'none',
+  backgroundColor: colorVars.color.gray000,
+  minWidth: layoutVars.minWidth,
+  maxWidth: layoutVars.maxWidth,
+  minHeight: layoutVars.height,
+  overflowWrap: 'break-word',
+  scrollbarWidth: 'none',
+  scrollBehavior: 'smooth',
+  color: colorVars.color.gray999,
+  fontFamily: fontVars.family.pretendard,
+  WebkitFontSmoothing: 'antialiased',
+  MozOsxFontSmoothing: 'grayscale',
   '@media': {
     '(min-width: 440px)': {
       boxShadow: '0px 32px 84px rgba(16, 18, 24, 0.22)',

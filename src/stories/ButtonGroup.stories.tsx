@@ -4,7 +4,7 @@ import ButtonGroup, {
   type ButtonGroupProps,
   type ButtonOption,
   type ButtonStatus,
-} from '@/pages/imageSetup/components/buttonGroup/ButtonGroup';
+} from '@pages/imageSetup/components/buttonGroup/ButtonGroup';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

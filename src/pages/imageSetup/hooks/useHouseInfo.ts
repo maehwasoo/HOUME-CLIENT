@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
 
-import { queryClient } from '@/shared/apis/queryClient';
-import { useToast } from '@/shared/components/toast/useToast';
-import { TOAST_TYPE } from '@/shared/types/toast';
+import { TOAST_TYPE } from '@shared/types/toast';
 
-import { useHousingSelectionMutation } from '../apis/houseInfo';
+import { queryClient } from '@apis/config/queryClient';
+
+import { useToast } from '@components/toast/useToast';
+
+import { queryKeys } from '@constants/queryKey';
+
+import { useHousingSelectionMutation } from '../apis/mutations/useHousingSelectionMutation';
 import { useFunnelStore } from '../stores/useFunnelStore';
 import { HOUSE_INFO_VALIDATION } from '../types/funnel/validation';
 
@@ -42,31 +46,25 @@ export const useHouseInfo = (context: ImageSetupSteps['HouseInfo']) => {
   // 개별 필드 변경 시 해당 필드의 에러만 클리어
   useEffect(() => {
     setErrors((prev) => {
-      if (prev.houseType) {
-        const { houseType, ...rest } = prev;
-        return rest;
-      }
-      return prev;
+      if (!prev.houseType) return prev;
+      const { houseType: _, ...rest } = prev;
+      return rest;
     });
   }, [formData.houseType]);
 
   useEffect(() => {
     setErrors((prev) => {
-      if (prev.roomType) {
-        const { roomType, ...rest } = prev;
-        return rest;
-      }
-      return prev;
+      if (!prev.roomType) return prev;
+      const { roomType: _, ...rest } = prev;
+      return rest;
     });
   }, [formData.roomType]);
 
   useEffect(() => {
     setErrors((prev) => {
-      if (prev.areaType) {
-        const { areaType, ...rest } = prev;
-        return rest;
-      }
-      return prev;
+      if (!prev.areaType) return prev;
+      const { areaType: _, ...rest } = prev;
+      return rest;
     });
   }, [formData.areaType]);
 
@@ -127,7 +125,9 @@ export const useHouseInfo = (context: ImageSetupSteps['HouseInfo']) => {
 
           // @use-funnel의 스텝들은 하나의 페이지 안의 컴포넌트
           // 뒤로가기, 앞으로가기 시에도 언마운트되지 않으므로, 해당 스텝에 진입할 때마다 실행되어야하는 api는 invalidate 필요
-          queryClient.invalidateQueries({ queryKey: ['floorPlan'] });
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.imageSetup.floorPlan(),
+          });
 
           onNext(completedData);
         },

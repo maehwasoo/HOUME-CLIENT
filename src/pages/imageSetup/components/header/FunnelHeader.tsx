@@ -1,5 +1,5 @@
-import ProgressBarKey from '@/shared/components/progressBarKey/ProgressBarKey';
-import type { ProgressStep } from '@/shared/components/progressBarKey/ProgressBarKey.types';
+import ProgressBarKey from '@components/progressBarKey/ProgressBarKey';
+import type { ProgressStep } from '@components/progressBarKey/ProgressBarKey.types';
 
 import * as styles from './FunnelHeader.css';
 

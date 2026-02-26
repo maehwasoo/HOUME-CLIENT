@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
 
-import { ROUTES } from '@/routes/paths';
-import CtaButton from '@/shared/components/button/ctaButton/CtaButton';
-import TitleNavBar from '@/shared/components/navBar/TitleNavBar';
+import { ROUTES } from '@routes/paths';
 
 import LoginBeforeImage from '@assets/icons/loginBefore.png';
+
+import CtaButton from '@components/button/ctaButton/CtaButton';
+import TitleNavBar from '@components/navBar/TitleNavBar';
+
 import { API_ENDPOINT } from '@constants/apiEndpoints';
 
 import * as styles from './loginPage.css';

@@ -6,7 +6,7 @@ interface CardReviewProps {
   username: string;
 }
 
-export const CardReview = ({ title, body, username }: CardReviewProps) => {
+const CardReview = ({ title, body, username }: CardReviewProps) => {
   return (
     <div className={styles.cardReview}>
       <div className={styles.title}>{title}</div>
@@ -15,3 +15,5 @@ export const CardReview = ({ title, body, username }: CardReviewProps) => {
     </div>
   );
 };
+
+export default CardReview;

@@ -1,52 +1,51 @@
 import { recipe } from '@vanilla-extract/recipes';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-
+import { fontStyle } from '@styles/fontStyle';
 import { colorVars } from '@styles/tokens/color.css';
 
 export const textField = recipe({
   base: {
-    width: '100%',
-    height: '4.9rem',
-    padding: '1.4rem 1.2rem',
-    borderRadius: '6px',
+    boxSizing: 'border-box',
     transition: 'all 0.2s ease-in-out',
     outline: 'none',
+    borderRadius: '6px',
+    padding: '1.4rem 1.2rem',
+    width: '100%',
     ...fontStyle('body_r_14'),
-    boxSizing: 'border-box',
+    height: '4.9rem',
 
     ':active': {
       backgroundColor: colorVars.color.gray300,
     },
 
     ':focus': {
-      color: colorVars.color.gray900,
       border: `1px solid ${colorVars.color.primary}`,
+      color: colorVars.color.gray900,
     },
   },
   variants: {
     state: {
       default: {
-        color: colorVars.color.gray400,
         backgroundColor: colorVars.color.gray100,
+        color: colorVars.color.gray400,
       },
       filled: {
         backgroundColor: colorVars.color.gray100,
         color: colorVars.color.gray900,
       },
       error: {
+        border: 'none',
         backgroundColor: colorVars.color.error_light,
         color: colorVars.color.error,
-        border: 'none',
 
         ':focus': {
           border: `1px solid ${colorVars.color.error}`,
         },
       },
       errorFocused: {
+        border: `1px solid ${colorVars.color.error}`,
         backgroundColor: colorVars.color.error_light,
         color: colorVars.color.error,
-        border: `1px solid ${colorVars.color.error}`,
         selectors: {
           '&:focus': {
             border: `1px solid ${colorVars.color.error}`,
@@ -56,9 +55,9 @@ export const textField = recipe({
     },
     fieldSize: {
       thin: {
+        padding: '0.8rem 1.2rem',
         minWidth: '25.9rem',
         height: '3.6rem',
-        padding: '0.8rem 1.2rem',
       },
       small: {
         minWidth: '10.7rem',

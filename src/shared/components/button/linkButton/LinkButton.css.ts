@@ -1,21 +1,20 @@
 import { recipe } from '@vanilla-extract/recipes';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-
+import { fontStyle } from '@styles/fontStyle';
 import { colorVars } from '@styles/tokens/color.css';
 
 export const linkButton = recipe({
   base: {
-    height: '2.6rem',
-    padding: '0.6rem',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: '999px',
-
     transition: 'all 0.2s ease-in-out',
     border: `1px solid ${colorVars.color.gray300}`,
+    borderRadius: '999px',
+
     backgroundColor: colorVars.color.gray000,
+    padding: '0.6rem',
+    height: '2.6rem',
 
     ':active': {
       backgroundColor: colorVars.color.gray300,
@@ -24,8 +23,8 @@ export const linkButton = recipe({
   variants: {
     type: {
       withText: {
-        width: 'fit-content',
         gap: '0.2rem',
+        width: 'fit-content',
         whiteSpace: 'nowrap',
         ...fontStyle('caption_r_11'),
         color: colorVars.color.gray700,

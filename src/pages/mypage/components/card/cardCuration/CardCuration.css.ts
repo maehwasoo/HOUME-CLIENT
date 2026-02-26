@@ -1,7 +1,10 @@
 import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
-import { animationTokens } from '@/shared/styles/tokens/animation.css';
+import {
+  SKELETON_GRADIENT,
+  animationTokens,
+} from '@styles/tokens/animation.css';
 
 export const cardCurationContainer = style({
   display: 'flex',
@@ -13,23 +16,23 @@ export const cardCurationContainer = style({
 });
 
 export const cardImage = style({
-  display: 'flex',
-  width: '100%',
-  justifyContent: 'center',
-  alignItems: 'center',
   aspectRatio: '1/1',
-  borderRadius: '0.8rem',
-  overflow: 'hidden',
-  cursor: 'pointer',
   position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  borderRadius: '0.8rem',
+  cursor: 'pointer',
+  width: '100%',
+  overflow: 'hidden',
 });
 
 export const image = recipe({
   base: {
-    width: '100%',
-    height: '100%',
+    transition: 'opacity 0.3s ease-in-out',
     objectFit: 'cover',
-    transition: 'opacity 0.3s ease-in-out', // 이미지 로드 완료 시 이미지로 부드럽게 전환
+    width: '100%',
+    height: '100%', // 이미지 로드 완료 시 이미지로 부드럽게 전환
   },
   variants: {
     loaded: {
@@ -46,7 +49,7 @@ export const skeleton = style({
   position: 'absolute',
   inset: 0,
   borderRadius: '0.8rem',
-  background: 'linear-gradient(90deg, #ececec 8%, #f0f0f0 18%, #ececec 33%)',
+  background: SKELETON_GRADIENT,
   backgroundSize: '200% 100%',
   animation: `${animationTokens.skeletonWave} 2s linear infinite`,
 });

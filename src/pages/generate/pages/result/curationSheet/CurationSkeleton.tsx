@@ -1,5 +1,5 @@
-import ArrowRightS from '@shared/assets/icons/ArrowRightS.svg?react';
-import ArrowLeftS from '@shared/assets/icons/prevDisabled.svg?react';
+import ArrowRightS from '@assets/icons/ArrowRightS.svg?react';
+import ArrowLeftS from '@assets/icons/prevDisabled.svg?react';
 
 import * as styles from './CurationSkeleton.css';
 

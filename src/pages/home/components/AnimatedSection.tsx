@@ -16,7 +16,7 @@ interface AnimatedSectionProps {
   duration?: number;
 }
 
-export const AnimatedSection = forwardRef<HTMLDivElement, AnimatedSectionProps>(
+const AnimatedSection = forwardRef<HTMLDivElement, AnimatedSectionProps>(
   (
     {
       children,
@@ -51,6 +51,8 @@ export const AnimatedSection = forwardRef<HTMLDivElement, AnimatedSectionProps>(
     );
   }
 );
+
+export default AnimatedSection;
 
 const getTransform = (type: string, isVisible: boolean) => {
   if (isVisible) return 'translateY(0) translateX(0) scale(1)';

@@ -1,6 +1,6 @@
 // 엑세스 토큰 만료 및 리프레시 토큰 재발급 테스트용 컴포넌트
 
-import { HTTPMethod, request } from '@/shared/apis/request';
+import { HTTPMethod, request } from '@apis/config/request';
 
 const TokenRefreshTest = () => {
   const getTokenTest = async () => {

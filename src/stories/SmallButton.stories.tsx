@@ -1,4 +1,4 @@
-import SmallButton from '@/pages/mypage/components/button/smallButton/SmallButton';
+import SmallButton from '@pages/mypage/components/button/smallButton/SmallButton';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import { TOAST_TYPE } from '@/shared/types/toast';
+import { TOAST_TYPE } from '@shared/types/toast';
 
 import ChargeButton from '@components/button/chargeButton/ChargeButton';
 

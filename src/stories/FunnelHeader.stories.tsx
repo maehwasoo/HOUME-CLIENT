@@ -1,7 +1,8 @@
-import FunnelHeader from '@/pages/imageSetup/components/header/FunnelHeader';
-import { PROGRESS_STEPS } from '@/shared/components/progressBarKey/ProgressBarKey.types';
+import FunnelHeader from '@pages/imageSetup/components/header/FunnelHeader';
 
 import HeaderImage from '@assets/images/cardExImg.svg?url';
+
+import { PROGRESS_STEPS } from '@components/progressBarKey/ProgressBarKey.types';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

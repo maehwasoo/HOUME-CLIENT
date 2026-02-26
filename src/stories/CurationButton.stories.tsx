@@ -1,4 +1,4 @@
-import CurationButton from '@/pages/mypage/components/button/curationButton/CurationButton';
+import CurationButton from '@pages/mypage/components/button/curationButton/CurationButton';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

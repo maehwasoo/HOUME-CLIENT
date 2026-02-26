@@ -1,17 +1,17 @@
 import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-import { animationTokens } from '@/shared/styles/tokens/animation.css';
-import { colorVars } from '@/shared/styles/tokens/color.css';
-import { zIndex } from '@/shared/styles/tokens/zIndex';
+import { fontStyle } from '@styles/fontStyle';
+import { animationTokens } from '@styles/tokens/animation.css';
+import { colorVars } from '@styles/tokens/color.css';
+import { zIndex } from '@styles/tokens/zIndex';
 
 export const wrapper = recipe({
   base: {
     display: 'flex',
     flexDirection: 'column',
-    width: '100%',
     paddingLeft: '2rem',
+    width: '100%',
     animation: animationTokens.fadeInUpFast,
   },
   variants: {
@@ -27,61 +27,61 @@ export const wrapper = recipe({
 });
 
 export const container = style({
+  position: 'relative',
   display: 'flex',
   justifyContent: 'space-between',
   width: '100%',
-  position: 'relative',
 });
 
 export const headerWapper = style({
-  display: 'flex',
-  flexDirection: 'column',
-  paddingTop: '1.2rem',
   position: 'relative',
   zIndex: zIndex.text,
-  flex: '1 1 auto', // 텍스트 영역이 필요한 만큼만 차지
+  display: 'flex',
+  flex: '1 1 auto',
+  flexDirection: 'column',
+  paddingTop: '1.2rem', // 텍스트 영역이 필요한 만큼만 차지
   minWidth: 0, // 텍스트가 넘치지 않도록
 });
 
 export const imgWrapper = style({
-  width: '14.4rem',
-  display: 'flex',
-  flexShrink: 0,
-  flexGrow: 0,
   position: 'relative',
   zIndex: zIndex.base,
+  display: 'flex',
+  flexGrow: 0,
+  flexShrink: 0,
+  width: '14.4rem',
 });
 
 export const progressWrapper = style({
   position: 'relative',
-  marginBottom: '2.4rem',
   zIndex: zIndex.text,
+  marginBottom: '2.4rem',
 });
 
 export const textWrapper = style({
+  position: 'relative',
+  zIndex: zIndex.text,
   display: 'flex',
   flexDirection: 'column',
   gap: '0.8rem',
   paddingRight: '1rem',
-  position: 'relative',
-  zIndex: zIndex.text,
 });
 
 export const title = style({
   ...fontStyle('heading_sb_20'),
-  color: colorVars.color.gray900,
   whiteSpace: 'nowrap',
+  color: colorVars.color.gray900,
 });
 
 export const detail = style({
   ...fontStyle('body_r_14'),
-  color: colorVars.color.gray600,
-  whiteSpace: 'pre', // 문자열에 개행(\n)이 있을 때만 줄바꿈함
+  whiteSpace: 'pre',
+  color: colorVars.color.gray600, // 문자열에 개행(\n)이 있을 때만 줄바꿈함
 });
 
 export const image = style({
-  width: '100%',
-  height: 'auto',
   objectFit: 'contain',
+  width: '100%',
   maxWidth: '14.4rem',
+  height: 'auto',
 });

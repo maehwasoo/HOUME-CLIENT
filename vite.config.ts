@@ -76,7 +76,6 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, 'src'),
       '@pages': path.resolve(__dirname, 'src/pages'),
-      '@layout': path.resolve(__dirname, 'src/layout'),
       '@routes': path.resolve(__dirname, 'src/routes'),
       '@stories': path.resolve(__dirname, 'src/stories'),
       '@shared': path.resolve(__dirname, 'src/shared'),
@@ -86,8 +85,9 @@ export default defineConfig({
       '@constants': path.resolve(__dirname, 'src/shared/constants'),
       '@hooks': path.resolve(__dirname, 'src/shared/hooks'),
       '@styles': path.resolve(__dirname, 'src/shared/styles'),
-      '@types': path.resolve(__dirname, 'src/shared/types'),
+      // @types는 npm @types 스코프와 충돌하므로 사용 불가 → @shared/types/ 사용
       '@utils': path.resolve(__dirname, 'src/shared/utils'),
+      '@store': path.resolve(__dirname, 'src/store'),
     },
   },
 });

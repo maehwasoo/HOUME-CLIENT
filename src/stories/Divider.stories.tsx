@@ -1,4 +1,4 @@
-import Divider from '@shared/components/divider/Divider';
+import Divider from '@components/divider/Divider';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

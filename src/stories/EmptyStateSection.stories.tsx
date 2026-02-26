@@ -1,6 +1,6 @@
 import { MemoryRouter } from 'react-router-dom';
 
-import EmptyStateSection from '@/pages/mypage/components/section/emptyState/EmptyStateSection';
+import EmptyStateSection from '@pages/mypage/components/section/emptyState/EmptyStateSection';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

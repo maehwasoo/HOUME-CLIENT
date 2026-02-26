@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import CurationButton from '@/pages/mypage/components/button/curationButton/CurationButton';
+import CurationButton from '@pages/mypage/components/button/curationButton/CurationButton';
 
 import CardImageUrl from '@assets/images/cardExImg.svg?url';
 

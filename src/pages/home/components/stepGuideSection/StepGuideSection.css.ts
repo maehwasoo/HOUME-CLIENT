@@ -1,29 +1,29 @@
 import { style } from '@vanilla-extract/css';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-import { colorVars } from '@/shared/styles/tokens/color.css';
+import { fontStyle } from '@styles/fontStyle';
+import { colorVars } from '@styles/tokens/color.css';
 
 export const wrapper = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  justifyContent: 'center',
   alignSelf: 'stretch',
+  justifyContent: 'center',
   width: '100%',
 });
 
 export const landingImage = style({
   display: 'flex',
   flexDirection: 'column',
+  alignItems: 'center',
   gap: '0.8rem',
   marginTop: '2.5rem',
   marginBottom: '4rem',
-  alignItems: 'center',
 });
 
 export const landingImageImg = style({
-  width: '37.5rem',
   objectFit: 'cover',
+  width: '37.5rem',
 });
 
 export const headingText = style({
@@ -38,11 +38,11 @@ export const headingText = style({
 });
 
 export const stepLandImage = style({
+  marginBottom: '4rem',
+  backgroundColor: colorVars.color.gray100,
+  objectFit: 'cover',
   width: '37.5rem',
   height: '22rem',
-  backgroundColor: colorVars.color.gray100,
-  marginBottom: '4rem',
-  objectFit: 'cover',
 });
 
 export const imageGap = style({
@@ -50,17 +50,17 @@ export const imageGap = style({
 });
 
 export const resultImageContainer = style({
-  width: '100%',
-  padding: '0 2rem',
   marginBottom: '4rem',
+  padding: '0 2rem',
+  width: '100%',
 });
 
 export const resultLandImage = style({
-  width: '100%',
+  boxSizing: 'border-box',
   aspectRatio: '3 / 2',
+  display: 'block',
+  borderRadius: '16px',
   backgroundColor: colorVars.color.gray100,
   objectFit: 'cover',
-  borderRadius: '16px',
-  display: 'block',
-  boxSizing: 'border-box',
+  width: '100%',
 });

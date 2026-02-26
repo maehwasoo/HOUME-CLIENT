@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-import * as styles from './CardImage.css.ts';
+import * as styles from './CardImage.css';
 
 interface CardImageProps extends React.ComponentProps<'div'> {
   src: string;

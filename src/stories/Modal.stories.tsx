@@ -1,4 +1,4 @@
-import CreditModal from '@/shared/components/overlay/modal/CreditModal';
+import CreditModal from '@components/overlay/modal/CreditModal';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

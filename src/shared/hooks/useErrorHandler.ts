@@ -2,12 +2,15 @@ import { useCallback, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { logLoginSocialViewToastLoginError } from '@/pages/login/utils/analytics';
-import { ROUTES } from '@/routes/paths';
-import { useToast } from '@/shared/components/toast/useToast';
-import type { ErrorType, PageContext } from '@/shared/types/error';
-import { ERROR_MESSAGES } from '@/shared/types/error';
-import { TOAST_TYPE } from '@/shared/types/toast';
+import { logLoginSocialViewToastLoginError } from '@pages/login/utils/analytics';
+
+import { ROUTES } from '@routes/paths';
+
+import type { ErrorType, PageContext } from '@shared/types/error';
+import { ERROR_MESSAGES } from '@shared/types/error';
+import { TOAST_TYPE } from '@shared/types/toast';
+
+import { useToast } from '@components/toast/useToast';
 
 /**
  * 중앙화된 에러 핸들러 훅

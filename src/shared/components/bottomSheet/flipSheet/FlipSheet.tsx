@@ -1,9 +1,8 @@
-import FilpButton from '@/shared/components/button/flipButton/FlipButton';
-
 import CtaButton from '@components/button/ctaButton/CtaButton';
+import FlipButton from '@components/button/flipButton/FlipButton';
 
 import * as styles from './FlipSheet.css';
-import { BottomSheetWrapper } from '../BottomSheetWrapper';
+import BottomSheetWrapper from '../BottomSheetWrapper';
 
 interface FlipSheetProps {
   onFlipClick: () => void;
@@ -15,7 +14,7 @@ interface FlipSheetProps {
   isFlipped: boolean;
 }
 
-export const FlipSheet = ({
+const FlipSheet = ({
   onFlipClick,
   onChooseClick,
   isOpen,
@@ -42,7 +41,8 @@ export const FlipSheet = ({
       </div>
 
       <div className={styles.buttonGroup}>
-        <FilpButton onClick={onFlipClick} isFlipped={false} />
+        {/* 의도적으로 isFlipped를 false로 고정 (버튼 색상용, 실제 flip 상태 저장과는 무관함) */}
+        <FlipButton onClick={onFlipClick} isFlipped={false} />
         <CtaButton onClick={onChooseClick}>선택하기</CtaButton>
       </div>
     </BottomSheetWrapper>

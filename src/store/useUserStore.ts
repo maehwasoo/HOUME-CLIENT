@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { useDetectionCacheStore } from '@pages/generate/stores/useDetectionCacheStore';
+import { useDetectionCacheStore } from '@shared/detection/stores/useDetectionCacheStore';
 
 interface UserStateTypes {
   accessToken: string | null;

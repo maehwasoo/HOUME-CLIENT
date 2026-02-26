@@ -1,6 +1,6 @@
 //ImageSetup 페이지 관련 Firebase Analytics 이벤트
 
-import { logAnalyticsEvent } from '@/shared/utils/analytics';
+import { logAnalyticsEvent } from '@utils/analytics';
 
 // ============================================================================
 // [퍼널 STEP1] 집 구조 선택 페이지 (HouseInfo) 관련 이벤트

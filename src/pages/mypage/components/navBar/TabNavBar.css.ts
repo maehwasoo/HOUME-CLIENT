@@ -1,38 +1,37 @@
 import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-
+import { fontStyle } from '@styles/fontStyle';
 import { colorVars } from '@styles/tokens/color.css';
 
 export const tabNavBar = style({
   display: 'flex',
-  width: '100%',
-  justifyContent: 'center',
   alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
 });
 
 export const tabButton = recipe({
   base: {
+    position: 'relative',
     display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    border: 'none',
+    backgroundColor: 'transparent',
+    cursor: 'pointer',
+    padding: 0,
     width: '100%',
     height: '5rem',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    position: 'relative',
-    padding: 0,
 
     '::after': {
-      content: '""',
       position: 'absolute',
+      right: 0,
       bottom: 0,
       left: 0,
-      right: 0,
       height: '0.2rem',
+      content: '""',
     },
   },
   variants: {

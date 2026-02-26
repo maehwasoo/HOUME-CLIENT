@@ -2,17 +2,19 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import CardCuration from '@/pages/mypage/components/card/cardCuration/CardCuration';
-import { useDetectionPrefetch } from '@/pages/mypage/hooks/useDetectionPrefetch';
-import { useMyPageImagesQuery } from '@/pages/mypage/hooks/useMypage';
+import { useMyPageImagesQuery } from '@pages/mypage/apis/queries/useMyPageImagesQuery';
+import CardCuration from '@pages/mypage/components/card/cardCuration/CardCuration';
+import { useDetectionPrefetch } from '@pages/mypage/hooks/useDetectionPrefetch';
 import type {
   MyPageImageHistory,
   MyPageUserData,
-} from '@/pages/mypage/types/apis/MyPage';
-import { logMyPageClickBtnImgCard } from '@/pages/mypage/utils/analytics';
-import { buildResultNavigationState } from '@/pages/mypage/utils/resultNavigation';
-import { ROUTES } from '@/routes/paths.ts';
-import Loading from '@/shared/components/loading/Loading';
+} from '@pages/mypage/types/apis/MyPage';
+import { logMyPageClickBtnImgCard } from '@pages/mypage/utils/analytics';
+import { buildResultNavigationState } from '@pages/mypage/utils/resultNavigation';
+
+import { ROUTES } from '@routes/paths';
+
+import Loading from '@components/loading/Loading';
 
 import * as styles from './GeneratedImagesSection.css';
 import EmptyStateSection from '../emptyState/EmptyStateSection';

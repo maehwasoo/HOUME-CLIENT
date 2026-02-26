@@ -1,4 +1,4 @@
-import { TOAST_TYPE } from '@/shared/types/toast';
+import { TOAST_TYPE } from '@shared/types/toast';
 
 import { useToast } from './useToast';
 

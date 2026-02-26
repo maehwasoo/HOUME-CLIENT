@@ -1,8 +1,7 @@
 import { style } from '@vanilla-extract/css';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-import { animationTokens } from '@/shared/styles/tokens/animation.css';
-
+import { fontStyle } from '@styles/fontStyle';
+import { animationTokens } from '@styles/tokens/animation.css';
 import { colorVars } from '@styles/tokens/color.css';
 
 const skeletonBlock = {
@@ -18,13 +17,13 @@ const skeletonBlock = {
 } as const;
 
 export const container = style({
-  width: '100%',
-  flex: '1 1 auto',
-  minHeight: 0,
   display: 'flex',
+  flex: '1 1 auto',
   flexDirection: 'column',
-  padding: '2rem 2rem 0',
   backgroundColor: colorVars.color.gray000,
+  padding: '2rem 2rem 0',
+  width: '100%',
+  minHeight: 0,
   overflow: 'hidden',
 });
 
@@ -35,19 +34,19 @@ export const title = style({
 
 export const filterSection = style({
   display: 'flex',
+  alignItems: 'center',
   gap: '0.4rem',
   marginTop: '0.8rem',
-  padding: '0.8rem 0',
-  alignItems: 'center',
   backgroundColor: colorVars.color.gray000,
+  padding: '0.8rem 0',
 
   overflowX: 'auto',
-  whiteSpace: 'nowrap',
+  scrollbarWidth: 'none',
 
   '::-webkit-scrollbar': {
     display: 'none',
   },
-  scrollbarWidth: 'none', // Firefox
+  whiteSpace: 'nowrap', // Firefox
   msOverflowStyle: 'none', // IE and Edge
 });
 
@@ -58,8 +57,7 @@ export const filterChipAnchor = style({
 
 // 카테고리 칩 스켈레톤 공통 스타일 정의
 export const filterSkeletonChip = style({
-  height: '3.6rem',
-  width: '6.9rem',
+  flexShrink: 0,
   borderRadius: '999px',
   background: `linear-gradient(
     90deg,
@@ -68,17 +66,18 @@ export const filterSkeletonChip = style({
     ${colorVars.color.gray200} 100%
   )`,
   backgroundSize: '200% 100%',
+  width: '6.9rem',
+  height: '3.6rem',
   animation: `${animationTokens.skeletonWave} 1.6s ease-in-out infinite`,
-  flexShrink: 0,
 });
 
 export const content = style({
-  flex: 1,
-  minHeight: 0,
   display: 'flex',
+  flex: 1,
   flexDirection: 'column',
-  overflowY: 'auto',
   marginTop: '0.8rem',
+  minHeight: 0,
+  overflowY: 'auto',
   overscrollBehavior: 'contain',
 
   selectors: {
@@ -102,26 +101,26 @@ export const categorySection = style({
 });
 
 export const gridbox = style({
-  width: '100%',
-  height: 'fit-content',
   display: 'grid',
   gridTemplateColumns: 'repeat(2, minmax(16.4rem, 1fr))',
-  columnGap: '1.1rem',
   rowGap: 0,
+  columnGap: '1.1rem',
+  width: '100%',
+  height: 'fit-content',
 });
 
 export const productSkeletonCard = style({
-  width: '100%',
   display: 'flex',
   flexDirection: 'column',
   paddingBottom: '2rem',
+  width: '100%',
 });
 
 export const productSkeletonImage = style({
   ...skeletonBlock,
-  width: '100%',
   aspectRatio: '1 / 1',
   borderRadius: '0.8rem',
+  width: '100%',
 });
 
 export const productSkeletonInfo = style({
@@ -133,60 +132,60 @@ export const productSkeletonInfo = style({
 
 export const productSkeletonBrand = style({
   ...skeletonBlock,
+  borderRadius: '0.2rem',
   width: '100%',
   height: '1.1rem',
-  borderRadius: '0.2rem',
 });
 
 export const productSkeletonName = style({
   ...skeletonBlock,
+  borderRadius: '0.2rem',
   width: '100%',
   height: '3.6rem',
-  borderRadius: '0.2rem',
 });
 
 export const productSkeletonPriceGroup = style({
-  width: '8.3rem',
   display: 'flex',
   flexDirection: 'column',
   gap: '0.3rem',
+  width: '8.3rem',
 });
 
 export const productSkeletonOldPrice = style({
   ...skeletonBlock,
+  borderRadius: '0.2rem',
   width: '100%',
   height: '1.2rem',
-  borderRadius: '0.2rem',
 });
 
 export const productSkeletonCurrentPrice = style({
   ...skeletonBlock,
+  borderRadius: '0.2rem',
   width: '100%',
   height: '1.7rem',
-  borderRadius: '0.2rem',
 });
 
 export const statusContainer = style({
-  width: '100%',
-  height: '100%',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  paddingBottom: '4.5rem',
   gap: '0.8rem',
+  paddingBottom: '4.5rem',
+  width: '100%',
+  height: '100%',
   textAlign: 'center',
   color: colorVars.color.gray500,
 });
 
 export const sectionStatusContainer = style({
-  width: '100%',
-  minHeight: '10rem',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
   gap: '0.8rem',
+  width: '100%',
+  minHeight: '10rem',
   textAlign: 'center',
   color: colorVars.color.gray500,
 });
@@ -204,11 +203,11 @@ export const statusMessageShimmer = style({
     ${colorVars.color.gray400} 50%,
     ${colorVars.color.gray600} 100%
   )`,
-  backgroundSize: '200% 100%',
   backgroundClip: 'text',
+  backgroundSize: '200% 100%',
+  animation: `${animationTokens.skeletonWave} 2s linear infinite`,
   WebkitBackgroundClip: 'text',
   WebkitTextFillColor: 'transparent',
-  animation: `${animationTokens.skeletonWave} 2s linear infinite`,
 });
 
 export const statusSubMessage = style({
@@ -219,11 +218,11 @@ export const statusSubMessage = style({
 
 export const statusButton = style({
   marginTop: '0.4rem',
-  padding: '0.8rem 1.6rem',
-  borderRadius: '999px',
   border: '1px solid',
+  borderRadius: '999px',
   borderColor: colorVars.color.gray300,
   backgroundColor: colorVars.color.gray000,
+  padding: '0.8rem 1.6rem',
   // 상태 안내 버튼 텍스트에 캡션_medium 12 적용
   ...fontStyle('caption_m_12'),
   color: colorVars.color.gray600,
@@ -236,10 +235,10 @@ export const loadingDots = style({
 });
 
 export const dot = style({
-  width: '0.4rem',
-  height: '0.4rem',
   borderRadius: '50%',
   backgroundColor: colorVars.color.gray500,
+  width: '0.4rem',
+  height: '0.4rem',
   animation: `${animationTokens.dotsBounce} 1.4s ease-in-out infinite`,
 
   selectors: {

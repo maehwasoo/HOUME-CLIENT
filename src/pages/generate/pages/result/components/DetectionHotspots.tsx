@@ -3,20 +3,20 @@
 // - 비고: 스팟 UI는 임시 제거(성능/UX)
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import { useDetectionCache } from '@pages/generate/hooks/useDetectionCache';
-import { useFurnitureHotspots } from '@pages/generate/hooks/useFurnitureHotspots';
 import { useCurationStore } from '@pages/generate/stores/useCurationStore';
+
+import { useDetectionCache } from '@shared/detection/hooks/useDetectionCache';
+import { useFurnitureHotspots } from '@shared/detection/hooks/useFurnitureHotspots';
+import type { FurnitureHotspot } from '@shared/detection/hooks/useFurnitureHotspots';
+import type { DetectionCacheEntry } from '@shared/detection/stores/useDetectionCacheStore';
+import type { ProcessedDetections } from '@shared/detection/types';
 import {
   filterAllowedDetectedObjects,
   mapHotspotsToDetectedObjects,
-} from '@pages/generate/utils/detectedObjectMapper';
-import { logFurniturePipelineEvent } from '@pages/generate/utils/furniturePipelineMonitor';
+} from '@shared/detection/utils/detectedObjectMapper';
+import { logFurniturePipelineEvent } from '@shared/detection/utils/furniturePipelineMonitor';
 
-import * as styles from './DetectionHotspots.css.ts';
-
-import type { FurnitureHotspot } from '@pages/generate/hooks/useFurnitureHotspots';
-import type { DetectionCacheEntry } from '@pages/generate/stores/useDetectionCacheStore';
-import type { ProcessedDetections } from '@pages/generate/types/detection';
+import * as styles from './DetectionHotspots.css';
 
 const isSameHotspotArray = (
   prev: FurnitureHotspot[] | null,
@@ -180,6 +180,8 @@ const DetectionHotspots = ({
         crossOrigin="anonymous"
         src={imageUrl}
         alt="generated"
+        loading="lazy"
+        decoding="async"
         className={styles.image({ mirrored, loaded: isImageLoaded })}
         onLoad={() => setIsImageLoaded(true)}
       />

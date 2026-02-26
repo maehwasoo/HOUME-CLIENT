@@ -4,7 +4,6 @@
     "paths": {
       "@/*": ["src/*"],
       "@pages/*": ["src/pages/*"],
-      "@layout/*": ["src/layout/*"],
       "@routes/*": ["src/routes/*"],
       "@stories/*": ["src/stories/*"],
       "@shared/*": ["src/shared/*"],
@@ -14,8 +13,8 @@
       "@constants/*": ["src/shared/constants/*"],
       "@hooks/*": ["src/shared/hooks/*"],
       "@styles/*": ["src/shared/styles/*"],
-      "@types/*": ["src/shared/types/*"],
-      "@utils/*": ["src/shared/utils/*"]
+      "@utils/*": ["src/shared/utils/*"],
+      "@store/*": ["src/store/*"]
     },
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2022",

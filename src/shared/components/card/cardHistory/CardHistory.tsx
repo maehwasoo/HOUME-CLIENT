@@ -1,6 +1,6 @@
-import CtaButton from '@shared/components/button/ctaButton/CtaButton.tsx';
+import CtaButton from '@components/button/ctaButton/CtaButton';
 
-import * as styles from './CardHistory.css.ts';
+import * as styles from './CardHistory.css';
 
 interface CardHistoryProps extends React.ComponentProps<'div'> {
   src: string;

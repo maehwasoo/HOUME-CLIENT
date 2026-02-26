@@ -1,8 +1,10 @@
 import { useState } from 'react';
 
-import { useMyPageUser } from '@/pages/mypage/hooks/useMypage';
-import { useToast } from '@/shared/components/toast/useToast';
-import { TOAST_TYPE } from '@/shared/types/toast';
+import { useMyPageUserQuery } from '@pages/mypage/apis/queries/useMyPageUserQuery';
+
+import { TOAST_TYPE } from '@shared/types/toast';
+
+import { useToast } from '@components/toast/useToast';
 
 export const useCreditCheck = () => {
   const { notify } = useToast();
@@ -11,7 +13,7 @@ export const useCreditCheck = () => {
   // CTA 클릭 시 크레딧 체크 수행 및 CTA Button enable/disable 결정(checkCredit 함수)
 
   // 크레딧 정보 가져오기
-  const { data: userData } = useMyPageUser();
+  const { data: userData } = useMyPageUserQuery();
 
   const creditCount = userData?.CreditCount ?? 0;
   const hasCredit = creditCount > 0; // 버튼 활성화 조건용

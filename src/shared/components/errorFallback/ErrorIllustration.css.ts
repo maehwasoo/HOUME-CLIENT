@@ -1,20 +1,20 @@
 import { style, keyframes } from '@vanilla-extract/css';
 
-import { zIndex } from '@/shared/styles/tokens/zIndex';
+import { zIndex } from '@styles/tokens/zIndex';
 
 export const wrapper = style({
+  aspectRatio: '822 / 768',
   position: 'relative',
-  width: '100%',
-  aspectRatio: '822 / 768', // 원본 프레임 비율
+  width: '100%', // 원본 프레임 비율
 });
 
 export const layer = style({
   position: 'absolute',
   inset: 0,
-  width: '100%',
-  height: '100%',
   objectFit: 'contain',
-  pointerEvents: 'none', // 클릭 차단
+  pointerEvents: 'none',
+  width: '100%',
+  height: '100%', // 클릭 차단
 });
 
 export const houseLayer = style([layer, { zIndex: zIndex.illustration }]); // layer + zIndex 값
@@ -27,6 +27,6 @@ const float = keyframes({
 
 // 왕복 애니메이션
 export const floatLoop = style({
-  animation: `${float} 3s ease-in-out infinite`,
   willChange: 'transform',
+  animation: `${float} 3s ease-in-out infinite`,
 });

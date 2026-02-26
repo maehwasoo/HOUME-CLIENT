@@ -1,12 +1,12 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
-import TitleNavBar from '@/shared/components/navBar/TitleNavBar';
+import TitleNavBar from '@components/navBar/TitleNavBar';
 
 import { PRIVACY_POLICY } from './constants/policies';
 import * as styles from './PolicyPage.css';
 
-const PrivacyPolicy = () => {
+const PrivacyPolicyPage = () => {
   return (
     <div className={styles.container}>
       <TitleNavBar title="개인정보 처리방침" />
@@ -24,4 +24,4 @@ const PrivacyPolicy = () => {
   );
 };
 
-export default PrivacyPolicy;
+export default PrivacyPolicyPage;

@@ -1,4 +1,4 @@
-import { CardReview } from '@shared/components/cardReview/CardReview';
+import CardReview from '@components/cardReview/CardReview';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

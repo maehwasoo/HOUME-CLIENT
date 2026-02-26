@@ -1,4 +1,4 @@
-import * as styles from './FloorCard.css.ts';
+import * as styles from './FloorCard.css';
 
 interface FloorPlanItemProps extends React.ComponentProps<'div'> {
   src: string;

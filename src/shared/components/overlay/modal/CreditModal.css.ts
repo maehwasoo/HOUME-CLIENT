@@ -1,8 +1,8 @@
 import { style, keyframes } from '@vanilla-extract/css';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-import { colorVars } from '@/shared/styles/tokens/color.css';
-import { zIndex } from '@/shared/styles/tokens/zIndex';
+import { fontStyle } from '@styles/fontStyle';
+import { colorVars } from '@styles/tokens/color.css';
+import { zIndex } from '@styles/tokens/zIndex';
 
 const fadeIn = keyframes({
   from: { opacity: 0 },
@@ -11,40 +11,40 @@ const fadeIn = keyframes({
 
 export const backdrop = style({
   position: 'fixed',
+  zIndex: zIndex.backdrop,
   inset: 0,
   background: 'rgba(0, 0, 0, 0.2)',
-  zIndex: zIndex.backdrop,
   animation: `${fadeIn} 0.45s cubic-bezier(0.22, 1, 0.36, 1)`,
 });
 
 export const container = style({
-  backgroundColor: colorVars.color.gray000,
   position: 'fixed',
+  zIndex: zIndex.modal,
   top: '50%',
   left: '50%',
-  transform: 'translate(-50%, -50%)',
-  zIndex: zIndex.modal,
   display: 'flex',
   flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: '3.2rem',
+  transform: 'translate(-50%, -50%)',
+  willChange: 'opacity',
+  border: 0,
+  borderRadius: '20px',
+  backgroundColor: colorVars.color.gray000,
+  padding: '3.2rem 0 1.6rem 0',
   width: '30rem',
   height: '42.6rem',
-  padding: '3.2rem 0 1.6rem 0',
-  justifyContent: 'center',
-  alignItems: 'center',
-  gap: '3.2rem',
-  borderRadius: '20px',
-  border: 0,
   animation: `${fadeIn} 0.45s cubic-bezier(0.22, 1, 0.36, 1)`,
-  willChange: 'opacity',
 });
 
 export const info = style({
   display: 'flex',
-  width: '22.8rem',
   flexDirection: 'column',
-  justifyContent: 'center',
   alignItems: 'center',
+  justifyContent: 'center',
   gap: '1.6rem',
+  width: '22.8rem',
   whiteSpace: 'pre-line', // 문자열에 개행(\n)이 있을 때만 줄바꿈함
 });
 
@@ -57,13 +57,13 @@ export const title = style({
 
 export const creditBox = style({
   display: 'flex',
-  minWidth: '11.5rem',
-  height: '3.6rem',
-  padding: '0 1.6rem',
   alignItems: 'center',
   gap: '0.8rem',
   borderRadius: '6px',
   background: colorVars.color.gray100,
+  padding: '0 1.6rem',
+  minWidth: '11.5rem',
+  height: '3.6rem',
 });
 
 export const label = style({
@@ -77,9 +77,9 @@ export const count = style({
 });
 
 export const creditImg = style({
+  background: colorVars.color.gray100,
   width: '22.8rem',
   height: '12rem',
-  background: colorVars.color.gray100,
 });
 
 export const buttonBox = style({
@@ -92,10 +92,10 @@ export const buttonBox = style({
 
 export const exitButton = style({
   display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   width: '4.8rem',
   height: '4.8rem',
-  justifyContent: 'center',
-  alignItems: 'center',
 });
 
 export const exitButtonText = style({

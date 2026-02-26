@@ -1,8 +1,8 @@
 import { keyframes, style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-import { colorVars } from '@/shared/styles/tokens/color.css';
+import { fontStyle } from '@styles/fontStyle';
+import { colorVars } from '@styles/tokens/color.css';
 const shimmer = keyframes({
   '0%': { transform: 'translateX(-100%)' },
   '100%': { transform: 'translateX(100%)' },
@@ -10,27 +10,27 @@ const shimmer = keyframes({
 
 export const cardcontainer = recipe({
   base: {
+    boxSizing: 'border-box',
+    position: 'relative',
+    outline: 'none',
+    borderRadius: '1.6rem',
+    cursor: 'pointer',
     width: '100%',
     minWidth: '16rem',
     maxWidth: '19.4rem',
     overflow: 'hidden',
-    borderRadius: '1.6rem',
-    outline: 'none',
-    boxSizing: 'border-box',
-    position: 'relative',
-    cursor: 'pointer',
     selectors: {
       '&::after': {
-        content: '',
         position: 'absolute',
         top: 0,
         left: 0,
-        width: '100%',
-        height: '100%',
+        transition: 'background-color 0.3s ease',
+        borderRadius: '16px',
         backgroundColor: 'transparent',
         pointerEvents: 'none',
-        borderRadius: '16px',
-        transition: 'background-color 0.3s ease',
+        width: '100%',
+        height: '100%',
+        content: '',
       },
     },
   },
@@ -41,7 +41,7 @@ export const cardcontainer = recipe({
         outline: 'none',
         selectors: {
           '&::after': {
-            backgroundColor: 'rgba(0, 0, 0, 0.30)',
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
           },
         },
       },
@@ -55,8 +55,8 @@ export const cardcontainer = recipe({
         },
       },
       disabled: {
-        cursor: 'not-allowed',
         outline: 'none',
+        cursor: 'not-allowed',
         selectors: {
           '&::after': {
             backgroundColor: 'transparent',
@@ -71,12 +71,12 @@ export const cardcontainer = recipe({
 });
 
 export const cardimg = style({
-  width: '100%',
-  height: '100%',
+  boxSizing: 'border-box',
+  display: 'block',
   objectFit: 'cover',
   objectPosition: 'center',
-  display: 'block',
-  boxSizing: 'border-box',
+  width: '100%',
+  height: '100%',
 });
 
 export const disabledcardimg = style([
@@ -89,37 +89,37 @@ export const disabledcardimg = style([
 export const checkbox = recipe({
   base: {
     position: 'absolute',
+    zIndex: 1,
     top: '1rem',
     right: '1rem',
-    width: '2rem',
-    height: '2rem',
-    borderRadius: '9999px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1,
-    ...fontStyle('body_m_14'),
     transition:
       'width 0.2s ease, height 0.2s ease, background-color 0.2s ease, color 0.2s ease',
+    borderRadius: '9999px',
+    width: '2rem',
+    ...fontStyle('body_m_14'),
+    height: '2rem',
   },
   variants: {
     state: {
       default: {
-        backgroundColor: colorVars.color.gray000,
         border: 'none',
+        backgroundColor: colorVars.color.gray000,
         color: 'transparent',
       },
       pressed: {
-        backgroundColor: colorVars.color.gray000,
         border: 'none',
+        backgroundColor: colorVars.color.gray000,
         color: 'transparent',
       },
       selected: {
-        backgroundColor: colorVars.color.primary,
         border: 'none',
-        color: colorVars.color.gray000,
+        backgroundColor: colorVars.color.primary,
         width: '2.4rem',
         height: '2.4rem',
+        color: colorVars.color.gray000,
       },
       disabled: {
         display: 'none',
@@ -129,24 +129,24 @@ export const checkbox = recipe({
 });
 
 export const skeletonCardImg = style({
-  width: '100%',
-  height: '100%',
+  position: 'relative',
   borderRadius: '12px',
   backgroundColor: colorVars.color.gray100,
-  position: 'relative',
+  width: '100%',
+  height: '100%',
   overflow: 'hidden',
 
   selectors: {
     '&::after': {
-      content: '""',
       position: 'absolute',
       top: 0,
       left: 0,
-      height: '100%',
-      width: '60%',
       background:
         'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+      width: '60%',
+      height: '100%',
       animation: `${shimmer} 1s infinite`,
+      content: '""',
     },
   },
 });

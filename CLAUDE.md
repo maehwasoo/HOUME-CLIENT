@@ -1,347 +1,166 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+이 파일은 HOUME 프로젝트에서 작업할 때 참고하는 가이드입니다.
 
-## Development Commands
+## 개발 명령어
 
 ```bash
-# Development
-pnpm dev              # Start development server with HMR
-pnpm build            # Production build with Vite
-pnpm preview          # Preview production build locally
-
-# Code Quality
-pnpm lint             # Run ESLint with strict rules
-pnpm format           # Format code with Prettier
-pnpm format:check     # Check if code is properly formatted
-
-# Testing & Documentation
-pnpm storybook        # Start Storybook development server
-pnpm build-storybook  # Build static Storybook for deployment
-
-# Setup
-pnpm prepare          # Setup Husky git hooks (run after clone)
+pnpm dev              # 개발 서버 (HMR)
+pnpm build            # 프로덕션 빌드 (tsc -b && vite build)
+pnpm lint             # ESLint 검사
+pnpm lint --fix       # ESLint 자동 수정
+pnpm format           # Prettier 포맷팅
+pnpm storybook        # Storybook 개발 서버
 ```
 
-## Architecture Overview
+## 기술 스택
 
-**HOUME** is an AI-powered interior design platform built with React 19 + TypeScript + Vite. The codebase uses feature-based organization with domain-driven design principles.
+- **React 19** + TypeScript + Vite
+- **Vanilla Extract** (zero-runtime CSS-in-JS) + 디자인 토큰 시스템
+- **TanStack Query v5** (서버 상태) + **Zustand** (클라이언트 상태)
+- **React Router DOM 7** (Data API, 객체 기반 라우트)
+- **@use-funnel** (온보딩 퍼널 위자드)
+- **pnpm** 패키지 매니저
 
-### Tech Stack
-
-- **Frontend**: React 19.1.0 + TypeScript 5.8.3 + Vite 7.0.0
-- **Styling**: Vanilla Extract (zero-runtime CSS-in-JS) + CSS Variables design system
-- **State Management**: Zustand (auth) + TanStack Query (server state) + @use-funnel (wizards)
-- **Routing**: React Router DOM 7.6.3 with Data APIs
-- **Package Manager**: pnpm 10.18.2 (required)
-- **Node Version**: 22.x (specified in .nvmrc)
-
-### Key Folder Structure
+## 프로젝트 구조
 
 ```
 src/
-├── pages/                    # Feature-based organization
-│   ├── home/                # Landing page with animations
-│   ├── imageSetup/          # Onboarding funnel (formerly "onboarding")
-│   ├── generate/            # AI image generation workflow
-│   ├── login/ & signup/     # Authentication (Kakao OAuth)
-│   └── mypage/              # User profile and history
-├── shared/                  # Cross-cutting concerns
-│   ├── apis/               # HTTP client setup and utilities
-│   ├── components/         # Reusable UI components (documented in Storybook)
-│   ├── styles/             # Design tokens and global styles
-│   ├── hooks/              # Custom React hooks
-│   └── types/              # Shared TypeScript definitions
-└── routes/                 # Routing configuration with object-based router
+├── pages/                    # Feature 기반 조직
+│   ├── home/                # 랜딩 페이지
+│   ├── imageSetup/          # 온보딩 퍼널 (HouseInfo → FloorPlan → InteriorStyle → ActivityInfo)
+│   ├── generate/            # AI 이미지 생성 (loading/, result/, start/)
+│   ├── login/ & signup/     # 인증 (카카오 OAuth)
+│   └── mypage/              # 프로필, 히스토리, 설정
+├── shared/                  # 공통 모듈
+│   ├── apis/config/         # axiosInstance, request<T>(), queryClient
+│   ├── components/          # 공통 UI 컴포넌트
+│   ├── constants/           # queryKeys factory, apiEndpoints, ROUTES
+│   ├── detection/           # ONNX 가구 탐지 시스템
+│   ├── hooks/               # 공통 훅
+│   ├── styles/              # 디자인 토큰 (colorVars, fontStyle)
+│   └── types/               # 공통 타입
+├── store/                   # 전역 Zustand 스토어
+└── routes/                  # 라우터 설정, RootLayout, paths.ts
 ```
 
-Each `pages/` feature contains its complete domain:
+각 Feature 폴더 내부 구조:
 
-- `apis/` - Feature-specific API calls
-- `components/` - Feature UI components
-- `hooks/` - Business logic hooks
-- `stores/` - Local Zustand stores
-- `types/` - Feature TypeScript definitions
-
-### Path Aliases (Configured in vite.config.ts)
-
-```typescript
-@/           → src/
-@pages       → src/pages/
-@layout      → src/layout/
-@routes      → src/routes/
-@stories     → src/stories/
-@shared      → src/shared/
-@apis        → src/shared/apis/
-@assets      → src/shared/assets/
-@components  → src/shared/components/
-@constants   → src/shared/constants/
-@hooks       → src/shared/hooks/
-@styles      → src/shared/styles/
-@types       → src/shared/types/
-@utils       → src/shared/utils/
+```
+pages/{feature}/
+├── apis/queries/            # bare API 함수 + useQuery 훅
+├── apis/mutations/          # bare API 함수 + useMutation 훅
+├── components/              # Feature UI 컴포넌트
+├── hooks/                   # Feature 비즈니스 로직 훅
+├── stores/                  # Feature Zustand 스토어
+├── types/                   # Feature 타입
+└── utils/                   # Feature 유틸
 ```
 
-### State Management Patterns
+## Path Alias
 
-- **Server State**: TanStack Query for API data with caching and synchronization
-- **Global Client State**: Zustand stores (primarily for authentication with localStorage persistence)
-- **Funnel/Wizard State**: @use-funnel for multi-step workflows (onboarding, generation)
-- **Local Component State**: React hooks (useState, useReducer)
+가장 짧은 alias를 사용한다.
 
-### Authentication Architecture
+| Alias          | 경로                     | 예시                                         |
+| -------------- | ------------------------ | -------------------------------------------- |
+| `@pages/`      | `src/pages/`             | `@pages/generate/pages/loading/...`          |
+| `@routes/`     | `src/routes/`            | `@routes/paths`                              |
+| `@store/`      | `src/store/`             | `@store/useUserStore`                        |
+| `@shared/`     | `src/shared/`            | `@shared/detection/...`, `@shared/types/...` |
+| `@apis/`       | `src/shared/apis/`       | `@apis/config/request`                       |
+| `@assets/`     | `src/shared/assets/`     | `@assets/icons/logoIcon.svg?react`           |
+| `@components/` | `src/shared/components/` | `@components/navBar/TitleNavBar`             |
+| `@constants/`  | `src/shared/constants/`  | `@constants/queryKey`                        |
+| `@hooks/`      | `src/shared/hooks/`      | `@hooks/useCreditGuard`                      |
+| `@styles/`     | `src/shared/styles/`     | `@styles/tokens/color.css`                   |
+| `@utils/`      | `src/shared/utils/`      | `@utils/history`                             |
 
-- **Kakao OAuth** integration for social login
-- **JWT tokens** with automatic refresh via axios interceptors in `shared/apis/`
-- **Protected routes** using authentication guards
-- **Auth state** managed in Zustand store with persistence
+**금지**: `@/` prefix, `@types/` alias (npm 스코프 충돌), 3단계 이상 상대경로
 
-### Styling System
+## 핵심 컨벤션
 
-- **Vanilla Extract** for type-safe CSS-in-JS (zero runtime)
-- **Design tokens** system in `shared/styles/` (colors, fonts, spacing, animations)
-- **Component documentation** in Storybook with visual regression testing
-- **Global styles** and CSS variables for consistent theming
+### 네이밍
 
-### Development Workflow
+- 폴더: `camelCase` / 컴포넌트: `PascalCase.tsx` / 스타일: `PascalCase.css.ts`
+- 페이지: `{Feature}Page` (e.g. `HomePage`, `LoginPage`)
+- Query 훅: `use{Subject}Query` / Mutation 훅: `use{Subject}Mutation`
+- API 함수: `{httpMethod}{Subject}` (e.g. `getFloorPlan`, `postHousingSelection`)
+- 상수: `UPPER_SNAKE_CASE` (e.g. `API_ENDPOINT`, `ROUTES`)
 
-- **Git Flow** with feature branches (e.g., `feature/issue-number/#123`)
-- **Husky pre-commit hooks** run lint-staged for code quality
-- **2+ reviewer approval** required for PR merges to main branch
-- **Issue-driven development** with numbered branches matching GitHub issues
+### Export
 
-### Testing Strategy
+- **컴포넌트 (.tsx)**: `default export`
+- **훅/유틸/상수/타입**: `named export`
+- **Barrel export (index.ts) 금지**, **mixed export 금지**
 
-- **Vitest** for unit testing
-- **Storybook** for component development and visual testing
-- **Playwright** for browser testing of Storybook stories
-- **Chromatic** for visual regression testing
+### Import
 
-### Build Configuration
+- 확장자 생략 (`.tsx`, `.ts` 붙이지 않음)
+- `.css.ts` 파일은 `.css`로 import (`import * as styles from './Button.css'`)
+- import 순서: ESLint `import/order`로 자동 정렬 (`pnpm lint --fix`)
 
-- **Vite plugins**: Vanilla Extract, SVGR (SVG as components)
-- **TypeScript strict mode** with comprehensive path mapping
-- **Code splitting ready** architecture for production optimization
-- **Vercel deployment** with SPA routing configuration
-
-## Key Architectural Patterns
-
-### API Layer Architecture
-
-The codebase uses a centralized API system with strict type safety:
-
-- **Request Wrapper**: All API calls use `shared/apis/request.ts` wrapper function
-- **Endpoint Constants**: API endpoints are centralized in `shared/constants/apiEndpoints.ts` with type safety
-- **Response Structure**: Standardized `BaseResponse<T>` wrapper for all API responses
-- **Error Handling**: Centralized error handling with automatic token refresh in axios interceptors
-
-**API Call Pattern:**
+### API / 데이터 페칭
 
 ```typescript
-// Always use the request wrapper with explicit typing
-export const getFloorPlan = async (): Promise<FloorPlanResponse['data']> => {
-  return request<FloorPlanResponse['data']>({
+// 1파일 = 1 API 작업 (bare 함수 + 훅 colocate)
+export const getXxx = async (): Promise<XxxResponse> => {
+  return request<XxxResponse>({
     method: HTTPMethod.GET,
-    url: API_ENDPOINT.IMAGE_SETUP.FLOOR_PLAN,
+    url: API_ENDPOINT.XXX.YYY,
+  });
+};
+
+export const useXxxQuery = () => {
+  return useQuery({
+    queryKey: queryKeys.xxx.yyy(),
+    queryFn: getXxx,
   });
 };
 ```
 
-**Token Refresh Mechanism:**
+- 모든 API 호출은 `request<T>()` 래퍼 경유 (직접 `axiosInstance` 사용 금지)
+- Query Key는 `queryKeys` factory 사용 (`src/shared/constants/queryKey.ts`)
+- **`isPending` 사용** (TanStack Query v5, `isLoading` 사용 금지)
+  - `useState` 기반 로딩 상태는 `isLoading` 허용
 
-- Axios interceptors automatically detect `ACCESS_TOKEN_EXPIRED` errors (code check in response)
-- Attempts token refresh via `/reissue` endpoint with `withCredentials: true`
-- Updates both `localStorage` and Zustand store synchronously
-- Retries original request with new token automatically
-- Throws `SESSION_EXPIRED` error if refresh fails (handled by UI layer)
+### 경로
 
-### ImageSetup Funnel Architecture
+- 모든 `navigate()`, `<Navigate>` 경로는 `ROUTES` 상수 사용 (`@routes/paths`)
+- 하드코딩 문자열 경로 금지
+- 예외: `window.location.href`는 에러 폴백(React Router 사용 불가)에서만 허용
 
-The main user onboarding flow (`pages/imageSetup/`) is a 4-step wizard:
+### Vanilla Extract 스타일링
 
-1. **HouseInfo**: Basic housing information (type, structure, area)
-2. **FloorPlan**: Floor plan template selection with mirror toggle
-3. **InteriorStyle**: Mood board selection for interior styling
-4. **ActivityInfo**: Activity type and furniture selection with validation rules
+- **색상**: `colorVars` 사용 (`@styles/tokens/color.css`), 하드코딩 `#hex`/`rgba()` 금지
+- **폰트**: `fontStyle()` 헬퍼 사용 (`@styles/fontStyle`), raw fontSize 등 금지
+- **CSS 속성 순서**: concentric order (ESLint 플러그인으로 자동 정렬)
 
-Each step uses `@use-funnel/react-router` for state management and navigation, with context passed between steps and strong TypeScript validation.
+### Cross-Feature Import
 
-**Funnel Pattern:**
+- Feature는 다른 Feature를 직접 import할 수 없음 (shared 모듈 사용)
+- `shared/`는 `pages/`를 import할 수 없음
 
-- Each step has strict input/output type definitions in `types/funnel/steps.ts`
-- Validation rules centralized in `types/funnel/validation.ts` (e.g., `HOUSE_INFO_VALIDATION`, `MAIN_ACTIVITY_VALIDATION`)
-- Business logic encapsulated in step-specific hooks (`hooks/use[Step].ts`)
+### 인증
 
-**Funnel History Management:**
+- 카카오 OAuth + JWT 토큰
+- 자동 refresh: axios 인터셉터 (`shared/apis/config/axiosInstance.ts`)
+- 인증 상태: `useUserStore` (Zustand, localStorage persistence)
+- 보호된 라우트: `ProtectedRoute` 컴포넌트
 
-```typescript
-// Use history.replace() to update current step without browser history
-history.replace('FloorPlan', data);
-// Use history.push() to navigate to next step with browser history
-history.push('InteriorStyle', data);
-```
+### Lazy Loading
 
-- `history.replace()`: Updates current step data without creating browser back button entry
-- `history.push()`: Navigates to next step, allows browser back button to return to previous step
-- This pattern preserves user input when navigating back while preventing duplicate history entries
+- **Eager**: HomePage, LoginPage, KakaoCallbackPage, ImageSetupPage, LoadingPage, ResultPage
+- **Lazy**: `route.lazy` 패턴으로 동적 import (SignupPage, MyPage, SettingPage 등)
 
-### Component Organization
+## Git 워크플로우
 
-- **Feature Components**: Specific to pages, co-located with business logic
-- **Shared Components**: Reusable UI components documented in Storybook
-- **No Barrel Exports**: Direct imports prevent bundling issues
-- **Vanilla Extract**: All styling is type-safe with zero runtime CSS-in-JS
+- **브랜치**: `develop`에서 분기, `develop`으로 merge
+- **브랜치 네이밍**: `type/description/#issue-number` (e.g. `feat/login-page/#12`)
+- **커밋 컨벤션**: `type: title` (e.g. `feat: 로그인 기능 구현`)
+  - types: `feat`, `fix`, `refactor`, `style`, `design`, `chore`, `docs`, `test`, `rename`, `remove`
+- **PR**: 2+ reviewer 승인 필요
 
-## Development Guidelines
+## 참고 문서
 
-### Naming Conventions
-
-Following the team's established conventions from the README:
-
-**Files & Folders:**
-
-- Components: `PascalCase.tsx` (e.g., `Button.tsx`, `UserProfile.tsx`)
-- Folders: `camelCase` (e.g., `userProfile/`, `sharedComponents/`)
-- Styles: `*.css.ts` for Vanilla Extract (e.g., `Button.css.ts`)
-- Hooks: `use*.ts` (e.g., `useUserList.ts`, `useModal.ts`)
-- API functions: `{resource}Api.ts` (e.g., `userApi.ts`) - though this project uses per-feature `apis/` folders
-- Types: `*.ts` (e.g., `user.ts`, `common.ts`)
-
-**Code:**
-
-- Variables/Functions: `camelCase` (e.g., `userName`, `getUserData`)
-- Constants: `BIG_SNAKE_CASE` (e.g., `MAX_LENGTH`, `API_KEY`)
-- Components/Classes: `PascalCase` (e.g., `RankTable`, `UserProfile`)
-- Functions: Use verb + noun (e.g., `getUserData`, `createNewUser`, `handleButtonClick`)
-- Boolean functions: `is/has/can` prefix (e.g., `isLoggedIn`, `hasPermission`)
-- API functions: HTTP method + noun (e.g., `getUserList`, `postComment`, `deleteArticle`)
-- TanStack Query hooks: `use + action + resource + Query/Mutation` (e.g., `useGetUserListQuery`, `useCreateUserMutation`)
-
-### Type Safety Requirements
-
-- **Explicit Return Types**: All async functions must specify `Promise<T>` return types
-- **API Type Consistency**: Use `request<T>()` wrapper with explicit generic types
-- **No Any Types**: Strict TypeScript configuration prohibits `any` usage
-- **Interface vs Type**: Use interfaces for objects/API responses, types for unions/functions
-- **Props Types**: Component props should be named `ComponentNameProps` (e.g., `ButtonProps`)
-- **No Prefixes**: Avoid `I`, `T`, or `Type` prefixes/suffixes (except generic `T`)
-
-### Import/Export Patterns
-
-**No Barrel Exports**: The codebase deliberately avoids index.ts re-exports to prevent bundling issues.
-
-```typescript
-// ❌ Bad - Don't create barrel exports
-// components/index.ts
-export { Button } from './Button';
-export { Input } from './Input';
-
-// ✅ Good - Direct imports with path aliases
-import Button from '@components/Button/Button';
-import Input from '@components/Input/Input';
-```
-
-**Path Aliases**: Always prefer path aliases over relative imports:
-
-```typescript
-// ✅ Good
-import { getUserList } from '@apis/user';
-import Button from '@components/Button';
-
-// ❌ Bad
-import { getUserList } from '../../../shared/apis/user';
-```
-
-**Default Exports**: Single-component files use default exports:
-
-```typescript
-// Button.tsx
-export default function Button() {}
-
-// Usage
-import Button from '@components/Button';
-```
-
-### Code Quality Standards
-
-- **ESLint Configuration**: Strict rules with React hooks exhaustive deps checking
-- **Prettier Formatting**: Automated formatting with pre-commit hooks
-- **Import Organization**: Auto-sorted imports with path alias preference (via ESLint plugin)
-- **Commit Conventions**: Conventional commits with 2+ reviewer approval required
-- **Pre-commit Hooks**: Husky + lint-staged runs ESLint --fix and Prettier on staged files
-
-### Query Key Pattern
-
-The codebase uses a simple object pattern for TanStack Query keys:
-
-```typescript
-// shared/constants/queryKey.ts
-export const QUERY_KEY = {
-  LANDING: 'landing',
-  MYPAGE_USER: 'mypage-user',
-  MYPAGE_IMAGES: 'mypage-images',
-  // Simple string constants, no factory pattern needed for this app
-};
-
-// Usage in hooks
-const { data } = useQuery({
-  queryKey: [QUERY_KEY.MYPAGE_USER],
-  queryFn: getUserData,
-});
-```
-
-Note: Unlike larger applications, this codebase uses simple string constants rather than factory functions for query keys. Dynamic parameters (like IDs) are appended as additional array elements when needed.
-
-## Git Workflow
-
-### Branch Strategy
-
-- **Main branches**: `main` (production) and `develop` (integration/development base)
-- **Feature branches**: Branch from `develop`, merge back to `develop`
-- **Branch naming**: `type/description/#issue-number`
-  - Examples: `feat/login-page/#12`, `fix/button-style/#25`
-
-### Issue-Driven Development
-
-- **Every feature requires a GitHub issue** created before implementation
-- **Issue format**: `[type] title` (e.g., `[feat] 로그인 페이지 구현`)
-- **PR format**: `[type] title` (e.g., `[feat] 로그인 페이지 구현`)
-
-### Commit Convention
-
-**Format**: `type: title` (e.g., `feat: 로그인 기능 구현`)
-
-**Types:**
-
-- `feat`: New feature
-- `fix`: Bug fix
-- `refactor`: Code refactoring (no behavior change)
-- `style`: Code formatting, semicolons, etc. (no business logic change)
-- `design`: UI/CSS changes
-- `chore`: Build scripts, configs, dependencies (no production code change)
-- `docs`: Documentation
-- `test`: Tests
-- `comment`: Comments
-- `rename`: Renaming files/folders
-- `remove`: File deletion
-
-### Pull Request Process
-
-- **2+ reviewer approval required** before merge
-- **Review acknowledgment**: Leave emoji reactions after reviewing
-- **Re-request review**: After addressing feedback, re-request review from reviewers
-- **PR destination**: Feature branches merge into `develop`, `develop` merges into `main` for releases
-
-## Known Technical Debt
-
-- `src/routes/router.tsx:11` - 라우트 lazy loading 필요
-- `src/pages/generate/pages/loading/LoadingPage.tsx:53` - 커스텀 훅 분리 필요
-- `src/pages/imageSetup/types/funnel/steps.ts:8,42` - 타입 DRY 리팩토링 필요
-- `src/shared/apis/queryClient.ts:15` - staleTime 검토 필요
-
-# important-instruction-reminders
-
-Do what has been asked; nothing more, nothing less.
-NEVER create files unless they're absolutely necessary for achieving your goal.
-ALWAYS prefer editing an existing file to creating a new one.
-NEVER proactively create documentation files (\*.md) or README files. Only create documentation files if explicitly requested by the User.
+- [컨벤션 상세 가이드](docs/reference/conventions.md) — 모든 컨벤션의 상세 규칙, 예시, ESLint 설정
+- [변경 기록](docs/changes/README.md) — 주요 리팩토링/기능 변경 이력

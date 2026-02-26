@@ -1,4 +1,4 @@
-import SkeletonCardImage from '@/shared/components/card/cardImage/SkeletonCardImage';
+import SkeletonCardImage from '@components/card/cardImage/SkeletonCardImage';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

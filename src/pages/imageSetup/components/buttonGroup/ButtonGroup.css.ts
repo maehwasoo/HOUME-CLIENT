@@ -1,8 +1,8 @@
 import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
-import { fontStyle } from '@/shared/styles/fontStyle';
-import { colorVars } from '@/shared/styles/tokens/color.css';
+import { fontStyle } from '@styles/fontStyle';
+import { colorVars } from '@styles/tokens/color.css';
 
 export const container = recipe({
   base: {
@@ -25,16 +25,16 @@ export const title = recipe({
   variants: {
     titleSize: {
       small: {
-        textAlign: 'start',
-        ...fontStyle('body_m_14'),
-        color: colorVars.color.gray700,
         marginBottom: '1rem',
+        ...fontStyle('body_m_14'),
+        textAlign: 'start',
+        color: colorVars.color.gray700,
       },
       large: {
-        textAlign: 'start',
-        ...fontStyle('title_sb_16'),
-        color: colorVars.color.gray800,
         marginBottom: '1.6rem',
+        ...fontStyle('title_sb_16'),
+        textAlign: 'start',
+        color: colorVars.color.gray800,
       },
     },
   },

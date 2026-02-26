@@ -2,23 +2,23 @@ import { keyframes } from '@vanilla-extract/css';
 
 const fadeInUp = keyframes({
   '0%': {
-    opacity: 0,
     transform: 'translateY(20px)',
+    opacity: 0,
   },
   '100%': {
-    opacity: 1,
     transform: 'translateY(0)',
+    opacity: 1,
   },
 });
 
 const slideLeft = keyframes({
   '0%': {
-    opacity: 0,
     transform: 'translateX(100%)',
+    opacity: 0,
   },
   '100%': {
-    opacity: 1,
     transform: 'translateX(0)',
+    opacity: 1,
   },
 });
 
@@ -39,3 +39,7 @@ export const animationTokens = {
     '40%': { opacity: 1 },
   }),
 } as const;
+
+// 스켈레톤 로딩 그라데이션 (skeletonWave와 함께 사용)
+export const SKELETON_GRADIENT =
+  'linear-gradient(90deg, #ececec 8%, #f0f0f0 18%, #ececec 33%)';

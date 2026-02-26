@@ -1,32 +1,33 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
+import { ErrorBoundary } from 'react-error-boundary';
 import { Navigate, useNavigate } from 'react-router-dom';
 
-import { ROUTES } from '@/routes/paths';
-import DislikeButton from '@/shared/components/button/likeButton/DislikeButton';
-import LikeButton from '@/shared/components/button/likeButton/LikeButton';
-import Loading from '@/shared/components/loading/Loading';
-import { useToast } from '@/shared/components/toast/useToast';
-import {
-  ERROR_CODES,
-  FALLBACK_TRIGGER_CODES,
-} from '@/shared/constants/apiErrorCode';
-import { useErrorHandler } from '@/shared/hooks/useErrorHandler';
-import { TOAST_TYPE } from '@/shared/types/toast';
-
-import {
-  useStackData,
-  usePostCarouselLikeMutation,
-  usePostCarouselHateMutation,
-  useGenerateImageApi,
-  useFallbackImage,
-} from '@pages/generate/hooks/useGenerate';
+import { usePostCarouselHateMutation } from '@pages/generate/apis/mutations/useCarouselHateMutation';
+import { usePostCarouselLikeMutation } from '@pages/generate/apis/mutations/useCarouselLikeMutation';
+import { useGenerateImageMutation } from '@pages/generate/apis/mutations/useGenerateImageMutation';
+import { useFallbackImageQuery } from '@pages/generate/apis/queries/useFallbackImageQuery';
+import { useStackDataQuery } from '@pages/generate/apis/queries/useStackDataQuery';
 import { useGenerateStore } from '@pages/generate/stores/useGenerateStore';
+import type { GenerateImageRequest } from '@pages/generate/types/generate';
+
+import { ROUTES } from '@routes/paths';
+
+import { TOAST_TYPE } from '@shared/types/toast';
+
+import DislikeButton from '@components/button/likeButton/DislikeButton';
+import LikeButton from '@components/button/likeButton/LikeButton';
+import FeatureErrorFallback from '@components/errorFallback/FeatureErrorFallback';
+import Loading from '@components/loading/Loading';
+import TitleNavBar from '@components/navBar/TitleNavBar';
+import { useToast } from '@components/toast/useToast';
+
+import { ERROR_CODES, FALLBACK_TRIGGER_CODES } from '@constants/apiErrorCode';
+
+import { useErrorHandler } from '@hooks/useErrorHandler';
 
 import * as styles from './LoadingPage.css';
 import ProgressBar from './ProgressBar';
-
-import type { GenerateImageRequest } from '@pages/generate/types/generate';
 
 const ANIMATION_DURATION = 600; // 캐러셀 애니메이션 지속 시간 (ms)
 const SESSION_STORAGE_KEY = 'generate_image_request'; // sessionStorage 키
@@ -91,12 +92,12 @@ const LoadingPage = () => {
   const [isNormalEntry, setIsNormalEntry] = useState(true);
 
   // 일반 이미지 생성 API(A/B 테스트 분류에 따라 이미지 1장/2장 생성)
-  const { mutate: mutateGenerateImage } = useGenerateImageApi();
+  const { mutate: mutateGenerateImage } = useGenerateImageMutation();
 
   // 폴백 이미지 생성 API (일반 API 실패 시 사용)
-  // isNormalEntry가 변경되면 컴포넌트 리렌더링 -> useFallbackImage 실행 -> useQuery가 enabled값 감지
+  // isNormalEntry가 변경되면 컴포넌트 리렌더링 -> useFallbackImageQuery 실행 -> useQuery가 enabled값 감지
   // -> true: 폴백 API 요청, false: 쿼리 실행 X
-  useFallbackImage(requestData?.houseId || 0, !isNormalEntry, (error) => {
+  useFallbackImageQuery(requestData?.houseId || 0, !isNormalEntry, (error) => {
     handleError(error, 'loading');
   });
 
@@ -116,15 +117,15 @@ const LoadingPage = () => {
 
   const {
     data: currentImages,
-    isLoading,
+    isPending,
     isError,
-  } = useStackData(currentPage, {
+  } = useStackDataQuery(currentPage, {
     enabled: !!requestData, // requestData가 있을 때만 활성화
     onSuccess: () => setCurrentIndex(0), // 새 페이지 로드 시 첫 이미지부터 시작
     onError: (err) => handleError(err, 'loading'),
   });
 
-  const { data: nextImages } = useStackData(currentPage + 1, {
+  const { data: nextImages } = useStackDataQuery(currentPage + 1, {
     enabled: !!currentImages && !!requestData,
   });
 
@@ -168,7 +169,7 @@ const LoadingPage = () => {
 
   const hasError =
     isError ||
-    (!isLoading && !currentImages) ||
+    (!isPending && !currentImages) ||
     !currentImages ||
     currentImages.length === 0;
 
@@ -199,7 +200,7 @@ const LoadingPage = () => {
 
   const handleVote = (isLike: boolean) => {
     // 로딩 중 or 투표 중에는 투표(vote) 불가
-    if (isLoading || isVoting) return;
+    if (isPending || isVoting) return;
 
     if (!currentImage) return;
     setIsVoting(true);
@@ -259,84 +260,92 @@ const LoadingPage = () => {
     return <Navigate to={ROUTES.IMAGE_SETUP} replace />;
   }
 
-  // 로딩 스피너
-  if (isLoading) {
-    return <Loading />;
-  }
-
   return (
-    <div className={styles.wrapper}>
-      <section className={styles.infoSection}>
-        <ProgressBar onComplete={handleProgressComplete} />
-        <p className={styles.infoText}>
-          마음에 드는 가구를 선택하면, <br />
-          하우미가 사용자님의 취향을 더 잘 이해할 수 있어요!
-        </p>
-      </section>
+    <main className={styles.pageLayout}>
+      <TitleNavBar
+        title="스타일링 이미지 생성"
+        isBackIcon={false}
+        isLoginBtn={false}
+      />
+      <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
+        {isPending ? (
+          <Loading />
+        ) : (
+          <div className={styles.wrapper}>
+            <section className={styles.infoSection}>
+              <ProgressBar onComplete={handleProgressComplete} />
+              <p className={styles.infoText}>
+                마음에 드는 가구를 선택하면, <br />
+                하우미가 사용자님의 취향을 더 잘 이해할 수 있어요!
+              </p>
+            </section>
 
-      <section className={styles.carouselSection}>
-        <div className={styles.imageContainer}>
-          {hasError ? (
-            // 에러 상황: 에러 메시지 표시
-            <div className={styles.errorMessage}>
-              <p>이미지를 불러올 수 없습니다</p>
-            </div>
-          ) : (
-            // 정상 상황: 이미지 캐러셀 표시
-            <>
-              {nextImage && (
-                <div
-                  key={`next-${currentPage + 1}-${nextImage.carouselId}`}
-                  className={`${styles.nextImageArea} ${
-                    animating ? styles.nextImageAreaActive : ''
-                  }`}
-                >
-                  <img
-                    src={nextImage.url}
-                    alt={`다음 가구 이미지 ${nextImage.carouselId}`}
-                    className={styles.imageStyle}
-                  />
+            <section className={styles.carouselSection}>
+              <div className={styles.imageContainer}>
+                {hasError ? (
+                  // 에러 상황: 에러 메시지 표시
+                  <div className={styles.errorMessage}>
+                    <p>이미지를 불러올 수 없습니다</p>
+                  </div>
+                ) : (
+                  // 정상 상황: 이미지 캐러셀 표시
+                  <>
+                    {nextImage && (
+                      <div
+                        key={`next-${currentPage + 1}-${nextImage.carouselId}`}
+                        className={`${styles.nextImageArea} ${
+                          animating ? styles.nextImageAreaActive : ''
+                        }`}
+                      >
+                        <img
+                          src={nextImage.url}
+                          alt={`다음 가구 이미지 ${nextImage.carouselId}`}
+                          className={styles.imageStyle}
+                        />
+                      </div>
+                    )}
+
+                    {currentImage && (
+                      <div
+                        key={`current-${currentPage}-${currentImage.carouselId}`}
+                        className={`${styles.currentImageArea} ${
+                          animating ? styles.currentImageAreaOut : ''
+                        }`}
+                      >
+                        <img
+                          src={currentImage.url}
+                          alt={`현재 가구 이미지 ${currentImage.carouselId}`}
+                          className={styles.imageStyle}
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+
+              {!hasError && (
+                <div className={styles.buttonGroup}>
+                  <LikeButton
+                    onClick={() => handleVote(true)}
+                    isSelected={selected === 'like'}
+                    disabled={isVoting || animating}
+                  >
+                    좋아요
+                  </LikeButton>
+                  <DislikeButton
+                    onClick={() => handleVote(false)}
+                    isSelected={selected === 'dislike'}
+                    disabled={isVoting || animating}
+                  >
+                    별로예요
+                  </DislikeButton>
                 </div>
               )}
-
-              {currentImage && (
-                <div
-                  key={`current-${currentPage}-${currentImage.carouselId}`}
-                  className={`${styles.currentImageArea} ${
-                    animating ? styles.currentImageAreaOut : ''
-                  }`}
-                >
-                  <img
-                    src={currentImage.url}
-                    alt={`현재 가구 이미지 ${currentImage.carouselId}`}
-                    className={styles.imageStyle}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        {!hasError && (
-          <div className={styles.buttonGroup}>
-            <LikeButton
-              onClick={() => handleVote(true)}
-              isSelected={selected === 'like'}
-              disabled={isVoting || animating}
-            >
-              좋아요
-            </LikeButton>
-            <DislikeButton
-              onClick={() => handleVote(false)}
-              isSelected={selected === 'dislike'}
-              disabled={isVoting || animating}
-            >
-              별로예요
-            </DislikeButton>
+            </section>
           </div>
         )}
-      </section>
-    </div>
+      </ErrorBoundary>
+    </main>
   );
 };
 

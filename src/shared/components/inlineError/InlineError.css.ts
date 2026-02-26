@@ -4,14 +4,14 @@ import { fontStyle } from '@styles/fontStyle';
 import { colorVars } from '@styles/tokens/color.css';
 
 export const container = style({
-  width: '100%',
-  flex: 1,
   display: 'flex',
+  flex: 1,
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  paddingBottom: '4.5rem',
   gap: '0.8rem',
+  paddingBottom: '4.5rem',
+  width: '100%',
   textAlign: 'center',
 });
 
@@ -22,12 +22,12 @@ export const message = style({
 
 export const retryButton = style({
   marginTop: '0.4rem',
-  padding: '0.8rem 1.6rem',
-  borderRadius: '999px',
   border: '1px solid',
+  borderRadius: '999px',
   borderColor: colorVars.color.gray300,
   backgroundColor: colorVars.color.gray000,
-  ...fontStyle('caption_m_12'),
-  color: colorVars.color.gray600,
   cursor: 'pointer',
+  ...fontStyle('caption_m_12'),
+  padding: '0.8rem 1.6rem',
+  color: colorVars.color.gray600,
 });

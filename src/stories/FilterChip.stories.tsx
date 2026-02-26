@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import FilterChip from '@/pages/generate/components/filterChip/FilterChip';
+import FilterChip from '@pages/generate/components/filterChip/FilterChip';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

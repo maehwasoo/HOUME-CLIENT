@@ -3,18 +3,20 @@ import { useEffect, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { useNavigate } from 'react-router-dom';
 
-import { ROUTES } from '@/routes/paths';
-import FeatureErrorFallback from '@/shared/components/errorFallback/FeatureErrorFallback';
-import InlineError from '@/shared/components/inlineError/InlineError';
-import Loading from '@/shared/components/loading/Loading';
-import TitleNavBar from '@/shared/components/navBar/TitleNavBar';
-import { useUserStore } from '@/store/useUserStore';
+import { ROUTES } from '@routes/paths';
 
+import { useUserStore } from '@store/useUserStore';
+
+import FeatureErrorFallback from '@components/errorFallback/FeatureErrorFallback';
+import InlineError from '@components/inlineError/InlineError';
+import Loading from '@components/loading/Loading';
+import TitleNavBar from '@components/navBar/TitleNavBar';
+
+import { useMyPageUserQuery } from './apis/queries/useMyPageUserQuery';
 import TabNavBar from './components/navBar/TabNavBar';
 import GeneratedImagesSection from './components/section/generatedImages/GeneratedImagesSection';
 import ProfileSection from './components/section/profile/ProfileSection';
 import SavedItemsSection from './components/section/savedItems/SavedItemsSection';
-import { useMyPageUser } from './hooks/useMypage';
 import * as styles from './MyPage.css';
 
 const MyPage = () => {
@@ -39,10 +41,10 @@ const MyPage = () => {
 
   const {
     data: userData,
-    isLoading: isUserLoading,
+    isPending: isUserLoading,
     isError: isUserError,
     refetch,
-  } = useMyPageUser({
+  } = useMyPageUserQuery({
     enabled: isLoggedIn,
   });
 

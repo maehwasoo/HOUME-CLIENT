@@ -1,10 +1,10 @@
-import LargeFilled from '@components/button/largeFilledButton/LargeFilledButton';
+import LargeFilledButton from '@components/button/largeFilledButton/LargeFilledButton';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-const meta: Meta<typeof LargeFilled> = {
-  title: 'shared/button/LargeFilled',
-  component: LargeFilled,
+const meta: Meta<typeof LargeFilledButton> = {
+  title: 'shared/button/LargeFilledButton',
+  component: LargeFilledButton,
   tags: ['autodocs'],
   parameters: {
     docs: {
@@ -17,7 +17,7 @@ const meta: Meta<typeof LargeFilled> = {
 };
 
 export default meta;
-type Story = StoryObj<typeof LargeFilled>;
+type Story = StoryObj<typeof LargeFilledButton>;
 
 export const Active: Story = {
   args: {

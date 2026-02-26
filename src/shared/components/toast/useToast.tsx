@@ -2,8 +2,9 @@ import { useCallback, useRef } from 'react';
 
 import { type Id, toast, type ToastOptions } from 'react-toastify';
 
-import Toast from '@/shared/components/toast/Toast';
-import { TOAST_TYPE, toastStyle, type ToastType } from '@/shared/types/toast';
+import { TOAST_TYPE, toastStyle, type ToastType } from '@shared/types/toast';
+
+import Toast from '@components/toast/Toast';
 
 interface UseToastParams {
   text: string;
