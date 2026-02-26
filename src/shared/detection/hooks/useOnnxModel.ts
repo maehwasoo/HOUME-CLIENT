@@ -17,8 +17,8 @@ import {
 } from '@shared/detection/utils/obj365Furniture';
 import { isIOSLikeDevice } from '@shared/utils/platform';
 
-type OnnxModule = typeof import('onnxruntime-web');
-type InferenceSession = import('onnxruntime-web').InferenceSession;
+type OnnxModule = typeof import('onnxruntime-web/wasm');
+type InferenceSession = import('onnxruntime-web/wasm').InferenceSession;
 
 type ModelLoadResult = {
   session: InferenceSession;
@@ -35,7 +35,7 @@ type ModelCacheEntry = {
 
 type ProgressCallback = (value: number) => void;
 
-const WASM_ASSET_BASE = 'https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/';
+const WASM_ASSET_BASE = '/onnxruntime/';
 const modelCache = new Map<string, ModelCacheEntry>();
 
 const ensureModelBufferIsBinary = (arrayBuffer: ArrayBuffer) => {
@@ -77,7 +77,7 @@ const loadOnnxModel = async (
   const isIOS = isIOSLikeDevice();
 
   onProgress?.(10);
-  const ort = await import('onnxruntime-web');
+  const ort = await import('onnxruntime-web/wasm');
   onProgress?.(20);
   ort.env.wasm.wasmPaths = WASM_ASSET_BASE;
   if (isIOS) {
@@ -92,7 +92,7 @@ const loadOnnxModel = async (
   onProgress?.(70);
   const session = await ort.InferenceSession.create(arrayBuffer, {
     executionProviders: ['wasm'],
-    graphOptimizationLevel: isIOS ? 'basic' : 'all',
+    graphOptimizationLevel: isIOS ? 'disabled' : 'all',
     ...(isIOS
       ? {
           executionMode: 'sequential',

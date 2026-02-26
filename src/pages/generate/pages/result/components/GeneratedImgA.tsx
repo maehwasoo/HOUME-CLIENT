@@ -295,7 +295,9 @@ const GeneratedImgA = ({
                   imageUrl={image.imageUrl}
                   mirrored={image.isMirror}
                   // 결과 페이지 플래그로 추론 on/off 제어
-                  shouldInferHotspots={shouldInferHotspots}
+                  shouldInferHotspots={
+                    shouldInferHotspots && index === currentSlideIndex
+                  }
                   cachedDetection={cachedDetection}
                 />
               </SwiperSlide>

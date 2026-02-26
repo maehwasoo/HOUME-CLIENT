@@ -180,6 +180,8 @@ const DetectionHotspots = ({
         crossOrigin="anonymous"
         src={imageUrl}
         alt="generated"
+        loading="lazy"
+        decoding="async"
         className={styles.image({ mirrored, loaded: isImageLoaded })}
         onLoad={() => setIsImageLoaded(true)}
       />

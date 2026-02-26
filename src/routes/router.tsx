@@ -10,8 +10,6 @@
 
 import { createBrowserRouter } from 'react-router-dom';
 
-import LoadingPage from '@pages/generate/pages/loading/LoadingPage';
-import ResultPage from '@pages/generate/pages/result/ResultPage';
 import HomePage from '@pages/home/HomePage';
 import ImageSetupPage from '@pages/imageSetup/ImageSetupPage';
 import KakaoCallbackPage from '@pages/login/KakaoCallbackPage';
@@ -75,11 +73,21 @@ const protectedRoutes = [
   },
   {
     path: ROUTES.GENERATE,
-    element: <LoadingPage />,
+    lazy: async () => {
+      const { default: LoadingPage } = await import(
+        '@pages/generate/pages/loading/LoadingPage'
+      );
+      return { Component: LoadingPage };
+    },
   },
   {
     path: ROUTES.GENERATE_RESULT,
-    element: <ResultPage />,
+    lazy: async () => {
+      const { default: ResultPage } = await import(
+        '@pages/generate/pages/result/ResultPage'
+      );
+      return { Component: ResultPage };
+    },
   },
   {
     path: ROUTES.MYPAGE,
