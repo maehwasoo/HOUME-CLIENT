@@ -1,6 +1,6 @@
 import { MemoryRouter } from 'react-router-dom';
 
-import CurationSkeleton from '@pages/generate/pages/result/curationSheet/CurationSkeleton';
+import CurationSkeleton from '@pages/generate/pages/result/curationSection/CurationSkeleton';
 
 import TitleNavBar from '@components/navBar/TitleNavBar';
 

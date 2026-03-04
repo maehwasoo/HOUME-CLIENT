@@ -15,7 +15,7 @@ import {
 import { useCurationCacheStore } from '@pages/generate/stores/useCurationCacheStore';
 import { useCurationStore } from '@pages/generate/stores/useCurationStore';
 import type { FurnitureProductsInfoResponse } from '@pages/generate/types/furniture';
-import { logResultImgClickCurationSheetFilter } from '@pages/generate/utils/analytics';
+import { logResultImgClickCurationSectionFilter } from '@pages/generate/utils/analytics';
 import { useGetJjymListQuery } from '@pages/mypage/apis/queries/useGetJjymListQuery';
 
 import { ROUTES } from '@routes/paths';
@@ -26,7 +26,7 @@ import { queryKeys } from '@constants/queryKey';
 
 import CardProductItem from './CardProductItem';
 import { normalizeProductsForCard } from './curationProducts';
-import * as styles from './CurationSheet.css';
+import * as styles from './CurationSection.css';
 
 const FILTER_SKELETON_CHIP_COUNT = 4;
 const PRODUCT_SKELETON_CARD_COUNT = 4;
@@ -36,7 +36,7 @@ type NormalizedProductsByCategory = Record<
   ReturnType<typeof normalizeProductsForCard>
 >;
 
-interface CurationSheetProps {
+interface CurationSectionProps {
   groupId?: number | null;
 }
 
@@ -45,7 +45,7 @@ interface CurationSheetProps {
  * - 감지된 가구 카테고리/상품을 고정 영역에 표시
  * - 그룹 기반 진입 시 groupId를 통해 캐시·프리패치 범위를 확정
  */
-const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
+const CurationSection = ({ groupId = null }: CurationSectionProps) => {
   const activeImageId = useActiveImageId();
   const imageState = useActiveImageCurationState();
   const selectedCategoryId = imageState?.selectedCategoryId ?? null;
@@ -286,7 +286,7 @@ const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
   const handleCategorySelect = (categoryId: number) => {
     if (activeImageId === null) return;
     if (selectedCategoryId !== categoryId) {
-      logResultImgClickCurationSheetFilter(variant);
+      logResultImgClickCurationSectionFilter(variant);
       selectCategory(activeImageId, categoryId);
     }
     scrollToCategorySection(categoryId);
@@ -508,4 +508,4 @@ const CurationSheet = ({ groupId = null }: CurationSheetProps) => {
   );
 };
 
-export default CurationSheet;
+export default CurationSection;

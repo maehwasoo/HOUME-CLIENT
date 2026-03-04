@@ -24,7 +24,7 @@ export const useSheetSnapState = () => {
   );
 };
 
-export const useOpenCurationSheet = () => {
+export const useOpenCurationSection = () => {
   const { setSnapState } = useSheetSnapState();
   return (next: CurationSnapState) => {
     setSnapState(next);
