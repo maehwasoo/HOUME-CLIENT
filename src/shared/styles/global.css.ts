@@ -1,7 +1,8 @@
 import { globalStyle, createGlobalTheme } from '@vanilla-extract/css';
 
-import { colorVars } from '@styles/tokens/color.css';
-import { fontVars } from '@styles/tokens/font.css';
+import { colorVars } from '@styles/tokensV2/color.css';
+import { fontVars } from '@styles/tokensV2/font.css';
+import { unitVars } from '@styles/tokensV2/unit.css';
 import '@styles/reset.css';
 import '@styles/fontFace.css';
 
@@ -19,14 +20,15 @@ import '@styles/fontFace.css';
 /**
  * 반응형 레이아웃을 위한 전역 CSS 변수
  * 모바일 앱과 같은 고정 너비 레이아웃 구현
+ * minWidth/maxWidth는 unit 토큰(dimension) 단일 소스 참조
  *
- * @property minWidth - 최소 너비 (iPhone SE 기준)
- * @property maxWidth - 최대 너비 (대형 모바일 기준)
+ * @property minWidth - unit.dimension.wMin (37.5rem)
+ * @property maxWidth - unit.dimension.wMax (44rem)
  * @property height - 뷰포트 높이 (동적 뷰포트 단위 사용)
  */
 export const layoutVars = createGlobalTheme(':root', {
-  minWidth: '375px',
-  maxWidth: '440px',
+  minWidth: unitVars.unit.dimension.wMin,
+  maxWidth: unitVars.unit.dimension.wMax,
   height: '100dvh',
   titleNavBarHeight: '4.8rem',
 });
@@ -97,7 +99,7 @@ globalStyle('body', {
   scrollbarWidth: 'none',
   scrollBehavior: 'smooth',
   color: colorVars.color.gray999,
-  fontFamily: fontVars.family.pretendard,
+  fontFamily: fontVars.font.family.pretendard,
   WebkitFontSmoothing: 'antialiased',
   MozOsxFontSmoothing: 'grayscale',
   '@media': {
