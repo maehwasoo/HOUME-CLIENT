@@ -1,0 +1,151 @@
+import { style } from '@vanilla-extract/css';
+import { recipe } from '@vanilla-extract/recipes';
+
+import { colorVars } from '@styles/tokensV2/color.css';
+import { fontVars } from '@styles/tokensV2/font.css';
+import { unitVars } from '@styles/tokensV2/unit.css';
+
+export const container = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  width: '100%',
+  minWidth: unitVars.unit.dimension.wMin,
+  maxWidth: unitVars.unit.dimension.wMax,
+  height: '4.8rem',
+});
+
+export const leftContainer = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingRight: unitVars.unit.gapPadding['500'],
+  paddingLeft: unitVars.unit.gapPadding['500'],
+  height: '100%',
+});
+
+export const logoImage = style({
+  display: 'block',
+  width: '7.2rem',
+  height: '1.6rem',
+});
+
+export const rightContainer = recipe({
+  base: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+  },
+  variants: {
+    hasAction: {
+      false: {
+        paddingRight: unitVars.unit.gapPadding['200'],
+        paddingLeft: unitVars.unit.gapPadding['200'],
+        width: '8rem',
+      },
+      true: {
+        paddingRight: unitVars.unit.gapPadding['200'],
+        paddingLeft: unitVars.unit.gapPadding['200'],
+      },
+    },
+  },
+});
+
+export const actionContainer = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingRight: unitVars.unit.gapPadding['200'],
+  paddingLeft: unitVars.unit.gapPadding['200'],
+  height: '100%',
+});
+
+export const generateButton = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: unitVars.unit.gapPadding['100'],
+  transition: 'transform 120ms ease',
+  border: 0,
+  borderRadius: unitVars.unit.radius.full,
+  backgroundColor: colorVars.color.fill.primary,
+  paddingRight: unitVars.unit.gapPadding['300'],
+  paddingLeft: unitVars.unit.gapPadding['300'],
+  height: '4rem',
+  selectors: {
+    '&:active': {
+      transform: 'scale(0.95)',
+    },
+  },
+});
+
+export const icon16 = style({
+  flexShrink: 0,
+  width: '1.6rem',
+  height: '1.6rem',
+});
+
+export const generateLabel = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  paddingRight: unitVars.unit.gapPadding['100'],
+  paddingLeft: unitVars.unit.gapPadding['100'],
+  whiteSpace: 'nowrap',
+  color: colorVars.color.text.inverse,
+  ...fontVars.font.title_sb_14,
+});
+
+export const loginButton = recipe({
+  base: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'transform 120ms ease',
+    border: 0,
+    background: 'transparent',
+    paddingRight: unitVars.unit.gapPadding['100'],
+    paddingLeft: unitVars.unit.gapPadding['100'],
+    ...fontVars.font.body_r_14,
+    selectors: {
+      '&:active': {
+        transform: 'scale(0.95)',
+      },
+    },
+  },
+  variants: {
+    page: {
+      landing: {
+        color: colorVars.color.text.primary,
+      },
+      home: {
+        color: colorVars.color.text.inverse,
+      },
+    },
+  },
+});
+
+export const profileButton = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transition: 'transform 120ms ease',
+  border: 0,
+  background: 'transparent',
+  padding: unitVars.unit.gapPadding['100'],
+  width: '4.8rem',
+  height: '4.8rem',
+  selectors: {
+    '&:active': {
+      transform: 'scale(0.95)',
+    },
+  },
+});
+
+export const profileImage = style({
+  display: 'block',
+  borderRadius: unitVars.unit.radius.full,
+  width: '4rem',
+  height: '4rem',
+});

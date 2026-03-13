@@ -1,0 +1,82 @@
+import imgProfile from '@assets/v2/images/ImgProfile.svg';
+import logotypeBlack from '@assets/v2/images/LogotypeBlack.svg';
+import logotypeWhite from '@assets/v2/images/LogotypeWhite.svg';
+import IcnDoubleStar from '@assets/v2/svg/IcnDoubleStar.svg?react';
+
+import * as styles from './LogoNavBar.css';
+
+type AuthSlot = 'none' | 'login' | 'profile';
+type Page = 'landing' | 'home';
+
+interface LogoNavBarProps extends React.ComponentProps<'nav'> {
+  page?: Page;
+  showGenerateButton?: boolean;
+  authSlot?: AuthSlot;
+  onGenerateClick?: () => void;
+  onLoginClick?: () => void;
+  onProfileClick?: () => void;
+}
+
+const LogoNavBar = ({
+  page = 'home',
+  showGenerateButton = false,
+  authSlot = 'none',
+  onGenerateClick,
+  onLoginClick,
+  onProfileClick,
+  ...props
+}: LogoNavBarProps) => {
+  const logoSrc = page === 'home' ? logotypeBlack : logotypeWhite;
+  const hasAction = showGenerateButton || authSlot !== 'none';
+
+  return (
+    <nav className={styles.container} {...props}>
+      <div className={styles.leftContainer}>
+        <img src={logoSrc} alt="Houme" className={styles.logoImage} />
+      </div>
+      <div className={styles.rightContainer({ hasAction })}>
+        {showGenerateButton && (
+          // TODO: 공컴 button으로 교체
+          <button
+            type="button"
+            className={styles.generateButton}
+            onClick={onGenerateClick}
+          >
+            <IcnDoubleStar className={styles.icon16} aria-hidden="true" />
+            <span className={styles.generateLabel}>이미지 생성</span>
+          </button>
+        )}
+        {authSlot === 'login' && (
+          <div className={styles.actionContainer}>
+            <button
+              type="button"
+              className={styles.loginButton({ page })}
+              onClick={onLoginClick}
+            >
+              로그인
+            </button>
+          </div>
+        )}
+        {authSlot === 'profile' && (
+          <div className={styles.actionContainer}>
+            <button
+              type="button"
+              aria-label="프로필"
+              className={styles.profileButton}
+              onClick={onProfileClick}
+            >
+              <img
+                src={imgProfile}
+                alt=""
+                aria-hidden="true"
+                className={styles.profileImage}
+              />
+            </button>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+};
+
+export default LogoNavBar;

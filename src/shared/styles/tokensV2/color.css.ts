@@ -47,6 +47,7 @@ const semantics = createGlobalTheme(':root', {
     },
     fill: {
       brand: primitives.color.purple600,
+      dim: primitives.color.gray999_a50,
       disabled: primitives.color.gray300,
       inverse: primitives.color.gray000,
       inverseSecondary: primitives.color.gray000_a80,
