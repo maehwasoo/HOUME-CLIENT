@@ -58,6 +58,8 @@ export default [
       // 기본 ESLint 규칙
       ...js.configs.recommended.rules,
       'no-undef': 'off',
+      'no-redeclare': 'off',
+      '@typescript-eslint/no-redeclare': 'error',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'warn',

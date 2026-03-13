@@ -27,7 +27,6 @@ export interface RequestConfig {
   rawResponse?: boolean;
 }
 
-/* eslint-disable no-redeclare -- 함수 오버로드는 TypeScript에서 정상 패턴 */
 // 오버로드: rawResponse: true → AxiosResponse 전체 반환
 export async function request<T>(
   config: RequestConfig & { rawResponse: true }
@@ -83,4 +82,3 @@ export async function request<T>(
     throw error;
   }
 }
-/* eslint-enable no-redeclare */
