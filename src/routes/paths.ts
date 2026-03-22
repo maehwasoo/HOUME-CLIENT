@@ -3,6 +3,7 @@
 // 값 유니온 타입(RoutePath)을 자동으로 얻어 타입 안전성을 확보할 수 있습니다.
 export const ROUTES = {
   HOME: '/',
+  LANDING: '/landing',
   LOGIN: '/login',
   SIGNUP: '/signup',
   GENERATE_START: '/generate/start',

@@ -1,7 +1,6 @@
 import imgProfile from '@assets/v2/images/ImgProfile.svg';
 import logotypeBlack from '@assets/v2/images/LogotypeBlack.svg';
 import logotypeWhite from '@assets/v2/images/LogotypeWhite.svg';
-import IcnDoubleStar from '@assets/v2/svg/IcnDoubleStar.svg?react';
 
 import * as styles from './LogoNavBar.css';
 
@@ -42,7 +41,6 @@ const LogoNavBar = ({
             className={styles.generateButton}
             onClick={onGenerateClick}
           >
-            <IcnDoubleStar className={styles.icon16} aria-hidden="true" />
             <span className={styles.generateLabel}>이미지 생성</span>
           </button>
         )}
