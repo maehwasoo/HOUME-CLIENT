@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -8,13 +8,11 @@ import { ROUTES } from '@routes/paths';
 
 import { useUserStore } from '@store/useUserStore';
 
-import CtaButton from '@components/button/ctaButton/CtaButton';
-import LogoNavBar from '@components/navBar/LogoNavBar';
+import MenuTab from '@components/v2/menuTab/MenuTab';
+import LogoNavBar from '@components/v2/navBar/LogoNavBar';
 
-import AnimatedSection from './components/AnimatedSection';
-import IntroSection from './components/introSection/IntroSection';
-import ReviewSection from './components/reviewSection/ReviewSection';
-import StepGuideSection from './components/stepGuideSection/StepGuideSection';
+import ExploreTab from './components/explore/ExploreTab';
+import ProductTab from './components/product/ProductTab';
 import * as styles from './HomePage.css';
 import {
   logLandingClickBtnCTA,
@@ -22,10 +20,13 @@ import {
   logLandingScrollDepthTreshold,
 } from './utils/analytics';
 
+export type HomeMenuTab = 'explore' | 'product';
+
 const HomePage = () => {
   const navigate = useNavigate();
   const accessToken = useUserStore((state) => state.accessToken);
   const isLoggedIn = !!accessToken;
+  const [activeMenuTab, setActiveMenuTab] = useState<HomeMenuTab>('explore');
 
   const scrollDepth50Sent = useRef(false);
   const scrollDepth100Sent = useRef(false);
@@ -71,23 +72,11 @@ const HomePage = () => {
   }, []);
 
   /**
-   * 플로팅 버튼 텍스트 결정
-   * - 로그인 안됨: "우리집에 딱 맞는 스타일 만들기"
-   * - 로그인됨 + 로딩중: "로딩중..."
-   * - 로그인됨: "우리집에 딱 맞는 스타일 만들기"
-   */
-  const getButtonText = () => {
-    if (!isLoggedIn) return '우리집에 딱 맞는 스타일 만들기';
-    if (isUserDataLoading) return '로딩중...';
-    return '우리집에 딱 맞는 스타일 만들기';
-  };
-
-  /**
    * 플로팅 버튼 클릭 핸들러
    * - 로그인 안됨: 로그인 페이지로 이동
    * - 로그인됨: imageSetup 이미지 생성 플로우로 이동 (크레딧 체크는 ActivityInfo에서 수행)
    */
-  const handleCtaButtonClick = () => {
+  const handleGenerate = () => {
     logLandingClickBtnCTA();
 
     if (!isLoggedIn) {
@@ -102,36 +91,37 @@ const HomePage = () => {
   };
 
   // 프로필 버튼 클릭 핸들러 (마이페이지 버튼 클릭 이벤트 전송)
-  const handleProfileClick = () => {
+  const handleProfile = () => {
     if (isLoggedIn) {
       logLandingClickBtnMypage();
     }
     navigate(ROUTES.MYPAGE);
   };
 
+  const handleLogin = () => {
+    navigate(ROUTES.LOGIN);
+  };
+
   return (
     <main className={styles.page}>
-      <div className={styles.gradFrame}>
-        <LogoNavBar
-          buttonType={isLoggedIn ? 'profile' : 'login'}
-          onProfileClick={isLoggedIn ? handleProfileClick : undefined}
-        />
-        <div className={styles.introSection}>
-          <IntroSection />
-        </div>
-      </div>
-      <div className={styles.contents}>
-        <StepGuideSection />
-        <AnimatedSection animationType="fadeInUp" delay={200} duration={1000}>
-          <ReviewSection />
-        </AnimatedSection>
-      </div>
-      <div className={styles.buttonContainer}>
-        {/* 로그인 상태에 따라 하단 플로팅 버튼 동적 변경 */}
-        <CtaButton onClick={handleCtaButtonClick} isActive={!isUserDataLoading}>
-          {getButtonText()}
-        </CtaButton>
-      </div>
+      <LogoNavBar
+        page="home"
+        showGenerateButton
+        authSlot={isLoggedIn ? 'profile' : 'login'}
+        onGenerateClick={handleGenerate}
+        onProfileClick={handleProfile}
+        onLoginClick={handleLogin}
+      />
+      <MenuTab
+        tabs={[
+          { value: 'explore', label: '탐색' },
+          { value: 'product', label: '상품' },
+        ]}
+        activeTab={activeMenuTab}
+        onTabChange={setActiveMenuTab}
+      />
+      {activeMenuTab === 'explore' && <ExploreTab />}
+      {activeMenuTab === 'product' && <ProductTab />}
     </main>
   );
 };

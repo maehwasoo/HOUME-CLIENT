@@ -3,6 +3,7 @@ import logotypeBlack from '@assets/v2/images/LogotypeBlack.svg';
 import logotypeWhite from '@assets/v2/images/LogotypeWhite.svg';
 
 import * as styles from './LogoNavBar.css';
+import TextButton from '../btnText/TextButton';
 
 type AuthSlot = 'none' | 'login' | 'profile';
 type Page = 'landing' | 'home';
@@ -46,13 +47,9 @@ const LogoNavBar = ({
         )}
         {authSlot === 'login' && (
           <div className={styles.actionContainer}>
-            <button
-              type="button"
-              className={styles.loginButton({ page })}
-              onClick={onLoginClick}
-            >
+            <TextButton color="primary" size="s" onClick={onLoginClick}>
               로그인
-            </button>
+            </TextButton>
           </div>
         )}
         {authSlot === 'profile' && (

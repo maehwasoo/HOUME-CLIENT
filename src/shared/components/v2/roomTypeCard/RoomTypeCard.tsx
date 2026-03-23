@@ -4,12 +4,10 @@ import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 
 import fallbackImage from '@assets/v2/images/CardRoomTypeFallback.svg';
-import IcnArrowLeftS from '@assets/v2/svg/IcnArrowLeftS.svg?react';
-import IcnArrowRightS from '@assets/v2/svg/IcnArrowRightS.svg?react';
-import IcnDoubleStar from '@assets/v2/svg/IcnDoubleStar.svg?react';
-import IcnPlusFill from '@assets/v2/svg/IcnPlusFill.svg?react';
 
 import * as styles from './RoomTypeCard.css';
+import IconButton from '../button/IconButton';
+import Icon from '../icon/Icon';
 
 type ButtonProps = Omit<
   ComponentProps<'button'>,
@@ -92,10 +90,7 @@ const RoomTypeOptionCard = ({
       />
       <div className={styles.gradient} aria-hidden="true" />
       <div className={styles.optionInfoRow({ size })}>
-        <IcnDoubleStar
-          className={styles.optionTitleIcon({ size })}
-          aria-hidden="true"
-        />
+        <Icon name="DoubleStar" size="16" />
         <p className={styles.optionTitle({ size })}>{label}</p>
       </div>
       {size === 'm' && showRecentBadge && (
@@ -142,7 +137,7 @@ const RoomTypePreviewCard = ({
         className={styles.previewNavButton}
         onClick={onPrevClick}
       >
-        <IcnArrowLeftS className={styles.previewNavIcon} aria-hidden="true" />
+        <IconButton name="ArrowLeft" size="M" />
       </button>
       <button
         type="button"
@@ -150,7 +145,7 @@ const RoomTypePreviewCard = ({
         className={styles.previewNavButton}
         onClick={onNextClick}
       >
-        <IcnArrowRightS className={styles.previewNavIcon} aria-hidden="true" />
+        <IconButton name="ArrowRight" size="M" />
       </button>
     </div>
   );
@@ -174,7 +169,7 @@ const MoreCard = ({
       {...rest}
     >
       <div className={styles.moreContent}>
-        <IcnPlusFill className={styles.plusIcon} aria-hidden="true" />
+        <Icon name="PlusFill" size="32" aria-hidden="true" />
         <div className={styles.moreLabelContainer}>
           <p className={styles.moreLabel}>{'눌러서\n공간 유형 더보기'}</p>
         </div>
