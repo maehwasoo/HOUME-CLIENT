@@ -15,6 +15,7 @@ export const ROUTES = {
   SETTING_SERVICE: '/mypage/setting/service',
   SETTING_PRIVACY: '/mypage/setting/privacy',
   OAUTH: '/oauth/kakao/callback',
+  TEST: '/test',
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];
