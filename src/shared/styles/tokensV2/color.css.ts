@@ -32,6 +32,9 @@ const primitives = createGlobalTheme(':root', {
     purple500: '#A696FF',
     purple300: '#E8E3FC',
     purple200: '#EFEDFD',
+
+    red700: '#ED1212',
+    red600: '#FF4D4D',
   },
 });
 
@@ -42,25 +45,32 @@ const semantics = createGlobalTheme(':root', {
     },
     border: {
       primary: primitives.color.gray300,
-      secondary: primitives.color.gray100,
-      tertiary: primitives.color.gray999_a30,
+      secondary: primitives.color.gray200,
+      tertiary: primitives.color.gray100,
+      strong: primitives.color.gray900,
+      weak: primitives.color.gray999_a30,
     },
     fill: {
       brand: primitives.color.purple600,
+      danger: primitives.color.red600,
       dim: primitives.color.gray999_a50,
+      dimSecondary: primitives.color.gray999_a30,
       disabled: primitives.color.gray300,
       inverse: primitives.color.gray000,
       inverseSecondary: primitives.color.gray000_a80,
       primary: primitives.color.gray900,
-      secondary: primitives.color.gray500,
+      secondary: primitives.color.gray700,
       strong: primitives.color.gray999,
-      tertiary: primitives.color.gray100,
+      tertiary: primitives.color.gray500,
+      weak: primitives.color.gray100,
     },
     shadow: {
-      primary: primitives.color.gray999_a04,
+      bottomSheet: primitives.color.gray999_a04,
     },
     text: {
       brand: primitives.color.purple600,
+      danger: primitives.color.red700,
+      disabled: primitives.color.gray300,
       inverse: primitives.color.gray000,
       inverseSecondary: primitives.color.gray000_a80,
       primary: primitives.color.gray900,

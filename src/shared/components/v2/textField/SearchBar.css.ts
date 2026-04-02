@@ -11,7 +11,7 @@ export const wrapper = recipe({
     alignItems: 'center',
     gap: unitVars.unit.gapPadding['200'],
     borderRadius: unitVars.unit.radius.full,
-    backgroundColor: colorVars.color.fill.tertiary,
+    backgroundColor: colorVars.color.fill.weak,
     padding: unitVars.unit.gapPadding['200'],
     width: '100%',
     height: '4.4rem',
@@ -44,7 +44,7 @@ export const rightContainer = style({
 export const textField = recipe({
   base: {
     outline: 'none',
-    backgroundColor: colorVars.color.fill.tertiary,
+    backgroundColor: colorVars.color.fill.weak,
     width: '100%',
     ...fontVars.font.body_r_14,
     caretColor: colorVars.color.fill.primary,

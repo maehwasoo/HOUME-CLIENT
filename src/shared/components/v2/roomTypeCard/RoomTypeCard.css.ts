@@ -30,7 +30,7 @@ export const optionCard = recipe({
       more: {
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: colorVars.color.fill.tertiary,
+        backgroundColor: colorVars.color.fill.weak,
       },
     },
     size: {
@@ -55,7 +55,7 @@ export const previewCard = style({
   alignItems: 'center',
   justifyContent: 'space-between',
   borderRadius: unitVars.unit.radius['600'],
-  backgroundColor: colorVars.color.fill.tertiary,
+  backgroundColor: colorVars.color.fill.weak,
   padding: unitVars.unit.gapPadding['100'],
   width: '33.9rem',
   height: '33.9rem',
