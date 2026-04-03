@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { recipe } from '@vanilla-extract/recipes';
 
 import { zIndex } from '@styles/tokens/zIndex';
 import { colorVars } from '@styles/tokensV2/color.css';
@@ -30,6 +31,7 @@ export const overlay = style([
     top: 0,
     bottom: 0,
     backgroundColor: colorVars.color.fill.dim,
+    pointerEvents: 'auto',
   },
 ]);
 
@@ -64,7 +66,7 @@ export const panel = style({
   borderTopLeftRadius: unitVars.unit.radius['700'],
   borderTopRightRadius: unitVars.unit.radius['700'],
   backgroundColor: colorVars.color.bg.primary,
-  padding: `${unitVars.unit.gapPadding['200']} ${unitVars.unit.gapPadding['600']} ${unitVars.unit.gapPadding['600']}`,
+  padding: `${unitVars.unit.gapPadding['200']} ${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['600']}`,
   width: '100%',
   maxHeight: 'calc(100dvh - 10.4rem)',
   overflow: 'hidden',
@@ -103,14 +105,28 @@ export const closeHeader = style({
   height: '4.8rem',
 });
 
-// close 타입 제목을 헤더 중앙에 고정하는 슬롯
-export const titleSlot = style({
-  position: 'absolute',
-  inset: 0,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  pointerEvents: 'none',
+// close 타입 제목을 헤더 왼쪽(FilterSheet)/중앙(FloorPlanSheet)에 고정하는 슬롯
+export const titleSlot = recipe({
+  base: {
+    display: 'flex',
+    alignItems: 'center',
+    minWidth: 0,
+  },
+  variants: {
+    align: {
+      center: {
+        position: 'absolute',
+        inset: 0,
+        justifyContent: 'center',
+        pointerEvents: 'none',
+      },
+      left: {
+        flex: 1,
+        justifyContent: 'flex-start',
+        paddingLeft: unitVars.unit.gapPadding['400'],
+      },
+    },
+  },
 });
 
 // 우측 상단 닫기 액션 버튼
@@ -131,19 +147,13 @@ export const closeButton = style({
   },
 });
 
-// 닫기 버튼 내부 X 아이콘의 고정 크기
-export const closeIcon = style({
-  flexShrink: 0,
-  width: '2.4rem',
-  height: '2.4rem',
-});
-
 // 본문 콘텐츠와 하단 버튼 감싸는 column 래퍼
 export const body = style({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'space-between',
   gap: unitVars.unit.gapPadding['500'],
+  padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['600']}`,
   width: '100%',
   height: '100%',
   minHeight: 0,

@@ -6,7 +6,6 @@ import clsx from 'clsx';
 import fallbackImage from '@assets/v2/images/CardRoomTypeFallback.svg';
 
 import * as styles from './RoomTypeCard.css';
-import IconButton from '../button/IconButton';
 import Icon from '../icon/Icon';
 
 type ButtonProps = Omit<
@@ -131,22 +130,26 @@ const RoomTypePreviewCard = ({
         draggable={false}
         onError={() => setImageSrc(fallbackImage)}
       />
-      <button
-        type="button"
-        aria-label={prevButtonLabel}
-        className={styles.previewNavButton}
-        onClick={onPrevClick}
-      >
-        <IconButton name="ArrowLeft" size="M" />
-      </button>
-      <button
-        type="button"
-        aria-label={nextButtonLabel}
-        className={styles.previewNavButton}
-        onClick={onNextClick}
-      >
-        <IconButton name="ArrowRight" size="M" />
-      </button>
+      {onPrevClick && (
+        <button
+          type="button"
+          aria-label={prevButtonLabel}
+          className={styles.previewNavButton}
+          onClick={onPrevClick}
+        >
+          <Icon name="ArrowLeftFill" size="24" />
+        </button>
+      )}
+      {onNextClick && (
+        <button
+          type="button"
+          aria-label={nextButtonLabel}
+          className={styles.previewNavButton}
+          onClick={onNextClick}
+        >
+          <Icon name="ArrowRightFill" size="24" />
+        </button>
+      )}
     </div>
   );
 };

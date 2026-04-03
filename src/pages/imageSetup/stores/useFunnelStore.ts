@@ -2,6 +2,8 @@ import { create } from 'zustand';
 
 import type { CompletedHouseInfo } from '../types/funnel/houseInfo';
 
+// TODO: FunnelStore 수정
+// moodBoard, activityInfo 스텝은 이미지 생성에 필요할 수도 있고 아닐 수도 있음
 interface FunnelStore {
   // 각 스텝 데이터(각 스텝 별 요구되는 데이터만 저장)
   houseInfo: CompletedHouseInfo | null;

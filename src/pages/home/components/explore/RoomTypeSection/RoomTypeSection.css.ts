@@ -43,3 +43,8 @@ export const cardList = style({
   padding: `0 ${unitVars.unit.gapPadding['500']}`,
   width: 'max-content',
 });
+
+export const cardItem = style({
+  flexShrink: 0,
+  width: '16rem',
+});

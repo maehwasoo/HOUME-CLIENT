@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
-import LogoNavBar from '@components/navBar/LogoNavBar';
-import TitleNavBar from '@components/navBar/TitleNavBar';
+import LogoNavBar from '@components/v2/navBar/LogoNavBar';
+import TitleNavBar from '@components/v2/navBar/TitleNavBar';
 
 import * as styles from './PageLayout.css';
 
@@ -9,14 +9,16 @@ type HeaderConfig =
   | {
       type: 'title';
       title: string;
-      showBackButton?: boolean;
+      backLabel?: string;
       onBackClick?: () => void;
-      showLoginButton?: boolean;
-      showSettingButton?: boolean;
     }
   | {
       type: 'logo';
-      buttonType?: 'login' | 'profile' | null;
+      page?: 'landing' | 'home';
+      showGenerateButton?: boolean;
+      authSlot?: 'none' | 'login' | 'profile';
+      onGenerateClick?: () => void;
+      onLoginClick?: () => void;
       onProfileClick?: () => void;
     }
   | { type: 'none' };
@@ -34,16 +36,18 @@ const PageLayout = ({ header, children, className }: PageLayoutProps) => {
         return (
           <TitleNavBar
             title={header.title}
-            isBackIcon={header.showBackButton ?? true}
+            backLabel={header.backLabel}
             onBackClick={header.onBackClick}
-            isLoginBtn={header.showLoginButton ?? false}
-            isSettingBtn={header.showSettingButton ?? false}
           />
         );
       case 'logo':
         return (
           <LogoNavBar
-            buttonType={header.buttonType ?? null}
+            page={header.page}
+            showGenerateButton={header.showGenerateButton}
+            authSlot={header.authSlot}
+            onGenerateClick={header.onGenerateClick}
+            onLoginClick={header.onLoginClick}
             onProfileClick={header.onProfileClick}
           />
         );
@@ -53,7 +57,7 @@ const PageLayout = ({ header, children, className }: PageLayoutProps) => {
   };
 
   return (
-    <div className={`${styles.layout} ${className ? ` ${className}` : ''}`}>
+    <div className={`${styles.layout}${className ? ` ${className}` : ''}`}>
       {renderHeader()}
       <div className={styles.content}>{children}</div>
     </div>

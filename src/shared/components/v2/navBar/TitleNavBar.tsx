@@ -1,4 +1,4 @@
-import IcnArrowLeftM from '@assets/v2/svg/IcnArrowLeftM.svg?react';
+import Icon from '@components/v2/icon/Icon';
 
 import * as styles from './TitleNavBar.css';
 
@@ -26,8 +26,8 @@ const TitleNavBar = ({
           className={styles.backButton}
           onClick={onBackClick}
         >
-          <IcnArrowLeftM className={styles.backIcon} aria-hidden="true" />
-          {backLabel}
+          <Icon name="ArrowLeft" size="16" />
+          <span className={styles.label}>{backLabel}</span>
         </button>
       </div>
       <h1 className={styles.title}>{title}</h1>

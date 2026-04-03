@@ -92,6 +92,10 @@ export const button = recipe({
       },
       false: {},
     },
+    fullWidth: {
+      true: { width: '100%' },
+      false: {},
+    },
   },
   compoundVariants: [
     {
@@ -121,6 +125,7 @@ export const button = recipe({
     color: 'primary',
     size: '2XL',
     disabled: false,
+    fullWidth: false,
   },
 });
 

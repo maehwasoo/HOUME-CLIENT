@@ -31,10 +31,6 @@ export const backButton = style({
   transition: 'transform 120ms ease',
   border: 0,
   background: 'transparent',
-  paddingTop: unitVars.unit.gapPadding['000'],
-  paddingRight: unitVars.unit.gapPadding['100'],
-  paddingBottom: unitVars.unit.gapPadding['000'],
-  paddingLeft: unitVars.unit.gapPadding['000'],
   color: colorVars.color.text.tertiary,
   ...fontVars.font.title_r_15,
   selectors: {
@@ -44,10 +40,8 @@ export const backButton = style({
   },
 });
 
-export const backIcon = style({
-  flexShrink: 0,
-  width: '2rem',
-  height: '2rem',
+export const label = style({
+  padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['100']}`,
 });
 
 export const title = style({

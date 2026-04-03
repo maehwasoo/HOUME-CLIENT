@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 
 import { Drawer } from 'vaul';
 
-import IcnX from '@assets/v2/svg/IcnX.svg?react';
+import IconButton from '@components/v2/button/IconButton';
 
 import * as styles from './BottomSheetBase.css';
 
@@ -11,6 +11,7 @@ interface BottomSheetBaseProps {
   open: boolean;
   headerType: 'dragHandle' | 'close';
   titleSlot?: ReactNode;
+  titleAlign?: 'left' | 'center';
   contentSlot: ReactNode;
   primaryButton: ReactNode;
   secondaryButton?: ReactNode;
@@ -27,6 +28,7 @@ const BottomSheetBase = ({
   open,
   headerType,
   titleSlot,
+  titleAlign = 'center',
   contentSlot,
   primaryButton,
   secondaryButton,
@@ -63,7 +65,8 @@ const BottomSheetBase = ({
       <Drawer.Portal>
         {open && (
           <div className={styles.viewportLayer}>
-            <Drawer.Overlay
+            {/* Drawer.Overlay(radix Dialog의 overlay) 사용 시 데스크탑 뒷배경 레이아웃 깨짐 현상 발생 -> 커스텀 dim overlay 적용 */}
+            <div
               className={styles.overlay}
               style={
                 dimOpacity !== undefined
@@ -71,6 +74,7 @@ const BottomSheetBase = ({
                   : undefined
               }
               onClick={onOverlayClick}
+              aria-hidden="true"
             />
             <Drawer.Content
               className={styles.content}
@@ -91,15 +95,16 @@ const BottomSheetBase = ({
                   <div className={styles.dragHeader}>{handleSlot}</div>
                 ) : (
                   <div className={styles.closeHeader}>
-                    <div className={styles.titleSlot}>{titleSlot}</div>
-                    <button
-                      type="button"
+                    <div className={styles.titleSlot({ align: titleAlign })}>
+                      {titleSlot}
+                    </div>
+                    <IconButton
+                      name="Close"
+                      size="M"
                       aria-label="닫기"
                       className={styles.closeButton}
                       onClick={onCloseClick}
-                    >
-                      <IcnX className={styles.closeIcon} aria-hidden="true" />
-                    </button>
+                    />
                   </div>
                 )}
                 <div className={styles.body}>

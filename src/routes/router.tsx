@@ -68,6 +68,16 @@ const publicRoutes = [
       return { Component: PrivacyPolicyPage };
     },
   },
+  // TODO: 확인 완료 후 삭제
+  {
+    path: '/test/floor-plan',
+    lazy: async () => {
+      const { default: FloorPlanSelectTest } = await import(
+        '@pages/imageSetup/v2/FloorPlanSelectTest'
+      );
+      return { Component: FloorPlanSelectTest };
+    },
+  },
 ];
 
 // 보호된 라우트 그룹 (인증 필요)

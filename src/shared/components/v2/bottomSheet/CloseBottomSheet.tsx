@@ -10,6 +10,7 @@ interface CloseBottomSheetProps {
   primaryButton: ReactNode;
   secondaryButton?: ReactNode;
   height?: string;
+  titleAlign?: 'left' | 'center';
 }
 
 const CloseBottomSheet = ({
@@ -20,12 +21,14 @@ const CloseBottomSheet = ({
   primaryButton,
   secondaryButton,
   height,
+  titleAlign = 'center',
 }: CloseBottomSheetProps) => {
   return (
     <BottomSheetBase
       open={open}
       headerType="close"
       titleSlot={titleSlot}
+      titleAlign={titleAlign}
       contentSlot={contentSlot}
       primaryButton={primaryButton}
       secondaryButton={secondaryButton}
