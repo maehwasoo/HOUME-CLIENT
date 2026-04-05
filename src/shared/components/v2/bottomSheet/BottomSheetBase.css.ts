@@ -12,7 +12,8 @@ const mobileFrame = style({
   maxWidth: unitVars.unit.dimension.wMax,
 });
 
-// 바텀시트 포털 전체를 viewport 하단 기준으로 정렬하는 고정 레이어
+// 화면 전체를 차지하는 컨테이너, 자식(바텀시트)을 화면 하단(flex-end)에 붙이는 역할
+// 바텀시트의 위치를 잡아주는 레이아웃 프레임
 export const viewportLayer = style({
   position: 'fixed',
   zIndex: zIndex.sheet,
@@ -30,8 +31,8 @@ export const overlay = style([
     position: 'absolute',
     top: 0,
     bottom: 0,
-    backgroundColor: colorVars.color.fill.dim,
-    pointerEvents: 'auto',
+    backgroundColor: colorVars.color.fill.dimSecondary,
+    // pointerEvents는 BottomSheetBase에서 backgroundInteractable prop에 따라 inline으로 제어
   },
 ]);
 

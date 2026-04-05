@@ -22,6 +22,10 @@ interface BottomSheetBaseProps {
   onOverlayClick?: () => void;
   onCloseClick?: () => void;
   handleSlot?: ReactNode;
+  /** true일 때 overlay/viewportLayer의 터치 이벤트를 통과시켜 뒷배경 터치 가능하게 함 */
+  backgroundInteractable?: boolean;
+  /** true일 때 body overflow를 hidden으로 설정하여 뒷배경 스크롤을 막음 (기본: true) */
+  preventScroll?: boolean;
 }
 
 const BottomSheetBase = ({
@@ -39,10 +43,12 @@ const BottomSheetBase = ({
   onOverlayClick,
   onCloseClick,
   handleSlot,
+  backgroundInteractable = false,
+  preventScroll = true,
 }: BottomSheetBaseProps) => {
-  // 뒷배경 스크롤 방지용
+  // expanded 상태에서만 스크롤을 막고, collapsed 상태(preventScroll=false)에서는 뒷배경 스크롤 허용
   useEffect(() => {
-    if (!open) return undefined;
+    if (!open || !preventScroll) return undefined;
 
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -50,7 +56,7 @@ const BottomSheetBase = ({
     return () => {
       document.body.style.overflow = previousOverflow;
     };
-  }, [open]);
+  }, [open, preventScroll]);
 
   // 접근성용 title
   const accessibleTitle =
@@ -61,23 +67,37 @@ const BottomSheetBase = ({
         : '드래그 핸들 바텀시트';
 
   return (
-    <Drawer.Root open={open} modal dismissible={false}>
+    // backgroundInteractable일 때만 modal=false
+    <Drawer.Root
+      open={open}
+      modal={!backgroundInteractable}
+      dismissible={false}
+    >
       <Drawer.Portal>
         {open && (
-          <div className={styles.viewportLayer}>
-            {/* Drawer.Overlay(radix Dialog의 overlay) 사용 시 데스크탑 뒷배경 레이아웃 깨짐 현상 발생 -> 커스텀 dim overlay 적용 */}
+          <div
+            className={styles.viewportLayer}
+            // backgroundInteractable=true일 때 viewportLayer의 터치를 통과시켜 뒷배경과 상호작용 가능하게 함
+            style={
+              backgroundInteractable ? { pointerEvents: 'none' } : undefined
+            }
+          >
+            {/* backgroundInteractable=true일 때 overlay도 터치를 통과시킴 */}
             <div
               className={styles.overlay}
-              style={
-                dimOpacity !== undefined
-                  ? { backgroundColor: `rgba(0, 0, 0, ${dimOpacity * 0.5})` }
-                  : undefined
-              }
+              style={{
+                ...(dimOpacity !== undefined ? { opacity: dimOpacity } : {}),
+                pointerEvents: backgroundInteractable ? 'none' : 'auto',
+              }}
               onClick={onOverlayClick}
               aria-hidden="true"
             />
+            {/* backgroundInteractable이어도 바텀시트 자체는 항상 터치 가능해야 함 */}
             <Drawer.Content
               className={styles.content}
+              style={
+                backgroundInteractable ? { pointerEvents: 'auto' } : undefined
+              }
               aria-describedby={undefined}
             >
               <Drawer.Title className={styles.srOnlyTitle}>

@@ -6,13 +6,15 @@ import * as styles from './BottomSheetBase.css';
 
 interface DragHandleBottomSheetProps {
   open: boolean;
-  // COLLAPSED_HEIGHT: string;
   contentSlot: ReactNode;
   primaryButton: ReactNode;
   secondaryButton?: ReactNode;
+  /** 최소 높이 (rem 문자열). 있으면 Persistent(최소높이 존재) 모드, 없으면 Dismissible 모드 */
+  collapsedHeight?: string;
+  /** Dismissible 모드에서 바텀시트가 사라질 때 부모에게 알리는 콜백 (부모가 open을 false로 바꿈) */
+  onDismiss?: () => void;
 }
 
-const COLLAPSED_HEIGHT = '24rem';
 const EXPANDED_HEIGHT = 'calc(100dvh - 10.4rem)';
 
 const parsePxFromRem = (rem: string): number => {
@@ -28,12 +30,15 @@ const resolveExpandedPx = (): number =>
 
 const DragHandleBottomSheet = ({
   open,
-  // COLLAPSED_HEIGHT,
   contentSlot,
   primaryButton,
   secondaryButton,
+  collapsedHeight,
+  onDismiss,
 }: DragHandleBottomSheetProps) => {
-  const [expanded, setExpanded] = useState(false);
+  const isPersistent = collapsedHeight !== undefined;
+
+  const [expanded, setExpanded] = useState(!isPersistent);
   const [isDragging, setIsDragging] = useState(false);
   const [dragHeight, setDragHeight] = useState<number | null>(null);
 
@@ -43,19 +48,25 @@ const DragHandleBottomSheet = ({
   const collapsedPxRef = useRef(0);
   const expandedPxRef = useRef(0);
 
-  const handlePointerDown = useCallback((e: React.PointerEvent) => {
-    const panel = panelRef.current;
-    if (!panel) return;
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent) => {
+      const panel = panelRef.current;
+      if (!panel) return;
 
-    dragStartYRef.current = e.clientY;
-    startHeightRef.current = panel.offsetHeight;
-    collapsedPxRef.current = parsePxFromRem(COLLAPSED_HEIGHT);
-    expandedPxRef.current = resolveExpandedPx();
+      dragStartYRef.current = e.clientY;
+      startHeightRef.current = panel.offsetHeight;
+      // Persistent: 최소 높이에서 멈춤 / Dismissible: 높이가 0까지 줄어들 수 있음
+      collapsedPxRef.current = isPersistent
+        ? parsePxFromRem(collapsedHeight)
+        : 0;
+      expandedPxRef.current = resolveExpandedPx();
 
-    setIsDragging(true);
-    setDragHeight(panel.offsetHeight);
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  }, []);
+      setIsDragging(true);
+      setDragHeight(panel.offsetHeight);
+      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    },
+    [isPersistent, collapsedHeight]
+  );
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent) => {
@@ -79,27 +90,55 @@ const DragHandleBottomSheet = ({
       (e.target as HTMLElement).releasePointerCapture(e.pointerId);
       setIsDragging(false);
 
-      const midPoint = (collapsedPxRef.current + expandedPxRef.current) / 2;
-      setExpanded(dragHeight > midPoint);
+      if (isPersistent) {
+        // Persistent: 절반 기준으로 expand/collapse 토글
+        const midPoint = (collapsedPxRef.current + expandedPxRef.current) / 2;
+        setExpanded(dragHeight > midPoint);
+      } else {
+        // Dismissible: 절반 이하면 dismiss, 이상이면 snap back
+        const midPoint = expandedPxRef.current / 2;
+        if (dragHeight > midPoint) {
+          setExpanded(true);
+        } else {
+          onDismiss?.();
+        }
+      }
       setDragHeight(null);
     },
-    [isDragging, dragHeight]
+    [isDragging, dragHeight, isPersistent, onDismiss]
   );
 
   const getDimOpacity = (): number => {
-    if (!isDragging || dragHeight == null) return expanded ? 1 : 0;
+    if (isPersistent) {
+      // Persistent: collapsed(0) ~ expanded(1) 사이를 선형 보간
+      if (!isDragging || dragHeight == null) return expanded ? 1 : 0;
 
-    const range = expandedPxRef.current - collapsedPxRef.current;
-    if (range <= 0) return 0;
+      const range = expandedPxRef.current - collapsedPxRef.current;
+      if (range <= 0) return 0;
 
-    const progress = (dragHeight - collapsedPxRef.current) / range;
+      const progress = (dragHeight - collapsedPxRef.current) / range;
+      return Math.max(0, Math.min(1, progress));
+    }
+
+    // Dismissible: 항상 dim 표시, 드래그 중에는 높이에 비례
+    if (!isDragging || dragHeight == null) return 1;
+
+    const progress = dragHeight / expandedPxRef.current;
     return Math.max(0, Math.min(1, progress));
   };
 
   const panelStyle: React.CSSProperties =
     isDragging && dragHeight != null
       ? { height: `${dragHeight}px` }
-      : { height: expanded ? EXPANDED_HEIGHT : COLLAPSED_HEIGHT };
+      : { height: expanded ? EXPANDED_HEIGHT : (collapsedHeight ?? '0') };
+
+  const handleOverlayClick = () => {
+    if (isPersistent) {
+      setExpanded(false);
+    } else {
+      onDismiss?.();
+    }
+  };
 
   return (
     <BottomSheetBase
@@ -112,7 +151,10 @@ const DragHandleBottomSheet = ({
       panelStyle={panelStyle}
       dimOpacity={getDimOpacity()}
       disableTransition={isDragging}
-      onOverlayClick={() => setExpanded(false)} // DragHandleBottomSheet은 dismissible={false}(vaul 자동닫기 꺼놓은 상태), DragHandle바텀시트에서 내부적으로 close 상태 관리 => 백드롭 클릭 시 collapse도 별도로 관리 필요
+      onOverlayClick={handleOverlayClick}
+      // Persistent collapsed 상태에서만 뒷배경 터치·스크롤 가능
+      backgroundInteractable={isPersistent && !expanded && !isDragging}
+      preventScroll={!isPersistent || expanded}
       handleSlot={
         <button
           type="button"
