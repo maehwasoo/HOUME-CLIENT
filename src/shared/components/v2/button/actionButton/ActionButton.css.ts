@@ -1,4 +1,3 @@
-import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
 import { colorVars } from '@styles/tokensV2/color.css';
@@ -129,9 +128,23 @@ export const button = recipe({
   },
 });
 
-export const btnLabel = style({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['100']}`,
+export const btnLabel = recipe({
+  base: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['100']}`,
+  },
+  variants: {
+    size: {
+      XS: {
+        padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['050']}`,
+      },
+      S: {},
+      M: {},
+      L: {},
+      XL: {},
+      '2XL': {},
+    },
+  },
 });
