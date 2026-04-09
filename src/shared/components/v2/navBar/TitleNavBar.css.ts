@@ -24,6 +24,7 @@ export const leftSlot = style({
   justifyContent: 'flex-start',
 });
 
+/** TextButton 레이아웃만 보정 (타이포·컬러·인터랙션은 TextButton 기본) */
 export const backButton = style({
   display: 'inline-flex',
   alignItems: 'center',

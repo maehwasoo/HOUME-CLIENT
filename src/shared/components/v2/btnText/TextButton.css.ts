@@ -1,3 +1,4 @@
+import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
 import { colorVars } from '@styles/tokensV2/color.css';
@@ -41,17 +42,9 @@ export const button = recipe({
   },
 });
 
-export const iconSlot = recipe({
-  base: {
-    display: 'inline-flex',
-    flexShrink: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  variants: {
-    size: {
-      s: { width: '1.6rem', height: '1.6rem' },
-      m: { width: '2rem', height: '2rem' },
-    },
-  },
+export const iconSlot = style({
+  display: 'inline-flex',
+  flexShrink: 0,
+  alignItems: 'center',
+  justifyContent: 'center',
 });

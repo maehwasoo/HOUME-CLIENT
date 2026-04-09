@@ -17,6 +17,8 @@ import HeartStrokeWhite from '@assets/v2/svg/HeartStrokeWhite.svg?url';
 import Link from '@assets/v2/svg/Link.svg?url';
 import PlusFill from '@assets/v2/svg/PlusFill.svg?url';
 import Profile from '@assets/v2/svg/Profile.svg?url';
+import RadioDefault from '@assets/v2/svg/RadioDefault.svg?url';
+import RadioSelected from '@assets/v2/svg/RadioSelected.svg?url';
 import Refresh from '@assets/v2/svg/Refresh.svg?url';
 import Search from '@assets/v2/svg/Search.svg?url';
 import ViewDetail from '@assets/v2/svg/ViewDetail.svg?url';
@@ -43,6 +45,8 @@ const IconsName = {
   Link,
   PlusFill,
   Profile,
+  RadioDefault,
+  RadioSelected,
   Refresh,
   Search,
   ViewDetail,
