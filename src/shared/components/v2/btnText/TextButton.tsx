@@ -47,7 +47,7 @@ const TextButton = ({
           <Icon name={leftIcon} size={iconSize} />
         </span>
       ) : null}
-      {children}
+      <span className={styles.textSlot}>{children}</span>
       {rightIcon != null ? (
         <span className={styles.iconSlot} aria-hidden>
           <Icon name={rightIcon} size={iconSize} />

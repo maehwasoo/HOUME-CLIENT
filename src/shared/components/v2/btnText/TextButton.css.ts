@@ -12,6 +12,7 @@ export const button = recipe({
     justifyContent: 'center',
     gap: unitVars.unit.gapPadding['000'],
     transition: 'transform 100ms ease',
+
     selectors: {
       '&:active': {
         transform: 'scale(0.95)',
@@ -47,4 +48,8 @@ export const iconSlot = style({
   flexShrink: 0,
   alignItems: 'center',
   justifyContent: 'center',
+});
+
+export const textSlot = style({
+  padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['100']}`,
 });

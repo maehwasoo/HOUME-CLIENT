@@ -8,6 +8,7 @@ import ChevronUp from '@assets/v2/svg/ChevronUp.svg?url';
 import Close from '@assets/v2/svg/Close.svg?url';
 import CloseFillBlack from '@assets/v2/svg/CloseFillBlack.svg?url';
 import CloseFillGray from '@assets/v2/svg/CloseFillGray.svg?url';
+import Credit from '@assets/v2/svg/Credit.svg?url';
 import DoubleStar from '@assets/v2/svg/DoubleStar.svg?url';
 import FlipHorizontal from '@assets/v2/svg/FlipHorizontal.svg?url';
 import HeartFillColor from '@assets/v2/svg/HeartFillColor.svg?url';
@@ -50,6 +51,7 @@ const IconsName = {
   Refresh,
   Search,
   ViewDetail,
+  Credit,
 } as const;
 
 export type IconName = keyof typeof IconsName;
