@@ -32,6 +32,7 @@ export interface ActionButtonProps
   leftIcon?: IconName;
   rightIcon?: IconName;
   fullWidth?: boolean;
+  visualDisabled?: boolean;
 }
 
 const ActionButton = ({
@@ -44,10 +45,12 @@ const ActionButton = ({
   fullWidth = false,
   type = 'button',
   disabled,
+  visualDisabled = false,
   className,
   ...props
 }: ActionButtonProps) => {
-  const isDisabled = disabled === true;
+  const isDomDisabled = disabled === true;
+  const isVisuallyDisabled = isDomDisabled || visualDisabled;
   const iconSize = BUTTON_SIZE_TO_ICON_SIZE[size];
 
   return (
@@ -59,11 +62,12 @@ const ActionButton = ({
           color,
           size,
           fullWidth,
-          ...(isDisabled ? { disabled: true } : {}),
+          ...(isVisuallyDisabled ? { disabled: true } : {}),
         }),
         className
       )}
-      disabled={isDisabled}
+      disabled={isDomDisabled}
+      aria-disabled={isDomDisabled || undefined}
       {...props}
     >
       {leftIcon != null ? <Icon name={leftIcon} size={iconSize} /> : null}

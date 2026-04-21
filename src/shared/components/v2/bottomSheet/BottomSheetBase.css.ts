@@ -165,6 +165,13 @@ export const contentSlot = style({
   width: '100%',
   minHeight: 0,
   overflow: 'auto',
+  scrollbarWidth: 'none',
+  msOverflowStyle: 'none',
+  selectors: {
+    '&::-webkit-scrollbar': {
+      display: 'none',
+    },
+  },
 });
 
 // 버튼 래퍼 row
