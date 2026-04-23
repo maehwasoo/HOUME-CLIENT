@@ -16,7 +16,8 @@
     "build-storybook": "storybook build --stats-json",
     "test": "vitest run --project unit",
     "test:watch": "vitest --project unit",
-    "test:coverage": "vitest run --project unit --coverage"
+    "test:coverage": "vitest run --project unit --coverage",
+    "api:generate": "node scripts/gen-api.mjs"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
@@ -95,6 +96,7 @@
     "playwright": "^1.53.1",
     "prettier": "3.6.2",
     "storybook": "^10.1.11",
+    "swagger-typescript-api": "^13.6.10",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.34.1",
     "vite": "^7.0.0",

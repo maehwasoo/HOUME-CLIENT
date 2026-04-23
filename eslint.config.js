@@ -16,7 +16,14 @@ import vanillaExtract from '@antebudimir/eslint-plugin-vanilla-extract';
 
 export default [
   {
-    ignores: ['dist', 'storybook-static/**', 'node_modules/', '*.js', '*.d.ts'],
+    ignores: [
+      'dist',
+      'storybook-static/**',
+      'node_modules/',
+      '*.js',
+      '*.d.ts',
+      'src/shared/apis/__generated__/**',
+    ],
   },
   {
     files: ['**/*.{ts,tsx}'],
