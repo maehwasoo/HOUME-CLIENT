@@ -28,24 +28,54 @@ export const handlers = [
     });
   }),
 
-  // GET /api/v1/dashboard-info — 활동 옵션 (prefetchStaticData에서 호출)
-  http.get('*/api/v1/dashboard-info', () => {
+  // GET /api/v2/dashboard/activities — 주요활동 + 활동별 필수 가구
+  http.get('*/api/v2/dashboard/activities', () => {
     return HttpResponse.json({
       code: 200,
       message: 'OK',
       data: {
         activities: [
-          { code: 'COOKING', label: '요리' },
-          { code: 'READING', label: '독서' },
+          {
+            code: 'REMOTE_WORK',
+            label: '재택근무형',
+            furnitures: [{ id: 7, code: 'DESK', label: '업무용 책상' }],
+          },
+          {
+            code: 'READING',
+            label: '독서형',
+            furnitures: [{ id: 12, code: 'BOOKSHELF', label: '책 선반' }],
+          },
+          {
+            code: 'FLOOR_LIVING',
+            label: '좌식 생활형',
+            furnitures: [{ id: 9, code: 'LOW_TABLE', label: '좌식 테이블' }],
+          },
+          {
+            code: 'HOME_CAFE',
+            label: '홈카페형',
+            furnitures: [{ id: 8, code: 'DINING_TABLE', label: '식탁' }],
+          },
         ],
+      },
+    });
+  }),
+
+  // GET /api/v2/dashboard/categories — 가구 카테고리 + 카테고리별 가구
+  http.get('*/api/v2/dashboard/categories', () => {
+    return HttpResponse.json({
+      code: 200,
+      message: 'OK',
+      data: {
         categories: [
           {
             categoryId: 1,
-            nameKr: '침대',
+            nameKr: '침대/프레임',
             nameEng: 'BED',
             furnitures: [
-              { id: 1, code: 'BED_SINGLE', label: '싱글 침대' },
-              { id: 2, code: 'BED_DOUBLE', label: '더블 침대' },
+              { id: 1, code: 'BED_SINGLE', label: '싱글' },
+              { id: 2, code: 'BED_SUPER_SINGLE', label: '슈퍼싱글' },
+              { id: 3, code: 'BED_DOUBLE', label: '더블' },
+              { id: 4, code: 'BED_QUEEN_OR_LARGER', label: '퀸 이상' },
             ],
           },
           {
@@ -53,35 +83,29 @@ export const handlers = [
             nameKr: '소파',
             nameEng: 'SOFA',
             furnitures: [
-              { id: 3, code: 'SOFA_2', label: '2인 소파' },
-              { id: 4, code: 'SOFA_3', label: '3인 소파' },
+              { id: 5, code: 'SOFA_SINGLE', label: '1인용' },
+              { id: 6, code: 'SOFA_DOUBLE', label: '2인용' },
             ],
           },
           {
             categoryId: 3,
-            nameKr: '수납',
-            nameEng: 'STORAGE',
+            nameKr: '테이블',
+            nameEng: 'TABLE',
             furnitures: [
-              { id: 5, code: 'STORAGE_SHELF', label: '선반' },
-              { id: 6, code: 'STORAGE_WARDROBE', label: '옷장' },
+              { id: 7, code: 'DESK', label: '업무용 책상' },
+              { id: 8, code: 'DINING_TABLE', label: '식탁' },
+              { id: 9, code: 'LOW_TABLE', label: '좌식 테이블' },
             ],
           },
           {
             categoryId: 4,
-            nameKr: '테이블',
-            nameEng: 'TABLE',
-            furnitures: [
-              { id: 7, code: 'TABLE_DINING', label: '식탁' },
-              { id: 8, code: 'TABLE_COFFEE', label: '커피 테이블' },
-            ],
-          },
-          {
-            categoryId: 5,
-            nameKr: '선택 가구',
+            nameKr: '그 외',
             nameEng: 'SELECTIVE',
             furnitures: [
-              { id: 9, code: 'SELECTIVE_PLANT', label: '화분' },
-              { id: 10, code: 'SELECTIVE_LAMP', label: '스탠드 조명' },
+              { id: 10, code: 'MOVABLE_TV', label: '이동식 TV' },
+              { id: 11, code: 'FULL_MIRROR', label: '전신 거울' },
+              { id: 12, code: 'BOOKSHELF', label: '책 선반' },
+              { id: 13, code: 'DISPLAY_CABINET', label: '장식장' },
             ],
           },
         ],

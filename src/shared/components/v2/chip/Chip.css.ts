@@ -12,8 +12,8 @@ export const chip = recipe({
     justifyContent: 'center',
     gap: unitVars.unit.gapPadding['050'],
     transition:
-      'transform 100ms ease, background-color 100ms ease, color 100ms ease',
-    borderWidth: '0.1rem',
+      'transform 120ms ease, background-color 120ms ease, color 120ms ease, border-color 120ms ease',
+    borderWidth: '1px',
     borderStyle: 'solid',
     borderRadius: unitVars.unit.gapPadding.full,
     background: 'transparent',
@@ -37,7 +37,32 @@ export const chip = recipe({
         color: colorVars.color.text.inverse,
       },
     },
+    color: {
+      strong: {},
+      weak: {},
+    },
+    disabled: {
+      true: {
+        borderColor: colorVars.color.border.tertiary,
+        cursor: 'default',
+        selectors: {
+          '&:active': {
+            transform: 'none',
+          },
+        },
+      },
+    },
   },
+  compoundVariants: [
+    {
+      variants: { color: 'weak', selected: true },
+      style: {
+        borderColor: 'transparent',
+        backgroundColor: colorVars.color.fill.weak,
+        color: colorVars.color.text.primary,
+      },
+    },
+  ],
 });
 
 export const label = recipe({
@@ -59,6 +84,15 @@ export const label = recipe({
         ...fontVars.font.body_m_13,
       },
     },
+    disabled: {
+      true: {
+        color: colorVars.color.text.disabled,
+      },
+    },
+    color: {
+      strong: {},
+      weak: {},
+    },
     hasSuffix: {
       false: {
         paddingRight: unitVars.unit.gapPadding['300'],
@@ -68,6 +102,14 @@ export const label = recipe({
       },
     },
   },
+  compoundVariants: [
+    {
+      variants: { color: 'weak', selected: true },
+      style: {
+        color: colorVars.color.text.primary,
+      },
+    },
+  ],
 });
 
 export const suffix = style({

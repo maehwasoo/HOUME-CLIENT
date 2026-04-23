@@ -9,7 +9,6 @@ export const wrapper = recipe({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
-    padding: unitVars.unit.gapPadding['000'],
     width: '100%',
   },
   variants: {
@@ -48,6 +47,7 @@ export const title = recipe({
 export const caption = recipe({
   base: {
     ...fontVars.font.body_r_14,
+    whiteSpace: 'pre-line',
     color: colorVars.color.text.secondary,
   },
   variants: {

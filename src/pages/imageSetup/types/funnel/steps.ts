@@ -14,12 +14,12 @@ export type ImageSetupSteps = {
     floorPlan: FloorPlan;
     moodBoardIds?: number[];
   };
-  // 이전 단계 입력값 누적 + activityType, selectiveIds
+  // 이전 단계 입력값 누적 + activity, furnitureIds
   ActivityInfo: {
     floorPlan: FloorPlan;
     moodBoardIds: number[];
-    activityType?: string;
-    selectiveIds?: number[];
+    activity?: string;
+    furnitureIds?: number[];
   };
 };
 

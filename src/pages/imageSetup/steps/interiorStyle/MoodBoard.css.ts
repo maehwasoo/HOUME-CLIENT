@@ -14,7 +14,6 @@ export const container = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  padding: '2rem',
   width: '100%',
   height: '100%',
 });

@@ -28,8 +28,9 @@ export const queryKeys = {
     housingOptions: () =>
       [...queryKeys.imageSetup.all, 'housingOptions'] as const,
     floorPlan: () => [...queryKeys.imageSetup.all, 'floorPlan'] as const,
-    activityOptions: () =>
-      [...queryKeys.imageSetup.all, 'activityOptions'] as const,
+    activities: () => [...queryKeys.imageSetup.all, 'activities'] as const,
+    furnitureCategories: () =>
+      [...queryKeys.imageSetup.all, 'furnitureCategories'] as const,
     moodBoard: (limit?: number) =>
       [...queryKeys.imageSetup.all, 'moodBoard', limit] as const,
   },

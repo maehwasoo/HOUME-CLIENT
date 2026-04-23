@@ -1,8 +1,9 @@
 import { overlay } from 'overlay-kit';
 import { useNavigate } from 'react-router-dom';
 
-import TitleNavBar from '@components/navBar/TitleNavBar';
 import Popup from '@components/overlay/popup/Popup';
+
+import TitleNavBar from '@/shared/components/v2/navBar/TitleNavBar';
 
 import * as styles from './FunnelLayout.css';
 import {
@@ -11,14 +12,24 @@ import {
   logSelectHouseInfoViewModal,
 } from '../../utils/analytics';
 
+type FunnelStepKey = 'FloorPlanSelect' | 'InteriorStyle' | 'ActivityInfo';
+
+// 퍼널 스텝 별 NavBar 타이틀 매핑
+const NAVBAR_TITLE_BY_STEP: Record<FunnelStepKey, string> = {
+  FloorPlanSelect: '공간 선택하기',
+  InteriorStyle: '취향 선택하기',
+  ActivityInfo: '가구 선택하기',
+};
+
 interface FunnelLayoutProps {
   children: React.ReactNode;
-  currentStep: 'FloorPlanSelect' | 'InteriorStyle' | 'ActivityInfo';
+  currentStep: FunnelStepKey;
 }
 
 const FunnelLayout = ({ children, currentStep }: FunnelLayoutProps) => {
   const navigate = useNavigate();
 
+  // TODO: 퍼널 전체 탈출 가드 useBlocker로 바꾸기
   const handleBackClick = () => {
     if (currentStep === 'FloorPlanSelect') {
       logSelectHouseInfoViewModal();
@@ -43,10 +54,8 @@ const FunnelLayout = ({ children, currentStep }: FunnelLayoutProps) => {
   return (
     <div className={styles.wrapper}>
       <TitleNavBar
-        // TODO: 각 스텝별 헤더 타이틀 설정하기
-        title="스타일링 이미지 생성"
-        isBackIcon={true}
-        isLoginBtn={false}
+        title={NAVBAR_TITLE_BY_STEP[currentStep]}
+        backLabel="이전"
         onBackClick={
           currentStep === 'FloorPlanSelect' ? handleBackClick : undefined
         }

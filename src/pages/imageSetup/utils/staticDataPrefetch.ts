@@ -1,6 +1,7 @@
 import { queryKeys } from '@constants/queryKey';
 
-import { getActivityOptions } from '../apis/queries/useActivityOptionsQuery';
+import { getActivities } from '../apis/queries/useActivitiesQuery';
+import { getFurnitureCategories } from '../apis/queries/useFurnitureCategoriesQuery';
 import { getHousingOptions } from '../apis/queries/useHousingOptionsQuery';
 import { getMoodBoardImage } from '../apis/queries/useMoodBoardQuery';
 import { MOOD_BOARD_CONSTANTS } from '../types/apis/interiorStyle';
@@ -19,10 +20,18 @@ export const prefetchStaticData = (queryClient: QueryClient) => {
     gcTime: 1000 * 60 * 60 * 24, // 24시간 가비지 컬렉션
   });
 
-  // 활동 옵션 데이터 (주요 활동, 침대 타입, 가구 옵션)
+  // 주요활동 데이터 (활동 목록 + 활동별 필수 가구)
   queryClient.prefetchQuery({
-    queryKey: queryKeys.imageSetup.activityOptions(),
-    queryFn: getActivityOptions,
+    queryKey: queryKeys.imageSetup.activities(),
+    queryFn: getActivities,
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60 * 24,
+  });
+
+  // 가구 카테고리 데이터 (카테고리 + 카테고리별 가구)
+  queryClient.prefetchQuery({
+    queryKey: queryKeys.imageSetup.furnitureCategories(),
+    queryFn: getFurnitureCategories,
     staleTime: Infinity,
     gcTime: 1000 * 60 * 60 * 24,
   });

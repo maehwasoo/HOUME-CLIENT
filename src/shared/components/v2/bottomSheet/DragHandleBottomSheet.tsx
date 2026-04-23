@@ -136,7 +136,9 @@ const DragHandleBottomSheet = ({
   const panelStyle: React.CSSProperties =
     isDragging && dragHeight != null
       ? { height: `${dragHeight}px` }
-      : { height: expanded ? EXPANDED_HEIGHT : (collapsedHeight ?? '0') };
+      : isPersistent
+        ? { height: expanded ? EXPANDED_HEIGHT : collapsedHeight }
+        : {}; // Dismissible: content 높이(auto) + CSS maxHeight가 상한
 
   const handleOverlayClick = () => {
     if (isPersistent) {
