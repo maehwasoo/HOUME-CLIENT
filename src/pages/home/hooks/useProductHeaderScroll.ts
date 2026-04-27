@@ -1,21 +1,34 @@
 import { useEffect, useRef, useState } from 'react';
 
-interface UseProductStickyHeaderParams {
+/**
+ * 상품 탭 헤더 스크롤 전용 훅
+ * - 필터 영역이 상단에 닿으면 sticky 상태로 전환한다.
+ * - sticky 상태에서 스크롤 방향에 따라 상단 검색바 노출을 제어한다.
+ */
+interface UseProductHeaderScrollParams {
   searchBarRef: React.RefObject<HTMLDivElement | null>;
   filterListRef: React.RefObject<HTMLDivElement | null>;
 }
 
-export const useProductStickyHeader = ({
+const useProductHeaderScroll = ({
   searchBarRef,
   filterListRef,
-}: UseProductStickyHeaderParams) => {
+}: UseProductHeaderScrollParams) => {
+  /** 스크롤 방향/상태 비교를 위한 내부 ref */
   const lastScrollYRef = useRef(0);
   const isFilterStickyRef = useRef(false);
+
+  /** 외부에 노출할 sticky 상태 */
   const [isFilterSticky, setIsFilterSticky] = useState(false);
   const [showStickySearchBar, setShowStickySearchBar] = useState(false);
 
+  /**
+   * window 스크롤 이벤트를 구독해 sticky 헤더 상태를 계산한다.
+   * - 필터 라인이 viewport top에 닿으면 sticky 시작
+   * - sticky 중 스크롤 업 + 원본 검색바 복귀 시 sticky 해제
+   * - sticky 중에는 스크롤 업일 때만 상단 검색바 표시
+   */
   useEffect(() => {
-    // handleScroll: 스크롤 위치/방향에 따라 sticky 상태와 검색바 노출 상태 갱신
     const handleScroll = () => {
       if (!searchBarRef.current || !filterListRef.current) return;
 
@@ -26,35 +39,38 @@ export const useProductStickyHeader = ({
       const filterTop = filterListRef.current.getBoundingClientRect().top;
       const searchBarTop = searchBarRef.current.getBoundingClientRect().top;
 
-      // 필터칩 행 상단이 viewport 상단에 닿으면 sticky 시작
       if (!isFilterStickyRef.current && filterTop <= 0) {
         isFilterStickyRef.current = true;
         setIsFilterSticky(true);
       }
 
       if (isFilterStickyRef.current) {
-        // 스크롤 업 중 원래 검색바 상단이 다시 화면 안으로 들어오면 sticky 해제
         if (isScrollUp && searchBarTop >= 0) {
           isFilterStickyRef.current = false;
           setIsFilterSticky(false);
           setShowStickySearchBar(false);
           return;
         }
-        // sticky 상태에서는 스크롤 업일 때만 검색바 노출
         setShowStickySearchBar(isScrollUp);
       }
     };
 
+    /** 마운트 시점과 스크롤 중 상태를 동일 규칙으로 동기화 */
     window.addEventListener('scroll', handleScroll, { passive: true });
-    // 최초 마운트 시 현재 스크롤 위치를 반영해 상태 동기화
     handleScroll();
+
+    /** 언마운트 시 스크롤 이벤트 정리 */
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [filterListRef, searchBarRef]);
 
+  /** SearchSection에서 사용할 공개 값 */
   return {
     isFilterSticky,
     showStickySearchBar,
+    showScrollTopFloatingButton: showStickySearchBar,
   };
 };
+
+export { useProductHeaderScroll };

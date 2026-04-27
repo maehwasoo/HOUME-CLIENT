@@ -1,16 +1,17 @@
+import ProductFilterSheet from '@pages/home/components/product/ProductFilterSheet/ProductFilterSheet';
+import {
+  MAX_SELECTED_PRODUCTS,
+  useProductTabController,
+} from '@pages/home/hooks/useProductTabController';
+
 import CloseBottomSheet from '@shared/components/v2/bottomSheet/CloseBottomSheet';
 import DragHandleBottomSheet from '@shared/components/v2/bottomSheet/DragHandleBottomSheet';
 import ActionButton from '@shared/components/v2/button/actionButton/ActionButton';
 
 import IntroSection from './IntroSection/IntroSection';
-import ProductFilterSheet from './ProductFilterSheet/ProductFilterSheet';
 import * as styles from './ProductTab.css';
 import SearchSection from './SearchSection/SearchSection';
 import SelectedProductSheet from './SelectedProductSheet/SelectedProductSheet';
-import {
-  MAX_SELECTED_PRODUCTS,
-  useProductTabState,
-} from '../../hooks/useProductTabState';
 
 const ProductTab = () => {
   const {
@@ -20,7 +21,8 @@ const ProductTab = () => {
     chipSelected,
     appliedFilterChips,
     selectedProducts,
-    productFilterSheetRef,
+    filterSheetProps,
+    productListQueryParams,
     handleFilterChipClick,
     handleRemoveAppliedChip,
     handleSelectProduct,
@@ -29,7 +31,7 @@ const ProductTab = () => {
     handleFilterSheetClose,
     handleFilterApply,
     handleFilterResetClick,
-  } = useProductTabState();
+  } = useProductTabController();
 
   return (
     <div className={styles.container}>
@@ -41,6 +43,7 @@ const ProductTab = () => {
         onAppliedFilterChipRemove={handleRemoveAppliedChip}
         selectedProductIds={selectedProducts.map((product) => product.id)}
         onSelectProduct={handleSelectProduct}
+        productListQueryParams={productListQueryParams}
       />
 
       <DragHandleBottomSheet
@@ -73,7 +76,7 @@ const ProductTab = () => {
         onClose={handleFilterSheetClose}
         titleAlign="left"
         titleSlot={<p className={styles.filterSheetTitle}>필터</p>}
-        contentSlot={<ProductFilterSheet ref={productFilterSheetRef} />}
+        contentSlot={<ProductFilterSheet {...filterSheetProps} />}
         secondaryButton={
           <ActionButton
             variant="outlined"

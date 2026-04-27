@@ -205,14 +205,18 @@ export const selectedInfoSection = style({
   padding: `calc(${unitVars.unit.gapPadding['200']} + ${unitVars.unit.gapPadding['050']}) ${unitVars.unit.gapPadding['050']}`,
   width: '100%',
   minWidth: 0,
-  minHeight: '7.2rem',
 });
 
 export const selectedTitle = style({
+  display: '-webkit-box',
+  margin: 0,
   overflow: 'hidden',
-  wordBreak: 'break-all',
+  overflowWrap: 'break-word',
+  textOverflow: 'ellipsis',
   color: colorVars.color.text.primary,
   ...fontVars.font.caption_r_12,
+  WebkitBoxOrient: 'vertical',
+  WebkitLineClamp: 2,
 });
 
 export const addInfoPlaceholder = style({

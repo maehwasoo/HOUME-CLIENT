@@ -1,37 +1,27 @@
 import { useCallback, useMemo, useRef } from 'react';
 
+import { overlay } from 'overlay-kit';
+
+import ProductDetailOverlay from '@pages/home/components/product/ProductPopup/ProductDetailOverlay';
+import { useProductHeaderScroll } from '@pages/home/hooks/useProductHeaderScroll';
+import { useProductSearch } from '@pages/home/hooks/useProductSearch';
+import type {
+  AppliedFilterChip,
+  ProductFilterChipCategory,
+  SelectedProduct,
+} from '@pages/home/types/productTab';
+
+import IconButton from '@shared/components/v2/button/IconButton';
 import ProductCard from '@shared/components/v2/productCard/ProductCard';
 import SearchBar from '@shared/components/v2/textField/SearchBar';
 
 import Chip from '@components/v2/chip/Chip';
 
-import {
-  getMockProductMainResponse,
-  toSearchSectionProducts,
-} from '@/pages/home/apis/queries/useProductMainQuery';
-import { useProductStickyHeader } from '@/pages/home/hooks/useProductStickyHeader';
+import type { ProductListQueryVariables } from '@constants/queryKey';
+
 import Icon from '@/shared/components/v2/icon/Icon';
 
 import * as styles from './SearchSection.css';
-
-export type ProductFilterChipCategory = 'furniture' | 'price' | 'color';
-
-export interface AppliedFilterChip {
-  category: ProductFilterChipCategory;
-  id: string;
-  label: string;
-  applied: boolean;
-}
-
-export interface SelectedProduct {
-  id: string;
-  title: string;
-  brand: string;
-  imageUrl?: string;
-  originalPrice: number;
-  discountPrice: number;
-  discountRate: number;
-}
 
 interface SearchSectionProps {
   chipSelected: Record<ProductFilterChipCategory, boolean>;
@@ -43,6 +33,7 @@ interface SearchSectionProps {
   ) => void;
   selectedProductIds: string[];
   onSelectProduct: (product: SelectedProduct) => void;
+  productListQueryParams: ProductListQueryVariables;
 }
 
 const SearchSection = ({
@@ -52,19 +43,15 @@ const SearchSection = ({
   onAppliedFilterChipRemove,
   selectedProductIds,
   onSelectProduct,
+  productListQueryParams,
 }: SearchSectionProps) => {
   const searchBarRef = useRef<HTMLDivElement>(null);
   const filterListRef = useRef<HTMLDivElement>(null);
-  const { isFilterSticky, showStickySearchBar } = useProductStickyHeader({
-    searchBarRef,
-    filterListRef,
-  });
+  const { isFilterSticky, showStickySearchBar, showScrollTopFloatingButton } =
+    useProductHeaderScroll({ searchBarRef, filterListRef });
 
-  const mockProducts = toSearchSectionProducts(
-    getMockProductMainResponse({
-      size: 20,
-    })
-  );
+  const { loadMoreRef, keyword, products, handleSearchKeywordChange } =
+    useProductSearch(productListQueryParams);
 
   const handleFilterChipCategoryClick = useCallback(
     (category: ProductFilterChipCategory) => {
@@ -80,14 +67,19 @@ const SearchSection = ({
     [onAppliedFilterChipRemove]
   );
 
-  const handleMockSaveToggle = useCallback(() => {}, []);
+  /** 상품 목록 찜 API 미연동 — ProductCard `SaveInfo`용 no-op */
+  const handleSaveToggleNoop = useCallback(() => {}, []);
 
-  const handleSelectMockProduct = useCallback(
+  const handleSelectProduct = useCallback(
     (product: SelectedProduct) => {
       onSelectProduct(product);
     },
     [onSelectProduct]
   );
+
+  const handleScrollToTopClick = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   const filterChips = useMemo(
     () =>
@@ -134,7 +126,7 @@ const SearchSection = ({
             }`}
           >
             <div className={styles.searchBarContainer}>
-              <SearchBar />
+              <SearchBar value={keyword} onChange={handleSearchKeywordChange} />
             </div>
           </div>
           <div className={styles.filterList}>
@@ -144,16 +136,17 @@ const SearchSection = ({
       ) : null}
       <div className={styles.searchHeader}>
         <div ref={searchBarRef} className={styles.searchBarContainer}>
-          <SearchBar />
+          <SearchBar value={keyword} onChange={handleSearchKeywordChange} />
         </div>
         <div ref={filterListRef} className={styles.filterList}>
           <div className={styles.filterScroll}>{filterChips}</div>
         </div>
       </div>
       <div className={styles.productList}>
-        {mockProducts.map(
+        {products.map(
           ({
             id,
+            detailProductId,
             title,
             brand,
             imageUrl,
@@ -165,47 +158,84 @@ const SearchSection = ({
             linkUrl,
           }) => {
             const isSelected = selectedProductIds.includes(id);
+            const cardProduct = {
+              title,
+              brand,
+              imageUrl,
+              colorHexes,
+            };
+            const cardPrice = {
+              original: originalPrice,
+              discountRate,
+              discount: discountPrice,
+            };
+            const cardSave = {
+              isSaved: false as const,
+              onToggle: handleSaveToggleNoop,
+              count: saveCount,
+            };
+            const cardLink = { href: linkUrl };
+            const cardShoppingAction = {
+              label: '선택' as const,
+              disabled: isSelected,
+              onClick: () =>
+                handleSelectProduct({
+                  id,
+                  title,
+                  brand,
+                  imageUrl,
+                  originalPrice,
+                  discountPrice,
+                  discountRate,
+                }),
+            };
+
+            const canOpenProductDetail = Number.isFinite(detailProductId);
+
             return (
               <ProductCard
                 key={id}
                 cardType="shopping"
-                product={{
-                  title,
-                  brand,
-                  imageUrl,
-                  colorHexes,
-                }}
-                price={{
-                  original: originalPrice,
-                  discountRate,
-                  discount: discountPrice,
-                }}
-                save={{
-                  isSaved: false,
-                  onToggle: handleMockSaveToggle,
-                  count: saveCount,
-                }}
-                link={{
-                  href: linkUrl,
-                }}
-                shoppingAction={{
-                  label: isSelected ? '선택' : '선택',
-                  disabled: isSelected,
-                  onClick: () =>
-                    handleSelectMockProduct({
-                      id,
-                      title,
-                      brand,
-                      imageUrl,
-                      originalPrice,
-                      discountPrice,
-                      discountRate,
-                    }),
-                }}
+                product={cardProduct}
+                price={cardPrice}
+                save={cardSave}
+                link={cardLink}
+                shoppingAction={cardShoppingAction}
+                {...(canOpenProductDetail
+                  ? {
+                      onShoppingViewDetailClick: () => {
+                        overlay.open(({ unmount }) => (
+                          <ProductDetailOverlay
+                            unmount={unmount}
+                            detailProductId={detailProductId}
+                            link={cardLink}
+                            price={cardPrice}
+                            product={cardProduct}
+                            save={cardSave}
+                            shoppingAction={cardShoppingAction}
+                          />
+                        ));
+                      },
+                    }
+                  : {})}
               />
             );
           }
         )}
+        <div ref={loadMoreRef} />
+      </div>
+
+      <div
+        className={`${styles.scrollTopFloatingWrap} ${
+          showScrollTopFloatingButton ? styles.scrollTopFloatingWrapVisible : ''
+        }`}
+      >
+        <IconButton
+          name="ArrowUp"
+          size="S"
+          aria-label="페이지 상단으로 이동"
+          onClick={handleScrollToTopClick}
+        />
       </div>
     </section>
   );

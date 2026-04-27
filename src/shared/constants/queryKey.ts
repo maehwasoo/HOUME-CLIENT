@@ -14,12 +14,31 @@ export interface ProductsQueryVariables {
   categoryId: number | null;
 }
 
+export interface ProductListQueryVariables {
+  keyword?: string;
+  types?: number[];
+  priceRanges?: string[];
+  colors?: number[];
+  cursor?: number;
+  size?: number;
+}
+
 // Query Key Factory
 export const queryKeys = {
   // 랜딩
   landing: {
     all: ['landing'] as const,
     history: () => [...queryKeys.landing.all, 'history'] as const,
+  },
+
+  // 상품
+  product: {
+    all: ['product'] as const,
+    productFilters: () => [...queryKeys.product.all, 'productFilters'] as const,
+    productList: (params: Omit<ProductListQueryVariables, 'cursor'>) =>
+      [...queryKeys.product.all, 'productList', params] as const,
+    productDetail: (productId: number) =>
+      [...queryKeys.product.all, 'productDetail', productId] as const,
   },
 
   // 이미지 설정 (온보딩 퍼널)
