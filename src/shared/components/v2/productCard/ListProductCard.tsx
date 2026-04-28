@@ -59,6 +59,17 @@ const ListProductCard = ({
     linkHref,
   });
 
+  const handleLinkButtonClick = () => {
+    if (link?.onClick) {
+      link.onClick();
+      return;
+    }
+
+    if (linkHref && typeof window !== 'undefined') {
+      window.open(linkHref, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div
       className={`${styles.wrapper({ size: cardSize })} ${
@@ -152,7 +163,7 @@ const ListProductCard = ({
           name="Link"
           size="S"
           disabled={disabled}
-          onClick={link?.onClick}
+          onClick={handleLinkButtonClick}
           aria-label={'상품 링크로 이동'}
         />
         <IconButton

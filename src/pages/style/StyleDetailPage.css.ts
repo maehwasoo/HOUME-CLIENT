@@ -36,13 +36,17 @@ export const products = style({
   width: '100%',
 });
 
-export const ctaBtn = style({
+export const btnWrapper = style({
   position: 'fixed',
   zIndex: zIndex.button,
-  right: 0,
-  bottom: unitVars.unit.gapPadding['500'],
-  left: 0,
-  margin: '0 auto',
-  width: `calc(100% - ${unitVars.unit.gapPadding['500']} * 2)`,
-  maxWidth: `calc(${unitVars.unit.dimension.wMax} - ${unitVars.unit.gapPadding['500']} * 2)`,
+  bottom: 0,
+  left: '50%',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transform: 'translateX(-50%)',
+  backgroundImage: `linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, #FFF 100%)`,
+  padding: unitVars.unit.gapPadding['500'],
+  width: '100%',
+  maxWidth: unitVars.unit.dimension.wMax,
 });

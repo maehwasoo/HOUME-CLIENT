@@ -177,7 +177,7 @@ export const largeFooterHeading = style({
 });
 
 export const largeFooterDescription = style({
-  height: ' 6rem',
+  maxHeight: '6rem',
   overflow: 'hidden',
   whiteSpace: 'pre-wrap',
   ...fontVars.font.body_r_13,

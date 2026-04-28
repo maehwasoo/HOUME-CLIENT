@@ -56,6 +56,10 @@ export const API_ENDPOINT = {
     CREDIT_LOGS: '/api/v1/credits/logs',
     CHECK_GENERATED_IMAGE: '/api/v1/check-has-generated-image',
   },
+  STYLES: {
+    STYLE_LIST: '/api/v1/other-styles',
+    STYLE_DETAIL: (styleId: number) => `/api/v1/other-styles/${styleId}`,
+  },
 } as const;
 
 // 헬퍼 타입: 중첩된 객체의 모든 리프(leaf) 값들을 추출

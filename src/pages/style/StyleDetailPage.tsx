@@ -8,6 +8,10 @@ import { useUserStore } from '@store/useUserStore';
 
 import { useJjymMutation } from '@apis/mutations/useJjymMutation';
 
+import FallbackImage from '@assets/v2/images/bannerFallback.svg';
+
+import InlineError from '@components/inlineError/InlineError';
+import Loading from '@components/loading/Loading';
 import ActionButton from '@components/v2/button/actionButton/ActionButton';
 import TitleNavBar from '@components/v2/navBar/TitleNavBar';
 import ListCardProduct from '@components/v2/productCard/ListProductCard';
@@ -15,7 +19,7 @@ import StyleCard from '@components/v2/styleCard/StyleCard';
 
 import { setLoginRedirect } from '@utils/loginRedirect';
 
-import { STYLE_DETAIL_MOCK } from './mocks/styleDetail';
+import { useGetStyleDetailQuery } from './apis/useGetStyleDetailQuery';
 import * as styles from './StyleDetailPage.css';
 import { normalizeColorHexes } from '../generate/pages/result/curationSection/curationProducts';
 
@@ -26,6 +30,13 @@ const StyleDetailPage = () => {
   const isLoggedIn = !!useUserStore((state) => state.accessToken);
 
   const savedProductIds = useSavedItemsStore((state) => state.savedProductIds);
+
+  const {
+    data: styleDetailData,
+    isFetching,
+    isError,
+    refetch,
+  } = useGetStyleDetailQuery(Number(styleId));
 
   // 찜 해제 토글
   const { mutate: toggleJjym } = useJjymMutation();
@@ -61,51 +72,71 @@ const StyleDetailPage = () => {
         onBackClick={() => navigate(-1)}
       />
       <div className={styles.container}>
-        <section className={styles.styleCardInfo}>
-          <StyleCard
-            size="L"
-            title={STYLE_DETAIL_MOCK.data.styleName}
-            largeContents={{
-              title: STYLE_DETAIL_MOCK.data.styleName,
-              description: STYLE_DETAIL_MOCK.data.styleDescription,
-            }}
-            imageSrc={STYLE_DETAIL_MOCK.data.styleImageUrl}
-            imageLoading="eager"
+        {isFetching ? (
+          <Loading />
+        ) : isError ? (
+          <InlineError
+            onRetry={refetch}
+            message="다른 스타일을 불러올 수 없습니다"
           />
-        </section>
-        <section className={styles.productList}>
-          <span className={styles.sectionTitle}>사용된 가구</span>
-          <div className={styles.products}>
-            {STYLE_DETAIL_MOCK.data.products.map((item) => (
-              <ListCardProduct
-                key={item.id}
-                product={{
-                  title: item.name,
-                  imageUrl: item.imageUrl,
-                  colorHexes: normalizeColorHexes(item.colors),
+        ) : (
+          <>
+            <section className={styles.styleCardInfo}>
+              <StyleCard
+                size="L"
+                title={styleDetailData?.styleName}
+                largeContents={{
+                  title: styleDetailData?.styleName || '',
+                  description: styleDetailData?.styleDescription || '',
                 }}
-                price={{
-                  original: item.originalPrice,
-                  discount: item.finalPrice,
-                  discountRate: item.discountRate,
-                }}
-                save={{
-                  isSaved: savedProductIds.has(item.id),
-                  onToggle: () => handleToggleSave(item.id),
-                }}
-                link={{
-                  href: item.linkUrl,
-                  // onClick: logMyPageClickBtnFurnitureCard,
-                }}
-                enableWholeCardLink={true}
+                imageSrc={styleDetailData?.styleImageUrl || FallbackImage}
+                imageLoading="eager"
               />
-            ))}
-          </div>
-        </section>
+            </section>
+            <section className={styles.productList}>
+              <span className={styles.sectionTitle}>사용된 가구</span>
+              <div className={styles.products}>
+                {styleDetailData?.products?.map((item) => (
+                  <ListCardProduct
+                    key={item.id}
+                    product={{
+                      title: item.name || '',
+                      imageUrl: item.imageUrl || FallbackImage,
+                      colorHexes: normalizeColorHexes(item.colors || []),
+                    }}
+                    price={{
+                      original: item.originalPrice,
+                      discount: item.finalPrice,
+                      discountRate: item.discountRate,
+                    }}
+                    save={{
+                      isSaved:
+                        item.id !== undefined
+                          ? savedProductIds.has(item.id) ||
+                            item.isLiked === true
+                          : false,
+                      onToggle: () => {
+                        if (item.id !== undefined) {
+                          handleToggleSave(item.id);
+                        }
+                      },
+                    }}
+                    link={{
+                      href: item.linkUrl || '',
+                    }}
+                    enableWholeCardLink={true}
+                  />
+                ))}
+              </div>
+            </section>
+          </>
+        )}
       </div>
-      <ActionButton onClick={handleCta} className={styles.ctaBtn}>
-        이 스타일로 우리 집 꾸미기
-      </ActionButton>
+      <div className={styles.btnWrapper}>
+        <ActionButton onClick={handleCta} fullWidth>
+          이 스타일로 우리 집 꾸미기
+        </ActionButton>
+      </div>
     </div>
   );
 };

@@ -96,4 +96,12 @@ export const queryKeys = {
     all: ['jjym'] as const,
     list: () => [...queryKeys.jjym.all, 'list'] as const,
   },
+
+  // 스타일
+  styles: {
+    all: ['styles'] as const,
+    list: (size?: number) => [...queryKeys.styles.all, 'list', size] as const,
+    detail: (styleId: number) =>
+      [...queryKeys.styles.all, 'detail', styleId] as const,
+  },
 } as const;
