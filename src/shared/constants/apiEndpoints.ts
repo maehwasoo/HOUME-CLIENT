@@ -14,6 +14,11 @@ export const API_ENDPOINT = {
       `/api/v1/mypage/images/${imageId}`,
     DELETE: '/api/v1/user',
   },
+  BANNER: {
+    LANDING: '/api/v1/landings',
+    BANNER_EXPLORE: (bannerId: number) => `/api/v1/banners/${bannerId}`,
+    BANNER_DETAIL: (bannerId: number) => `/api/v1/banners/${bannerId}/detail`,
+  },
   IMAGE_SETUP: {
     HOUSE_OPTIONS: '/api/v1/housing-options', // GET 집구조 제공(OFFICETEL, VILLA 등)
     HOUSE_INFO: '/api/v1/housing-selections', // POST 집구조 선택

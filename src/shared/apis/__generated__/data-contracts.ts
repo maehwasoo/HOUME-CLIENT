@@ -855,9 +855,18 @@ export interface ApiResponseRecentFloorPlanResponse {
   data?: RecentFloorPlanResponse;
 }
 
+export interface RecentFloorPlanItemResponse {
+  /** @format int64 */
+  id?: number;
+  name?: string;
+  imageUrl?: string;
+  equilibrium?: string;
+  view?: string;
+}
+
 export interface RecentFloorPlanResponse {
   hasRecentImage?: boolean;
-  floorPlan?: object;
+  floorPlan?: RecentFloorPlanItemResponse;
 }
 
 export interface ApiResponseMyPageGeneratedImageV2Response {
@@ -991,16 +1000,14 @@ export interface FurnitureCategoryGroup {
   categoryId?: number;
   nameKr?: string;
   nameEng?: string;
-  furnitures?: FurnitureItem[];
+  furnitures?: FurnitureCategoryItem[];
 }
 
-export interface FurnitureItem {
+export interface FurnitureCategoryItem {
   /** @format int64 */
   id?: number;
   code?: string;
   label?: string;
-  /** @format int32 */
-  priority?: number;
 }
 
 export interface ActivityFurnitureMappingsResponse {
@@ -1018,6 +1025,15 @@ export interface ApiResponseActivityFurnitureMappingsResponse {
   code?: number;
   msg?: string;
   data?: ActivityFurnitureMappingsResponse;
+}
+
+export interface FurnitureItem {
+  /** @format int64 */
+  id?: number;
+  code?: string;
+  label?: string;
+  /** @format int32 */
+  priority?: number;
 }
 
 export interface ApiResponseGetCarouselV2ListResponseDTO {
@@ -1190,6 +1206,8 @@ export interface LandingListResponse {
 export interface LandingResponse {
   /** @format int64 */
   id?: number;
+  /** @format int64 */
+  bannerId?: number;
   name?: string;
   imageUrl?: string;
 }
@@ -1331,6 +1349,8 @@ export interface SimilarItemResponse {
   linkUrl?: string;
   colors?: ProductColorResponse[];
   isLiked?: boolean;
+  /** @format int64 */
+  jjymCount?: number;
 }
 
 export interface SimilarItemsResponse {

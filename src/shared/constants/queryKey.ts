@@ -41,6 +41,15 @@ export const queryKeys = {
       [...queryKeys.product.all, 'productDetail', productId] as const,
   },
 
+  // 배너
+  banner: {
+    all: ['banner'] as const,
+    list: (bannerId: number) =>
+      [...queryKeys.banner.all, 'list', bannerId] as const,
+    detail: (bannerId: number) =>
+      [...queryKeys.banner.all, 'detail', bannerId] as const,
+  },
+
   // 이미지 설정 (온보딩 퍼널)
   imageSetup: {
     all: ['imageSetup'] as const,

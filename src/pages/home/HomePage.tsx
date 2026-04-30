@@ -23,13 +23,19 @@ import {
 
 export type HomeMenuTab = 'explore' | 'product';
 
+export type HomeLocationState = {
+  activeTab?: HomeMenuTab;
+  exploreSeedBannerId?: number;
+};
+
 const HomePage = () => {
   const navigate = useNavigate();
   const accessToken = useUserStore((state) => state.accessToken);
   const isLoggedIn = !!accessToken;
   const location = useLocation();
+  const homeState = location.state as HomeLocationState | undefined;
   const [activeMenuTab, setActiveMenuTab] = useState<HomeMenuTab>(
-    location.state?.activeTab ?? 'explore'
+    homeState?.activeTab ?? 'explore'
   );
 
   const scrollDepth50Sent = useRef(false);
@@ -82,7 +88,6 @@ const HomePage = () => {
     navigate(ROUTES.IMAGE_SETUP);
   };
 
-  // 프로필 버튼 클릭 핸들러 (마이페이지 버튼 클릭 이벤트 전송)
   const handleProfile = () => {
     if (isLoggedIn) {
       logLandingClickBtnMypage();
@@ -113,7 +118,9 @@ const HomePage = () => {
         sticky={activeMenuTab === 'explore'}
         onTabChange={setActiveMenuTab}
       />
-      {activeMenuTab === 'explore' && <ExploreTab />}
+      {activeMenuTab === 'explore' && (
+        <ExploreTab exploreSeedBannerId={homeState?.exploreSeedBannerId} />
+      )}
       {activeMenuTab === 'product' && <ProductTab />}
     </main>
   );

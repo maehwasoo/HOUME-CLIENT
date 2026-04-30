@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { Autoplay } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import 'swiper/css';
+
+import { useBannerListQuery } from '@pages/home/apis/queries/useBannerListQuery';
 
 import Icon from '@shared/components/v2/icon/Icon';
 
@@ -20,62 +22,84 @@ export type BannerSlide = {
 const AUTO_PLAY_DELAY_MS = 4000;
 
 type BannerProps = {
-  slides: BannerSlide[];
+  seedBannerId: number;
   onSlideClick?: (slide: BannerSlide) => void;
 };
 
-const Banner = ({ slides, onSlideClick }: BannerProps) => {
+const Banner = ({ seedBannerId, onSlideClick }: BannerProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const { data } = useBannerListQuery(seedBannerId);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [seedBannerId]);
+
+  const slides: BannerSlide[] = useMemo(() => {
+    const banners = data?.banners ?? [];
+    return banners
+      .filter((b) => b.id != null)
+      .map((b) => ({
+        id: b.id as number,
+        title: b.name ?? '',
+        imageUrl: b.imageUrl ?? '',
+      }));
+  }, [data?.banners]);
+
   const hasMultipleSlides = slides.length > 1;
   const currentSlide = slides[activeIndex] ?? slides[0];
+  const showPlaceholder = slides.length === 0;
 
   return (
     <div className={styles.root}>
       <div className={styles.swiperWrapper}>
-        <Swiper
-          className={styles.bannerSwiper}
-          modules={[Autoplay]}
-          slidesPerView={1}
-          loop={hasMultipleSlides}
-          autoplay={
-            hasMultipleSlides
-              ? {
-                  delay: AUTO_PLAY_DELAY_MS,
-                  disableOnInteraction: false,
-                }
-              : false
-          }
-          onSlideChange={(swiper: SwiperType) => {
-            setActiveIndex(swiper.realIndex);
-          }}
-          onSwiper={(swiper: SwiperType) => {
-            setActiveIndex(swiper.realIndex);
-          }}
-        >
-          {slides.map((slide, index) => (
-            <SwiperSlide
-              key={slide.id}
-              className={styles.swiperSlide}
-              onClick={() => onSlideClick?.(slide)}
-            >
-              {slide.imageUrl ? (
-                <div className={styles.wrapper}>
-                  <img
-                    src={slide.imageUrl}
-                    alt={slide.title}
-                    className={styles.image}
-                    draggable={false}
-                    loading={index === 0 ? 'eager' : 'lazy'}
-                    decoding="async"
-                  />
-                  <div className={styles.gradientOverlay} />
-                </div>
-              ) : (
-                <div className={styles.slidePlaceholder} />
-              )}
-            </SwiperSlide>
-          ))}
-        </Swiper>
+        {showPlaceholder ? (
+          <div className={styles.slidePlaceholder} />
+        ) : (
+          <Swiper
+            className={styles.bannerSwiper}
+            modules={[Autoplay]}
+            slidesPerView={1}
+            loop={hasMultipleSlides}
+            autoplay={
+              hasMultipleSlides
+                ? {
+                    delay: AUTO_PLAY_DELAY_MS,
+                    disableOnInteraction: false,
+                  }
+                : false
+            }
+            onSlideChange={(swiper: SwiperType) => {
+              setActiveIndex(swiper.realIndex);
+            }}
+            onSwiper={(swiper: SwiperType) => {
+              setActiveIndex(swiper.realIndex);
+            }}
+          >
+            {slides.map((slide, index) => (
+              <SwiperSlide
+                key={slide.id}
+                className={styles.swiperSlide}
+                onClick={() => onSlideClick?.(slide)}
+              >
+                {slide.imageUrl ? (
+                  <div className={styles.wrapper}>
+                    <img
+                      src={slide.imageUrl}
+                      alt={slide.title}
+                      className={styles.image}
+                      draggable={false}
+                      loading={index === 0 ? 'eager' : 'lazy'}
+                      decoding="async"
+                    />
+                    <div className={styles.gradientOverlay} />
+                  </div>
+                ) : (
+                  <div className={styles.slidePlaceholder} />
+                )}
+              </SwiperSlide>
+            ))}
+          </Swiper>
+        )}
       </div>
 
       {slides.length > 0 && currentSlide && (
