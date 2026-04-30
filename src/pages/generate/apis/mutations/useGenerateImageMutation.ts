@@ -1,59 +1,44 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { useABTest } from '@pages/generate/hooks/useABTest';
 import { useGenerateStore } from '@pages/generate/stores/useGenerateStore';
-import type {
-  GenerateImageAResponse,
-  GenerateImageBResponse,
-  GenerateImageData,
-  GenerateImageRequest,
-} from '@pages/generate/types/generate';
 
+import type {
+  BannerGenerateImageResponse,
+  GenerateImageV4Request,
+} from '@apis/__generated__/data-contracts';
 import { queryClient } from '@apis/config/queryClient';
 import { HTTPMethod, request } from '@apis/config/request';
 
 import { API_ENDPOINT } from '@constants/apiEndpoints';
 import { queryKeys } from '@constants/queryKey';
 
-export const postGenerateImages = async (
-  requestData: GenerateImageRequest
-): Promise<GenerateImageAResponse['data']> => {
-  return request<GenerateImageAResponse['data']>({
-    method: HTTPMethod.POST,
-    url: API_ENDPOINT.GENERATE.IMAGE_V3,
-    body: requestData,
-  });
-};
-
 export const postGenerateImage = async (
-  requestData: GenerateImageRequest
-): Promise<GenerateImageBResponse['data']> => {
-  return request<GenerateImageBResponse['data']>({
+  requestData: GenerateImageV4Request
+): Promise<BannerGenerateImageResponse> => {
+  const response = await request<BannerGenerateImageResponse>({
     method: HTTPMethod.POST,
-    url: API_ENDPOINT.GENERATE.IMAGE_V2,
+    url: API_ENDPOINT.GENERATE.IMAGE_V4,
     body: requestData,
   });
+
+  // 응답은 200이지만 imageId가 오지 않는 예외 고려 (실제 발생 가능성은 낮음, 토끼 추천)
+  if (typeof response.imageId !== 'number') {
+    throw new Error('이미지 생성 응답에 imageId가 누락되었습니다');
+  }
+
+  return response;
 };
 
 export const useGenerateImageMutation = () => {
   const { setApiCompleted, setNavigationData, resetGenerate } =
     useGenerateStore();
-  const { isMultipleImages } = useABTest();
 
-  const generateImageRequest = useMutation<
-    { imageInfoResponses: GenerateImageData[] },
+  return useMutation<
+    BannerGenerateImageResponse,
     Error,
-    GenerateImageRequest
+    GenerateImageV4Request
   >({
-    mutationFn: async (userInfo: GenerateImageRequest) => {
-      if (isMultipleImages) {
-        const res = await postGenerateImages(userInfo);
-        return res;
-      } else {
-        const res = await postGenerateImage(userInfo);
-        return { imageInfoResponses: [res] };
-      }
-    },
+    mutationFn: postGenerateImage,
     onSuccess: (data) => {
       resetGenerate();
       setNavigationData(data);
@@ -63,6 +48,4 @@ export const useGenerateImageMutation = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.mypage.user() });
     },
   });
-
-  return generateImageRequest;
 };

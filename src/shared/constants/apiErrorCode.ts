@@ -9,10 +9,3 @@ export const ERROR_CODES = {
   // HTTP
   HTTP_RATE_LIMITED: 429,
 } as const;
-
-/** 폴백 이미지 API로 전환해야 하는 에러 코드 */
-export const FALLBACK_TRIGGER_CODES = new Set([
-  ERROR_CODES.IMAGE_QUOTA_EXCEEDED,
-  ERROR_CODES.IMAGE_LIMIT_EXCEEDED,
-  ERROR_CODES.IMAGE_ALREADY_REQUESTED,
-]);

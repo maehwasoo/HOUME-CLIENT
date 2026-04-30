@@ -3,7 +3,7 @@
  * 1. 도면 선택 상태
  *    - selectedFloorPlanId: 어떤 도면 카드를 선택했는지
  *    - isMirror: 좌우반전 여부
- * 2. 필터 상태 (API query param 이름과 통일: residenceType, layoutType, areaSize)
+ * 2. 필터 상태 (API query param 이름과 통일: residenceType, layoutType, equilibrium)
  *    - appliedFilters: 실제 적용된 필터 (도면 카드 그리드에 반영됨)
  *    - pendingFilters: FilterSheet에서 선택했지만 아직 적용하지 않은 값 저장용 임시 필터
  * 3. 시트 열림/닫힘 상태

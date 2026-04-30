@@ -57,8 +57,10 @@ const ActivityInfo = ({ context }: ActivityInfoProps) => {
   const selectionByNameEng: Record<string, typeof categorySelections.bed> = {
     BED: categorySelections.bed,
     SOFA: categorySelections.sofa,
+    STORAGE: categorySelections.storage,
     TABLE: categorySelections.table,
     SELECTIVE: categorySelections.selective,
+    LIGHTING: categorySelections.lighting,
   };
 
   return (
@@ -93,7 +95,7 @@ const ActivityInfo = ({ context }: ActivityInfoProps) => {
             <div className={styles.furList}>
               {/* TODO: 추후 Chip 최신화하기 (아이콘 포함 Chip 반영) */}
               {categories.map((category) => {
-                const selection = selectionByNameEng[category.nameEng];
+                const selection = selectionByNameEng[category.nameEng!];
                 if (!selection) return null;
 
                 return (
@@ -103,15 +105,15 @@ const ActivityInfo = ({ context }: ActivityInfoProps) => {
                   >
                     <span className={styles.furTitle}>{category.nameKr}</span>
                     <div className={styles.chipList}>
-                      {category.furnitures.map((furniture) => {
+                      {category.furnitures!.map((furniture) => {
                         const isSelected = selection.selectedValues.includes(
-                          furniture.id
+                          furniture.id!
                         );
                         const status = selection.furnitureStatus.find(
                           (s) => s.id === furniture.id
                         );
                         const isRequired =
-                          globalConstraints.isRequiredFurniture(furniture.id);
+                          globalConstraints.isRequiredFurniture(furniture.id!);
 
                         return (
                           <Chip
@@ -125,7 +127,7 @@ const ActivityInfo = ({ context }: ActivityInfoProps) => {
                               ) : undefined
                             }
                             onClick={() =>
-                              selection.toggleFurniture(furniture.id)
+                              selection.toggleFurniture(furniture.id!)
                             }
                           >
                             {furniture.label}

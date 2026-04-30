@@ -3,19 +3,16 @@ import { useEffect } from 'react';
 import { useToast } from '@components/toast/useToast';
 
 import { useFunnelStore } from '../../stores/useFunnelStore';
-import {
-  DUMMY_FILTER_CATEGORIES,
-  DUMMY_FLOOR_PLAN_DETAILS,
-  DUMMY_FLOOR_PLANS,
-  DUMMY_RECENT_FLOOR_PLAN,
-} from '../constants/floorPlanDummy';
+import { useHouseTemplateDetailQuery } from '../apis/queries/useHouseTemplateDetailQuery';
+import { useHouseTemplatesQuery } from '../apis/queries/useHouseTemplatesQuery';
+import { useRecentFloorPlanQuery } from '../apis/queries/useRecentFloorPlanQuery';
+import { FILTER_CATEGORIES } from '../constants/floorPlanFilters';
 import { useFloorPlanStore } from '../stores/useFloorPlanStore';
 
 import type {
   CompletedFloorPlanSelect,
   ImageSetupSteps,
 } from '../../types/funnel/steps';
-import type { FloorPlanFilters, RecentFloorPlanData } from '../types/floorPlan';
 
 export const useFloorPlanSelect = (
   _context: ImageSetupSteps['FloorPlanSelect'],
@@ -24,15 +21,32 @@ export const useFloorPlanSelect = (
   const store = useFloorPlanStore();
   const { notify } = useToast();
 
-  // 더미 데이터 (추후 useFloorPlanQuery / useRecentFloorPlanQuery로 교체)
-  const filterCategories = DUMMY_FILTER_CATEGORIES;
-  const allFloorPlans = DUMMY_FLOOR_PLANS;
-  // 최근 생성 도면 (별도 API 응답)
-  const recentFloorPlan: RecentFloorPlanData | null = DUMMY_RECENT_FLOOR_PLAN;
+  // 도면 전체 조회 (필터 변경 시 자동 refetch — queryKey에 appliedFilters 포함)
+  const { data: houseTemplatesData } = useHouseTemplatesQuery(
+    store.appliedFilters
+  );
+  const floorPlans = houseTemplatesData?.floorPlans ?? [];
 
-  // 최근 생성 공간이 있으면 초기 시트 표시 + 토스트 알림
+  // 도면 상세 조회 (카드 선택 -> floorPlanId가 null이 아닐 때 쿼리 enabled)
+  const { data: detailData } = useHouseTemplateDetailQuery(
+    store.selectedFloorPlanId
+  );
+  const selectedFloorPlanName = detailData?.floorPlanName ?? '';
+  const selectedEquilibrium = detailData?.equilibrium ?? '';
+  const selectedDetailViews = detailData?.floorPlans ?? []; // [{imageUrl, view}]
+
+  // 최근 사용 도면 조회 (RecentSheet 용도)
+  const { data: recentFloorPlanData } = useRecentFloorPlanQuery();
+  const recentFloorPlan = recentFloorPlanData?.hasRecentImage
+    ? (recentFloorPlanData.floorPlan ?? null)
+    : null;
+
+  // 시트 표시 우선순위:
+  // 1순위: useFunnelStore에 저장된 도면이 있는 경우 시트 복원
+  //   (case: 경로 3 홈 도면 클릭 / 로그인 게이트에서 복귀)
+  // 2순위: 최근 생성 공간이 있는 경우 RecentSheet 표시 + 토스트
+  // 3순위: useFloorPlanStore 저장 도면도 없고 최근 생성 공간도 없으면 바텀시트 X
   useEffect(() => {
-    // 1순위: useFunnelStore에 저장된 도면이 있는 경우 (case: 경로 3 홈 도면 클릭 / 로그인 게이트에서 복귀)
     const savedFloorPlan = useFunnelStore.getState().floorPlan;
     if (savedFloorPlan) {
       store.restoreFloorPlan(
@@ -43,80 +57,70 @@ export const useFloorPlanSelect = (
       return;
     }
 
-    // 2순위: 최근 생성 공간이 있는 경우 (case: API 응답에 최근 생성 공간 O)
-    // TODO: 최근 생성 공간 API 연동 시 RecentSheet에 해당 도면을 띄우도록 데이터 전달해야 함
     if (recentFloorPlan) {
       store.openRecentSheet();
       notify({ text: '저장된 내 공간을 불러왔어요.' });
     }
-
-    // 마운트 시 1회만 실행
+    // 마운트 시 1회만 실행 (recentFloorPlan은 처음 fetch 완료 후 한 번만 반영하면 됨)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [recentFloorPlan]);
 
-  // TODO: API 연동 후에는 불필요한 함수
-  const matchesFilter = (selected: string[], value: string): boolean =>
-    selected.length === 0 || selected.includes(value);
+  // 로그인 게이트 복귀 등으로 도면 상세가 새로 fetch될 때, funnelStore에 저장된 floorPlanView와
+  // 일치하는 슬라이드 인덱스를 복원해 사용자가 이전에 보던 도면 view가 그대로 노출되도록 함
+  // floorPlanId가 일치할 때만 복원 — 다른 도면이 같은 view 라벨을 가진 경우 의도치 않게 강제 복원되는 것을 방지
+  useEffect(() => {
+    const saved = useFunnelStore.getState().floorPlan;
+    if (!saved?.floorPlanView || !detailData?.floorPlans) return;
+    if (saved.floorPlanId !== detailData.floorPlanId) return;
 
-  // TODO: API 연동 후 서버 필터링으로 전환 (API 연동 후에는 불필요한 함수)
-  const filteredFloorPlans = allFloorPlans.filter((plan) => {
-    const f: FloorPlanFilters = store.appliedFilters;
-    return (
-      matchesFilter(f.residenceType, plan.residenceType) &&
-      matchesFilter(f.layoutType, plan.layoutType) &&
-      matchesFilter(f.areaSize, plan.areaSize)
+    const idx = detailData.floorPlans.findIndex(
+      (p) => p.view === saved.floorPlanView
     );
-  });
-
-  // TODO: API 연동 시 도면 상세 조회 API(GET /explore/house-templates/{id})로 교체
-  // selectedFloorPlan, selectedDetailViews 모두 하나의 API 응답에서 추출
-  const selectedFloorPlan =
-    allFloorPlans.find((p) => p.id === store.selectedFloorPlanId) ?? null;
-
-  const selectedDetailViews = store.selectedFloorPlanId
-    ? (DUMMY_FLOOR_PLAN_DETAILS[store.selectedFloorPlanId] ?? [])
-    : [];
-
-  /**
-   * handleConfirmFloorPlan / handleConfirmRecentFloorPlan에서
-   * payload 생성 + funnelStore 저장 로직이 동일하므로 헬퍼로 추출
-   */
-  const confirmFloorPlan = (
-    floorPlanData: CompletedFloorPlanSelect['floorPlan']
-  ) => {
-    useFunnelStore.getState().setFloorPlan(floorPlanData);
-    onNext({ floorPlan: floorPlanData });
-  };
+    if (idx >= 0) store.setViewIndex(idx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [detailData]);
 
   const handleCardClick = (floorPlanId: number) => {
     store.selectNewFloorPlan(floorPlanId);
     store.openFloorPlanSheet();
   };
 
-  // 도면 선택 후 "공간 선택하기" CTA
+  // 도면 선택 후 바텀시트 "공간 선택하기" CTA
   const handleConfirmFloorPlan = () => {
-    if (!selectedFloorPlan) return;
-    confirmFloorPlan({
-      floorPlanId: selectedFloorPlan.id,
+    if (store.selectedFloorPlanId === null) return;
+
+    // 도면 swiper에서 사용자가 선택한 view(ex: 창가뷰)를 string으로 가져옴
+    const floorPlanView =
+      selectedDetailViews[store.selectedViewIndex]?.view ?? '';
+
+    const floorPlanData: CompletedFloorPlanSelect['floorPlan'] = {
+      floorPlanId: store.selectedFloorPlanId,
       isMirror: store.isMirror,
-    });
+      floorPlanView,
+    };
+    useFunnelStore.getState().setFloorPlan(floorPlanData);
+    onNext({ floorPlan: floorPlanData });
   };
 
-  // 최근 생성 공간 바텀시트 "선택 완료" CTA
+  // 최근 생성 공간 바텀시트 "공간 선택하기" CTA
   const handleConfirmRecentFloorPlan = () => {
-    if (!recentFloorPlan) return;
+    if (!recentFloorPlan?.id) return;
     store.closeRecentSheet();
-    confirmFloorPlan({
+
+    const floorPlanData: CompletedFloorPlanSelect['floorPlan'] = {
       floorPlanId: recentFloorPlan.id,
       isMirror: store.isMirror,
-    });
+      floorPlanView: recentFloorPlan.view ?? '',
+    };
+    useFunnelStore.getState().setFloorPlan(floorPlanData);
+    onNext({ floorPlan: floorPlanData });
   };
 
-  // 컴포넌트별로 필요한 상태/액션을 묶어서 반환
   return {
-    filterCategories,
-    filteredFloorPlans,
-    selectedFloorPlan,
+    filterCategories: FILTER_CATEGORIES,
+    floorPlans,
+    selectedFloorPlanName,
+    selectedEquilibrium,
     selectedDetailViews,
     recentFloorPlan,
     handleCardClick,

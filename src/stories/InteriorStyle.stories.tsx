@@ -11,7 +11,7 @@ const meta: Meta<typeof InteriorStyle> = {
   tags: ['autodocs'],
   args: {
     context: {
-      floorPlan: { floorPlanId: 1, isMirror: false },
+      floorPlan: { floorPlanId: 1, isMirror: false, floorPlanView: '정면뷰' },
     },
     onNext: fn(),
   },

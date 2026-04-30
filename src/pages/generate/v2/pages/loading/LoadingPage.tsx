@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Navigate, useNavigate } from 'react-router-dom';
 
-import { useFallbackImageQuery } from '@pages/generate/apis/queries/useFallbackImageQuery';
 import { usePostCarouselLikeMutation } from '@pages/generate/v2/apis/mutations/useCarouselLikeMutation';
 import { useStackDataQuery } from '@pages/generate/v2/apis/queries/useStackDataQuery';
 import { useGenerateStore } from '@pages/generate/v2/stores/useGenerateStore';
@@ -89,17 +88,6 @@ const LoadingPage = () => {
       return null;
     }
   }, []);
-
-  // 정상 진입 여부, true: 일반 이미지 생성 API 호출, false: 폴백 이미지 API 호출
-  const [isNormalEntry, setIsNormalEntry] = useState(true);
-  console.log(setIsNormalEntry, 'isNormalEntry 상태 업데이트 함수'); // 빌드 에러 방지용
-
-  // 폴백 이미지 생성 API (일반 API 실패 시 사용)
-  // isNormalEntry가 변경되면 컴포넌트 리렌더링 -> useFallbackImageQuery 실행 -> useQuery가 enabled값 감지
-  // -> true: 폴백 API 요청, false: 쿼리 실행 X
-  useFallbackImageQuery(requestData?.houseId || 0, !isNormalEntry, (error) => {
-    handleError(error, 'loading');
-  });
 
   // 캐러셀 페이지네이션 (무한 스크롤) - 스택 UI
   const [currentPage, setCurrentPage] = useState(0);

@@ -3,11 +3,13 @@
 
 import { useMemo } from 'react';
 
+import type { ExploreHouseTemplateDetailItemResponse } from '@apis/__generated__/data-contracts';
+
 import { useFloorPlanStore } from '../stores/useFloorPlanStore';
 
-import type { FloorPlanDetailView } from '../types/floorPlan';
-
-export const useFloorPlanSheet = (detailViews: FloorPlanDetailView[]) => {
+export const useFloorPlanSheet = (
+  detailViews: ExploreHouseTemplateDetailItemResponse[]
+) => {
   const { selectedViewIndex, setViewIndex, isMirror, toggleMirror } =
     useFloorPlanStore();
 
@@ -19,11 +21,11 @@ export const useFloorPlanSheet = (detailViews: FloorPlanDetailView[]) => {
   );
 
   return {
-    currentView, // 현재 보고 있는 뷰 (FloorPlanDetailView)
-    selectedViewIndex, // 현재 뷰 인덱스
-    setViewIndex, // 뷰 인덱스 직접 설정 (Swiper 연동)
+    currentView, // 현재 보고 있는 뷰 (imageUrl, view)
+    selectedViewIndex,
+    setViewIndex,
     isMultiView, // 뷰 2개 이상 → prev/next 버튼 표시
-    isMirror, // 좌우반전 상태
-    toggleMirror, // 좌우반전 토글
+    isMirror,
+    toggleMirror,
   };
 };

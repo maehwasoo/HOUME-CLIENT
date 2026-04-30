@@ -16,8 +16,9 @@ interface FloorPlanSelectStepProps {
 const FloorPlanSelectStep = ({ context, onNext }: FloorPlanSelectStepProps) => {
   const {
     filterCategories,
-    filteredFloorPlans,
-    selectedFloorPlan,
+    floorPlans,
+    selectedFloorPlanName,
+    selectedEquilibrium,
     selectedDetailViews,
     recentFloorPlan,
     handleCardClick,
@@ -33,7 +34,7 @@ const FloorPlanSelectStep = ({ context, onNext }: FloorPlanSelectStepProps) => {
     <>
       <FloorPlanSelectGrid
         filterCategories={filterCategories}
-        floorPlans={filteredFloorPlans}
+        floorPlans={floorPlans}
         appliedFilters={grid.appliedFilters}
         onCardClick={handleCardClick}
         onFilterChipClick={grid.onFilterChipClick}
@@ -54,7 +55,8 @@ const FloorPlanSelectStep = ({ context, onNext }: FloorPlanSelectStepProps) => {
       <FloorPlanSheet
         open={floorPlanSheet.open}
         onClose={floorPlanSheet.onClose}
-        floorPlanName={selectedFloorPlan?.name ?? ''}
+        floorPlanName={selectedFloorPlanName}
+        equilibrium={selectedEquilibrium}
         detailViews={selectedDetailViews}
         onConfirm={handleConfirmFloorPlan}
       />
@@ -63,8 +65,14 @@ const FloorPlanSelectStep = ({ context, onNext }: FloorPlanSelectStepProps) => {
         <FloorPlanSheet
           open={recentSheet.open}
           onClose={recentSheet.onClose}
-          floorPlanName={recentFloorPlan.name}
-          detailViews={[recentFloorPlan]}
+          floorPlanName={recentFloorPlan.name ?? ''}
+          equilibrium={recentFloorPlan.equilibrium ?? ''}
+          detailViews={[
+            {
+              imageUrl: recentFloorPlan.imageUrl,
+              view: recentFloorPlan.view,
+            },
+          ]}
           onConfirm={handleConfirmRecentFloorPlan}
         />
       )}

@@ -22,7 +22,11 @@ export const API_ENDPOINT = {
   IMAGE_SETUP: {
     HOUSE_OPTIONS: '/api/v1/housing-options', // GET 집구조 제공(OFFICETEL, VILLA 등)
     HOUSE_INFO: '/api/v1/housing-selections', // POST 집구조 선택
-    FLOOR_PLAN: '/api/v1/house-templates', // GET 도면 템플릿 제공
+    FLOOR_PLAN: '/api/v1/house-templates', // @deprecated 예전 API, 사용 X
+    HOUSE_TEMPLATES: '/api/v2/house-templates', // GET 도면 전체 조회 (필터/페이지네이션)
+    HOUSE_TEMPLATE_DETAIL: (floorPlanId: number) =>
+      `/api/v2/house-templates/${floorPlanId}`, // GET 도면 상세 조회 (다중 뷰)
+    RECENT_FLOOR_PLAN: '/api/v2/recent-floor-plan', // GET 최근 사용한 도면 조회 (RecentSheet용)
     POST_ADDRESS: '/api/v1/addresses', // POST 사용자 주소 입력받기
     INTERIOR_STYLE: '/api/v1/moodboard-images', // GET 무드보드 제공
     ACTIVITIES: '/api/v2/dashboard/activities', // GET 주요활동 + 활동별 필수 가구
@@ -34,9 +38,7 @@ export const API_ENDPOINT = {
     CAROUSELS_HATE: '/api/v1/carousels/hate',
     CAROUSELS_V2: '/api/v2/carousels',
     CAROUSELS_LIKE_V2: '/api/v2/carousels/like',
-    IMAGE_V2: '/api/v2/generated-images/generate/gemini',
-    IMAGE_V3: '/api/v3/generated-images/generate/gemini',
-    IMAGE_STATUS: '/api/v1/generated-images/generate',
+    IMAGE_V4: '/api/v4/generated-images/generate', // 풀퍼널 이미지 생성
     IMAGE_PREFERENCE: '/api/v1/generated-images',
     FACTORS: '/api/v1/factors',
     FACTOR_PREFERENCE: (imageId: number, factorId: number) =>

@@ -26,7 +26,8 @@ export const optionCard = recipe({
     kind: {
       default: {
         flexDirection: 'column',
-        backgroundColor: colorVars.color.fill.strong,
+        // 이미지 로드 전 노출 시 깜빡임 완화 위해 회색 placeholder 배경
+        backgroundColor: colorVars.color.fill.disabled,
       },
       more: {
         alignItems: 'center',

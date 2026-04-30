@@ -1,20 +1,20 @@
+import type { ActivityWithFurnitureResponse } from '@apis/__generated__/data-contracts';
+
 import Icon from '@components/v2/icon/Icon';
 
 import { getActivityIconName } from './activityIcons';
 import * as styles from './SelectTrigger.css';
 
-import type { ActivityItem } from '../../types/apis/activityInfo';
-
 interface SelectTriggerProps {
-  selectedActivity?: ActivityItem;
+  selectedActivity?: ActivityWithFurnitureResponse;
   onClick: () => void;
 }
 
 const SelectTrigger = ({ selectedActivity, onClick }: SelectTriggerProps) => {
   const activityIconName = selectedActivity
-    ? getActivityIconName(selectedActivity.code, 'black')
+    ? getActivityIconName(selectedActivity.code!, 'black')
     : null;
-  const requiredFurnitureLabel = selectedActivity?.furnitures[0]?.label;
+  const requiredFurnitureLabel = selectedActivity?.furnitures?.[0]?.label;
 
   return (
     <button type="button" className={styles.trigger} onClick={onClick}>

@@ -1,6 +1,7 @@
 interface FloorPlan {
   floorPlanId: number;
   isMirror: boolean;
+  floorPlanView: string; // ex: '창문뷰'
 }
 
 // Funnel Step 정의 (v2: HouseInfo + FloorPlan → FloorPlanSelect)

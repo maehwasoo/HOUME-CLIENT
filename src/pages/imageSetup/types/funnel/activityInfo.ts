@@ -13,6 +13,8 @@ export type CategorySelectionMode = 'single' | 'multiple';
 export const CATEGORY_SELECTION_MODE: Record<string, CategorySelectionMode> = {
   BED: 'single',
   SOFA: 'multiple',
+  STORAGE: 'multiple',
   TABLE: 'multiple',
   SELECTIVE: 'multiple',
+  LIGHTING: 'multiple',
 };

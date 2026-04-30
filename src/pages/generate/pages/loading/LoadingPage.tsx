@@ -6,14 +6,14 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { usePostCarouselHateMutation } from '@pages/generate/apis/mutations/useCarouselHateMutation';
 import { usePostCarouselLikeMutation } from '@pages/generate/apis/mutations/useCarouselLikeMutation';
 import { useGenerateImageMutation } from '@pages/generate/apis/mutations/useGenerateImageMutation';
-import { useFallbackImageQuery } from '@pages/generate/apis/queries/useFallbackImageQuery';
 import { useStackDataQuery } from '@pages/generate/apis/queries/useStackDataQuery';
 import { useGenerateStore } from '@pages/generate/stores/useGenerateStore';
-import type { GenerateImageRequest } from '@pages/generate/types/generate';
 
 import { ROUTES } from '@routes/paths';
 
 import { TOAST_TYPE } from '@shared/types/toast';
+
+import type { GenerateImageV4Request } from '@apis/__generated__/data-contracts';
 
 import DislikeButton from '@components/button/likeButton/DislikeButton';
 import LikeButton from '@components/button/likeButton/LikeButton';
@@ -21,8 +21,6 @@ import FeatureErrorFallback from '@components/errorFallback/FeatureErrorFallback
 import Loading from '@components/loading/Loading';
 import TitleNavBar from '@components/navBar/TitleNavBar';
 import { useToast } from '@components/toast/useToast';
-
-import { ERROR_CODES, FALLBACK_TRIGGER_CODES } from '@constants/apiErrorCode';
 
 import { useErrorHandler } from '@hooks/useErrorHandler';
 
@@ -32,28 +30,24 @@ import ProgressBar from './ProgressBar';
 const ANIMATION_DURATION = 600; // 캐러셀 애니메이션 지속 시간 (ms)
 const SESSION_STORAGE_KEY = 'generate_image_request'; // sessionStorage 키
 
-// Type Guard: GenerateImageRequest 검증
+// Type Guard: GenerateImageV4Request 검증
 // sessionStorage에서 가져온 데이터 검증
 const isValidGenerateImageRequest = (
   value: unknown
-): value is GenerateImageRequest => {
+): value is GenerateImageV4Request => {
   if (!value || typeof value !== 'object') return false;
 
   const request = value as Record<string, unknown>;
-  const floorPlan = request.floorPlan as Record<string, unknown> | undefined;
 
   return (
-    typeof request.houseId === 'number' &&
-    typeof request.equilibrium === 'string' &&
+    typeof request.floorPlanId === 'number' &&
+    typeof request.floorPlanView === 'string' &&
+    typeof request.isMirror === 'boolean' &&
     typeof request.activity === 'string' &&
     Array.isArray(request.moodBoardIds) &&
     (request.moodBoardIds as unknown[]).every((n) => typeof n === 'number') &&
-    Array.isArray(request.selectiveIds) &&
-    (request.selectiveIds as unknown[]).every((n) => typeof n === 'number') &&
-    floorPlan !== undefined &&
-    typeof floorPlan === 'object' &&
-    typeof floorPlan.floorPlanId === 'number' &&
-    typeof floorPlan.isMirror === 'boolean'
+    Array.isArray(request.furnitureIds) &&
+    (request.furnitureIds as unknown[]).every((n) => typeof n === 'number')
   );
 };
 
@@ -75,7 +69,7 @@ const LoadingPage = () => {
   }
 
   // sessionStorage에서 이미지 생성 요청 데이터 가져오기
-  const requestData: GenerateImageRequest | null = useMemo(() => {
+  const requestData: GenerateImageV4Request | null = useMemo(() => {
     // useMemo로 파싱 결과 참조 고정해 렌더 시 불필요한 API 재호출 차단
     const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!stored) return null;
@@ -88,18 +82,8 @@ const LoadingPage = () => {
     }
   }, []);
 
-  // 정상 진입 여부, true: 일반 이미지 생성 API 호출, false: 폴백 이미지 API 호출
-  const [isNormalEntry, setIsNormalEntry] = useState(true);
-
-  // 일반 이미지 생성 API(A/B 테스트 분류에 따라 이미지 1장/2장 생성)
+  // 이미지 생성 API
   const { mutate: mutateGenerateImage } = useGenerateImageMutation();
-
-  // 폴백 이미지 생성 API (일반 API 실패 시 사용)
-  // isNormalEntry가 변경되면 컴포넌트 리렌더링 -> useFallbackImageQuery 실행 -> useQuery가 enabled값 감지
-  // -> true: 폴백 API 요청, false: 쿼리 실행 X
-  useFallbackImageQuery(requestData?.houseId || 0, !isNormalEntry, (error) => {
-    handleError(error, 'loading');
-  });
 
   // 캐러셀 페이지네이션 (무한 스크롤) - 스택 UI
   const [currentPage, setCurrentPage] = useState(0);
@@ -139,22 +123,9 @@ const LoadingPage = () => {
       onSuccess: () => {
         // 성공 시 navigationData 설정, 프로그래스 바 완료 후 페이지 이동
       },
-      onError: (error: any) => {
-        const errorCode = error?.response?.data?.code;
-        const errorStatus = error?.response?.status;
-
-        // rate limit 또는 이미지 생성 관련 에러: 폴백 API로 전환
-        if (
-          errorStatus === ERROR_CODES.HTTP_RATE_LIMITED ||
-          FALLBACK_TRIGGER_CODES.has(errorCode)
-        ) {
-          setIsNormalEntry(false); // 폴백 API 활성화
-        }
-        // 기타 에러: 일반 에러 처리
-        else {
-          console.error('이미지 생성 실패:', error);
-          handleError(error, 'loading');
-        }
+      onError: (error) => {
+        console.error('이미지 생성 실패:', error);
+        handleError(error, 'loading');
       },
     });
   }, [handleError, mutateGenerateImage, requestData]);
@@ -189,10 +160,11 @@ const LoadingPage = () => {
   const handleProgressComplete = () => {
     if (navigationData && isApiCompleted) {
       sessionStorage.removeItem(SESSION_STORAGE_KEY);
-      navigate(ROUTES.GENERATE_RESULT, {
-        state: {
-          result: navigationData,
-        },
+      // V4 응답 = { imageId } — ResultPage가 ?houseId= query param으로 진입해 detail fetch
+      // (ResultPage 변수명/엔드포인트 정리는 별도 작업으로 분리)
+      const imageId = (navigationData as { imageId?: number })?.imageId;
+      if (typeof imageId !== 'number') return;
+      navigate(`${ROUTES.GENERATE_RESULT}?houseId=${imageId}`, {
         replace: true,
       });
     }

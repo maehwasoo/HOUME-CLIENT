@@ -56,6 +56,20 @@ export const queryKeys = {
     housingOptions: () =>
       [...queryKeys.imageSetup.all, 'housingOptions'] as const,
     floorPlan: () => [...queryKeys.imageSetup.all, 'floorPlan'] as const,
+    houseTemplates: (params: {
+      size?: number;
+      residenceType?: string[];
+      layoutType?: string[];
+      equilibrium?: string[];
+    }) => [...queryKeys.imageSetup.all, 'houseTemplates', params] as const,
+    houseTemplateDetail: (floorPlanId: number) =>
+      [
+        ...queryKeys.imageSetup.all,
+        'houseTemplateDetail',
+        floorPlanId,
+      ] as const,
+    recentFloorPlan: () =>
+      [...queryKeys.imageSetup.all, 'recentFloorPlan'] as const,
     activities: () => [...queryKeys.imageSetup.all, 'activities'] as const,
     furnitureCategories: () =>
       [...queryKeys.imageSetup.all, 'furnitureCategories'] as const,

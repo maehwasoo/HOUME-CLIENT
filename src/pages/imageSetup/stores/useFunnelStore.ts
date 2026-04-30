@@ -8,6 +8,7 @@ interface FunnelStore {
   floorPlan: {
     floorPlanId: number;
     isMirror: boolean;
+    floorPlanView: string;
   } | null;
   moodBoardIds: number[] | null;
   activityInfo: {
@@ -18,7 +19,11 @@ interface FunnelStore {
   } | null;
 
   // 각 스텝의 데이터 저장
-  setFloorPlan: (data: { floorPlanId: number; isMirror: boolean }) => void;
+  setFloorPlan: (data: {
+    floorPlanId: number;
+    isMirror: boolean;
+    floorPlanView: string;
+  }) => void;
   setMoodBoardIds: (ids: number[]) => void;
   setActivityInfo: (data: {
     activity?: string;

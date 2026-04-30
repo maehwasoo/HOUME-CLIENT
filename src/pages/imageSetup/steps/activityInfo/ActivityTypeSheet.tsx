@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import type { ActivityWithFurnitureResponse } from '@apis/__generated__/data-contracts';
+
 import DragHandleBottomSheet from '@components/v2/bottomSheet/DragHandleBottomSheet';
 import ActionButton from '@components/v2/button/actionButton/ActionButton';
 import Icon from '@components/v2/icon/Icon';
@@ -8,11 +10,9 @@ import TextHeading from '@components/v2/textHeading/TextHeading';
 import { getActivityIconName } from './activityIcons';
 import * as styles from './ActivityTypeSheet.css';
 
-import type { ActivityItem } from '../../types/apis/activityInfo';
-
 interface ActivityTypeSheetProps {
   open: boolean;
-  activities: ActivityItem[];
+  activities: ActivityWithFurnitureResponse[];
   selectedActivityCode?: string;
   onConfirm: (activityCode: string) => void;
   onClose: () => void;
@@ -50,10 +50,10 @@ const ActivityTypeSheet = ({
             {activities.map((activity) => {
               const isSelected = localSelected === activity.code;
               const iconName = getActivityIconName(
-                activity.code,
+                activity.code!,
                 isSelected ? 'black' : 'gray'
               );
-              const requiredFurnitureLabel = activity.furnitures[0]?.label;
+              const requiredFurnitureLabel = activity.furnitures![0]?.label;
 
               return (
                 <button

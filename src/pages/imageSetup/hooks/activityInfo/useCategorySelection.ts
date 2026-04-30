@@ -1,5 +1,6 @@
+import type { FurnitureCategoryGroup } from '@apis/__generated__/data-contracts';
+
 import type { useGlobalConstraints } from './useGlobalConstraints';
-import type { FurnitureCategory } from '../../types/apis/activityInfo';
 import type {
   ActivityInfoFormData,
   CategorySelectionMode,
@@ -12,12 +13,14 @@ import type {
  * - multiple모드: 카테고리 내 여러 개 선택 가능 (전역 최대 6개 + 필수 가구 제약 적용)
  */
 export const useCategorySelection = (
-  category: FurnitureCategory | null,
+  category: FurnitureCategoryGroup | null,
   mode: CategorySelectionMode,
   formData: ActivityInfoFormData,
   setFormData: React.Dispatch<React.SetStateAction<ActivityInfoFormData>>,
   globalConstraints: ReturnType<typeof useGlobalConstraints>
 ) => {
+  const furnitures = category?.furnitures ?? [];
+
   // 카테고리가 없는 경우 빈 인터페이스 반환
   if (!category) {
     return {
@@ -30,7 +33,7 @@ export const useCategorySelection = (
   // 현재 카테고리에서 선택된 가구 ID들
   const selectedValues =
     formData.furnitureIds?.filter((id) =>
-      category.furnitures.some((f) => f.id === id)
+      furnitures.some((f) => f.id === id)
     ) || [];
 
   // 가구 토글
@@ -53,7 +56,7 @@ export const useCategorySelection = (
     if (mode === 'single') {
       // 이 카테고리에 속한 기존 선택을 모두 제거하고 새 항목만 추가
       const preservedIds = currentIds.filter(
-        (id) => !category.furnitures.some((f) => f.id === id)
+        (id) => !furnitures.some((f) => f.id === id)
       );
       const updatedFurnitureIds = globalConstraints.applyConstraints([
         ...preservedIds,
@@ -72,9 +75,10 @@ export const useCategorySelection = (
   };
 
   // 각 가구별 활성화 상태 정보 (Chip의 disabled 매핑)
-  const furnitureStatus = category.furnitures.map((furniture) => ({
-    id: furniture.id,
-    isActive: globalConstraints.canSelectFurniture(furniture.id),
+  // swagger optional이지만 백엔드 명세상 id는 항상 옴 → non-null assertion 사용
+  const furnitureStatus = furnitures.map((furniture) => ({
+    id: furniture.id!,
+    isActive: globalConstraints.canSelectFurniture(furniture.id!),
   }));
 
   return {

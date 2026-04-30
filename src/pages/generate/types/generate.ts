@@ -17,18 +17,7 @@ export interface ImageStackResponse {
   carouselResponseDTOS: CarouselItem[];
 }
 
-// 이미지 생성 API 요청 데이터 타입
-export interface GenerateImageRequest extends Record<string, unknown> {
-  houseId: number;
-  equilibrium: string;
-  floorPlan: {
-    floorPlanId: number;
-    isMirror: boolean;
-  };
-  moodBoardIds: number[];
-  activity: string;
-  selectiveIds: number[];
-}
+// 이미지 생성 V4 요청 타입은 swagger 자동 생성 사용, V2/V3 Legacy API 관련 타입은 제거
 
 // 이미지 생성 API 응답 데이터 타입
 export interface GenerateImageData {

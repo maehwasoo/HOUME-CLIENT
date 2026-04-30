@@ -113,7 +113,7 @@ const ImageSetupPage = () => {
                 } else {
                   // 숏퍼널(경로 2, 4, 5): 퍼널 탈출 → 이미지 생성
                   // 숏퍼널은 마지막 스텝이 FloorPlanSelect → 퍼널 탈출 시점에 데이터 조합 및 API 요청. 이 위치에서 처리하는게 자연스러움
-                  // TODO: 경로별 이미지 생성 API 확정 후 요청 데이터 재설계 필요
+                  // TODO: 숏퍼널 전용 별도 API 연동 작업 시 payload 형식/저장 방식/라우팅 재설계 (현재 형식은 V4 generate와 다른 별도 흐름)
                   const generateRequest = {
                     houseId: 0,
                     equilibrium: '',

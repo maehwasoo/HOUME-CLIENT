@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import type { GenerateImageRequest } from '@pages/generate/types/generate';
 import {
   logSelectFurnitureClickBtnCTA,
   logSelectFurnitureClickBtnCTACreditError,
 } from '@pages/imageSetup/utils/analytics';
 
 import { ROUTES } from '@routes/paths';
+
+import type { GenerateImageV4Request } from '@apis/__generated__/data-contracts';
 
 import { useCreditGuard } from '@hooks/useCreditGuard';
 
@@ -92,31 +93,49 @@ export const useActivityInfo = (context: ImageSetupSteps['ActivityInfo']) => {
     !!formData.activity
   );
 
-  // 카테고리별 가구 선택 훅 (API 카테고리 순서 기준 인덱싱)
+  // 카테고리별 가구 선택 훅 (nameEng 기반 매핑 — 백엔드 응답 순서/추가에 영향 없음)
+  const categories = categoriesData?.categories;
+  const findByNameEng = (name: string) =>
+    categories?.find((c) => c.nameEng === name) ?? null;
+
   const bed = useCategorySelection(
-    categoriesData?.categories[0] ?? null,
+    findByNameEng('BED'),
     CATEGORY_SELECTION_MODE.BED,
     formData,
     setFormData,
     globalConstraints
   );
   const sofa = useCategorySelection(
-    categoriesData?.categories[1] ?? null,
+    findByNameEng('SOFA'),
     CATEGORY_SELECTION_MODE.SOFA,
     formData,
     setFormData,
     globalConstraints
   );
+  const storage = useCategorySelection(
+    findByNameEng('STORAGE'),
+    CATEGORY_SELECTION_MODE.STORAGE,
+    formData,
+    setFormData,
+    globalConstraints
+  );
   const table = useCategorySelection(
-    categoriesData?.categories[2] ?? null,
+    findByNameEng('TABLE'),
     CATEGORY_SELECTION_MODE.TABLE,
     formData,
     setFormData,
     globalConstraints
   );
   const selective = useCategorySelection(
-    categoriesData?.categories[3] ?? null,
+    findByNameEng('SELECTIVE'),
     CATEGORY_SELECTION_MODE.SELECTIVE,
+    formData,
+    setFormData,
+    globalConstraints
+  );
+  const lighting = useCategorySelection(
+    findByNameEng('LIGHTING'),
+    CATEGORY_SELECTION_MODE.LIGHTING,
     formData,
     setFormData,
     globalConstraints
@@ -124,7 +143,7 @@ export const useActivityInfo = (context: ImageSetupSteps['ActivityInfo']) => {
 
   // 카테고리 선택 객체 구성
   const categorySelections = categoriesData
-    ? { bed, sofa, table, selective }
+    ? { bed, sofa, storage, table, selective, lighting }
     : null;
 
   // 선택된 주요 활동의 라벨
@@ -185,19 +204,14 @@ export const useActivityInfo = (context: ImageSetupSteps['ActivityInfo']) => {
       return;
     }
 
-    // TODO: 이미지 생성 API 명세 확정 시 selectiveIds → furnitureIds 직접 대입으로 변경
-    // (현재는 서버가 selectiveIds로 받고 있어 클라이언트 furnitureIds를 매핑)
-    const generateImageRequest: GenerateImageRequest = {
-      houseId: 0, // TODO: 경로별 API 분리 후 제거
-      equilibrium: '', // TODO: 경로별 API 분리 후 제거
-      floorPlan: {
-        floorPlanId:
-          savedFloorPlan?.floorPlanId ?? context.floorPlan.floorPlanId,
-        isMirror: savedFloorPlan?.isMirror ?? context.floorPlan.isMirror,
-      },
+    const generateImageRequest: GenerateImageV4Request = {
+      floorPlanId: savedFloorPlan?.floorPlanId ?? context.floorPlan.floorPlanId,
+      floorPlanView:
+        savedFloorPlan?.floorPlanView ?? context.floorPlan.floorPlanView,
+      isMirror: savedFloorPlan?.isMirror ?? context.floorPlan.isMirror,
       moodBoardIds: savedMoodBoardIds ?? context.moodBoardIds,
       activity: formData.activity!,
-      selectiveIds: formData.furnitureIds!,
+      furnitureIds: formData.furnitureIds!,
     };
 
     // sessionStorage에 저장

@@ -1,10 +1,12 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 import clsx from 'clsx';
 import { Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 import 'swiper/css';
+
+import type { ExploreHouseTemplateDetailItemResponse } from '@apis/__generated__/data-contracts';
 
 import CloseBottomSheet from '@components/v2/bottomSheet/CloseBottomSheet';
 import ActionButton from '@components/v2/button/actionButton/ActionButton';
@@ -14,14 +16,14 @@ import Icon from '@components/v2/icon/Icon';
 import * as styles from './FloorPlanSheet.css';
 import { useFloorPlanSheet } from '../../hooks/useFloorPlanSheet';
 
-import type { FloorPlanDetailView } from '../../types/floorPlan';
 import type { Swiper as SwiperType } from 'swiper';
 
 interface FloorPlanSheetProps {
   open: boolean;
   onClose: () => void;
   floorPlanName: string;
-  detailViews: FloorPlanDetailView[];
+  equilibrium: string;
+  detailViews: ExploreHouseTemplateDetailItemResponse[];
   onConfirm: () => void;
 }
 
@@ -29,6 +31,7 @@ const FloorPlanSheet = ({
   open,
   onClose,
   floorPlanName,
+  equilibrium,
   detailViews,
   onConfirm,
 }: FloorPlanSheetProps) => {
@@ -42,6 +45,21 @@ const FloorPlanSheet = ({
     setViewIndex,
   } = useFloorPlanSheet(detailViews);
 
+  // 도면 상세 시트 마운트 후, 로그인 게이트에서 도면 상세 시트로 복귀 시, swiper API로 기존에 사용자가 선택했던 view로 이동
+  // loop=true(=isMultiView)인 경우 복제된 슬라이드 때문에 activeIndex와 realIndex가 다르므로,
+  // realIndex 기준으로 관리되는 selectedViewIndex를 정확히 따라가려면 slideToLoop을 사용해야 함
+  useEffect(() => {
+    const swiper = swiperRef.current;
+    if (!swiper) return;
+    if (swiper.realIndex === selectedViewIndex) return;
+
+    if (isMultiView) {
+      swiper.slideToLoop(selectedViewIndex);
+    } else {
+      swiper.slideTo(selectedViewIndex);
+    }
+  }, [selectedViewIndex, isMultiView]);
+
   if (!currentView) return null;
 
   return (
@@ -53,7 +71,7 @@ const FloorPlanSheet = ({
           <Icon name="DoubleStar" size="16" />
           <span className={styles.titleMain}>{floorPlanName}</span>
           <span className={styles.titleMeta}>·</span>
-          <span className={styles.titleMeta}>{currentView.equilibrium}</span>
+          <span className={styles.titleMeta}>{equilibrium}</span>
         </div>
       }
       contentSlot={
@@ -75,7 +93,7 @@ const FloorPlanSheet = ({
                 }}
               >
                 {detailViews.map((view, index) => (
-                  <SwiperSlide key={`${view.id}-${index}`}>
+                  <SwiperSlide key={`view-${index}`}>
                     <img
                       src={view.imageUrl}
                       alt={`${floorPlanName} ${view.view}`}

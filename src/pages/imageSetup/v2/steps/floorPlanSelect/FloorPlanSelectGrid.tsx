@@ -1,3 +1,5 @@
+import type { ExploreHouseTemplateItemResponse } from '@apis/__generated__/data-contracts';
+
 import emptyImage from '@assets/v2/images/ImgEmpty.png';
 
 import Chip from '@components/v2/chip/Chip';
@@ -6,15 +8,11 @@ import RoomTypeCard from '@components/v2/roomTypeCard/RoomTypeCard';
 
 import * as styles from './FloorPlanSelectGrid.css';
 
-import type {
-  FilterCategory,
-  FloorPlanData,
-  FloorPlanFilters,
-} from '../../types/floorPlan';
+import type { FilterCategory, FloorPlanFilters } from '../../types/floorPlan';
 
 interface FloorPlanSelectGridProps {
   filterCategories: FilterCategory[];
-  floorPlans: FloorPlanData[];
+  floorPlans: ExploreHouseTemplateItemResponse[];
   appliedFilters: FloorPlanFilters;
   onCardClick: (floorPlanId: number) => void;
   onFilterChipClick: () => void;
@@ -107,17 +105,20 @@ const FloorPlanSelectGrid = ({
           </>
         ) : (
           <div className={styles.grid}>
-            {floorPlans.map((plan) => (
-              <RoomTypeCard
-                key={plan.id}
-                type="default"
-                size="m"
-                label={plan.name}
-                imageSrc={plan.imageUrl}
-                showRecentBadge={plan.isLatest}
-                onClick={() => onCardClick(plan.id)}
-              />
-            ))}
+            {floorPlans.map((plan) => {
+              if (plan.id === undefined) return null;
+              return (
+                <RoomTypeCard
+                  key={plan.id}
+                  type="default"
+                  size="m"
+                  label={plan.name ?? ''}
+                  imageSrc={plan.imageUrl ?? ''}
+                  showRecentBadge={plan.isLatest}
+                  onClick={() => onCardClick(plan.id as number)}
+                />
+              );
+            })}
           </div>
         )}
       </div>
