@@ -27,6 +27,8 @@ export const API_ENDPOINT = {
     CAROUSELS: '/api/v1/carousels',
     CAROUSELS_LIKE: '/api/v1/carousels/like',
     CAROUSELS_HATE: '/api/v1/carousels/hate',
+    CAROUSELS_V2: '/api/v2/carousels',
+    CAROUSELS_LIKE_V2: '/api/v2/carousels/like',
     IMAGE_V2: '/api/v2/generated-images/generate/gemini',
     IMAGE_V3: '/api/v3/generated-images/generate/gemini',
     IMAGE_STATUS: '/api/v1/generated-images/generate',

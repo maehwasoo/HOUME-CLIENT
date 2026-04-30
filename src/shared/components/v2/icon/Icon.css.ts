@@ -29,6 +29,7 @@ export const iconButton = recipe({
       true: { opacity: 0.2, cursor: 'not-allowed' },
     },
     size: {
+      XXS: {},
       S: {},
       M: { padding: unitVars.unit.gapPadding['200'] },
       L: {},

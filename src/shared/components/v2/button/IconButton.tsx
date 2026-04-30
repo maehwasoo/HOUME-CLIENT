@@ -4,9 +4,10 @@ import { type IconName, type IconSize } from '../icon/Icon';
 import Icon from '../icon/Icon';
 import * as styles from '../icon/Icon.css';
 
-export type IconButtonSize = 'S' | 'M' | 'L' | 'XL';
+export type IconButtonSize = 'XXS' | 'S' | 'M' | 'L' | 'XL';
 
 const ICON_BUTTON_SIZE: Record<IconButtonSize, IconSize> = {
+  XXS: '12',
   S: '20',
   M: '24',
   L: '32',
