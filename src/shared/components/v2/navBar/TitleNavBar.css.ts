@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { recipe } from '@vanilla-extract/recipes';
 
 import { colorVars } from '@styles/tokensV2/color.css';
 import { fontVars } from '@styles/tokensV2/font.css';
@@ -6,20 +7,49 @@ import { unitVars } from '@styles/tokensV2/unit.css';
 
 import { zIndex } from '@/shared/styles/tokens/zIndex';
 
-export const container = style({
-  position: 'sticky',
-  zIndex: zIndex.navBar,
-  top: 0,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-  backgroundColor: colorVars.color.bg.primary,
-  paddingRight: unitVars.unit.gapPadding['400'],
-  paddingLeft: unitVars.unit.gapPadding['300'],
-  width: '100%',
-  minWidth: unitVars.unit.dimension.wMin,
-  maxWidth: unitVars.unit.dimension.wMax,
-  height: '4.8rem',
+export const container = recipe({
+  base: {
+    zIndex: zIndex.navBar,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingRight: unitVars.unit.gapPadding['400'],
+    paddingLeft: unitVars.unit.gapPadding['300'],
+    width: '100%',
+    minWidth: unitVars.unit.dimension.wMin,
+    maxWidth: unitVars.unit.dimension.wMax,
+    height: '4.8rem',
+  },
+  variants: {
+    placement: {
+      /** 일반 페이지: 문서 흐름 + 상단 고정 */
+      sticky: {
+        position: 'sticky',
+        top: 0,
+      },
+      /** 풀블리드 콘텐츠 위 오버레이(부모는 `position: relative` 권장) */
+      overContent: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        left: 0,
+        marginRight: 'auto',
+        marginLeft: 'auto',
+      },
+    },
+    background: {
+      transparent: {
+        backgroundColor: 'transparent',
+      },
+      primary: {
+        backgroundColor: colorVars.color.bg.primary,
+      },
+    },
+  },
+  defaultVariants: {
+    placement: 'sticky',
+    background: 'primary',
+  },
 });
 
 export const leftSlot = style({

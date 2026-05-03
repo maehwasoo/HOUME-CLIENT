@@ -117,7 +117,7 @@ const protectedRoutes = [
     path: ROUTES.GENERATE_RESULT,
     lazy: async () => {
       const { default: ResultPage } = await import(
-        '@pages/generate/pages/result/ResultPage'
+        '@pages/generate/v2/pages/result/ResultPage'
       );
       return { Component: ResultPage };
     },

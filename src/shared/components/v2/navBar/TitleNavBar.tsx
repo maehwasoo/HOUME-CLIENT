@@ -6,11 +6,16 @@ import { ROUTES } from '@/routes/paths';
 
 import * as styles from './TitleNavBar.css';
 
+export type TitleNavBarBackground = 'transparent' | 'primary';
+export type TitleNavBarPlacement = 'sticky' | 'overContent';
+
 interface TitleNavBarProps extends React.ComponentProps<'nav'> {
-  title: string;
+  title?: string;
   backLabel?: string;
   isSettingBtn?: boolean;
   onBackClick?: () => void;
+  background?: TitleNavBarBackground;
+  placement?: TitleNavBarPlacement;
 }
 
 const TitleNavBar = ({
@@ -18,13 +23,16 @@ const TitleNavBar = ({
   backLabel,
   onBackClick,
   isSettingBtn = false,
+  background = 'primary',
+  placement = 'sticky',
   ...props
 }: TitleNavBarProps) => {
   const backAriaLabel = backLabel ?? '뒤로가기';
   const navigate = useNavigate();
+  const displayTitle = title?.trim();
 
   return (
-    <nav className={styles.container} {...props}>
+    <nav className={styles.container({ background, placement })} {...props}>
       <div className={styles.leftSlot}>
         <TextButton
           color="secondary"
@@ -36,7 +44,7 @@ const TitleNavBar = ({
           {backLabel}
         </TextButton>
       </div>
-      <h1 className={styles.title}>{title}</h1>
+      {displayTitle ? <h1 className={styles.title}>{displayTitle}</h1> : null}
       <div className={styles.rightSlot}>
         {isSettingBtn && (
           <TextButton

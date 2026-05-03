@@ -89,6 +89,12 @@ export const queryKeys = {
     factors: (isLike: boolean) =>
       [...queryKeys.generate.all, 'factors', isLike] as const,
     image: () => [...queryKeys.generate.all, 'image'] as const,
+    listResultItems: (imageId: number) =>
+      [...queryKeys.generate.all, 'listResultItems', imageId] as const,
+    similarItems: (imageId: number) =>
+      [...queryKeys.generate.all, 'similarItems', imageId] as const,
+    relatedImages: (imageId: number) =>
+      [...queryKeys.generate.all, 'relatedImages', imageId] as const,
   },
 
   // 가구 큐레이션
