@@ -127,4 +127,11 @@ export const queryKeys = {
     detail: (styleId: number) =>
       [...queryKeys.styles.all, 'detail', styleId] as const,
   },
+
+  // 랜덤 닉네임
+  signup: {
+    all: ['signup'] as const,
+    randomNickname: () => [...queryKeys.signup.all, 'randomNickname'] as const,
+  },
+
 } as const;

@@ -1,18 +1,23 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
+import { overlay } from 'overlay-kit';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import { ROUTES } from '@routes/paths';
 
-import CtaButton from '@components/button/ctaButton/CtaButton';
-import ErrorMessage from '@components/button/errorMessage/ErrorMessage';
-import LargeFilledButton from '@components/button/largeFilledButton/LargeFilledButton';
-import TitleNavBar from '@components/navBar/TitleNavBar';
-import TextField from '@components/textField/TextField';
+import ActionButton from '@components/v2/button/actionButton/ActionButton';
+import Chip from '@components/v2/chip/Chip';
+import Icon from '@components/v2/icon/Icon';
+import Popup from '@components/v2/popup/Popup';
 
 import { ERROR_MESSAGES } from '@constants/clientErrorMessage';
 
 import { usePostSignupMutation } from './apis/mutations/usePostSignupMutation';
+import { useGetRandomNicknameQuery } from './apis/queries/useGetNickname';
+import SignupExitPopupContent from './components/exitPopupContent/SignupExitPopupContent';
+import DateField from './components/textField/DateField';
+import TextField from './components/textField/TextField';
+import { useSignupExitConfirm } from './hooks/useSignupExitConfirm';
 import useSignupForm from './hooks/useSignupForm';
 import * as styles from './SignupPage.css';
 import {
@@ -40,6 +45,37 @@ const isSignupLocationState = (
 const SignupPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const isInitialized = useRef(false);
+  const nicknameRef = useRef<HTMLInputElement>(null);
+  const yearRef = useRef<HTMLInputElement>(null);
+  const [isNameSubmitted, setIsNameSubmitted] = useState(false);
+
+  // 이탈 방지 팝업
+  const { popupClosed } = useSignupExitConfirm({
+    onBackAttempt: () => {
+      overlay.open(({ unmount }) => {
+        const closePopup = () => {
+          popupClosed();
+          unmount();
+        };
+
+        return (
+          <Popup
+            btnStyle="text"
+            btnText="계속하기"
+            weakBtnText="그만두기"
+            onClose={closePopup}
+            onConfirm={closePopup}
+            onCancel={() => {
+              closePopup();
+              navigate(ROUTES.LOGIN, { replace: true });
+            }}
+            content={<SignupExitPopupContent />}
+          />
+        );
+      });
+    },
+  });
 
   const routeSignupToken = isSignupLocationState(location.state)
     ? (location.state.signupToken ?? null)
@@ -59,12 +95,12 @@ const SignupPage = () => {
   }, [signupToken, navigate]);
 
   const {
-    name,
+    nickname,
     birthYear,
     birthMonth,
     birthDay,
     gender,
-    handleNameChange,
+    handleNicknameChange,
     handleBirthYearChange,
     handleBirthMonthChange,
     handleBirthDayChange,
@@ -81,6 +117,44 @@ const SignupPage = () => {
 
   const { mutate: signUp } = usePostSignupMutation();
 
+  // 랜덤 닉네임 GET 쿼리
+  const { data: randomNickname, refetch } = useGetRandomNicknameQuery();
+
+  // 닉네임 필드 유효
+  const isNameSectionValid =
+    nickname !== '' && !isNameFormatInvalid && !isNameLengthInvalid;
+
+  // 닉네임이 유효하지 않으면 isNameSubmitted 초기화
+  useEffect(() => {
+    if (!isNameSectionValid) {
+      setIsNameSubmitted(false);
+    }
+  }, [isNameSectionValid]);
+
+  // 페이지 로드 시 랜덤 닉네임으로 초기값 설정 (첫 마운트, 랜덤닉네임 존재, 초기화 전)
+  useEffect(() => {
+    if (randomNickname && !isInitialized.current && nickname === '') {
+      handleNicknameChange(randomNickname);
+      isInitialized.current = true;
+
+      // 닉네임 들어온 뒤 포커스 처리
+      const el = nicknameRef.current;
+      if (el) {
+        el.focus();
+        el.setSelectionRange(el.value.length, el.value.length);
+      }
+    }
+  }, [randomNickname, nickname, handleNicknameChange]);
+
+  const handleRefresh = async () => {
+    try {
+      const { data } = await refetch();
+      if (data) handleNicknameChange(data);
+    } catch (error) {
+      console.error('[handleRefresh] 닉네임 새로고침 실패:', error);
+    }
+  };
+
   const errorSentRef = useRef(false);
 
   // 에러가 표시될 때 이벤트 전송 (최초 1회)
@@ -94,6 +168,20 @@ const SignupPage = () => {
     }
   }, [hasError]);
 
+  // 닉네임 Enter시
+  const handleNicknameEnter = () => {
+    if (isNameSectionValid) {
+      setIsNameSubmitted(true);
+    }
+  };
+
+  // 생년월일 필드 렌더링된 직후 감지해 포커싱
+  useEffect(() => {
+    if (isNameSubmitted && isNameSectionValid) {
+      yearRef.current?.focus();
+    }
+  }, [isNameSubmitted, isNameSectionValid]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -104,11 +192,9 @@ const SignupPage = () => {
 
     const formattedBirthday = `${birthYear}-${birthMonth}-${birthDay}`;
 
-    // console.log(name, gender.value, formattedBirthday);
-
     signUp({
       signupToken,
-      name,
+      nickname,
       gender: gender.value,
       birthday: formattedBirthday,
     });
@@ -116,108 +202,126 @@ const SignupPage = () => {
 
   if (!signupToken) return null;
 
+  // 생년월일 필드 유효
+  const isBirthSectionValid =
+    birthYear !== '' &&
+    birthMonth !== '' &&
+    birthDay !== '' &&
+    !yearFormatError &&
+    !yearAgeError &&
+    !monthFieldError &&
+    !dayFieldError;
+
+  // 닉네임 에러 메시지
+  const nameErrorMessage = (() => {
+    if (isNameFormatInvalid) return ERROR_MESSAGES.NAME_INVALID;
+    if (isNameLengthInvalid) return ERROR_MESSAGES.LENGTH_INVALID;
+    return '';
+  })();
+
+  // 생년월일 에러 메시지
+  const birthErrorMessage = (() => {
+    if (yearAgeError) return ERROR_MESSAGES.AGE_INVALID;
+    if (yearFormatError || monthFieldError || dayFieldError)
+      return ERROR_MESSAGES.BIRTH_INVALID;
+    return '';
+  })();
+
+  const dateErrorStatus = {
+    year: birthYear !== '' && (yearFormatError || yearAgeError),
+    month: birthMonth !== '' && monthFieldError,
+    day: birthDay !== '' && dayFieldError,
+  };
+
   return (
-    <form onSubmit={handleSubmit}>
-      <TitleNavBar title="회원가입" isBackIcon={false} isLoginBtn={false} />
+    <form onSubmit={handleSubmit} className={styles.wrapper}>
+      <header className={styles.header}>
+        <div className={styles.iconContainer}>
+          <Icon name="StepDefault" size="12" />
+          <Icon name="StepActive" size="12" />
+        </div>
+        <h1 className={styles.title}>완료까지 한 걸음 남았어요!</h1>
+      </header>
 
       <div className={styles.container}>
-        <h1 className={styles.title}>추가 회원가입 정보</h1>
-
-        {/* 이름 입력 */}
+        {/* 닉네임 입력 */}
         <div className={styles.fieldbox}>
-          <h2 className={styles.fieldtitle}>이름</h2>
-          <TextField
-            fieldSize="large"
-            placeholder="이름을 입력해주세요."
-            maxLength={25}
-            value={name}
-            onChange={handleNameChange}
-            isError={isNameFormatInvalid || isNameLengthInvalid}
-          />
-          {isNameFormatInvalid && (
-            <ErrorMessage message={ERROR_MESSAGES.NAME_INVALID} />
-          )}
-          {!isNameFormatInvalid && isNameLengthInvalid && (
-            <ErrorMessage message={ERROR_MESSAGES.LENGTH_INVALID} />
-          )}
+          <h2 className={styles.fieldtitle}>닉네임</h2>
+          <div className={styles.flexbox}>
+            <TextField
+              value={nickname}
+              ref={nicknameRef}
+              onChange={handleNicknameChange}
+              isError={isNameFormatInvalid || isNameLengthInvalid}
+              errorMessage={nameErrorMessage}
+              maxLength={18}
+              onRefresh={handleRefresh}
+              onEnter={handleNicknameEnter}
+            />
+          </div>
         </div>
 
         {/* 생년월일 입력 */}
-        <div className={styles.fieldbox}>
-          <h2 className={styles.fieldtitle}>생년월일</h2>
-          <div className={styles.flexbox}>
-            <TextField
-              fieldSize="small"
-              placeholder="YYYY"
-              maxLength={4}
-              value={birthYear}
-              onChange={handleBirthYearChange}
-              isError={birthYear !== '' && (yearFormatError || yearAgeError)}
-              inputMode="numeric"
-            />
-            <TextField
-              fieldSize="small"
-              placeholder="MM"
-              maxLength={2}
-              value={birthMonth}
-              onChange={handleBirthMonthChange}
-              isError={birthMonth !== '' && monthFieldError}
-              inputMode="numeric"
-            />
-            <TextField
-              fieldSize="small"
-              placeholder="DD"
-              maxLength={2}
-              value={birthDay}
-              onChange={handleBirthDayChange}
-              isError={birthDay !== '' && dayFieldError}
-              inputMode="numeric"
-            />
+        {isNameSectionValid && isNameSubmitted && (
+          <div className={styles.fieldbox}>
+            <h2 className={styles.fieldtitle}>생년월일</h2>
+            <div className={styles.flexbox}>
+              <DateField
+                ref={yearRef}
+                value={{ year: birthYear, month: birthMonth, day: birthDay }}
+                onChange={(value) => {
+                  handleBirthYearChange(value.year);
+                  handleBirthMonthChange(value.month);
+                  handleBirthDayChange(value.day);
+                }}
+                error={dateErrorStatus}
+                errorMessage={birthErrorMessage}
+              />
+            </div>
           </div>
-          {(() => {
-            if (yearAgeError)
-              return <ErrorMessage message={ERROR_MESSAGES.AGE_INVALID} />;
-            if (yearFormatError || monthFieldError || dayFieldError)
-              return <ErrorMessage message={ERROR_MESSAGES.BIRTH_INVALID} />;
-            return null;
-          })()}
-        </div>
+        )}
 
         {/* 성별 선택 */}
-        <div className={styles.fieldbox}>
-          <h2 className={styles.fieldtitle}>성별</h2>
-          <div className={styles.flexbox}>
-            <LargeFilledButton
-              buttonSize="small"
-              isSelected={gender?.value === 'MALE'}
-              onClick={() => setGender({ value: 'MALE', label: '남성' })}
-            >
-              남성
-            </LargeFilledButton>
-            <LargeFilledButton
-              buttonSize="small"
-              isSelected={gender?.value === 'FEMALE'}
-              onClick={() => setGender({ value: 'FEMALE', label: '여성' })}
-            >
-              여성
-            </LargeFilledButton>
-            <LargeFilledButton
-              buttonSize="small"
-              isSelected={gender?.value === 'NONBINARY'}
-              onClick={() =>
-                setGender({ value: 'NONBINARY', label: '논바이너리' })
-              }
-            >
-              논바이너리
-            </LargeFilledButton>
+        {isNameSectionValid && isNameSubmitted && isBirthSectionValid && (
+          <div className={styles.fieldbox}>
+            <h2 className={styles.fieldtitle}>성별</h2>
+            <div className={styles.flexbox}>
+              <Chip
+                selected={gender?.value === 'MALE'}
+                color="weak"
+                onClick={() => setGender({ value: 'MALE', label: '남성' })}
+              >
+                남성
+              </Chip>
+              <Chip
+                selected={gender?.value === 'FEMALE'}
+                color="weak"
+                onClick={() => setGender({ value: 'FEMALE', label: '여성' })}
+              >
+                여성
+              </Chip>
+              <Chip
+                selected={gender?.value === 'NONBINARY'}
+                color="weak"
+                onClick={() =>
+                  setGender({ value: 'NONBINARY', label: '밝히고 싶지 않음' })
+                }
+              >
+                밝히고 싶지 않음
+              </Chip>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       <div className={styles.btnarea}>
-        <CtaButton isActive={isFormValid && !!signupToken} type="submit">
-          회원가입 완료하기
-        </CtaButton>
+        <ActionButton
+          disabled={!isFormValid || !signupToken}
+          type="submit"
+          fullWidth
+        >
+          완료하기
+        </ActionButton>
       </div>
     </form>
   );

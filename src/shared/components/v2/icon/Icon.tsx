@@ -24,6 +24,7 @@ import HeartFillGray from '@assets/v2/svg/HeartFillGray.svg?url';
 import HeartFillWhite from '@assets/v2/svg/HeartFillWhite.svg?url';
 import HeartStrokeGray from '@assets/v2/svg/HeartStrokeGray.svg?url';
 import HeartStrokeWhite from '@assets/v2/svg/HeartStrokeWhite.svg?url';
+import Kakao from '@assets/v2/svg/Kakao.svg?url';
 import Link from '@assets/v2/svg/Link.svg?url';
 import Lock from '@assets/v2/svg/Lock.svg?url';
 import MouseBlack from '@assets/v2/svg/MouseBlack.svg?url';
@@ -34,7 +35,10 @@ import RadioDefault from '@assets/v2/svg/RadioDefault.svg?url';
 import RadioSelected from '@assets/v2/svg/RadioSelected.svg?url';
 import Refresh from '@assets/v2/svg/Refresh.svg?url';
 import Search from '@assets/v2/svg/Search.svg?url';
+import StepActive from '@assets/v2/svg/StepActive.svg?url';
+import StepDefault from '@assets/v2/svg/StepDefault.svg?url';
 import ViewDetail from '@assets/v2/svg/ViewDetail.svg?url';
+import WarningFillDanger from '@assets/v2/svg/WarningFillDanger.svg?url';
 
 import * as styles from './Icon.css';
 
@@ -74,6 +78,10 @@ const IconsName = {
   Search,
   ViewDetail,
   Credit,
+  Kakao,
+  WarningFillDanger,
+  StepActive,
+  StepDefault,
   HeartFillWhite,
   DislikeWhite,
 } as const;

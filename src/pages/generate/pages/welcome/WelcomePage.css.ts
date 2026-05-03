@@ -1,25 +1,24 @@
 import { style } from '@vanilla-extract/css';
 
-import { fontStyle } from '@styles/fontStyle';
 import { animationTokens } from '@styles/tokens/animation.css';
-import { colorVars } from '@styles/tokens/color.css';
+import { unitVars } from '@styles/tokensV2/unit.css';
+
+import { colorVars } from '@/shared/styles/tokensV2/color.css';
+import { fontVars } from '@/shared/styles/tokensV2/font.css';
 
 export const container = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  background: colorVars.color.gray000,
+  background: colorVars.color.bg.primary,
   width: '100%',
   height: '100%',
 });
 
 export const contents = style({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: '2rem',
-  paddingTop: '4rem',
-  width: '100%',
+  gap: unitVars.unit.gapPadding['200'],
+  background: colorVars.color.bg.primary,
+  padding: `${unitVars.unit.gapPadding['500']} ${unitVars.unit.gapPadding['000']}`,
   animation: animationTokens.fadeInUpFast,
 });
 
@@ -29,29 +28,28 @@ export const imgbox = style({
   width: '100%',
 });
 
-export const signUpImg = style({
-  width: '37.5rem',
-  height: '34.4rem',
-});
-
 export const textbox = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  gap: '0.8rem',
-  padding: '2rem',
+  justifyContent: 'center',
+  gap: unitVars.unit.gapPadding['300'],
+  marginTop: unitVars.unit.gapPadding['200'],
+  padding: `${unitVars.unit.gapPadding['300']} ${unitVars.unit.gapPadding['500']}`,
+  ...fontVars.font.title_sb_20,
   width: '100%',
+  animation: animationTokens.fadeInUpFast,
   textAlign: 'center',
 });
 
 export const title = style({
-  ...fontStyle('heading_sb_20'),
-  color: colorVars.color.gray900,
+  ...fontVars.font.title_sb_20,
+  color: colorVars.color.text.primary,
 });
 
 export const content = style({
-  ...fontStyle('body_r_14'),
-  color: colorVars.color.gray500,
+  ...fontVars.font.body_r_14,
+  color: colorVars.color.text.secondary,
 });
 
 export const btnarea = style({
@@ -61,8 +59,9 @@ export const btnarea = style({
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '1rem',
-  padding: '0 2rem 2rem 2rem',
+  gap: unitVars.unit.gapPadding['100'],
+  background: `linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, #FFF 100%)`,
+  padding: unitVars.unit.gapPadding['500'],
   width: '100%',
-  maxWidth: '430px',
+  maxWidth: unitVars.unit.dimension.wMax,
 });

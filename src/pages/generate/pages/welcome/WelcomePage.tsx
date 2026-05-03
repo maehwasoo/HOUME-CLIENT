@@ -8,13 +8,15 @@ import { ROUTES } from '@routes/paths';
 
 import { useUserStore } from '@store/useUserStore';
 
-import SignupImage from '@assets/images/signupWelcome.png';
+import KakaoLoginImg from '@assets/v2/images/ImgKakaoLogin.png';
 
-import CtaButton from '@components/button/ctaButton/CtaButton';
+import ActionButton from '@components/v2/button/actionButton/ActionButton';
 
 import { getLoginRedirect, consumeLoginRedirect } from '@utils/loginRedirect';
 
 import * as styles from './WelcomePage.css';
+
+const TOKEN_COUNT = 5;
 
 const WelcomePage = () => {
   // zustand에서 userName 가져오기
@@ -45,11 +47,7 @@ const WelcomePage = () => {
     <div className={styles.container}>
       <div className={styles.contents}>
         <div className={styles.imgbox}>
-          <img
-            src={SignupImage}
-            alt="회원가입 완료 이미지"
-            className={styles.signUpImg}
-          />
+          <img src={KakaoLoginImg} alt="회원가입 완료 이미지" />
         </div>
         <div className={styles.textbox}>
           <h1 className={styles.title}>
@@ -58,14 +56,14 @@ const WelcomePage = () => {
           </h1>
           <p className={styles.content}>
             24시간 동안 무료로 이미지를 생성할 수 있는 <br />
-            토큰 N개를 선물로 드렸어요.
+            토큰 {TOKEN_COUNT}개를 선물로 드렸어요.
           </p>
         </div>
       </div>
       <div className={styles.btnarea}>
-        <CtaButton onClick={handleCtaClick}>
-          {isFromMypage ? '홈에서 시작하기' : '계속해서 이미지 생성하기'}
-        </CtaButton>
+        <ActionButton onClick={handleCtaClick} fullWidth>
+          이미지 생성 시작하기
+        </ActionButton>
       </div>
     </div>
   );

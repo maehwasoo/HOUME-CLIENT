@@ -2,12 +2,11 @@ import { Link } from 'react-router-dom';
 
 import { ROUTES } from '@routes/paths';
 
-import LoginBeforeImage from '@assets/icons/loginBefore.png';
-
-import CtaButton from '@components/button/ctaButton/CtaButton';
-import TitleNavBar from '@components/navBar/TitleNavBar';
+import KakaoLoginImg from '@assets/v2/images/ImgKakaoLogin.png';
 
 import { API_ENDPOINT } from '@constants/apiEndpoints';
+
+import Icon from '@/shared/components/v2/icon/Icon';
 
 import * as styles from './loginPage.css';
 import { logLoginSocialClickBtnCTA } from './utils/analytics';
@@ -51,30 +50,36 @@ const LoginPage = () => {
 
   return (
     <div className={styles.container}>
-      <TitleNavBar
-        title="회원가입/로그인"
-        isBackIcon={false}
-        isLoginBtn={false}
-      />
-      <div className={styles.textbox}>
-        <h1 className={styles.title}>하우미와 나다운 집을 만들어가요!</h1>
-        <p className={styles.content}>
-          로그인하면 매번 집, 취향, 활동 정보를 입력할 필요없이 <br /> 스타일링
-          결과를 저장하고 다시 볼 수 있어요.
-        </p>
-      </div>
       <div className={styles.imgbox}>
         <img
-          src={LoginBeforeImage}
+          src={KakaoLoginImg}
           alt="로그인 전 이미지"
           className={styles.loginImg}
-          loading="lazy"
+          loading="eager"
         />
       </div>
+      <div className={styles.textbox}>
+        <h1 className={styles.title}>
+          이제 머릿속으로 상상하지 말고, <br />
+          AI로 미리 그려보세요.
+        </h1>
+        <p className={styles.content}>
+          로그인하고 우리 집을 원하는 대로 만들어봐요.
+        </p>
+      </div>
+
       <div className={styles.btnarea}>
-        <CtaButton typeVariant="kakao" onClick={handleKakaoLogin}>
-          카카오 로그인
-        </CtaButton>
+        <div className={styles.buttonWrapper}>
+          <button
+            type="button"
+            onClick={handleKakaoLogin}
+            className={styles.btn}
+          >
+            <Icon name="Kakao" />
+            <span className={styles.kakaoText}>카카오 로그인</span>
+          </button>
+        </div>
+
         <aside className={styles.aside}>
           가입 시{' '}
           <Link to={ROUTES.SETTING_SERVICE} className={styles.link}>

@@ -1,6 +1,6 @@
 // 검증 관련 상수
 export const VALIDATION_RULES = {
-  NAME_REGEX: /^[\p{Script=Hangul}]+$/u,
+  NAME_REGEX: /^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]+$/,
   NAME_MIN_LENGTH: 2,
   YEAR_REGEX: /^\d{4}$/,
   MONTH_REGEX: /^\d{2}$/,
@@ -9,18 +9,23 @@ export const VALIDATION_RULES = {
 };
 
 // 이름이 한글만으로 이루어졌는지
-export function isKoreanOnly(name: string): boolean {
-  return VALIDATION_RULES.NAME_REGEX.test(name);
-}
+// export function isKoreanOnly(name: string): boolean {
+//   return VALIDATION_RULES.NAME_REGEX.test(name);
+// }
 
 // 이름이 최소 길이 이상인지
 export function isMinLength(str: string, min: number): boolean {
   return str.length >= min;
 }
 
-// 이름 입력값에서 한글만 남기기
-export function filterKorean(input: string): string {
-  return input.replace(/[A-Za-z\u{1F000}-\u{1FFFF}]/gu, '');
+// 닉네임 입력값에서 공백 및 특수문자 제거
+export function filterNickname(input: string): string {
+  return input.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]/g, '');
+}
+
+// 닉네임 형식이 맞는지
+export function isValidNicknameFormat(name: string): boolean {
+  return VALIDATION_RULES.NAME_REGEX.test(name);
 }
 
 // 연도 형식이 맞는지
@@ -70,3 +75,11 @@ export function isValidDate(year: number, month: number, day: number): boolean {
     date.getDate() === day
   );
 }
+
+// 한 자리 숫자를 두 자리로 패딩
+export const padToTwoDigits = (value: string): string => {
+  if (value !== '' && value.length === 1) {
+    return value.padStart(2, '0');
+  }
+  return value;
+};

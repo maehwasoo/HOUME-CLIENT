@@ -7,6 +7,7 @@ import { useUserStore } from '@store/useUserStore';
 
 import { TOAST_TYPE } from '@shared/types/toast';
 
+import type { SocialSignUpV2Request } from '@apis/__generated__/data-contracts';
 import { HTTPMethod, request } from '@apis/config/request';
 
 import { useToast } from '@components/toast/useToast';
@@ -16,14 +17,14 @@ import { RESPONSE_MESSAGE, HTTP_STATUS } from '@constants/response';
 
 import { consumeLoginRedirect } from '@utils/loginRedirect';
 
-import type { SignupRequest, SignupResponse } from '../../types/apis/signup';
+import type { SignupResponse } from '../../types/apis/signup';
 
 export const postSignup = async (
-  data: SignupRequest
+  data: SocialSignUpV2Request
 ): Promise<SignupResponse> => {
   const response = await request<string>({
     method: HTTPMethod.POST,
-    url: API_ENDPOINT.USER.SIGN_UP,
+    url: API_ENDPOINT.USER.SIGN_UP_V2,
     body: data,
     rawResponse: true,
   });
@@ -47,7 +48,7 @@ export const usePostSignupMutation = () => {
   const setUserName = useUserStore((state) => state.setUserName);
   const setAccessToken = useUserStore((state) => state.setAccessToken);
 
-  return useMutation<SignupResponse, Error, SignupRequest>({
+  return useMutation<SignupResponse, Error, SocialSignUpV2Request>({
     mutationFn: postSignup,
     retry: false,
     onSuccess: (response) => {

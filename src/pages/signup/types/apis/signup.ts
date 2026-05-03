@@ -2,7 +2,7 @@
 
 export interface SignupRequest {
   signupToken: string;
-  name: string;
+  nickname: string;
   gender: 'MALE' | 'FEMALE' | 'NONBINARY';
   birthday: string; // e.g. "2001-01-10"
 }

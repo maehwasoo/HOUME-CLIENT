@@ -7,12 +7,14 @@ export const API_ENDPOINT = {
   },
   USER: {
     SIGN_UP: '/api/v1/sign-up',
+    SIGN_UP_V2: '/api/v2/sign-up',
     MYPAGE: '/api/v1/mypage/user',
     MYPAGE_IMAGES: '/api/v1/mypage/images',
     MYPAGE_IMAGES_V2: '/api/v2/mypage/images',
     MYPAGE_IMAGE_DETAIL: (imageId: number) =>
       `/api/v1/mypage/images/${imageId}`,
     DELETE: '/api/v1/user',
+    ROTATE_NICKNAME: '/api/v2/nickname/rotate',
   },
   BANNER: {
     LANDING: '/api/v1/landings',
