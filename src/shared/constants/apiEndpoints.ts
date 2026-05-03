@@ -39,6 +39,8 @@ export const API_ENDPOINT = {
     CAROUSELS_V2: '/api/v2/carousels',
     CAROUSELS_LIKE_V2: '/api/v2/carousels/like',
     IMAGE_V4: '/api/v4/generated-images/generate', // 풀퍼널 이미지 생성
+    IMAGE_BANNER: '/api/v1/generated-images/generate/banner', // 경로2 배너 진입 이미지 생성
+    IMAGE_OTHER_STYLE: '/api/v1/generated-images/generate/other-style', // 경로4 다른 스타일 진입 이미지 생성
     IMAGE_PREFERENCE: '/api/v1/generated-images',
     FACTORS: '/api/v1/factors',
     FACTOR_PREFERENCE: (imageId: number, factorId: number) =>

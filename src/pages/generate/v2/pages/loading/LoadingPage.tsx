@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { ErrorBoundary } from 'react-error-boundary';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -6,9 +6,11 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { usePostCarouselLikeMutation } from '@pages/generate/v2/apis/mutations/useCarouselLikeMutation';
 import { useStackDataQuery } from '@pages/generate/v2/apis/queries/useStackDataQuery';
 import { useGenerateStore } from '@pages/generate/v2/stores/useGenerateStore';
-import type { GenerateImageRequest } from '@pages/generate/v2/types/generate';
+import { useFunnelStore } from '@pages/imageSetup/stores/useFunnelStore';
 
 import { ROUTES } from '@routes/paths';
+
+import { useImageFlowStore } from '@store/useImageFlowStore';
 
 import { TOAST_TYPE } from '@shared/types/toast';
 
@@ -18,42 +20,15 @@ import FeatureErrorFallback from '@components/errorFallback/FeatureErrorFallback
 import Loading from '@components/loading/Loading';
 import { useToast } from '@components/toast/useToast';
 
-// import { ERROR_CODES, FALLBACK_TRIGGER_CODES } from '@constants/apiErrorCode';
-
 import { useErrorHandler } from '@hooks/useErrorHandler';
 
+import { useGenerateImageRequest } from './hooks/useGenerateImageRequest';
 import * as styles from './LoadingPage.css';
 import ProgressBar from './ProgressBar';
 import LikeButton from '../../components/likeButton/LikeButton';
 import Tooltip from '../../components/tooltip/Tooltip';
 
 const ANIMATION_DURATION = 600; // 캐러셀 애니메이션 지속 시간 (ms)
-const SESSION_STORAGE_KEY = 'generate_image_request'; // sessionStorage 키
-
-// Type Guard: GenerateImageRequest 검증
-// sessionStorage에서 가져온 데이터 검증
-const isValidGenerateImageRequest = (
-  value: unknown
-): value is GenerateImageRequest => {
-  if (!value || typeof value !== 'object') return false;
-
-  const request = value as Record<string, unknown>;
-  const floorPlan = request.floorPlan as Record<string, unknown> | undefined;
-
-  return (
-    typeof request.houseId === 'number' &&
-    typeof request.equilibrium === 'string' &&
-    typeof request.activity === 'string' &&
-    Array.isArray(request.moodBoardIds) &&
-    (request.moodBoardIds as unknown[]).every((n) => typeof n === 'number') &&
-    Array.isArray(request.selectiveIds) &&
-    (request.selectiveIds as unknown[]).every((n) => typeof n === 'number') &&
-    floorPlan !== undefined &&
-    typeof floorPlan === 'object' &&
-    typeof floorPlan.floorPlanId === 'number' &&
-    typeof floorPlan.isMirror === 'boolean'
-  );
-};
 
 // TODO: 커스텀 훅, 유틸함수로 빼기, 기능 별 커스텀 훅 분할 시급
 const LoadingPage = () => {
@@ -65,6 +40,7 @@ const LoadingPage = () => {
   const [isTooltipOpen, setIsTooltipOpen] = useState(true);
 
   // Zustand store: 이미지 생성 완료 상태 및 결과 데이터
+  // TODO: 해당 store는 props로 대체 가능, 없애기
   const { isApiCompleted, navigationData, resetGenerate } = useGenerateStore();
 
   // LoadingPage 진입 시 이전 이미지 생성 상태 초기화 (이미지 재생성 시 이전 이미지를 보여주는 버그 방지)
@@ -75,19 +51,13 @@ const LoadingPage = () => {
     hasResetRef.current = true;
   }
 
-  // sessionStorage에서 이미지 생성 요청 데이터 가져오기
-  const requestData: GenerateImageRequest | null = useMemo(() => {
-    // useMemo로 파싱 결과 참조 고정해 렌더 시 불필요한 API 재호출 차단
-    const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
-    if (!stored) return null;
+  // 진입경로(useImageFlowStore.preset)에 따라 적합한 mutation + payload 결정
+  // - 풀퍼널: useFunnelStore 데이터로 풀퍼널 이미지 생성 payload 조립
+  // - 숏퍼널: 프리셋 데이터(useImageFlowStore.preset) + 퍼널의 도면 데이터(useFunnelStore.floorPlan)로 배너/다른 스타일로 이미지 생성 payload 조립
+  const requestState = useGenerateImageRequest();
 
-    try {
-      const parsed = JSON.parse(stored);
-      return isValidGenerateImageRequest(parsed) ? parsed : null;
-    } catch {
-      return null;
-    }
-  }, []);
+  // 이미지 생성 payload에 필요한 데이터가 정상적으로 구성되어 있으면 true
+  const isRequestValid = requestState.kind !== 'invalid';
 
   // 캐러셀 페이지네이션 (무한 스크롤) - 스택 UI
   const [currentPage, setCurrentPage] = useState(0);
@@ -107,47 +77,54 @@ const LoadingPage = () => {
     isPending,
     isError,
   } = useStackDataQuery(currentPage, {
-    enabled: !!requestData, // requestData가 있을 때만 활성화
+    enabled: isRequestValid,
     onSuccess: () => setCurrentIndex(0), // 새 페이지 로드 시 첫 이미지부터 시작
     onError: (err) => handleError(err, 'loading'),
   });
 
   const { data: nextImages } = useStackDataQuery(currentPage + 1, {
-    enabled: !!currentImages && !!requestData,
+    enabled: !!currentImages && isRequestValid,
   });
 
   const likeMutation = usePostCarouselLikeMutation();
 
-  // 테스트용
-  const shouldShowLoading = !!requestData && isPending;
+  // 진입경로별 mutation 호출 (풀퍼널 / banner / otherStyle 분기)
+  useEffect(() => {
+    const onMutationError = (error: Error) => {
+      console.error('이미지 생성 실패:', error);
+      handleError(error, 'loading');
+    };
 
-  // mutateGenerateImage는 A/B 테스트 시절 이미지 생성
-  // useEffect(() => {
-  //   if (!requestData) return;
+    // mutation 응답 시(성공/실패 모두) 퍼널/프리셋 데이터 즉시 정리
+    // (이전 입력값이 sessionStorage에 살아있으면 사용자가 /generate URL로 직접 재진입 시 mutation이 재실행되어 같은 요청이 불필요하게 다시 실행됨)
+    // - useFunnelStore.reset(): 풀퍼널 분기(preset === null) 차단 — useFunnelStore 데이터 비워서 useGenerateImageRequest가 invalid 반환하도록
+    // - preset null: 숏퍼널 분기(preset.type === 'banner'/'style') 차단
+    // - useImageFlowStore의 entryRoute/resultType은 ResultPage에서 사용하므로 유지
+    const onMutationSettled = () => {
+      useFunnelStore.getState().reset();
+      useImageFlowStore.setState({ preset: null });
+    };
 
-  //   mutateGenerateImage(requestData, {
-  //     onSuccess: () => {
-  //       // 성공 시 navigationData 설정, 프로그래스 바 완료 후 페이지 이동
-  //     },
-  //     onError: (error: any) => {
-  //       const errorCode = error?.response?.data?.code;
-  //       const errorStatus = error?.response?.status;
+    const mutateOptions = {
+      onError: onMutationError,
+      onSettled: onMutationSettled,
+    };
 
-  //       // rate limit 또는 이미지 생성 관련 에러: 폴백 API로 전환
-  //       if (
-  //         errorStatus === ERROR_CODES.HTTP_RATE_LIMITED ||
-  //         FALLBACK_TRIGGER_CODES.has(errorCode)
-  //       ) {
-  //         setIsNormalEntry(false); // 폴백 API 활성화
-  //       }
-  //       // 기타 에러: 일반 에러 처리
-  //       else {
-  //         console.error('이미지 생성 실패:', error);
-  //         handleError(error, 'loading');
-  //       }
-  //     },
-  //   });
-  // }, [handleError, mutateGenerateImage, requestData]);
+    switch (requestState.kind) {
+      case 'invalid':
+        console.error('invalid requestState kind');
+        return;
+      case 'fullFunnel':
+        requestState.mutate(requestState.payload, mutateOptions);
+        return;
+      case 'banner':
+        requestState.mutate(requestState.payload, mutateOptions);
+        return;
+      case 'otherStyle':
+        requestState.mutate(requestState.payload, mutateOptions);
+        return;
+    }
+  }, [handleError, requestState]);
 
   useEffect(() => {
     return () => {
@@ -178,11 +155,15 @@ const LoadingPage = () => {
 
   const handleProgressComplete = () => {
     if (navigationData && isApiCompleted) {
-      sessionStorage.removeItem(SESSION_STORAGE_KEY);
-      navigate(ROUTES.GENERATE_RESULT, {
-        state: {
-          result: navigationData,
-        },
+      // ResultPage 변수명/엔드포인트 정리는 별도 작업으로 분리
+      // TODO: 백엔드가 모든 이미지 생성 응답에 imageUrl을 추가하면 swagger 재생성
+      // url에 imageId 전달, navigate state에 imageUrl 전달
+      // -> ResultPage가 imageId로 이미지 상세조회 API fetch 응답 도착 전 즉시 이미지 표시 가능(location.state에 imageUrl이 있으니까) -> UX 개선
+      // +) 새로고침하면 imageId는 url에 유지되지만 브라우저에 따라 location.state 날아가는데, 그때는 ResultPage의 기본동작(imageId로 이미지 상세조회 API 요청) 실행됨
+      // LoadingPage + ResultPage 묶어서 별도 PR로 작업하기
+      const imageId = (navigationData as { imageId?: number })?.imageId;
+      if (typeof imageId !== 'number') return;
+      navigate(`${ROUTES.GENERATE_RESULT}?houseId=${imageId}`, {
         replace: true,
       });
     }
@@ -252,15 +233,16 @@ const LoadingPage = () => {
   };
 
   // early return
-  // requestData가 없으면 IMAGE_SETUP으로 리다이렉트
-  if (!requestData) {
-    return <Navigate to={ROUTES.IMAGE_SETUP} replace />;
+  // store에서 payload 조립 실패 시(직접 URL 접근, 데이터 손실 등) HOME으로 리다이렉트
+  // (ImageSetupPage의 entryRoute 가드와 동일하게 HOME fallback)
+  if (requestState.kind === 'invalid') {
+    return <Navigate to={ROUTES.HOME} replace />;
   }
 
   return (
     <main className={styles.pageLayout}>
       <ErrorBoundary FallbackComponent={FeatureErrorFallback}>
-        {shouldShowLoading ? ( // 여기 테스트용으로 바꿈 원래는 isPending
+        {isPending ? (
           <Loading />
         ) : (
           <div className={styles.wrapper}>

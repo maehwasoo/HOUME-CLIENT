@@ -35,16 +35,17 @@ export interface GenerateImageV4Request {
   furnitureIds: number[];
 }
 
-export interface ApiResponseBannerGenerateImageResponse {
+export interface ApiResponseGenerateImageV4Response {
   /** @format int32 */
   code?: number;
   msg?: string;
-  data?: BannerGenerateImageResponse;
+  data?: GenerateImageV4Response;
 }
 
-export interface BannerGenerateImageResponse {
+export interface GenerateImageV4Response {
   /** @format int64 */
   imageId?: number;
+  imageUrl?: string;
 }
 
 export interface FloorPlanInfo {
@@ -202,6 +203,18 @@ export interface BannerGenerateImageRequest {
   floorPlanId: number;
   floorPlanView: string;
   isMirror: boolean;
+}
+
+export interface ApiResponseBannerGenerateImageResponse {
+  /** @format int32 */
+  code?: number;
+  msg?: string;
+  data?: BannerGenerateImageResponse;
+}
+
+export interface BannerGenerateImageResponse {
+  /** @format int64 */
+  imageId?: number;
 }
 
 export interface AdminTagRequestDTO {
@@ -1036,6 +1049,52 @@ export interface FurnitureItem {
   priority?: number;
 }
 
+export interface ApiResponseCurationProductListResponse {
+  /** @format int32 */
+  code?: number;
+  msg?: string;
+  data?: CurationProductListResponse;
+}
+
+export interface CurationProductAppliedFilterResponse {
+  category?: string;
+  id?: string;
+  label?: string;
+  value?: string;
+}
+
+export interface CurationProductListResponse {
+  products?: CurationProductResponse[];
+  meta?: CurationProductMetaResponse;
+}
+
+export interface CurationProductMetaResponse {
+  /** @format int64 */
+  nextCursor?: number;
+  hasNext?: boolean;
+  appliedFilters?: CurationProductAppliedFilterResponse[];
+}
+
+export interface CurationProductResponse {
+  /** @format int64 */
+  id?: number;
+  /** @format int64 */
+  productId?: number;
+  categoryName?: string;
+  source?: string;
+  brand?: string;
+  name?: string;
+  imageUrl?: string;
+  /** @format int64 */
+  originalPrice?: number;
+  /** @format int32 */
+  discountRate?: number;
+  /** @format int64 */
+  finalPrice?: number;
+  mallName?: string;
+  linkUrl?: string;
+}
+
 export interface ApiResponseGetCarouselV2ListResponseDTO {
   /** @format int32 */
   code?: number;
@@ -1439,52 +1498,6 @@ export interface ApiResponseFurnitureAndActivityResponse {
 export interface FurnitureAndActivityResponse {
   activities?: ActivityItem[];
   categories?: FurnitureCategoryGroup[];
-}
-
-export interface ApiResponseCurationProductListResponse {
-  /** @format int32 */
-  code?: number;
-  msg?: string;
-  data?: CurationProductListResponse;
-}
-
-export interface CurationProductAppliedFilterResponse {
-  category?: string;
-  id?: string;
-  label?: string;
-  value?: string;
-}
-
-export interface CurationProductListResponse {
-  products?: CurationProductResponse[];
-  meta?: CurationProductMetaResponse;
-}
-
-export interface CurationProductMetaResponse {
-  /** @format int64 */
-  nextCursor?: number;
-  hasNext?: boolean;
-  appliedFilters?: CurationProductAppliedFilterResponse[];
-}
-
-export interface CurationProductResponse {
-  /** @format int64 */
-  id?: number;
-  /** @format int64 */
-  productId?: number;
-  categoryName?: string;
-  source?: string;
-  brand?: string;
-  name?: string;
-  imageUrl?: string;
-  /** @format int64 */
-  originalPrice?: number;
-  /** @format int32 */
-  discountRate?: number;
-  /** @format int64 */
-  finalPrice?: number;
-  mallName?: string;
-  linkUrl?: string;
 }
 
 export interface ApiResponseCurationProductDetailResponse {
@@ -1910,8 +1923,7 @@ export type ReissueData = ApiResponseString;
 
 export type LogoutData = ApiResponseString;
 
-export type GenerateImageV4ByGeminiData =
-  ApiResponseBannerGenerateImageResponse;
+export type GenerateImageV4ByGeminiData = ApiResponseGenerateImageV4Response;
 
 export type Generate2ImageByFastApiData = ApiResponseImageInfoListResponse;
 
@@ -2098,6 +2110,8 @@ export type GetDashboardCategoriesData = ApiResponseDashboardCategoriesResponse;
 export type GetActivityFurnitureMappingsData =
   ApiResponseActivityFurnitureMappingsResponse;
 
+export type GetProductsData = ApiResponseCurationProductListResponse;
+
 export type GetCarouselsV2Data = ApiResponseGetCarouselV2ListResponseDTO;
 
 export type GetOtherStylesData = ApiResponseOtherStyleListResponse;
@@ -2146,7 +2160,7 @@ export type GetEnvData = Record<string, string>;
 export type GetFurnitureAndActivityData =
   ApiResponseFurnitureAndActivityResponse;
 
-export type GetProductsData = ApiResponseCurationProductListResponse;
+export type GetProducts1Data = ApiResponseCurationProductListResponse;
 
 export type GetProductDetailData = ApiResponseCurationProductDetailResponse;
 

@@ -108,7 +108,7 @@ const protectedRoutes = [
     path: ROUTES.GENERATE,
     lazy: async () => {
       const { default: LoadingPage } = await import(
-        '@pages/generate/pages/loading/LoadingPage'
+        '@pages/generate/v2/pages/loading/LoadingPage'
       );
       return { Component: LoadingPage };
     },

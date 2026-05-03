@@ -46,22 +46,22 @@ const ImageSetupPage = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState<StepType>('FloorPlanSelect');
 
-  // 퍼널 전체가 unmount될 때 (퍼널 벗어날 때) 데이터 초기화
+  // 퍼널 데이터 정리 방식
+  // - mount: useFunnelStore.reset() — 새 퍼널 진입이므로 이전 데이터 정리
+  // - cleanup: useFunnelStore.reset()은 호출하지 않음 — LoadingPage가 useFunnelStore 데이터로 이미지 생성 API payload를 조립하므로 보존 필요
+  // - loginRedirect 진행 중에는 reset 스킵 (로그인 게이트 복귀 시 사용자 입력 복원)
   useEffect(() => {
-    // cleanup
+    const loginRedirect = getLoginRedirect();
+    if (!loginRedirect) {
+      useFunnelStore.getState().reset();
+    }
+
     return () => {
       const loginRedirect = getLoginRedirect();
-      // loginRedirect는 로그인 게이트 시작 시 setLoginRedirect()로 저장, 완료 시 consumeLoginRedirect()로 삭제됨
-      // 로그인 후 복귀 시 도면 선택값을 복원해야하므로, 로그인 게이트 진행 중(loginRedirect 존재하는 경우)에는 reset 스킵
       if (!loginRedirect) {
-        // 로그인 게이트로 퍼널을 탈출하는게 아닌 경우에는 퍼널 store, 도면 store값 초기화
-        useFunnelStore.getState().reset();
+        // useFloorPlanStore(도면 시트 UI 상태) + entryRoute(가드용)만 cleanup에서 정리
+        // useImageFlowStore의 preset/resultType은 LoadingPage/ResultPage에서 사용하므로 유지
         useFloorPlanStore.getState().reset();
-        // 의도적 퍼널 이탈 혹은 퍼널 완료 시 퍼널을 탈출함. 이때 useImageFlowStore 전체를 reset하면
-        // 1. Result 페이지에서 추천형/목록형 분기에 resultType을 사용할 수 없고,
-        // 2. Loading 페이지에서 이미지 생성 API 호출 시 preset을 사용할 수 없다
-        // 따라서 entryRoute만 null로 초기화, 나머지 ImageFlow 값들은 유지
-        // +) 퍼널 진입 시 모든 진입점에서 setFlow()로 entryRoute, resultType, preset을 초기화하므로 문제 X
         useImageFlowStore.setState({ entryRoute: null });
       }
     };
@@ -111,21 +111,8 @@ const ImageSetupPage = () => {
                   // 퍼널 내에서 다음 스텝(InteriorStyle)으로 이동
                   history.push('InteriorStyle', data);
                 } else {
-                  // 숏퍼널(경로 2, 4, 5): 퍼널 탈출 → 이미지 생성
-                  // 숏퍼널은 마지막 스텝이 FloorPlanSelect → 퍼널 탈출 시점에 데이터 조합 및 API 요청. 이 위치에서 처리하는게 자연스러움
-                  // TODO: 숏퍼널 전용 별도 API 연동 작업 시 payload 형식/저장 방식/라우팅 재설계 (현재 형식은 V4 generate와 다른 별도 흐름)
-                  const generateRequest = {
-                    houseId: 0,
-                    equilibrium: '',
-                    floorPlan: data.floorPlan,
-                    moodBoardIds: [],
-                    activity: '',
-                    selectiveIds: [],
-                  };
-                  sessionStorage.setItem(
-                    'generate_image_request',
-                    JSON.stringify(generateRequest)
-                  );
+                  // 숏퍼널(경로 2, 4, 5): FloorPlanSelect가 마지막 스텝 → 바로 이미지 생성으로 이동
+                  // payload는 LoadingPage가 useImageFlowStore.preset + useFunnelStore.floorPlan으로 조립
                   navigate(ROUTES.GENERATE);
                 }
               },

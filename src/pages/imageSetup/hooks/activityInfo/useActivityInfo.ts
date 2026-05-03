@@ -9,8 +9,6 @@ import {
 
 import { ROUTES } from '@routes/paths';
 
-import type { GenerateImageV4Request } from '@apis/__generated__/data-contracts';
-
 import { useCreditGuard } from '@hooks/useCreditGuard';
 
 import { useActivitySelection } from './useActivitySelection';
@@ -63,8 +61,6 @@ export const useActivityInfo = (context: ImageSetupSteps['ActivityInfo']) => {
 
   // Zustand store에서 저장된 데이터
   const savedActivityInfo = useFunnelStore((state) => state.activityInfo);
-  const savedFloorPlan = useFunnelStore((state) => state.floorPlan);
-  const savedMoodBoardIds = useFunnelStore((state) => state.moodBoardIds);
 
   // 초기값 설정: Zustand에 값이 있으면 사용, 없으면 context 사용
   const [formData, setFormData] = useState<ActivityInfoFormData>({
@@ -204,26 +200,9 @@ export const useActivityInfo = (context: ImageSetupSteps['ActivityInfo']) => {
       return;
     }
 
-    const generateImageRequest: GenerateImageV4Request = {
-      floorPlanId: savedFloorPlan?.floorPlanId ?? context.floorPlan.floorPlanId,
-      floorPlanView:
-        savedFloorPlan?.floorPlanView ?? context.floorPlan.floorPlanView,
-      isMirror: savedFloorPlan?.isMirror ?? context.floorPlan.isMirror,
-      moodBoardIds: savedMoodBoardIds ?? context.moodBoardIds,
-      activity: formData.activity!,
-      furnitureIds: formData.furnitureIds!,
-    };
-
-    // sessionStorage에 저장
-    sessionStorage.setItem(
-      'generate_image_request',
-      JSON.stringify(generateImageRequest)
-    );
-
+    // payload 조립 + 다음 페이지(LoadingPage)로 데이터 전달은 useGenerateImageRequest 훅이 담당
+    // 퍼널 데이터는 ImageSetupPage mount 시점에 다음 진입에서 reset
     navigate(ROUTES.GENERATE);
-
-    // 퍼널 완료 후 Zustand 초기화
-    useFunnelStore.getState().reset();
   };
 
   return {
