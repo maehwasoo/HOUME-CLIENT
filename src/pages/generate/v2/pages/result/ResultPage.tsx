@@ -16,7 +16,7 @@ const DEV_UI_DEFAULT_RESULT_VIEW: 'curation' | 'list' = 'curation';
 /** 라우팅·API 연동 전 UI 확인용 목 데이터 */
 const MOCK_GENERATE_IMAGES: GenerateImageData[] = [
   {
-    imageId: 90001,
+    imageId: 9051,
     imageUrl: 'https://picsum.photos/seed/houme-gen-1/800/800',
     isMirror: false,
     equilibrium: 'mock',

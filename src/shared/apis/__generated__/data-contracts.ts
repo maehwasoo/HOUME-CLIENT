@@ -46,6 +46,7 @@ export interface GenerateImageV4Response {
   /** @format int64 */
   imageId?: number;
   imageUrl?: string;
+  isMirror?: boolean;
 }
 
 export interface FloorPlanInfo {
@@ -192,6 +193,8 @@ export interface ApiResponseOtherStyleGenerateImageResponse {
 export interface OtherStyleGenerateImageResponse {
   /** @format int64 */
   imageId?: number;
+  imageUrl?: string;
+  isMirror?: boolean;
 }
 
 export interface BannerGenerateImageRequest {
@@ -215,6 +218,8 @@ export interface ApiResponseBannerGenerateImageResponse {
 export interface BannerGenerateImageResponse {
   /** @format int64 */
   imageId?: number;
+  imageUrl?: string;
+  isMirror?: boolean;
 }
 
 export interface AdminTagRequestDTO {
@@ -1461,8 +1466,6 @@ export interface GenerateImageResultProductResponse {
 export interface GenerateImageResultResponse {
   /** @format int64 */
   imageId?: number;
-  imageUrl?: string;
-  isMirror?: boolean;
   products?: GenerateImageResultProductResponse[];
 }
 
