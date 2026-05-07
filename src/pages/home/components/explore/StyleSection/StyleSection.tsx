@@ -41,7 +41,7 @@ const StyleSection = () => {
         <h2 className={styles.sectionTitle}>다른 스타일로 꾸며보기</h2>
         <TextButton
           color="secondary"
-          size="m"
+          size="s"
           rightIcon="ArrowRight"
           onClick={handleMoreClick}
         >

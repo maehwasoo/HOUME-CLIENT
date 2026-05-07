@@ -66,7 +66,7 @@ export const API_ENDPOINT = {
     MYPAGE_JJYM_LIST_V2: '/api/v2/jjyms',
   },
   PRODUCT: {
-    LIST: '/api/v1/curations/products',
+    LIST: '/api/v2/curations/products',
     DETAIL: (productId: number) => `/api/v1/curations/products/${productId}`,
     FILTERS: '/api/v1/curations/products/filters',
   },

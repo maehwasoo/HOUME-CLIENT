@@ -12,7 +12,6 @@ import type { ProductListQueryVariables } from '@constants/queryKey';
  */
 interface ProductSearchCardItem {
   id: string;
-  /** `GET /api/v1/curations/products/:id` 상세 조회용 */
   detailProductId: number;
   title: string;
   brand: string;

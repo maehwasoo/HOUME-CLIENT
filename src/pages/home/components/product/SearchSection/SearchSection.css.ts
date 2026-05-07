@@ -25,9 +25,11 @@ export const stickyHeader = style({
   position: 'fixed',
   zIndex: zIndex.navigation,
   top: 0,
-  left: 0,
+  margin: '0 auto',
   background: colorVars.color.bg.primary,
   width: '100%',
+  minWidth: unitVars.unit.dimension.wMin,
+  maxWidth: unitVars.unit.dimension.wMax,
 });
 
 export const stickySearchBarWrap = style({
