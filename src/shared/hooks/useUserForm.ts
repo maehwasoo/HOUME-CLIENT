@@ -1,4 +1,6 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+
+import type { Gender } from '@shared/types/formOptions';
 
 import {
   VALIDATION_RULES,
@@ -9,19 +11,41 @@ import {
   isValidDayFormat,
   isMinimumAge,
   isValidDate,
-} from '../utils/validation';
+} from '../utils/userFormValidation';
 
-import type { GenderOption } from '../types/formOptions';
+interface InitialFormData {
+  nickname?: string;
+  birthYear?: string;
+  birthMonth?: string;
+  birthDay?: string;
+  gender?: Gender | null;
+}
 
-const useSignupForm = (initialName: string = '') => {
+const useUserForm = (initialData: InitialFormData = {}) => {
   // -------------------------
   // 상태 관리
   // -------------------------
-  const [nickname, setNickname] = useState(initialName);
-  const [birthYear, setBirthYear] = useState('');
-  const [birthMonth, setBirthMonth] = useState('');
-  const [birthDay, setBirthDay] = useState('');
-  const [gender, setGender] = useState<GenderOption | null>(null);
+  const [nickname, setNickname] = useState(initialData.nickname ?? '');
+  const [birthYear, setBirthYear] = useState(initialData.birthYear ?? '');
+  const [birthMonth, setBirthMonth] = useState(initialData.birthMonth ?? '');
+  const [birthDay, setBirthDay] = useState(initialData.birthDay ?? '');
+  const [gender, setGender] = useState<Gender | null>(
+    initialData.gender ?? null
+  );
+
+  useEffect(() => {
+    setNickname(initialData.nickname ?? '');
+    setBirthYear(initialData.birthYear ?? '');
+    setBirthMonth(initialData.birthMonth ?? '');
+    setBirthDay(initialData.birthDay ?? '');
+    setGender(initialData.gender ?? null);
+  }, [
+    initialData.nickname,
+    initialData.birthYear,
+    initialData.birthMonth,
+    initialData.birthDay,
+    initialData.gender,
+  ]);
 
   // -------------------------
   // 이름 유효성 검사
@@ -170,4 +194,4 @@ const useSignupForm = (initialName: string = '') => {
   };
 };
 
-export default useSignupForm;
+export default useUserForm;

@@ -1,6 +1,6 @@
 // 스택 UI
 export interface CarouselItem {
-  rawProductId: number;
+  carouselId: number;
   url: string;
 }
 

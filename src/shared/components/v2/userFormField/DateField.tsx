@@ -1,8 +1,9 @@
 import { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 
+import { padToTwoDigits } from '@utils/userFormValidation';
+
 import * as styles from './DateField.css';
 import TextFieldContainer from './TextFieldContainer';
-import { padToTwoDigits } from '../../utils/validation';
 
 interface DateValue {
   year: string;

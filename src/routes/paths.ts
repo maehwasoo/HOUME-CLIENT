@@ -14,6 +14,7 @@ export const ROUTES = {
   SETTING: '/mypage/setting',
   SETTING_SERVICE: '/mypage/setting/service',
   SETTING_PRIVACY: '/mypage/setting/privacy',
+  SETTING_PROFILE_EDIT: '/mypage/setting/profileEdit',
   OAUTH: '/oauth/kakao/callback',
   STYLE_LIST: '/styles',
   STYLE_DETAIL: '/styles/:styleId',

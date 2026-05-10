@@ -10,7 +10,7 @@ import type {
 import type { MyPageUserData } from '../types/apis/userData';
 
 interface BuildResultNavigationArgs {
-  history: MyPageImageHistory;
+  imageId: number;
   userProfile?: MyPageUserData | null;
 }
 
@@ -31,18 +31,17 @@ const toDetailSkeleton = (history: MyPageImageHistory): MyPageImageDetail => ({
 });
 
 export const buildResultNavigationState = ({
-  history,
   userProfile,
+  imageId,
 }: BuildResultNavigationArgs): ResultNavigationState => {
   const detectionEntry =
-    useDetectionCacheStore.getState().images[history.imageId] ?? null;
+    useDetectionCacheStore.getState().images[imageId] ?? null;
   if (detectionEntry) {
-    primeDetectionCacheEntry(history.imageId, detectionEntry);
+    primeDetectionCacheEntry(imageId, detectionEntry);
   }
 
   return {
     userProfile,
-    initialHistory: history,
     cachedDetection: detectionEntry,
   };
 };

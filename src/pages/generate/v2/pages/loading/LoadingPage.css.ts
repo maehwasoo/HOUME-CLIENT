@@ -73,8 +73,7 @@ export const nextImageArea = style({
   aspectRatio: '1 / 1',
   position: 'absolute',
   transform: 'translateY(30px)',
-  transition:
-    'transform 0.6s ease, opacity 0.6s ease, width 0.6s ease, height 0.6s ease',
+  transition: 'transform 0.6s ease, opacity 0.6s ease',
   opacity: 0,
   borderRadius: unitVars.unit.radius['700'],
   width: '91%',

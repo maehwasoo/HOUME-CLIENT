@@ -7,11 +7,12 @@ import type { SaveItemsRequest, SaveItemsResponse } from '@shared/types/jjym';
 import { queryClient } from '@apis/config/queryClient';
 import { HTTPMethod, request } from '@apis/config/request';
 
-import { API_ENDPOINT } from '@constants/apiEndpoints';
-import { queryKeys } from '@constants/queryKey';
+import { useToast } from '@components/toast/useToast';
 
-import { useToast } from '@/shared/components/toast/useToast';
+import { API_ENDPOINT } from '@constants/apiEndpoints';
+
 import { TOAST_TYPE } from '@/shared/types/toast';
+import { invalidateJjymRelatedQueries } from '@/shared/utils/invalidateJjymQueries';
 
 import type { AxiosError } from 'axios';
 
@@ -57,7 +58,7 @@ export const useJjymMutation = () => {
         actionLabel: data.favorited ? '이동' : '되돌리기',
       });
 
-      queryClient.invalidateQueries({ queryKey: queryKeys.jjym.list() });
+      invalidateJjymRelatedQueries(queryClient);
     },
 
     onError: (error, rawProductId) => {

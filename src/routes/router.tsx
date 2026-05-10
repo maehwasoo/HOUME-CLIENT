@@ -139,6 +139,15 @@ const protectedRoutes = [
     },
   },
   {
+    path: ROUTES.SETTING_PROFILE_EDIT,
+    lazy: async () => {
+      const { default: ProfileEditPage } = await import(
+        '@pages/mypage/pages/setting/ProfileEditPage'
+      );
+      return { Component: ProfileEditPage };
+    },
+  },
+  {
     path: ROUTES.WELCOME,
     lazy: async () => {
       const { default: WelcomePage } = await import(

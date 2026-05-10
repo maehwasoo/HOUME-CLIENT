@@ -9,16 +9,17 @@ import ActionButton from '@components/v2/button/actionButton/ActionButton';
 import Chip from '@components/v2/chip/Chip';
 import Icon from '@components/v2/icon/Icon';
 import Popup from '@components/v2/popup/Popup';
+import DateField from '@components/v2/userFormField/DateField';
+import TextField from '@components/v2/userFormField/TextField';
 
 import { ERROR_MESSAGES } from '@constants/clientErrorMessage';
 
+import { useRandomNickname } from '@hooks/useGetRandomNickname';
+import useUserForm from '@hooks/useUserForm';
+
 import { usePostSignupMutation } from './apis/mutations/usePostSignupMutation';
-import { useGetRandomNicknameQuery } from './apis/queries/useGetNickname';
 import SignupExitPopupContent from './components/exitPopupContent/SignupExitPopupContent';
-import DateField from './components/textField/DateField';
-import TextField from './components/textField/TextField';
 import { useSignupExitConfirm } from './hooks/useSignupExitConfirm';
-import useSignupForm from './hooks/useSignupForm';
 import * as styles from './SignupPage.css';
 import {
   logSignupFormClickBtnCTA,
@@ -113,12 +114,12 @@ const SignupPage = () => {
     dayFieldError,
     isFormValid,
     hasError,
-  } = useSignupForm();
+  } = useUserForm();
 
   const { mutate: signUp } = usePostSignupMutation();
 
   // 랜덤 닉네임 GET 쿼리
-  const { data: randomNickname, refetch } = useGetRandomNicknameQuery();
+  const { randomNickname, refresh } = useRandomNickname(handleNicknameChange);
 
   // 닉네임 필드 유효
   const isNameSectionValid =
@@ -145,15 +146,6 @@ const SignupPage = () => {
       }
     }
   }, [randomNickname, nickname, handleNicknameChange]);
-
-  const handleRefresh = async () => {
-    try {
-      const { data } = await refetch();
-      if (data) handleNicknameChange(data);
-    } catch (error) {
-      console.error('[handleRefresh] 닉네임 새로고침 실패:', error);
-    }
-  };
 
   const errorSentRef = useRef(false);
 
@@ -195,7 +187,7 @@ const SignupPage = () => {
     signUp({
       signupToken,
       nickname,
-      gender: gender.value,
+      gender: gender,
       birthday: formattedBirthday,
     });
   };
@@ -255,7 +247,7 @@ const SignupPage = () => {
               isError={isNameFormatInvalid || isNameLengthInvalid}
               errorMessage={nameErrorMessage}
               maxLength={18}
-              onRefresh={handleRefresh}
+              onRefresh={refresh}
               onEnter={handleNicknameEnter}
             />
           </div>
@@ -287,25 +279,23 @@ const SignupPage = () => {
             <h2 className={styles.fieldtitle}>성별</h2>
             <div className={styles.flexbox}>
               <Chip
-                selected={gender?.value === 'MALE'}
+                selected={gender === 'MALE'}
                 color="weak"
-                onClick={() => setGender({ value: 'MALE', label: '남성' })}
+                onClick={() => setGender('MALE')}
               >
                 남성
               </Chip>
               <Chip
-                selected={gender?.value === 'FEMALE'}
+                selected={gender === 'FEMALE'}
                 color="weak"
-                onClick={() => setGender({ value: 'FEMALE', label: '여성' })}
+                onClick={() => setGender('FEMALE')}
               >
                 여성
               </Chip>
               <Chip
-                selected={gender?.value === 'NONBINARY'}
+                selected={gender === 'NONBINARY'}
                 color="weak"
-                onClick={() =>
-                  setGender({ value: 'NONBINARY', label: '밝히고 싶지 않음' })
-                }
+                onClick={() => setGender('NONBINARY')}
               >
                 밝히고 싶지 않음
               </Chip>

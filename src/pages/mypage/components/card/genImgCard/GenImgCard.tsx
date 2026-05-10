@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 import TestImage from '@assets/v2/images/TestImg.png';
 
 import { logMyPageClickBtnFurnitureCard } from '@/pages/mypage/utils/analytics';
@@ -12,19 +14,31 @@ import type { UsedProduct } from '@/pages/mypage/types/apis/generateList';
 interface GenImgCardProps {
   cardType?: 'list' | 'curation';
   productSummaryText?: string;
+  imageId: number;
   imageUrl?: string;
   usedProducts?: UsedProduct[];
+  isLoaded?: boolean;
   onCurationClick?: () => void;
+  onImageLoad?: (imageId: number, imageUrl?: string) => void;
 }
 
 const GenImgCard = ({
   cardType = 'list',
   productSummaryText,
+  imageId,
   imageUrl,
   usedProducts = [],
+  isLoaded = false,
   onCurationClick,
+  onImageLoad,
 }: GenImgCardProps) => {
   const isListType = cardType === 'list';
+  const [isImageReady, setIsImageReady] = useState(isLoaded); // 이미지 로드 완료 여부
+
+  const handleImageLoad = () => {
+    setIsImageReady(true);
+    onImageLoad?.(imageId, imageUrl);
+  };
 
   // 찜 토글
   const { mutate: toggleJjym } = useJjymMutation();
@@ -37,7 +51,6 @@ const GenImgCard = ({
     <div className={styles.wrapper}>
       <section className={styles.textContainer} onClick={onCurationClick}>
         <span className={styles.headingText}>{productSummaryText}</span>
-        {/* 컴포넌트 수정 필요 */}
         <TextButton
           color="secondary"
           size="s"
@@ -51,16 +64,18 @@ const GenImgCard = ({
         </TextButton>
       </section>
       <section className={styles.imgContainer}>
+        {/* 이미지 로드 완료 전에는 skeleton, 완료 시 실제 이미지 렌더링 */}
+        {!isImageReady && <div className={styles.skeleton} />}
         <img
           src={imageUrl || TestImage}
           alt={productSummaryText ?? '생성 이미지'}
           className={styles.cardImg}
+          onLoad={handleImageLoad}
         />
       </section>
 
       {isListType && (
         <section className={styles.listCardContainer}>
-          {/* 찜 부분 수정 필요 */}
           {usedProducts.map((item) => (
             <ListProductCard
               key={item.rawProductId}

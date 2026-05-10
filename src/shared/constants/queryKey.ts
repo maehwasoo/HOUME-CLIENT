@@ -118,12 +118,7 @@ export const queryKeys = {
     images: () => [...queryKeys.mypage.all, 'images'] as const,
     imageDetail: (houseId: number) =>
       [...queryKeys.mypage.all, 'imageDetail', houseId] as const,
-  },
-
-  // 찜 목록
-  jjym: {
-    all: ['jjym'] as const,
-    list: () => [...queryKeys.jjym.all, 'list'] as const,
+    jjymList: () => [...queryKeys.mypage.all, 'jjym', 'list'] as const,
   },
 
   // 스타일
@@ -134,10 +129,9 @@ export const queryKeys = {
       [...queryKeys.styles.all, 'detail', styleId] as const,
   },
 
-  // 랜덤 닉네임
+  // 회원가입: 랜덤 닉네임
   signup: {
     all: ['signup'] as const,
     randomNickname: () => [...queryKeys.signup.all, 'randomNickname'] as const,
   },
-
 } as const;

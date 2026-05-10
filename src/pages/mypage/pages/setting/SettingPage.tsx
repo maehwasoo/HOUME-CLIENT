@@ -39,6 +39,10 @@ const SettingPage = () => {
     navigate(ROUTES.SETTING_PRIVACY);
   };
 
+  const handleProfileEdit = () => {
+    navigate(ROUTES.SETTING_PROFILE_EDIT);
+  };
+
   const handleLogout = () => {
     logMyPageClickBtnLogout();
     // 1) 토스트 표시 (2.5초 유지)
@@ -107,7 +111,7 @@ const SettingPage = () => {
               <TextButton
                 color="primary"
                 size="s"
-                // onClick={() => navigate(ROUTES.PROFILE_EDIT)}
+                onClick={handleProfileEdit}
                 aria-label="프로필 수정"
               >
                 프로필 수정

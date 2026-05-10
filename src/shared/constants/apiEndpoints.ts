@@ -15,6 +15,8 @@ export const API_ENDPOINT = {
       `/api/v1/mypage/images/${imageId}`,
     DELETE: '/api/v1/user',
     ROTATE_NICKNAME: '/api/v2/nickname/rotate',
+    MYPAGE_PROFILE: '/api/v2/mypage/user',
+    MYPAGE_PROFILE_EDIT: '/api/v2/mypage/user',
   },
   BANNER: {
     LANDING: '/api/v1/landings',
