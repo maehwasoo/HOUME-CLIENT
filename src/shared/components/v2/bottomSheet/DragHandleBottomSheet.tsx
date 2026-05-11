@@ -16,8 +16,6 @@ interface DragHandleBottomSheetProps {
   onDismiss?: () => void;
 }
 
-const EXPANDED_HEIGHT = 'calc(100dvh - 10.4rem)';
-
 const parsePxFromRem = (rem: string): number => {
   const value = parseFloat(rem);
   const fontSize = parseFloat(
@@ -59,16 +57,20 @@ const DragHandleBottomSheet = ({
       const panel = panelRef.current;
       if (!panel) return;
 
+      // vaul의 자체 drag 핸들러(Drawer.Content data-vaul-drawer)와 충돌해 panel transform이 적용되며
+      // 튕기는 애니메이션이 발생 -> 자체 drag만 수행하도록 propagation 차단.
+      // 튕김 해결에 효과가 없음...
+      e.stopPropagation();
+
+      // ref만 기록. setIsDragging/setDragHeight는 PointerMove에서 임계값(5px) 넘은 후 호출
+      // (단순 터치만 했을 때 panel 인라인이 변경되어 바텀시트가 튕기는 문제 해결)
       dragStartYRef.current = e.clientY;
       startHeightRef.current = panel.offsetHeight;
-      // Persistent: 최소 높이에서 멈춤 / Dismissible: 높이가 0까지 줄어들 수 있음
       collapsedPxRef.current = isPersistent
         ? parsePxFromRem(collapsedHeight)
         : 0;
       expandedPxRef.current = resolveExpandedPx();
 
-      setIsDragging(true);
-      setDragHeight(panel.offsetHeight);
       (e.target as HTMLElement).setPointerCapture(e.pointerId);
     },
     [isPersistent, collapsedHeight]
@@ -76,9 +78,17 @@ const DragHandleBottomSheet = ({
 
   const handlePointerMove = useCallback(
     (e: React.PointerEvent) => {
-      if (!isDragging) return;
+      // dragStartYRef가 set되지 않았으면 PointerDown 거치지 않은 이벤트
+      if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
 
       const delta = dragStartYRef.current - e.clientY;
+
+      // drag 시작 임계값(5px) — 단순 터치/탭은 무시
+      if (!isDragging) {
+        if (Math.abs(delta) < 5) return;
+        setIsDragging(true);
+      }
+
       const newHeight = startHeightRef.current + delta;
       const clamped = Math.max(
         collapsedPxRef.current,
@@ -91,9 +101,14 @@ const DragHandleBottomSheet = ({
 
   const handlePointerUp = useCallback(
     (e: React.PointerEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.hasPointerCapture(e.pointerId)) {
+        target.releasePointerCapture(e.pointerId);
+      }
+
+      // 단순 터치(임계값 미만)는 drag 시작 X — 추가 작업 없이 종료
       if (!isDragging || dragHeight == null) return;
 
-      (e.target as HTMLElement).releasePointerCapture(e.pointerId);
       setIsDragging(false);
 
       if (isPersistent) {
@@ -137,8 +152,8 @@ const DragHandleBottomSheet = ({
     isDragging && dragHeight != null
       ? { height: `${dragHeight}px` }
       : isPersistent
-        ? { height: expanded ? EXPANDED_HEIGHT : collapsedHeight }
-        : {}; // Dismissible: content 높이(auto) + CSS maxHeight가 상한
+        ? { height: expanded ? 'auto' : collapsedHeight }
+        : {};
 
   const handleOverlayClick = () => {
     if (isPersistent) {

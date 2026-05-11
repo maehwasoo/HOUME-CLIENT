@@ -8,8 +8,8 @@ export const zIndex = {
   navigation: 200,
   backdrop: 250,
   modal: 300,
-  popup: 350,
   toast: 400,
-  sheet: 450,
   navBar: 500,
+  sheet: 550,
+  popup: 600,
 } as const;
