@@ -1,4 +1,4 @@
-import { MemoryRouter } from 'react-router-dom';
+import { createMemoryRouter, RouterProvider } from 'react-router-dom';
 
 import FunnelLayout from '@pages/imageSetup/components/layout/FunnelLayout';
 
@@ -8,11 +8,13 @@ const meta = {
   title: 'pages/imageSetup/FunnelLayout',
   component: FunnelLayout,
   tags: ['autodocs'],
+  // FunnelLayout 내부의 useExitBlocker → useBlocker는 Data Router 환경에서만 동작하므로
+  // legacy <MemoryRouter> 대신 createMemoryRouter + RouterProvider 사용
   decorators: [
     (Story) => (
-      <MemoryRouter>
-        <Story />
-      </MemoryRouter>
+      <RouterProvider
+        router={createMemoryRouter([{ path: '/', element: <Story /> }])}
+      />
     ),
   ],
   argTypes: {
