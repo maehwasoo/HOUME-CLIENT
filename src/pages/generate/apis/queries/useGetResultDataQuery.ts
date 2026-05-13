@@ -8,7 +8,7 @@ import { queryKeys } from '@constants/queryKey';
 export const getResultData = async (houseId: number) => {
   return request({
     method: HTTPMethod.GET,
-    url: `${API_ENDPOINT.GENERATE.IMAGE_PREFERENCE}/${houseId}/preference`,
+    url: `${API_ENDPOINT.GENERATE.IMAGE_GENERATION}/${houseId}/preference`,
   });
 };
 

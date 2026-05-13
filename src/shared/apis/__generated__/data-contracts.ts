@@ -1433,16 +1433,42 @@ export interface GeneratedImageMetaResponse {
   isMirror?: boolean;
 }
 
-export interface ApiResponseFurnitureProductsInfoResponse {
+export interface ApiResponseFurnitureProductsInfoResponseV2 {
   /** @format int32 */
   code?: number;
   msg?: string;
-  data?: FurnitureProductsInfoResponse;
+  data?: FurnitureProductsInfoResponseV2;
 }
 
-export interface FurnitureProductsInfoResponse {
+export interface FurnitureProductsInfoResponseV2 {
   userName?: string;
-  products?: FurnitureProductInfo[];
+  products?: ProductWrapper[];
+}
+
+export interface ProductInfo {
+  /** @format int64 */
+  id?: number;
+  /** @format int64 */
+  productId?: number;
+  categoryName?: string;
+  source?: string;
+  brand?: string;
+  name?: string;
+  imageUrl?: string;
+  /** @format int64 */
+  originalPrice?: number;
+  /** @format int32 */
+  discountRate?: number;
+  /** @format int64 */
+  finalPrice?: number;
+  mallName?: string;
+  linkUrl?: string;
+  colors?: ProductColorResponse[];
+  isLiked?: boolean;
+}
+
+export interface ProductWrapper {
+  product?: ProductInfo;
 }
 
 export interface ApiResponseSimilarItemsResponse {
@@ -2211,7 +2237,7 @@ export type GetFurnitureProductInfoFromNaverApiForPlanV2Data =
 export type GetGeneratedImageMetaData = ApiResponseGeneratedImageMetaResponse;
 
 export type GetFurnitureProductInfoFromNaverApiData =
-  ApiResponseFurnitureProductsInfoResponse;
+  ApiResponseFurnitureProductsInfoResponseV2;
 
 export type GetFurnitureCategoriesData = ApiResponseFurnitureCategoriesResponse;
 

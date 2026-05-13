@@ -51,12 +51,17 @@ export const API_ENDPOINT = {
       `/api/v1/generated-images/list-result/${imageId}/items`,
     IMAGE_BANNER: '/api/v1/generated-images/generate/banner', // 경로2 배너 진입 이미지 생성
     IMAGE_OTHER_STYLE: '/api/v1/generated-images/generate/other-style', // 경로4 다른 스타일 진입 이미지 생성
-    IMAGE_PREFERENCE: '/api/v1/generated-images',
+    IMAGE_GENERATION: '/api/v1/generated-images',
+    IMAGE_PREFERENCE: (imageId: number) =>
+      `/api/v1/generated-images/${imageId}/preference`,
     FACTORS: '/api/v1/factors',
     FACTOR_PREFERENCE: (imageId: number, factorId: number) =>
       `/api/v1/generated-images/${imageId}/preference/factors/${factorId}`,
     CURATION_CATEGORIES: (imageId: number) =>
       `/api/v1/generated-images/${imageId}/curations/categories`,
+    CURATION_CATEGORIES_V2: (
+      imageId: number // b-2 추천형 (객체 인식 X)
+    ) => `/api/v2/generated-images/${imageId}/curations/categories`,
     CURATION_PRODUCTS: (imageId: number, categoryId: number) =>
       `/api/v1/generated-images/${imageId}/curations/products/${categoryId}`,
     CURATION_DASHBOARD: '/api/v1/dashboard-info',

@@ -39,7 +39,8 @@ export const content = style({
 
 export const chipList = style({
   display: 'flex',
-  flexDirection: 'column',
+  flexDirection: 'row',
+  flexWrap: 'wrap',
   gap: unitVars.unit.gapPadding['200'],
   width: '100%',
 });
@@ -48,5 +49,12 @@ export const productList = style({
   display: 'grid',
   gridTemplateColumns: 'repeat(2, 1fr)',
   gap: unitVars.unit.gapPadding['200'],
+  width: '100%',
+});
+
+export const blockSlot = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   width: '100%',
 });

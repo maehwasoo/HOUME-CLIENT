@@ -95,6 +95,15 @@ export const queryKeys = {
       [...queryKeys.generate.all, 'similarItems', imageId] as const,
     relatedImages: (imageId: number) =>
       [...queryKeys.generate.all, 'relatedImages', imageId] as const,
+    curationCategories: (imageId: number) =>
+      [...queryKeys.generate.all, 'curationCategories', imageId] as const,
+    curationProducts: (imageId: number, categoryId: number) =>
+      [
+        ...queryKeys.generate.all,
+        'curationProducts',
+        imageId,
+        categoryId,
+      ] as const,
   },
 
   // 가구 큐레이션
