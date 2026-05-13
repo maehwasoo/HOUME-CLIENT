@@ -1,4 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+
+import { useImageFlowStore } from '@store/useImageFlowStore';
 
 import { useToast } from '@components/toast/useToast';
 
@@ -41,11 +43,10 @@ export const useFloorPlanSelect = (
     ? (recentFloorPlanData.floorPlan ?? null)
     : null;
 
-  // 시트 표시 우선순위:
-  // 1순위: useFunnelStore에 저장된 도면이 있는 경우 시트 복원
-  //   (case: 경로 3 홈 도면 클릭 / 로그인 게이트에서 복귀)
-  // 2순위: 최근 생성 공간이 있는 경우 RecentSheet 표시 + 토스트
-  // 3순위: useFloorPlanStore 저장 도면도 없고 최근 생성 공간도 없으면 바텀시트 X
+  // 시트 자동 오픈 우선순위 (마운트 시 1회 평가):
+  // 1순위: useFunnelStore.floorPlan 있음 → FloorPlanSheet 복원 (로그인 게이트 복귀)
+  // 2순위: useImageFlowStore.preset.type === 'floorPlan' → FloorPlanSheet 오픈, 이후 바로 preset 소비 (LoadingPage에 preset이 불필요하므로 바로 null 처리)
+  // 그 외: 자동 오픈 없음
   useEffect(() => {
     const savedFloorPlan = useFunnelStore.getState().floorPlan;
     if (savedFloorPlan) {
@@ -57,11 +58,30 @@ export const useFloorPlanSelect = (
       return;
     }
 
-    if (recentFloorPlan) {
-      store.openRecentSheet();
-      notify({ text: '저장된 내 공간을 불러왔어요.' });
+    const preset = useImageFlowStore.getState().preset;
+    if (preset?.type === 'floorPlan') {
+      store.selectNewFloorPlan(preset.floorPlanId);
+      store.openFloorPlanSheet();
+      // FLOOR_PLAN 경로는 풀퍼널이므로 LoadingPage가 preset을 사용하지 않음 → 시트 오픈 후 즉시 클리어
+      useImageFlowStore.getState().clearPreset();
     }
-    // 마운트 시 1회만 실행 (recentFloorPlan은 처음 fetch 완료 후 한 번만 반영하면 됨)
+    // 마운트 시 1회만 평가
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // RecentSheet 자동 오픈: FloorPlanSheet가 자동 오픈되지 않은 모든 경로에서 표시
+  // recentFloorPlan이 캐시된 상태로 진입하면 위 useEffect와 같은 mount commit에서 함께 실행되는데,
+  // 그때 `store` 변수는 첫 렌더의 snapshot이라 위 effect의 openFloorPlanSheet()가 반영되지 않음.
+  // -> useFloorPlanStore.getState()로 zustand에서 동기적으로 최신값을 읽어 race condition 방지!
+  const recentHandledRef = useRef(false);
+  useEffect(() => {
+    if (recentHandledRef.current) return;
+    if (!recentFloorPlan) return;
+    if (useFloorPlanStore.getState().isFloorPlanSheetOpen) return;
+
+    recentHandledRef.current = true;
+    store.openRecentSheet();
+    notify({ text: '저장된 내 공간을 불러왔어요.' });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recentFloorPlan]);
 

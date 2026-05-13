@@ -105,7 +105,7 @@ const LoadingPage = () => {
     // - useImageFlowStore의 entryRoute/resultType은 ResultPage에서 사용하므로 유지
     const onMutationSettled = () => {
       useFunnelStore.getState().reset();
-      useImageFlowStore.setState({ preset: null });
+      useImageFlowStore.getState().clearPreset();
     };
 
     const mutateOptions = {

@@ -59,6 +59,14 @@ interface FloorPlanStoreState {
   // 최근 선택한 도면이 있을 경우 RecentSheet open
   openRecentSheet: () => void;
   closeRecentSheet: () => void;
+  // 페이지 이탈 가드 popup이 떠 있는 동안 시트 visibility만 임시로 false (선택/필터 상태 보존)
+  pauseSheets: () => void;
+  // pauseSheets로 숨겼던 시트를 snapshot 기반으로 다시 보이게 복원
+  restoreSheets: (snapshot: {
+    isFilterSheetOpen: boolean;
+    isFloorPlanSheetOpen: boolean;
+    isRecentSheetOpen: boolean;
+  }) => void;
   // 페이지 이탈 시 모든 상태 초기화
   reset: () => void;
 }
@@ -128,6 +136,20 @@ export const useFloorPlanStore = create<FloorPlanStoreState>((set) => ({
   // TODO: 최근 생성 공간 API 연동 시, 도면 데이터를 파라미터로 받아 스토어에 저장하거나 별도 방식으로 전달 검토
   openRecentSheet: () => set({ isRecentSheetOpen: true }),
   closeRecentSheet: () => set({ isRecentSheetOpen: false }),
+
+  // 이탈 가드 popup 표시 동안만 시트 visibility를 false로 (선택/필터 상태는 보존)
+  pauseSheets: () =>
+    set({
+      isFilterSheetOpen: false,
+      isFloorPlanSheetOpen: false,
+      isRecentSheetOpen: false,
+    }),
+  restoreSheets: (snapshot) =>
+    set({
+      isFilterSheetOpen: snapshot.isFilterSheetOpen,
+      isFloorPlanSheetOpen: snapshot.isFloorPlanSheetOpen,
+      isRecentSheetOpen: snapshot.isRecentSheetOpen,
+    }),
 
   reset: () =>
     set({

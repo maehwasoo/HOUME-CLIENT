@@ -81,8 +81,8 @@ export const useGenerateImageRequest = (): GenerateImageRequestResult => {
     // 모든 이미지 생성 API 요청 필수 값: floorPlan (필드 단위 타입 검증)
     if (!isFloorPlanValid(floorPlan)) return { kind: 'invalid' };
 
-    // 풀퍼널 (preset 없음)
-    if (preset === null) {
+    // 풀퍼널 (preset 없음 또는 FLOOR_PLAN 경로의 floorPlan preset 잔존 — useFloorPlanSelect가 정상 소비하면 null이지만 안전망)
+    if (preset === null || preset.type === 'floorPlan') {
       const activity = activityInfo?.activity;
       const furnitureIds = activityInfo?.furnitureIds;
 
