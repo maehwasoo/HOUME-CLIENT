@@ -5,10 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import { useGetGeneratedImageListQuery } from '@pages/mypage/apis/queries/useMyPageImagesQuery';
 import { useDetectionPrefetch } from '@pages/mypage/hooks/useDetectionPrefetch';
 import type { GeneratedImageListItem } from '@pages/mypage/types/apis/generateList';
-import type { MyPageUserData } from '@pages/mypage/types/apis/userData';
 import { logMyPageClickBtnImgCard } from '@pages/mypage/utils/analytics';
 import { formatDate } from '@pages/mypage/utils/formatting';
-import { buildResultNavigationState } from '@pages/mypage/utils/resultNavigation';
 
 import { ROUTES } from '@routes/paths';
 
@@ -18,18 +16,11 @@ import * as styles from './GeneratedImagesSection.css';
 import GenImgCard from '../../card/genImgCard/GenImgCard';
 import EmptyStateSection from '../emptyState/EmptyStateSection';
 
-// 프로필 섹션 (닉네임, 크레딧 개수)
-interface GeneratedImagesSectionProps {
-  userProfile?: MyPageUserData | null;
-}
-
 /**
  * 마이페이지 생성 이미지 목록 섹션
  * - 감지 데이터 프리패치와 네비게이션 상태 구성을 함께 처리
  */
-const GeneratedImagesSection = ({
-  userProfile,
-}: GeneratedImagesSectionProps) => {
+const GeneratedImagesSection = () => {
   const navigate = useNavigate();
 
   const {
@@ -107,17 +98,19 @@ const GeneratedImagesSection = ({
   );
 
   /**
-   * 결과 페이지로 이동하며 필요한 감지 데이터를 선행 프리패치
+   * - url에 imageId(houseId)와 viewType을 전달
+   *   - houseId: ResultPage가 /meta API 호출에 사용
+   *   - viewType: ResultPage의 CurationResult/ListResult 분기 기준
+   * - state로 imageUrl 전달
    */
   const handleViewResult = (item: GeneratedImageListItem) => {
     logMyPageClickBtnImgCard();
-    const navigationState = buildResultNavigationState({
-      userProfile: userProfile ?? null,
-      imageId: item.imageId,
-    });
-    navigate(ROUTES.GENERATE_RESULT, {
-      state: navigationState,
-    });
+    navigate(
+      `${ROUTES.GENERATE_RESULT}?houseId=${item.imageId}&viewType=${item.viewType}`,
+      {
+        state: { imageUrl: item.generatedImageUrl },
+      }
+    );
     // 네비게이션 직후 우선순위 감지 프리페치 실행
     scheduleDetectionPrefetch(item.imageId, item.generatedImageUrl, {
       immediate: true,

@@ -102,9 +102,7 @@ const MyPage = () => {
               onTabChange={setActiveMenuTab}
             />
           </div>
-          {activeMenuTab === 'generatedImages' && (
-            <GeneratedImagesSection userProfile={userData} />
-          )}
+          {activeMenuTab === 'generatedImages' && <GeneratedImagesSection />}
           {activeMenuTab === 'savedItems' && <SavedItemsSection />}
         </ErrorBoundary>
       )}

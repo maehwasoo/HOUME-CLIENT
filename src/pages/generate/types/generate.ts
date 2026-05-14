@@ -19,31 +19,13 @@ export interface ImageStackResponse {
 
 // 이미지 생성 V4 요청 타입은 swagger 자동 생성 사용, V2/V3 Legacy API 관련 타입은 제거
 
-// 이미지 생성 API 응답 데이터 타입
-export interface GenerateImageData {
+// 이미지 생성/조회 응답의 optional 이미지 메타데이터(imageId/imageUrl/isMirror)를 narrow하여 공용으로 사용하는 타입
+// - swagger 자동 생성 응답(GeneratedImageMetaResponse, GenerateImageV4Response 등)은 imageId/imageUrl/isMirror 모두 optional
+// - 이미지 생성 API 응답에서 optional 제거 -> 사용처에서 optional 검증 코드 불필요
+export interface GeneratedImagePayload {
   imageId: number;
   imageUrl: string;
   isMirror: boolean;
-  equilibrium: string;
-  houseForm: string;
-  tagName: string;
-  name: string;
-}
-
-// 이미지 생성 API 응답 데이터 타입 - 여러 이미지 응답 (A안)
-export interface GenerateImageAResponse {
-  code: number;
-  msg: string;
-  data: {
-    imageInfoResponses: GenerateImageData[];
-  };
-}
-
-// 이미지 생성 API 응답 데이터 타입 - 단일 이미지 (B안)
-export interface GenerateImageBResponse {
-  code: number;
-  msg: string;
-  data: GenerateImageData;
 }
 
 // 요인 문구 타입

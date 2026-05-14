@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
+import type { GeneratedImagePayload } from '@pages/generate/types/generate';
 import { useGenerateStore } from '@pages/generate/v2/stores/useGenerateStore';
 
 import type {
@@ -12,21 +13,18 @@ import { HTTPMethod, request } from '@apis/config/request';
 import { API_ENDPOINT } from '@constants/apiEndpoints';
 import { queryKeys } from '@constants/queryKey';
 
+import { toGeneratedImagePayload } from './toGeneratedImagePayload';
+
 export const postGenerateOtherStyleImage = async (
   requestData: OtherStyleGenerateImageRequest
-): Promise<OtherStyleGenerateImageResponse> => {
+): Promise<GeneratedImagePayload> => {
   const response = await request<OtherStyleGenerateImageResponse>({
     method: HTTPMethod.POST,
     url: API_ENDPOINT.GENERATE.IMAGE_OTHER_STYLE,
     body: requestData,
   });
 
-  // 응답은 200이지만 imageId가 오지 않는 예외 고려
-  if (typeof response.imageId !== 'number') {
-    throw new Error('이미지 생성 응답에 imageId가 누락되었습니다');
-  }
-
-  return response;
+  return toGeneratedImagePayload(response);
 };
 
 export const useGenerateOtherStyleImageMutation = () => {
@@ -34,7 +32,7 @@ export const useGenerateOtherStyleImageMutation = () => {
     useGenerateStore();
 
   return useMutation<
-    OtherStyleGenerateImageResponse,
+    GeneratedImagePayload,
     Error,
     OtherStyleGenerateImageRequest
   >({

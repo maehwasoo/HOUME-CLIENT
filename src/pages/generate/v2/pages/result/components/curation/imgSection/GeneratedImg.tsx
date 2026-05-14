@@ -7,8 +7,6 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-import type { GenerateImageData } from '@pages/generate/types/generate';
-
 import generateResultLockedPreview from '@assets/images/generateResultLockedPreview.png';
 
 import CommunityComingSoonModal from '@components/overlay/modal/CommunityComingSoonModal';
@@ -17,10 +15,11 @@ import IconButton from '@components/v2/button/IconButton';
 
 import * as styles from './GeneratedImg.css';
 
+import type { ResultImageMeta } from '../../../types';
 import type { Swiper as SwiperType } from 'swiper';
 
 export interface GeneratedImgCurationProps {
-  images: GenerateImageData[];
+  images: ResultImageMeta[];
   onCurrentImgIdChange?: (currentImgId: number) => void;
   onSlideChange?: (slideIndex: number) => void;
 }

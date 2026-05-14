@@ -1,4 +1,3 @@
-import type { GenerateImageData } from '@pages/generate/types/generate';
 import { useGenerateListResultQuery } from '@pages/generate/v2/apis/queries/useGenerateListResultQuery';
 import { useRelatedImagesQuery } from '@pages/generate/v2/apis/queries/useRelatedImagesQuery';
 import { useSimilarItemsQuery } from '@pages/generate/v2/apis/queries/useSimilarItemsQuery';
@@ -10,8 +9,10 @@ import StyleCard from '@/shared/components/v2/styleCard/StyleCard';
 import GeneratedImg from './imgSection/GeneratedImg';
 import * as styles from './ListResult.css';
 
+import type { ResultImageMeta } from '../../types';
+
 export interface ListResultProps {
-  image: GenerateImageData;
+  image: ResultImageMeta;
 }
 
 const ListResult = ({ image }: ListResultProps) => {

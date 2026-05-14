@@ -1,45 +1,113 @@
-import { useState } from 'react';
+import {
+  Navigate,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from 'react-router-dom';
 
-import { useNavigate } from 'react-router-dom';
+import { useImageMetaQuery } from '@pages/generate/v2/apis/queries/useImageMetaQuery';
 
-import type { GenerateImageData } from '@pages/generate/types/generate';
+import { ROUTES } from '@routes/paths';
 
+import InlineError from '@components/inlineError/InlineError';
+import Loading from '@components/loading/Loading';
 import TitleNavBar from '@components/v2/navBar/TitleNavBar';
 
 import CurationResult from './components/curation/CurationResult';
 import ListResult from './components/list/ListResult';
 import * as styles from './ResultPage.css';
 
-/** 라우팅 연동 전: 초기에 보여줄 결과 뷰 (`'curation'` | `'list'`) */
-const DEV_UI_DEFAULT_RESULT_VIEW: 'curation' | 'list' = 'curation';
-
-/** 라우팅·API 연동 전 UI 확인용 목 데이터 */
-const MOCK_GENERATE_IMAGES: GenerateImageData[] = [
-  {
-    imageId: 9051,
-    imageUrl: 'https://picsum.photos/seed/houme-gen-1/800/800',
-    isMirror: false,
-    equilibrium: 'mock',
-    houseForm: 'mock',
-    tagName: 'mock',
-    name: 'mock',
-  },
-  {
-    imageId: 90002,
-    imageUrl: 'https://picsum.photos/seed/houme-gen-2/800/800',
-    isMirror: false,
-    equilibrium: 'mock',
-    houseForm: 'mock',
-    tagName: 'mock',
-    name: 'mock',
-  },
-];
+import type { ResultImageMeta } from './types';
 
 const ResultPage = () => {
   const navigate = useNavigate();
-  const [resultView, setResultView] = useState<'curation' | 'list'>(
-    DEV_UI_DEFAULT_RESULT_VIEW
-  );
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+
+  // URL ?houseId= 파싱 (NaN/소수점/음수는 클라이언트에서 차단, 그 외 잘못된 id는 백엔드 응답 에러로 처리)
+  const rawHouseId = searchParams.get('houseId')?.trim() ?? '';
+  const candidate = Number(rawHouseId);
+  const parsedImageId =
+    rawHouseId !== '' && Number.isInteger(candidate) && candidate > 0
+      ? candidate
+      : null;
+
+  // URL ?viewType= 파싱 —> CurationResult/ListResult 분기 기준으로 사용
+  // /meta 응답에 viewType이 없어서 새로고침이나 직접 URL 진입에도 분기를 유지하려면 URL에 viewType이 명시되어 있어야 함
+  // viewType이 'LIST'일 때만 ListResult로 분기, 그 외(없음/알 수 없는 값)는 모두 CurationResult로 fallback
+  const rawViewType = searchParams.get('viewType');
+  const isListView = rawViewType === 'LIST';
+
+  // LoadingPage/마이페이지에서 navigate state로 전달한 데이터 (새로고침 시 손실 → /meta로 fallback)
+  // imageUrl/isMirror는 /meta 응답에 포함되므로 state 손실 시 자동 보충 가능
+  const locationState = location.state as {
+    imageUrl?: string;
+    isMirror?: boolean;
+  } | null;
+  const stateImageUrl = locationState?.imageUrl;
+  const stateIsMirror = locationState?.isMirror;
+
+  // state.imageUrl이 비어있는 경우(null/빈 문자열)도 누락으로 간주 -> /meta로 fallback
+  const hasStateImageUrl =
+    typeof stateImageUrl === 'string' && stateImageUrl.trim() !== '';
+  const hasStateIsMirror = typeof stateIsMirror === 'boolean';
+
+  // /meta API 호출 — state에 imageUrl/isMirror가 모두 유효하게 들어왔으면 호출 불필요
+  // 둘 중 하나라도 누락되었거나 새로고침으로 state가 손실된 경우에만 fallback으로 호출
+  const needsMetaFallback = !hasStateImageUrl || !hasStateIsMirror;
+  const {
+    data: meta,
+    isPending: isMetaPending,
+    isError: isMetaError,
+  } = useImageMetaQuery(parsedImageId ?? 0, {
+    enabled: parsedImageId !== null && needsMetaFallback,
+  });
+
+  // 잘못된 houseId → HOME으로
+  if (parsedImageId === null) {
+    return <Navigate to={ROUTES.HOME} replace />;
+  }
+
+  // 유효한 state 값 우선, 부재 시 meta 응답으로 보충
+  const resolvedImageUrl = hasStateImageUrl ? stateImageUrl : meta?.imageUrl;
+  const resolvedIsMirror = hasStateIsMirror
+    ? stateIsMirror
+    : (meta?.isMirror ?? false);
+
+  // state도 없고 meta도 아직 로딩 중 → 로딩 UI
+  if (!resolvedImageUrl && isMetaPending) {
+    return (
+      <main className={styles.pageLayout}>
+        <TitleNavBar
+          background="transparent"
+          placement="overContent"
+          onBackClick={() => navigate(-1)}
+        />
+        <Loading />
+      </main>
+    );
+  }
+
+  // state도 없고 meta도 실패 → 에러 UI
+  if (!resolvedImageUrl && isMetaError) {
+    return (
+      <main className={styles.pageLayout}>
+        <TitleNavBar
+          background="transparent"
+          placement="overContent"
+          onBackClick={() => navigate(-1)}
+        />
+        <InlineError message="이미지를 불러올 수 없습니다" />
+      </main>
+    );
+  }
+
+  // 자식 컴포넌트에 전달할 이미지 메타 (자식들은 imageId로 자체 API 호출하여 큐레이션/리스트 데이터 fetch)
+  const image: ResultImageMeta = {
+    imageId: parsedImageId,
+    imageUrl: resolvedImageUrl ?? '',
+    isMirror: resolvedIsMirror,
+  };
 
   return (
     <main className={styles.pageLayout}>
@@ -50,41 +118,11 @@ const ResultPage = () => {
       />
       <div className={styles.content}>
         <div className={styles.resultBody}>
-          {resultView === 'curation' ? (
-            <CurationResult images={MOCK_GENERATE_IMAGES} />
+          {isListView ? (
+            <ListResult image={image} />
           ) : (
-            <ListResult image={MOCK_GENERATE_IMAGES[0]} />
+            <CurationResult images={[image]} />
           )}
-        </div>
-
-        <div
-          className={styles.devViewToggle}
-          role="group"
-          aria-label="개발용 결과 뷰"
-        >
-          <span className={styles.devViewToggleLabel}>
-            (개발) 결과 뷰 — 라우팅 전 임시 전환
-          </span>
-          <div className={styles.devViewToggleButtons}>
-            <button
-              type="button"
-              className={`${styles.devViewToggleBtn} ${
-                resultView === 'curation' ? styles.devViewToggleBtnActive : ''
-              }`}
-              onClick={() => setResultView('curation')}
-            >
-              curation
-            </button>
-            <button
-              type="button"
-              className={`${styles.devViewToggleBtn} ${
-                resultView === 'list' ? styles.devViewToggleBtnActive : ''
-              }`}
-              onClick={() => setResultView('list')}
-            >
-              list
-            </button>
-          </div>
         </div>
       </div>
     </main>

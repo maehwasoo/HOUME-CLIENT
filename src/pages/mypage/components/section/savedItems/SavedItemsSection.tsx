@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { normalizeColorHexes } from '@pages/generate/pages/result/curationSection/curationProducts';
 import { useGetJjymListQuery } from '@pages/mypage/apis/queries/useGetJjymListQuery';
 import { logMyPageClickBtnFurnitureCard } from '@pages/mypage/utils/analytics';
 
 import { useJjymMutation } from '@apis/mutations/useJjymMutation';
 
 import { SESSION_STORAGE_KEYS } from '@constants/bottomSheet';
+
+import { normalizeColorHexes } from '@utils/normalizeColorHexes';
 
 import ProductCard from '@/shared/components/v2/productCard/ProductCard';
 

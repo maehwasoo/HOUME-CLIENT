@@ -82,6 +82,8 @@ export const queryKeys = {
     all: ['generate'] as const,
     stack: (page: number) =>
       [...queryKeys.generate.all, 'stack', page] as const,
+    meta: (imageId: number) =>
+      [...queryKeys.generate.all, 'meta', imageId] as const,
     result: (houseId: number) =>
       [...queryKeys.generate.all, 'result', houseId] as const,
     fallback: (houseId: number) =>

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import type { GenerateImageData } from '@pages/generate/types/generate';
 import { useCurationCategoriesQuery } from '@pages/generate/v2/apis/queries/useCurationCategoriesQuery';
 import { useCurationProductsQuery } from '@pages/generate/v2/apis/queries/useCurationProductsQuery';
 
@@ -14,8 +13,10 @@ import * as styles from './CurationResult.css';
 import ImgFeedback from './feedbackSection/ImgFeedback';
 import GeneratedImg from './imgSection/GeneratedImg';
 
+import type { ResultImageMeta } from '../../types';
+
 export interface CurationResultProps {
-  images: GenerateImageData[];
+  images: ResultImageMeta[];
   onCurrentImgIdChange?: (imageId: number) => void;
   groupId?: number | null;
 }

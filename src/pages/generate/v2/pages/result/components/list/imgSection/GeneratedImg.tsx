@@ -1,10 +1,10 @@
-import type { GenerateImageData } from '@pages/generate/types/generate';
-
 import * as styles from './GeneratedImg.css';
+
+import type { ResultImageMeta } from '../../../types';
 
 export interface GeneratedImgListProps {
   /** 단일 생성 이미지 */
-  image: GenerateImageData;
+  image: ResultImageMeta;
 }
 
 /**

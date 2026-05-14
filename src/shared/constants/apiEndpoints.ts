@@ -51,6 +51,7 @@ export const API_ENDPOINT = {
       `/api/v1/generated-images/list-result/${imageId}/items`,
     IMAGE_BANNER: '/api/v1/generated-images/generate/banner', // 경로2 배너 진입 이미지 생성
     IMAGE_OTHER_STYLE: '/api/v1/generated-images/generate/other-style', // 경로4 다른 스타일 진입 이미지 생성
+    IMAGE_META: (imageId: number) => `/api/v1/generated-images/${imageId}/meta`, // 생성 이미지 메타 조회 (imageId/imageUrl/isMirror)
     IMAGE_GENERATION: '/api/v1/generated-images',
     IMAGE_PREFERENCE: (imageId: number) =>
       `/api/v1/generated-images/${imageId}/preference`,

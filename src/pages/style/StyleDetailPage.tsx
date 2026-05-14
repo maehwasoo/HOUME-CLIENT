@@ -18,10 +18,10 @@ import ListCardProduct from '@components/v2/productCard/ListProductCard';
 import StyleCard from '@components/v2/styleCard/StyleCard';
 
 import { setLoginRedirect } from '@utils/loginRedirect';
+import { normalizeColorHexes } from '@utils/normalizeColorHexes';
 
 import { useGetStyleDetailQuery } from './apis/useGetStyleDetailQuery';
 import * as styles from './StyleDetailPage.css';
-import { normalizeColorHexes } from '../generate/pages/result/curationSection/curationProducts';
 
 const StyleDetailPage = () => {
   const { styleId } = useParams();
