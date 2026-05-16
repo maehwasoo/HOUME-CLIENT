@@ -178,7 +178,7 @@ const ProductCard = ({
                   )}
                   {discountPriceText && (
                     <div className={styles.discountRow}>
-                      {discountRateText && (
+                      {discountRateText && discountRateText !== '0%' && (
                         <span className={styles.discountRateText}>
                           {discountRateText}
                         </span>
