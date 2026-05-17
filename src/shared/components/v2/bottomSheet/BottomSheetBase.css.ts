@@ -5,6 +5,8 @@ import { zIndex } from '@styles/tokens/zIndex';
 import { colorVars } from '@styles/tokensV2/color.css';
 import { unitVars } from '@styles/tokensV2/unit.css';
 
+import { SHEET_TRANSITION_EASING, SHEET_TRANSITION_MS } from './constants';
+
 // dim과 바텀시트를 동일한 모바일 프레임 폭으로 맞추기 위한 공통 폭 제한
 const mobileFrame = style({
   width: '100%',
@@ -36,7 +38,7 @@ export const overlay = style([
   },
 ]);
 
-// 실제 바텀시트 콘텐츠를 담는 Vaul drawer의 루트
+// 모바일 프레임 폭으로 panel을 감싸는 컨테이너
 export const content = style([
   mobileFrame,
   {
@@ -59,11 +61,14 @@ export const srOnlyTitle = style({
 });
 
 // 헤더, 본문, 액션 영역을 감싸는 바텀시트 패널 본체
+// transform: open/close 슬라이드 (BottomSheetBase 소유)
+// height: expanded/collapsed/dragging (DragHandleBottomSheet 소유)
 export const panel = style({
   display: 'flex',
   flexDirection: 'column',
   gap: unitVars.unit.gapPadding['200'],
-  transition: 'height 350ms ease-in-out',
+  transition: `transform ${SHEET_TRANSITION_MS}ms ${SHEET_TRANSITION_EASING}, height ${SHEET_TRANSITION_MS}ms ${SHEET_TRANSITION_EASING}`,
+  willChange: 'transform, height',
   borderTopLeftRadius: unitVars.unit.radius['700'],
   borderTopRightRadius: unitVars.unit.radius['700'],
   backgroundColor: colorVars.color.bg.primary,
@@ -71,6 +76,8 @@ export const panel = style({
   width: '100%',
   maxHeight: 'calc(100dvh - 10.4rem)',
   overflow: 'hidden',
+  overscrollBehavior: 'contain',
+  WebkitTapHighlightColor: 'transparent',
 });
 
 // drag handle 타입에서 상단 핸들을 가운데 배치하는 헤더
@@ -78,6 +85,7 @@ export const dragHeader = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  touchAction: 'none',
   padding: unitVars.unit.gapPadding['200'],
   width: '100%',
 });
@@ -90,9 +98,16 @@ export const dragHandleButton = style({
   border: 0,
   borderRadius: unitVars.unit.radius.full,
   backgroundColor: colorVars.color.border.primary,
+  cursor: 'grab',
+  touchAction: 'none',
   padding: 0,
   width: '3.5rem',
   height: '0.4rem',
+  selectors: {
+    '&:active': {
+      cursor: 'grabbing',
+    },
+  },
 });
 
 // close 타입에서 제목과 닫기 버튼을 배치하는 헤더
@@ -101,6 +116,7 @@ export const closeHeader = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'flex-end',
+  touchAction: 'none',
   padding: unitVars.unit.gapPadding['200'],
   width: '100%',
   height: '4.8rem',
@@ -162,11 +178,14 @@ export const body = style({
 
 // contentSlot(바텀시트 내부의 실질적인 contents 영역)이 스크롤되도록 하는 슬롯
 export const contentSlot = style({
+  touchAction: 'pan-y',
   width: '100%',
   minHeight: 0,
   overflow: 'auto',
+  overscrollBehavior: 'contain',
   scrollbarWidth: 'none',
   msOverflowStyle: 'none',
+  WebkitOverflowScrolling: 'touch',
   selectors: {
     '&::-webkit-scrollbar': {
       display: 'none',

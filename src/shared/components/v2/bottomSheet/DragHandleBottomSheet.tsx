@@ -1,8 +1,19 @@
 import type { ReactNode } from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import BottomSheetBase from './BottomSheetBase';
 import * as styles from './BottomSheetBase.css';
+import {
+  DRAG_THRESHOLD_PX,
+  PERSISTENT_EXPAND_RATIO,
+  SHEET_TRANSITION_MS,
+} from './constants';
 
 interface DragHandleBottomSheetProps {
   open: boolean;
@@ -10,11 +21,15 @@ interface DragHandleBottomSheetProps {
   primaryButton: ReactNode;
   secondaryButton?: ReactNode;
   onExpandedChange?: (expanded: boolean) => void;
-  /** 최소 높이 (rem 문자열). 있으면 Persistent(최소높이 존재) 모드, 없으면 Dismissible 모드 */
+  /** 최소 높이 (rem 문자열). 있으면 Persistent 모드, 없으면 Dismissible 모드 */
   collapsedHeight?: string;
-  /** Dismissible 모드에서 바텀시트가 사라질 때 부모에게 알리는 콜백 (부모가 open을 false로 바꿈) */
+  /** Dismissible 모드에서 바텀시트가 닫혀야 할 때 부모에게 알리는 콜백 */
   onDismiss?: () => void;
 }
+
+// 'snapping' = collapsed → expanded snap 중 콘텐츠 자연 높이로 부드럽게 보간하는 단계
+// (px → auto 점프로 인한 디핑 방지)
+type DragPhase = 'idle' | 'dragging' | 'snapping';
 
 const parsePxFromRem = (rem: string): number => {
   const value = parseFloat(rem);
@@ -39,117 +54,186 @@ const DragHandleBottomSheet = ({
   const isPersistent = collapsedHeight !== undefined;
 
   const [expanded, setExpanded] = useState(!isPersistent);
-  const [isDragging, setIsDragging] = useState(false);
+  const [dragPhase, setDragPhase] = useState<DragPhase>('idle');
   const [dragHeight, setDragHeight] = useState<number | null>(null);
 
-  const panelRef = useRef<HTMLDivElement>(null);
-  const dragStartYRef = useRef(0);
+  // BottomSheetBase가 mount하는 panel DOM (PointerDown 시 측정용)
+  const panelNodeRef = useRef<HTMLDivElement | null>(null);
+
+  const startYRef = useRef(0);
   const startHeightRef = useRef(0);
+  const currentHeightRef = useRef(0);
   const collapsedPxRef = useRef(0);
   const expandedPxRef = useRef(0);
+  const draggedRef = useRef(false);
+  const finishedRef = useRef(false);
+  const pointerIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     onExpandedChange?.(expanded);
   }, [expanded, onExpandedChange]);
 
+  // snapping phase: collapsed → expanded snap 시 콘텐츠 자연 높이 측정 + transition으로 보간
+  useLayoutEffect(() => {
+    if (dragPhase !== 'snapping') return undefined;
+    const panel = panelNodeRef.current;
+    if (!panel) return undefined;
+
+    // panel.style.height를 잠깐 auto로 두고 콘텐츠 자연 높이 측정 후 복원
+    // useLayoutEffect는 paint 전 동기 실행이라 깜빡임 발생 X
+    const prevHeight = panel.style.height;
+    panel.style.height = 'auto';
+    const naturalH = panel.offsetHeight;
+    panel.style.height = prevHeight;
+
+    // 측정값으로 transition (현재 dragHeight → naturalH로 부드럽게 보간)
+    setDragHeight(naturalH);
+
+    // transition 종료 후 idle + height auto로 정리 (naturalH ≈ auto라 점프 없음)
+    const timer = window.setTimeout(() => {
+      setDragHeight(null);
+      setDragPhase('idle');
+    }, SHEET_TRANSITION_MS + 50);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [dragPhase]);
+
   const handlePointerDown = useCallback(
-    (e: React.PointerEvent) => {
-      const panel = panelRef.current;
+    (e: React.PointerEvent<HTMLButtonElement>) => {
+      const panel = panelNodeRef.current;
       if (!panel) return;
 
-      // vaul의 자체 drag 핸들러(Drawer.Content data-vaul-drawer)와 충돌해 panel transform이 적용되며
-      // 튕기는 애니메이션이 발생 -> 자체 drag만 수행하도록 propagation 차단.
-      // 튕김 해결에 효과가 없음...
       e.stopPropagation();
 
-      // ref만 기록. setIsDragging/setDragHeight는 PointerMove에서 임계값(5px) 넘은 후 호출
-      // (단순 터치만 했을 때 panel 인라인이 변경되어 바텀시트가 튕기는 문제 해결)
-      dragStartYRef.current = e.clientY;
-      startHeightRef.current = panel.offsetHeight;
-      collapsedPxRef.current = isPersistent
-        ? parsePxFromRem(collapsedHeight)
+      const collapsedPx = isPersistent
+        ? parsePxFromRem(collapsedHeight as string)
         : 0;
-      expandedPxRef.current = resolveExpandedPx();
+      const expandedPx = resolveExpandedPx();
+      const startHeight = panel.offsetHeight;
 
-      (e.target as HTMLElement).setPointerCapture(e.pointerId);
+      startYRef.current = e.clientY;
+      startHeightRef.current = startHeight;
+      currentHeightRef.current = startHeight;
+      collapsedPxRef.current = collapsedPx;
+      expandedPxRef.current = expandedPx;
+      pointerIdRef.current = e.pointerId;
+      draggedRef.current = false;
+      finishedRef.current = false;
+
+      e.currentTarget.setPointerCapture(e.pointerId);
     },
     [isPersistent, collapsedHeight]
   );
 
   const handlePointerMove = useCallback(
-    (e: React.PointerEvent) => {
-      // dragStartYRef가 set되지 않았으면 PointerDown 거치지 않은 이벤트
-      if (!e.currentTarget.hasPointerCapture(e.pointerId)) return;
+    (e: React.PointerEvent<HTMLButtonElement>) => {
+      if (pointerIdRef.current !== e.pointerId) return;
+      if (finishedRef.current) return;
 
-      const delta = dragStartYRef.current - e.clientY;
+      // 위로 끌면 양수 (height 증가 방향)
+      const delta = startYRef.current - e.clientY;
 
-      // drag 시작 임계값(5px) — 단순 터치/탭은 무시
-      if (!isDragging) {
-        if (Math.abs(delta) < 5) return;
-        setIsDragging(true);
+      if (!draggedRef.current) {
+        if (Math.abs(delta) < DRAG_THRESHOLD_PX) return;
+        draggedRef.current = true;
+        setDragPhase('dragging');
       }
 
-      const newHeight = startHeightRef.current + delta;
-      const clamped = Math.max(
-        collapsedPxRef.current,
-        Math.min(expandedPxRef.current, newHeight)
+      const collapsedPx = collapsedPxRef.current;
+      const expandedPx = expandedPxRef.current;
+      const minH = isPersistent ? collapsedPx : 0;
+      const next = Math.max(
+        minH,
+        Math.min(expandedPx, startHeightRef.current + delta)
       );
-      setDragHeight(clamped);
+
+      currentHeightRef.current = next;
+      setDragHeight(next);
     },
-    [isDragging]
+    [isPersistent]
   );
 
-  const handlePointerUp = useCallback(
-    (e: React.PointerEvent) => {
-      const target = e.target as HTMLElement;
+  const finishDrag = useCallback(
+    (e: React.PointerEvent<HTMLButtonElement>) => {
+      if (finishedRef.current) return;
+      finishedRef.current = true;
+
+      const target = e.currentTarget;
       if (target.hasPointerCapture(e.pointerId)) {
         target.releasePointerCapture(e.pointerId);
       }
+      pointerIdRef.current = null;
 
-      // 단순 터치(임계값 미만)는 drag 시작 X — 추가 작업 없이 종료
-      if (!isDragging || dragHeight == null) return;
+      // 단순 탭 (임계 미통과)
+      if (!draggedRef.current) {
+        setDragPhase('idle');
+        return;
+      }
 
-      setIsDragging(false);
+      // pointercancel: 원위치 복귀
+      if (e.type === 'pointercancel') {
+        currentHeightRef.current = startHeightRef.current;
+        setDragHeight(null);
+        setDragPhase('idle');
+        return;
+      }
+
+      const h = currentHeightRef.current;
+      const collapsedPx = collapsedPxRef.current;
+      const expandedPx = expandedPxRef.current;
 
       if (isPersistent) {
-        // Persistent: 절반 기준으로 expand/collapse 토글
-        const midPoint = (collapsedPxRef.current + expandedPxRef.current) / 2;
-        setExpanded(dragHeight > midPoint);
+        // collapsed~expanded 구간의 20% 지점만 넘으면 expanded snap
+        const threshold =
+          collapsedPx + (expandedPx - collapsedPx) * PERSISTENT_EXPAND_RATIO;
+        const shouldExpand = h > threshold;
+
+        if (shouldExpand && !expanded) {
+          // collapsed → expanded: 콘텐츠 자연 높이로 부드럽게 보간 (snapping phase)
+          // dragHeight 유지, useLayoutEffect에서 naturalH 측정 후 transition
+          setExpanded(true);
+          setDragPhase('snapping');
+          return;
+        }
+
+        // 그 외(이미 expanded → expanded 유지 / expanded → collapsed / collapsed 유지):
+        // height: dragHeight → collapsedHeight 또는 auto 점프 (점프 시각상 미미)
+        setExpanded(shouldExpand);
       } else {
-        // Dismissible: 절반 이하면 dismiss, 이상이면 snap back
-        const midPoint = expandedPxRef.current / 2;
-        if (dragHeight > midPoint) {
+        const midPoint = expandedPx / 2;
+        if (h > midPoint) {
           setExpanded(true);
         } else {
           onDismiss?.();
         }
       }
+
       setDragHeight(null);
+      setDragPhase('idle');
     },
-    [isDragging, dragHeight, isPersistent, onDismiss]
+    [isPersistent, onDismiss, expanded]
   );
 
-  const getDimOpacity = (): number => {
+  const computeDimOpacity = (): number => {
+    if (dragPhase !== 'dragging' || dragHeight === null) {
+      return isPersistent ? (expanded ? 1 : 0) : 1;
+    }
     if (isPersistent) {
-      // Persistent: collapsed(0) ~ expanded(1) 사이를 선형 보간
-      if (!isDragging || dragHeight == null) return expanded ? 1 : 0;
-
       const range = expandedPxRef.current - collapsedPxRef.current;
       if (range <= 0) return 0;
-
       const progress = (dragHeight - collapsedPxRef.current) / range;
       return Math.max(0, Math.min(1, progress));
     }
-
-    // Dismissible: 항상 dim 표시, 드래그 중에는 높이에 비례
-    if (!isDragging || dragHeight == null) return 1;
-
-    const progress = dragHeight / expandedPxRef.current;
-    return Math.max(0, Math.min(1, progress));
+    const expandedPx = expandedPxRef.current;
+    if (expandedPx <= 0) return 0;
+    return Math.max(0, Math.min(1, dragHeight / expandedPx));
   };
 
+  // panel height 결정
   const panelStyle: React.CSSProperties =
-    isDragging && dragHeight != null
+    dragPhase === 'dragging' && dragHeight !== null
       ? { height: `${dragHeight}px` }
       : isPersistent
         ? { height: expanded ? 'auto' : collapsedHeight }
@@ -170,13 +254,14 @@ const DragHandleBottomSheet = ({
       contentSlot={contentSlot}
       primaryButton={primaryButton}
       secondaryButton={secondaryButton}
-      panelRef={panelRef}
+      panelRef={panelNodeRef}
       panelStyle={panelStyle}
-      dimOpacity={getDimOpacity()}
-      disableTransition={isDragging}
+      disableTransition={dragPhase === 'dragging'}
       onOverlayClick={handleOverlayClick}
-      // Persistent collapsed 상태에서만 뒷배경 터치·스크롤 가능
-      backgroundInteractable={isPersistent && !expanded && !isDragging}
+      backgroundInteractable={
+        isPersistent && !expanded && dragPhase !== 'dragging'
+      }
+      dimOpacity={computeDimOpacity()}
       preventScroll={!isPersistent || expanded}
       handleSlot={
         <button
@@ -185,7 +270,9 @@ const DragHandleBottomSheet = ({
           className={styles.dragHandleButton}
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
+          onPointerUp={finishDrag}
+          onPointerCancel={finishDrag}
+          onLostPointerCapture={finishDrag}
         />
       }
     />
