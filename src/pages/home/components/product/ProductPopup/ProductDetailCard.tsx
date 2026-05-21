@@ -31,6 +31,10 @@ const ProductDetailCard = ({
     getPriceTexts(price?.original, price?.discount, price?.discountRate);
 
   const linkHref = linkHrefOverride ?? link?.href;
+  const hasDiscount =
+    typeof price?.discountRate === 'number' &&
+    Number.isFinite(price.discountRate) &&
+    price.discountRate > 0;
 
   return (
     <div className={styles.popupPreviewCard}>
@@ -103,17 +107,17 @@ const ProductDetailCard = ({
         <p className={styles.popupPreviewTitle}>{product.title}</p>
         {(originalPriceText || discountPriceText) && (
           <div className={styles.popupPreviewPriceSection}>
-            {originalPriceText && (
+            {hasDiscount && originalPriceText ? (
               <p className={styles.popupPreviewOriginalPrice}>
                 {originalPriceText}
               </p>
-            )}
+            ) : null}
             <div className={styles.popupPreviewDiscountRow}>
-              {discountRateText && (
+              {hasDiscount && discountRateText ? (
                 <span className={styles.popupPreviewDiscountRate}>
                   {discountRateText}
                 </span>
-              )}
+              ) : null}
               {discountPriceText && (
                 <span className={styles.popupPreviewDiscountPrice}>
                   {discountPriceText}

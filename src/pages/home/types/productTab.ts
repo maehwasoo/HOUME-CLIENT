@@ -8,7 +8,7 @@ export interface AppliedFilterChip {
 }
 
 export interface SelectedProduct {
-  id: string;
+  id: number;
   title: string;
   brand: string;
   imageUrl?: string;

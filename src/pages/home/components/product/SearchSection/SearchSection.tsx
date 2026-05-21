@@ -31,7 +31,7 @@ interface SearchSectionProps {
     category: ProductFilterChipCategory,
     id: string
   ) => void;
-  selectedProductIds: string[];
+  selectedProductIds: number[];
   onSelectProduct: (product: SelectedProduct) => void;
   productListQueryParams: ProductListQueryVariables;
 }
@@ -146,7 +146,6 @@ const SearchSection = ({
         {products.map(
           ({
             id,
-            detailProductId,
             title,
             brand,
             imageUrl,
@@ -190,8 +189,6 @@ const SearchSection = ({
                 }),
             };
 
-            const canOpenProductDetail = Number.isFinite(detailProductId);
-
             return (
               <ProductCard
                 key={id}
@@ -201,23 +198,19 @@ const SearchSection = ({
                 save={cardSave}
                 link={cardLink}
                 shoppingAction={cardShoppingAction}
-                {...(canOpenProductDetail
-                  ? {
-                      onShoppingViewDetailClick: () => {
-                        overlay.open(({ unmount }) => (
-                          <ProductDetailOverlay
-                            unmount={unmount}
-                            detailProductId={detailProductId}
-                            link={cardLink}
-                            price={cardPrice}
-                            product={cardProduct}
-                            save={cardSave}
-                            shoppingAction={cardShoppingAction}
-                          />
-                        ));
-                      },
-                    }
-                  : {})}
+                onShoppingViewDetailClick={() => {
+                  overlay.open(({ unmount }) => (
+                    <ProductDetailOverlay
+                      unmount={unmount}
+                      id={id}
+                      link={cardLink}
+                      price={cardPrice}
+                      product={cardProduct}
+                      save={cardSave}
+                      shoppingAction={cardShoppingAction}
+                    />
+                  ));
+                }}
               />
             );
           }

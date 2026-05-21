@@ -37,8 +37,8 @@ export const queryKeys = {
     productFilters: () => [...queryKeys.product.all, 'productFilters'] as const,
     productList: (params: Omit<ProductListQueryVariables, 'cursor'>) =>
       [...queryKeys.product.all, 'productList', params] as const,
-    productDetail: (productId: number) =>
-      [...queryKeys.product.all, 'productDetail', productId] as const,
+    productDetail: (id: number) =>
+      [...queryKeys.product.all, 'productDetail', id] as const,
   },
 
   // 배너

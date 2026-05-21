@@ -3,8 +3,12 @@ import { useEffect, useState } from 'react';
 import { useCurationCategoriesQuery } from '@pages/generate/v2/apis/queries/useCurationCategoriesQuery';
 import { useCurationProductsQuery } from '@pages/generate/v2/apis/queries/useCurationProductsQuery';
 
+import { useSavedItemsStore } from '@store/useSavedItemsStore';
+
 import Chip from '@shared/components/v2/chip/Chip';
 import ProductCard from '@shared/components/v2/productCard/ProductCard';
+
+import { useJjymMutation } from '@apis/mutations/useJjymMutation';
 
 import InlineError from '@components/inlineError/InlineError';
 import Loading from '@components/loading/Loading';
@@ -60,6 +64,8 @@ const CurationResult = ({
   } = useCurationProductsQuery(currentImageId, selectedCategoryId ?? 0);
   const products = productsData?.products ?? [];
   const categories = categoriesData?.categories ?? [];
+  const { mutate: toggleJjym } = useJjymMutation();
+  const savedProductIds = useSavedItemsStore((s) => s.savedProductIds);
 
   const showCategoriesEmptyUnexpected =
     !isCategoriesLoading && !isCategoriesError && categories.length === 0;
@@ -153,10 +159,13 @@ const CurationResult = ({
               {!isProductsLoading &&
               !isProductsError &&
               !showProductsEmptyUnexpected
-                ? products.map((wrapper, index) => {
+                ? products.map((wrapper) => {
                     const p = wrapper.product;
                     if (p == null) return null;
-                    const key = p.id ?? p.productId ?? `product-${index}`;
+                    const href = p.linkUrl ?? '';
+                    const rawProductId = p.id;
+                    if (rawProductId == null) return null;
+                    const key = rawProductId;
                     return (
                       <ProductCard
                         key={key}
@@ -174,14 +183,15 @@ const CurationResult = ({
                           discountRate: p.discountRate,
                         }}
                         save={{
-                          isSaved: Boolean(p.isLiked),
-                          onToggle: () => {},
+                          isSaved: savedProductIds.has(rawProductId),
+                          onToggle: () => toggleJjym(rawProductId),
                         }}
                         link={{
-                          href: p.linkUrl ?? '',
-                          onClick: () => {},
+                          href,
+                          onClick: () =>
+                            href &&
+                            window.open(href, '_blank', 'noopener,noreferrer'),
                         }}
-                        enableWholeCardLink={Boolean(p.linkUrl)}
                       />
                     );
                   })

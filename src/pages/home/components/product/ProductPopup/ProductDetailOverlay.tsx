@@ -2,6 +2,8 @@ import { useMemo } from 'react';
 
 import { useProductDetailQuery } from '@pages/home/apis/queries/useProductDetailQuery';
 
+import { useSavedItemsStore } from '@store/useSavedItemsStore';
+
 import type { ProductColorDetail } from '@shared/apis/__generated__/data-contracts';
 import Popup from '@shared/components/v2/popup/Popup';
 import type {
@@ -11,11 +13,13 @@ import type {
   SaveInfo,
 } from '@shared/types/productCard';
 
+import { useJjymMutation } from '@apis/mutations/useJjymMutation';
+
 import ProductDetailCard from './ProductDetailCard';
 
 interface ProductDetailOverlayProps {
   unmount: () => void;
-  detailProductId: number;
+  id: number;
   product: ProductInfo;
   price?: PriceInfo;
   save: SaveInfo;
@@ -29,15 +33,17 @@ interface ProductDetailOverlayProps {
 
 const ProductDetailOverlay = ({
   unmount,
-  detailProductId,
+  id,
   product: listProduct,
   price: listPrice,
   save,
   link,
   shoppingAction,
 }: ProductDetailOverlayProps) => {
-  const { data } = useProductDetailQuery(detailProductId);
+  const { data } = useProductDetailQuery(id);
   const detail = data?.product;
+  const { mutate: toggleJjym } = useJjymMutation();
+  const savedProductIds = useSavedItemsStore((s) => s.savedProductIds);
 
   const merged = useMemo(() => {
     const detailColorHexes =
@@ -63,10 +69,21 @@ const ProductDetailOverlay = ({
 
     const linkHrefOverride = detail?.linkUrl ?? link?.href;
 
-    return { product, price, linkHrefOverride };
-  }, [detail, link?.href, listPrice, listProduct]);
+    const saveCount =
+      detail != null
+        ? detail.jjymCount
+        : save.count != null && save.count > 0
+          ? save.count
+          : undefined;
 
-  const isSaved = detail?.isLiked ?? save.isSaved;
+    return { product, price, linkHrefOverride, saveCount };
+  }, [detail, link?.href, listPrice, listProduct, save.count]);
+
+  const isSaved = savedProductIds.has(id);
+
+  const handleSaveToggle = () => {
+    toggleJjym(id);
+  };
 
   return (
     <Popup
@@ -74,18 +91,18 @@ const ProductDetailOverlay = ({
       btnText={shoppingAction?.label ?? '선택'}
       confirmDisabled={shoppingAction?.disabled}
       onClose={unmount}
-      onCancel={save.onToggle}
+      onCancel={handleSaveToggle}
       onConfirm={() => {
         shoppingAction?.onClick();
         unmount();
       }}
       showCloseButton
-      sideIconName={isSaved ? 'HeartFillGray' : 'HeartStrokeGray'}
+      sideIconName={isSaved ? 'HeartFillColor' : 'HeartStrokeGray'}
       content={
         <ProductDetailCard
           product={merged.product}
           price={merged.price}
-          saveCount={save.count}
+          saveCount={merged.saveCount}
           link={link}
           linkHrefOverride={merged.linkHrefOverride}
         />

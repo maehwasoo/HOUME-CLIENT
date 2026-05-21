@@ -40,9 +40,16 @@ export const content = style({
 export const chipList = style({
   display: 'flex',
   flexDirection: 'row',
-  flexWrap: 'wrap',
+  flexWrap: 'nowrap',
   gap: unitVars.unit.gapPadding['200'],
   width: '100%',
+  overflowX: 'auto',
+  overflowY: 'hidden',
+  selectors: {
+    '&::-webkit-scrollbar': {
+      display: 'none',
+    },
+  },
 });
 
 export const productList = style({

@@ -11,8 +11,7 @@ import type { ProductListQueryVariables } from '@constants/queryKey';
  * - SearchSection ProductCard 입력 형태를 기준으로 정의한다.
  */
 interface ProductSearchCardItem {
-  id: string;
-  detailProductId: number;
+  id: number;
   title: string;
   brand: string;
   imageUrl: string;
@@ -33,8 +32,7 @@ const toProductSearchCardItems = (
   products
     .filter((product) => product.id != null)
     .map((product) => ({
-      id: String(product.id),
-      detailProductId: product.productId ?? (product.id as number),
+      id: product.id as number,
       title: product.name ?? '',
       brand: product.brand ?? '',
       imageUrl: product.imageUrl ?? '',

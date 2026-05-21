@@ -507,6 +507,11 @@ export interface SoozipRawProductSaveResponse {
   skippedCount?: number;
 }
 
+export interface AdminCurationRawProductColorRequest {
+  rawColorName?: string;
+  clientColorName?: string;
+}
+
 export interface AdminCurationRawProductCreateRequest {
   /** @pattern ^[a-zA-Z0-9][a-zA-Z0-9_-]{0,49}$ */
   source: string;
@@ -541,6 +546,7 @@ export interface AdminCurationRawProductCreateRequest {
   isExposed?: boolean;
   /** @format date-time */
   fetchedAt?: string;
+  colors?: AdminCurationRawProductColorRequest[];
 }
 
 export interface AdminCurationRawProductColorResponse {
@@ -862,6 +868,7 @@ export interface AdminCurationRawProductUpdateRequest {
   isExposed?: boolean;
   /** @format date-time */
   fetchedAt?: string;
+  colors?: AdminCurationRawProductColorRequest[];
 }
 
 export interface AdminCurationRawProductFurnitureTagUpdateRequest {
@@ -1619,6 +1626,8 @@ export interface ProductDetail {
   linkUrl?: string;
   colors?: ProductColorDetail[];
   isLiked?: boolean;
+  /** @format int64 */
+  jjymCount?: number;
 }
 
 export interface ApiResponseCurationProductFilterResponse {

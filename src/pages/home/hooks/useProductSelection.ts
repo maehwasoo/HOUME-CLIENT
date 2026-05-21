@@ -54,10 +54,8 @@ const useProductSelection = () => {
   );
 
   /** 선택된 상품 1개 제거 */
-  const handleRemoveSelectedProduct = useCallback((productId: string) => {
-    setSelectedProducts((prev) =>
-      prev.filter((product) => product.id !== productId)
-    );
+  const handleRemoveSelectedProduct = useCallback((id: number) => {
+    setSelectedProducts((prev) => prev.filter((product) => product.id !== id));
   }, []);
 
   /** "꾸미기" CTA 클릭 시 최소 1개 선택 검증 */

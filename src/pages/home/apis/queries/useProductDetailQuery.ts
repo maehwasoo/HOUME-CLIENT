@@ -8,23 +8,23 @@ import { API_ENDPOINT } from '@constants/apiEndpoints';
 import { queryKeys } from '@constants/queryKey';
 
 export const getProductDetail = async (
-  productId: number
+  id: number
 ): Promise<CurationProductDetailResponse> => {
   return request<CurationProductDetailResponse>({
     method: HTTPMethod.GET,
-    url: API_ENDPOINT.PRODUCT.DETAIL(productId),
+    url: API_ENDPOINT.PRODUCT.DETAIL(id),
   });
 };
 
 export const useProductDetailQuery = (
-  productId: number,
+  id: number,
   options?: { enabled?: boolean }
 ) => {
   const enabled = options?.enabled ?? true;
 
   return useQuery({
-    queryKey: queryKeys.product.productDetail(productId),
-    queryFn: () => getProductDetail(productId),
+    queryKey: queryKeys.product.productDetail(id),
+    queryFn: () => getProductDetail(id),
     enabled,
     staleTime: 1000 * 60,
     gcTime: 1000 * 60 * 10,

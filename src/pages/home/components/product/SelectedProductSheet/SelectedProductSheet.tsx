@@ -6,7 +6,7 @@ import Icon from '@shared/components/v2/icon/Icon';
 import * as styles from './SelectedProductSheet.css';
 
 interface SelectedProductItem {
-  id: string;
+  id: number;
   title: string;
   imageUrl?: string;
   originalPrice: number;
@@ -17,7 +17,7 @@ interface SelectedProductItem {
 interface SelectedProductSheetProps {
   expanded: boolean;
   selectedProducts: SelectedProductItem[];
-  onRemoveProduct: (productId: string) => void;
+  onRemoveProduct: (id: number) => void;
   maxCount?: number;
 }
 
@@ -34,8 +34,8 @@ const SelectedProductSheet = ({
   const formatPrice = (price: number) => price.toLocaleString('ko-KR');
 
   const handleRemoveProductClick = useCallback(
-    (productId: string) => {
-      onRemoveProduct(productId);
+    (id: number) => {
+      onRemoveProduct(id);
     },
     [onRemoveProduct]
   );
