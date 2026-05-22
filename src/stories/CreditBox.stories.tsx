@@ -1,8 +1,8 @@
 import { ToastContainer } from 'react-toastify';
 
-import { toastConfig } from '@shared/types/toast';
-
 import CreditBox from '@components/creditBox/CreditBox';
+
+import { toastConfig } from '@/shared/types/toastLegacy';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 

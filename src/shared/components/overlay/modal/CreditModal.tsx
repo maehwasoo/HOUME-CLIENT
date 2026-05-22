@@ -4,7 +4,7 @@ import { useMyPageUserQuery } from '@pages/mypage/apis/queries/useMyPageUserQuer
 
 import { useUserStore } from '@store/useUserStore';
 
-import { TOAST_TYPE } from '@shared/types/toast';
+import { TOAST_TYPE } from '@shared/types/toastLegacy';
 
 import CreditIcon from '@assets/icons/modalCoin.png';
 

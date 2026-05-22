@@ -8,9 +8,10 @@ import { ROUTES } from '@routes/paths';
 
 import type { ErrorType, PageContext } from '@shared/types/error';
 import { ERROR_MESSAGES } from '@shared/types/error';
-import { TOAST_TYPE } from '@shared/types/toast';
 
 import { useToast } from '@components/toast/useToast';
+
+import { TOAST_TYPE } from '@/shared/types/toastLegacy';
 
 /**
  * 중앙화된 에러 핸들러 훅

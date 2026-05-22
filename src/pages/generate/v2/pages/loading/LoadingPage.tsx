@@ -13,8 +13,6 @@ import { ROUTES } from '@routes/paths';
 
 import { RESULT_TYPE, useImageFlowStore } from '@store/useImageFlowStore';
 
-import { TOAST_TYPE } from '@shared/types/toast';
-
 import TestImg from '@assets/v2/images/TestImg.png';
 
 import FeatureErrorFallback from '@components/errorFallback/FeatureErrorFallback';
@@ -22,6 +20,8 @@ import Loading from '@components/loading/Loading';
 import { useToast } from '@components/toast/useToast';
 
 import { useErrorHandler } from '@hooks/useErrorHandler';
+
+import { TOAST_TYPE } from '@/shared/types/toastLegacy';
 
 import { useGenerateImageRequest } from './hooks/useGenerateImageRequest';
 import * as styles from './LoadingPage.css';

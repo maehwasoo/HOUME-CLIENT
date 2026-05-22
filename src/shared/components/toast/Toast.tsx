@@ -2,9 +2,9 @@ import type { JSX } from 'react';
 
 import { type ToastContentProps } from 'react-toastify';
 
-import { TOAST_TYPE, type ToastType } from '@shared/types/toast';
-
 import WarningIcon from '@assets/icn_warning_toast.svg?react';
+
+import { TOAST_TYPE, type ToastType } from '@/shared/types/toastLegacy';
 
 import * as styles from './Toast.css';
 

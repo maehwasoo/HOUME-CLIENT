@@ -14,13 +14,12 @@ import {
 
 import { ROUTES } from '@routes/paths';
 
-import { TOAST_TYPE } from '@shared/types/toast';
-
 import GeneralModal from '@components/overlay/modal/GeneralModal';
 import { useToast } from '@components/toast/useToast';
 import TitleNavBar from '@components/v2/navBar/TitleNavBar';
 
 import TextButton from '@/shared/components/v2/btnText/TextButton';
+import { TOAST_TYPE } from '@/shared/types/toastLegacy';
 
 import * as styles from './SettingPage.css';
 

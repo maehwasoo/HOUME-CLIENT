@@ -11,7 +11,7 @@ import { useToast } from '@components/toast/useToast';
 
 import { API_ENDPOINT } from '@constants/apiEndpoints';
 
-import { TOAST_TYPE } from '@/shared/types/toast';
+import { TOAST_TYPE } from '@/shared/types/toastLegacy';
 import { invalidateJjymRelatedQueries } from '@/shared/utils/invalidateJjymQueries';
 
 import type { AxiosError } from 'axios';

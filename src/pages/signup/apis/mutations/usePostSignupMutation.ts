@@ -5,8 +5,6 @@ import { ROUTES } from '@routes/paths';
 
 import { useUserStore } from '@store/useUserStore';
 
-import { TOAST_TYPE } from '@shared/types/toast';
-
 import type { SocialSignUpV2Request } from '@apis/__generated__/data-contracts';
 import { HTTPMethod, request } from '@apis/config/request';
 
@@ -16,6 +14,8 @@ import { API_ENDPOINT } from '@constants/apiEndpoints';
 import { RESPONSE_MESSAGE, HTTP_STATUS } from '@constants/response';
 
 import { consumeLoginRedirect } from '@utils/loginRedirect';
+
+import { TOAST_TYPE } from '@/shared/types/toastLegacy';
 
 import type { SignupResponse } from '../../types/apis/signup';
 

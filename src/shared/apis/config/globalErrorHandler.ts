@@ -4,9 +4,9 @@ import { toast } from 'react-toastify';
 
 import { ROUTES } from '@routes/paths';
 
-import { TOAST_TYPE, toastStyle } from '@shared/types/toast';
-
 import Toast from '@components/toast/Toast';
+
+import { TOAST_TYPE, toastStyle } from '@/shared/types/toastLegacy';
 
 // React 외부 toast 유틸 (훅을 쓸 수 없는 모듈 스코프에서 사용)
 const showGlobalToast = (text: string) => {

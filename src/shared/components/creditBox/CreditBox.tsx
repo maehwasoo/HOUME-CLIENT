@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 
-import { TOAST_TYPE } from '@shared/types/toast';
-
 import ChargeButton from '@components/button/chargeButton/ChargeButton';
+
+import { TOAST_TYPE } from '@/shared/types/toastLegacy';
 
 import * as styles from './CreditBox.css';
 import { useToast } from '../toast/useToast';

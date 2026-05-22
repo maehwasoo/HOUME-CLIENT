@@ -2,9 +2,9 @@ import { useCallback, useState } from 'react';
 
 import { useMyPageUserQuery } from '@pages/mypage/apis/queries/useMyPageUserQuery';
 
-import { useToast } from '@components/toast/useToast';
+import { TOAST_TYPE } from '@shared/types/toastLegacy';
 
-import { TOAST_TYPE } from '../types/toast';
+import { useToast } from '@components/toast/useToast';
 
 interface CreditGuardReturn {
   checkCredit: () => Promise<boolean>;

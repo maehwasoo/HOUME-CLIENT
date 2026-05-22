@@ -2,9 +2,9 @@ import { useState } from 'react';
 
 import { useMyPageUserQuery } from '@pages/mypage/apis/queries/useMyPageUserQuery';
 
-import { TOAST_TYPE } from '@shared/types/toast';
-
 import { useToast } from '@components/toast/useToast';
+
+import { TOAST_TYPE } from '@/shared/types/toastLegacy';
 
 export const useCreditCheck = () => {
   const { notify } = useToast();
