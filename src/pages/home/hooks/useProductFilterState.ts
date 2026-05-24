@@ -141,6 +141,11 @@ const useProductFilterState = () => {
     setDraftValues(toDraftFromExternal(appliedValues, allIds));
   }, [allIds, appliedValues]);
 
+  /** 적용된 모든 필터를 비움(섹션별 ALL로 복귀) — 외부로부터 상품 탭에 진입(ResultPage에서 상품 재선택 버튼을 눌러 상품 탭에 진입하는 등)할 때 필터 칩 전부 해제 용도 */
+  const clearAllFilters = useCallback(() => {
+    setAppliedValues(INITIAL_FILTER_VALUES);
+  }, []);
+
   /** 시트 내부 값만 초기화(섹션별 전체 선택으로 복원) */
   const resetDraft = useCallback(() => {
     setDraftValues({
@@ -238,6 +243,7 @@ const useProductFilterState = () => {
     appliedValues,
     syncDraftFromApplied,
     resetDraft,
+    clearAllFilters,
     toggleDraftChip,
     applyDraft,
     removeAppliedChip,

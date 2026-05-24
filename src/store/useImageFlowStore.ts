@@ -11,12 +11,34 @@ export const ENTRY_ROUTE = {
 
 export type EntryRoute = (typeof ENTRY_ROUTE)[keyof typeof ENTRY_ROUTE];
 
+// 서버 응답 viewType과 enum 값 통일
+// +) 서버 응답의 'LEGACY'는 enum에서 제외 (LEGACY는 isCurationViewType 헬퍼에서 추천형으로 처리)
 export const RESULT_TYPE = {
-  RECOMMENDATION: 'RECOMMENDATION',
-  LIST: 'LIST',
+  BANNER: 'BANNER',
+  FULL_FUNNEL: 'FULL_FUNNEL',
+  STYLE: 'STYLE',
+  PRODUCT: 'PRODUCT',
 } as const;
 
 export type ResultType = (typeof RESULT_TYPE)[keyof typeof RESULT_TYPE];
+
+// viewType이 추천형인지 판단하는 헬퍼
+export const isCurationViewType = (viewType: string | null | undefined) =>
+  viewType !== RESULT_TYPE.BANNER &&
+  viewType !== RESULT_TYPE.STYLE &&
+  viewType !== RESULT_TYPE.PRODUCT;
+
+// 경로5(PRODUCT_SELECTION)에서 ProductTab UI 복원에 사용하는 스냅샷
+// productIds는 상품으로 이미지 생성 API payload용, productsToBeRestored는 외부(로그인게이트/ResultPage)로부터 ProductTab에 진입했을 때 사용
+export interface ProductItem {
+  id: number;
+  title: string;
+  brand: string;
+  imageUrl?: string;
+  originalPrice: number;
+  discountPrice: number;
+  discountRate: number;
+}
 
 // 경로별 프리셋 (경로에 따라 preset이 달라짐을 나타내고, 경로별 타입 안정성을 위해 discriminated union 적용)
 // 퍼널 진입 시점에 setFlow()로 저장 → 최종 이미지 생성 API 호출 시 사용
@@ -24,14 +46,19 @@ export type PresetData =
   | { type: 'banner'; bannerId: number; answerId: number } // 경로2
   | { type: 'floorPlan'; floorPlanId: number } // 경로3: 홈에서 도면 선택
   | { type: 'style'; styleId: number } // 경로4
-  | { type: 'product'; productIds: number[] }; // 경로5
+  | {
+      // 경로5(product)는 productIds(API payload) + productsToBeRestored(UI 복원, 로그인 게이트 복귀/재선택 진입 시 ProductTab useState 초기값으로 사용)을 함께 보관
+      // (홈 화면에서 상품 '탭'은 url이 없으므로, 자체 url이 존재하는 banner/style 플로우와 달리 UI 복원을 위해 productsToBeRestored 필드까지 있어야 함)
+      type: 'product';
+      productIds: number[];
+      productsToBeRestored: ProductItem[];
+    }; // 경로5
 
 interface ImageFlowState {
   entryRoute: EntryRoute | null;
   resultType: ResultType | null;
   preset: PresetData | null;
   // 퍼널 진입 시 호출, 진입경로 + 프리셋 세팅 및 resultType 자동 매핑
-  // TODO: API 명세 나오면 entryRoute와 preset 조합을 타입으로 강제 (ex: STYLE_RESTYLE + banner preset 방지)
   setFlow: (params: { entryRoute: EntryRoute; preset?: PresetData }) => void;
   // preset만 선택적으로 비움 (entryRoute/resultType은 ResultPage에서 사용하므로 유지해야 하는 케이스에 사용)
   clearPreset: () => void;
@@ -39,13 +66,12 @@ interface ImageFlowState {
   reset: () => void;
 }
 
-// 경로 → 결과 유형 자동 매핑
 const RESULT_TYPE_MAP: Record<EntryRoute, ResultType> = {
-  [ENTRY_ROUTE.GENERATE_BUTTON]: RESULT_TYPE.RECOMMENDATION,
-  [ENTRY_ROUTE.HOME_BANNER]: RESULT_TYPE.LIST,
-  [ENTRY_ROUTE.FLOOR_PLAN]: RESULT_TYPE.RECOMMENDATION,
-  [ENTRY_ROUTE.STYLE_RESTYLE]: RESULT_TYPE.LIST,
-  [ENTRY_ROUTE.PRODUCT_SELECTION]: RESULT_TYPE.LIST,
+  [ENTRY_ROUTE.GENERATE_BUTTON]: RESULT_TYPE.FULL_FUNNEL,
+  [ENTRY_ROUTE.HOME_BANNER]: RESULT_TYPE.BANNER,
+  [ENTRY_ROUTE.FLOOR_PLAN]: RESULT_TYPE.FULL_FUNNEL,
+  [ENTRY_ROUTE.STYLE_RESTYLE]: RESULT_TYPE.STYLE,
+  [ENTRY_ROUTE.PRODUCT_SELECTION]: RESULT_TYPE.PRODUCT,
 };
 
 export const useImageFlowStore = create<ImageFlowState>()(

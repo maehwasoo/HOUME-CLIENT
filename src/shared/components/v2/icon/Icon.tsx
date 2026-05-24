@@ -39,6 +39,7 @@ import Profile from '@assets/v2/svg/Profile.svg?url';
 import RadioDefault from '@assets/v2/svg/RadioDefault.svg?url';
 import RadioSelected from '@assets/v2/svg/RadioSelected.svg?url';
 import Refresh from '@assets/v2/svg/Refresh.svg?url';
+import RefreshStrokeWhite from '@assets/v2/svg/RefreshStrokeWhite.svg?url';
 import Search from '@assets/v2/svg/Search.svg?url';
 import StepActive from '@assets/v2/svg/StepActive.svg?url';
 import StepDefault from '@assets/v2/svg/StepDefault.svg?url';
@@ -81,6 +82,7 @@ const IconsName = {
   RadioDefault,
   RadioSelected,
   Refresh,
+  RefreshStrokeWhite,
   Search,
   ViewDetail,
   Credit,

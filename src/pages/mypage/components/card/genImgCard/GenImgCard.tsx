@@ -1,5 +1,7 @@
 import { useState } from 'react';
 
+import type { UsedProductResponse } from '@apis/__generated__/data-contracts';
+
 import TestImage from '@assets/v2/images/TestImg.png';
 
 import { logMyPageClickBtnFurnitureCard } from '@/pages/mypage/utils/analytics';
@@ -9,14 +11,13 @@ import ListProductCard from '@/shared/components/v2/productCard/ListProductCard'
 
 import * as styles from './GenImgCard.css';
 
-import type { UsedProduct } from '@/pages/mypage/types/apis/generateList';
-
 interface GenImgCardProps {
   cardType?: 'list' | 'curation';
-  productSummaryText?: string;
+  productSummaryText?: string | null;
   imageId: number;
   imageUrl?: string;
-  usedProducts?: UsedProduct[];
+  isMirror?: boolean;
+  usedProducts?: UsedProductResponse[];
   isLoaded?: boolean;
   onCurationClick?: () => void;
   onImageLoad?: (imageId: number, imageUrl?: string) => void;
@@ -27,6 +28,7 @@ const GenImgCard = ({
   productSummaryText,
   imageId,
   imageUrl,
+  isMirror = false,
   usedProducts = [],
   isLoaded = false,
   onCurationClick,
@@ -69,37 +71,40 @@ const GenImgCard = ({
         <img
           src={imageUrl || TestImage}
           alt={productSummaryText ?? '생성 이미지'}
-          className={styles.cardImg}
+          className={styles.cardImg({ mirrored: isMirror })}
           onLoad={handleImageLoad}
         />
       </section>
 
       {isListType && (
         <section className={styles.listCardContainer}>
-          {usedProducts.map((item) => (
-            <ListProductCard
-              key={item.rawProductId}
-              cardSize="s"
-              product={{
-                title: item.productName,
-                imageUrl: item.productImageUrl,
-              }}
-              price={{
-                original: item.listPrice,
-                discount: item.discountPrice,
-                discountRate: item.discountRate,
-              }}
-              save={{
-                isSaved: item.isJjym,
-                onToggle: () => handleToggleSave(item.rawProductId),
-              }}
-              link={{
-                href: item.productSiteUrl,
-                onClick: logMyPageClickBtnFurnitureCard,
-              }}
-              enableWholeCardLink={true}
-            />
-          ))}
+          {usedProducts.map((item) => {
+            if (item.rawProductId == null) return null;
+            return (
+              <ListProductCard
+                key={item.rawProductId}
+                cardSize="s"
+                product={{
+                  title: item.productName ?? '',
+                  imageUrl: item.productImageUrl ?? '',
+                }}
+                price={{
+                  original: item.listPrice ?? 0,
+                  discount: item.discountPrice ?? 0,
+                  discountRate: item.discountRate ?? 0,
+                }}
+                save={{
+                  isSaved: item.isJjym ?? false,
+                  onToggle: () => handleToggleSave(item.rawProductId!),
+                }}
+                link={{
+                  href: item.productSiteUrl ?? '',
+                  onClick: logMyPageClickBtnFurnitureCard,
+                }}
+                enableWholeCardLink={true}
+              />
+            );
+          })}
         </section>
       )}
     </div>

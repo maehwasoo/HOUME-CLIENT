@@ -4,11 +4,14 @@ import { useNavigate } from 'react-router-dom';
 
 import { useGetGeneratedImageListQuery } from '@pages/mypage/apis/queries/useMyPageImagesQuery';
 import { useDetectionPrefetch } from '@pages/mypage/hooks/useDetectionPrefetch';
-import type { GeneratedImageListItem } from '@pages/mypage/types/apis/generateList';
 import { logMyPageClickBtnImgCard } from '@pages/mypage/utils/analytics';
 import { formatDate } from '@pages/mypage/utils/formatting';
 
 import { ROUTES } from '@routes/paths';
+
+import { isCurationViewType } from '@store/useImageFlowStore';
+
+import type { ItemResponse } from '@apis/__generated__/data-contracts';
 
 import Loading from '@components/loading/Loading';
 
@@ -43,7 +46,8 @@ const GeneratedImagesSection = () => {
     }
   );
 
-  const primaryImageId = imagesListData?.groups[0]?.items[0]?.imageId ?? null;
+  const primaryImageId =
+    imagesListData?.groups?.[0]?.items?.[0]?.imageId ?? null;
 
   /**
    * 모든 이미지 감지 데이터 백그라운드 prefetch
@@ -51,9 +55,12 @@ const GeneratedImagesSection = () => {
   useEffect(() => {
     if (!imagesListData?.groups) return;
 
-    const allItems = imagesListData.groups.flatMap((group) => group.items);
+    const allItems = imagesListData.groups.flatMap(
+      (group) => group.items ?? []
+    );
 
     allItems.forEach((item, index) => {
+      if (item.imageId == null || !item.generatedImageUrl) return;
       if (prefetchedImageIdsRef.current.has(item.imageId)) return;
       prefetchedImageIdsRef.current.add(item.imageId);
       prefetchDetection(item.imageId, item.generatedImageUrl, {
@@ -100,15 +107,22 @@ const GeneratedImagesSection = () => {
   /**
    * - url에 imageId(houseId)와 viewType을 전달
    *   - houseId: ResultPage가 /meta API 호출에 사용
-   *   - viewType: ResultPage의 CurationResult/ListResult 분기 기준
-   * - state로 imageUrl 전달
+   *   - viewType: ResultPage의 CurationResult/ListResult 분기 기준 + '상품 다시 선택하기' 버튼 분기 기준
+   * - state로 imageUrl + isMirror 전달
    */
-  const handleViewResult = (item: GeneratedImageListItem) => {
+  const handleViewResult = (item: ItemResponse) => {
+    // viewType 누락 시 URL에 `viewType=undefined` 문자열이 그대로 들어가 ResultPage 분기가 의도와 다르게 동작 → 가드로 차단
+    if (item.imageId == null || !item.generatedImageUrl || !item.viewType) {
+      return;
+    }
     logMyPageClickBtnImgCard();
     navigate(
       `${ROUTES.GENERATE_RESULT}?houseId=${item.imageId}&viewType=${item.viewType}`,
       {
-        state: { imageUrl: item.generatedImageUrl },
+        state: {
+          imageUrl: item.generatedImageUrl,
+          isMirror: item.isMirror,
+        },
       }
     );
     // 네비게이션 직후 우선순위 감지 프리페치 실행
@@ -151,33 +165,41 @@ const GeneratedImagesSection = () => {
   }
 
   // 이미지가 없을 때
-  if (imagesListData.groups.length === 0) {
+  const groups = imagesListData.groups ?? [];
+  if (groups.length === 0) {
     return <EmptyStateSection type="generatedImages" />;
   }
 
   return (
     <section className={styles.wrapper}>
-      {imagesListData.groups.map((group, index) => (
+      {groups.map((group, index) => (
         <div key={group.date}>
           {index > 0 && <div className={styles.divider} />}
           <div className={styles.groupContainer}>
-            <div className={styles.date}>{formatDate(group.date)}</div>
+            <div className={styles.date}>
+              {group.date ? formatDate(group.date) : ''}
+            </div>
             <div className={styles.listContainer}>
-              {group.items.map((item) => (
-                <GenImgCard
-                  key={item.imageId}
-                  cardType={item.viewType === 'CURATION' ? 'curation' : 'list'}
-                  productSummaryText={item.productSummaryText}
-                  imageId={item.imageId}
-                  imageUrl={item.generatedImageUrl}
-                  usedProducts={item.usedProducts}
-                  isLoaded={loadedImages[item.imageId]}
-                  onCurationClick={() => handleViewResult(item)}
-                  onImageLoad={() =>
-                    handleImageLoad(item.imageId, item.generatedImageUrl)
-                  }
-                />
-              ))}
+              {(group.items ?? []).map((item) => {
+                if (item.imageId == null) return null;
+                const isCurationCard = isCurationViewType(item.viewType);
+                return (
+                  <GenImgCard
+                    key={item.imageId}
+                    cardType={isCurationCard ? 'curation' : 'list'}
+                    productSummaryText={item.productSummaryText}
+                    imageId={item.imageId}
+                    imageUrl={item.generatedImageUrl}
+                    isMirror={item.isMirror}
+                    usedProducts={item.usedProducts}
+                    isLoaded={loadedImages[item.imageId]}
+                    onCurationClick={() => handleViewResult(item)}
+                    onImageLoad={() =>
+                      handleImageLoad(item.imageId!, item.generatedImageUrl)
+                    }
+                  />
+                );
+              })}
             </div>
           </div>
         </div>

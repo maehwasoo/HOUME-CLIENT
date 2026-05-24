@@ -9,6 +9,15 @@ import { useToast } from '@components/toast/useToast';
  */
 export const MAX_SELECTED_PRODUCTS = 6;
 
+interface UseProductSelectionOptions {
+  /**
+   * 상품 탭 mount 시 selectedProducts state의 초기값으로 주입할 상품 목록
+   * - 로그인 게이트 복귀 / ResultPage '상품 다시 선택하기'로부터 상품 탭 진입 등 외부에서 ProductTab 상태 복원이 필요한 경우 사용
+   * - 빈 배열이면 기존 동작과 동일
+   */
+  initialSelectedProducts?: SelectedProduct[];
+}
+
 /**
  * 상품 선택 상태 전용 훅
  * - 선택/해제
@@ -16,12 +25,16 @@ export const MAX_SELECTED_PRODUCTS = 6;
  * - 선택 관련 토스트
  * 를 한 곳에서 관리
  */
-const useProductSelection = () => {
+const useProductSelection = ({
+  initialSelectedProducts = [],
+}: UseProductSelectionOptions = {}) => {
   /** 현재 선택된 상품 목록 */
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(
-    []
+    initialSelectedProducts
   );
-  const selectedProductsRef = useRef<SelectedProduct[]>([]);
+  const selectedProductsRef = useRef<SelectedProduct[]>(
+    initialSelectedProducts
+  );
   const { notify } = useToast();
 
   useEffect(() => {
@@ -58,19 +71,14 @@ const useProductSelection = () => {
     setSelectedProducts((prev) => prev.filter((product) => product.id !== id));
   }, []);
 
-  /** "꾸미기" CTA 클릭 시 최소 1개 선택 검증 */
-  const handleDecorateWithProductsClick = useCallback(() => {
-    if (selectedProducts.length === 0) {
-      notify({ text: '상품을 1개 이상 선택해주세요' });
-    }
-  }, [notify, selectedProducts.length]);
+  /**
+   * - "이 상품들로 우리 집 꾸미기" CTA 클릭 핸들러는 navigate/auth/store 의존성이 추가로 필요해 useProductTabController에서 본구현 (로그인 게이트 / ResultPage에서 상품 탭 진입 시 navigate/auth/stor로부터 selectedProduct를 복구해야 함)
+   */
 
-  /** ProductTab에서 사용할 공개 값 */
   return {
     selectedProducts,
     handleSelectProduct,
     handleRemoveSelectedProduct,
-    handleDecorateWithProductsClick,
   };
 };
 

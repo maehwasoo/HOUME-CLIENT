@@ -25,9 +25,15 @@ export const section = style({
   width: '100%',
 });
 
+export const sectionHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: `0 ${unitVars.unit.gapPadding['100']}`,
+});
+
 export const sectionTitle = style({
   ...fontVars.font.title_sb_16,
-  padding: `0 ${unitVars.unit.gapPadding['100']}`,
   color: colorVars.color.text.primary,
 });
 

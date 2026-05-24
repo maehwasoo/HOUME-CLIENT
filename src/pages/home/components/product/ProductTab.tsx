@@ -1,8 +1,12 @@
+import { useEffect, useMemo } from 'react';
+
 import ProductFilterSheet from '@pages/home/components/product/ProductFilterSheet/ProductFilterSheet';
 import {
   MAX_SELECTED_PRODUCTS,
   useProductTabController,
 } from '@pages/home/hooks/useProductTabController';
+
+import { useImageFlowStore } from '@store/useImageFlowStore';
 
 import CloseBottomSheet from '@shared/components/v2/bottomSheet/CloseBottomSheet';
 import DragHandleBottomSheet from '@shared/components/v2/bottomSheet/DragHandleBottomSheet';
@@ -14,6 +18,26 @@ import SearchSection from './SearchSection/SearchSection';
 import SelectedProductSheet from './SelectedProductSheet/SelectedProductSheet';
 
 const ProductTab = () => {
+  /**
+   * 외부 진입 시 ProductTab 상태 복원
+   * - useImageFlowStore.preset.type === 'product'면 로그인 게이트 복귀 또는 ResultPage '상품 다시 선택하기' 흐름 이라는 의미
+   * - mount 시 1회 캡처 (useMemo deps []) — 이후 사용자 편집은 controller의 selectedProducts로만 진행 !!
+   * - mount effect에서 clearPreset를 호출해 sessionStorage stale 데이터 제거 !!
+   */
+  const productsToBeRestored = useMemo(() => {
+    const preset = useImageFlowStore.getState().preset;
+    return preset?.type === 'product' ? preset.productsToBeRestored : [];
+    // mount 시 1회만 평가 (store는 ref 안정)
+  }, []);
+  const hasProductsToBeRestored = productsToBeRestored.length > 0;
+
+  useEffect(() => {
+    if (hasProductsToBeRestored) {
+      useImageFlowStore.getState().clearPreset();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const {
     sheetExpanded,
     setSheetExpanded,
@@ -31,7 +55,11 @@ const ProductTab = () => {
     handleFilterSheetClose,
     handleFilterApply,
     handleFilterResetClick,
-  } = useProductTabController();
+  } = useProductTabController({
+    initialSelectedProducts: productsToBeRestored,
+    initialSheetExpanded: hasProductsToBeRestored,
+    resetFiltersOnMount: hasProductsToBeRestored,
+  });
 
   return (
     <div className={styles.container}>

@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { useGenerateBannerImageMutation } from '@pages/generate/apis/mutations/useGenerateBannerImageMutation';
 import { useGenerateFullFunnelImageMutation } from '@pages/generate/apis/mutations/useGenerateFullFunnelImageMutation';
 import { useGenerateOtherStyleImageMutation } from '@pages/generate/apis/mutations/useGenerateOtherStyleImageMutation';
+import { useGenerateProductImageMutation } from '@pages/generate/apis/mutations/useGenerateProductImageMutation';
 import { useFunnelStore } from '@pages/imageSetup/stores/useFunnelStore';
 
 import { useImageFlowStore } from '@store/useImageFlowStore';
@@ -11,6 +12,7 @@ import type {
   BannerGenerateImageRequest,
   GenerateImageV4Request,
   OtherStyleGenerateImageRequest,
+  ProductGenerateImageRequest,
 } from '@apis/__generated__/data-contracts';
 
 // ReturnType<typeof XxxMutation>['mutate']: 각 mutation 훅이 반환하는 mutate 함수의 타입을 추출하는 코드
@@ -21,6 +23,9 @@ type FullFunnelMutate = ReturnType<
 type BannerMutate = ReturnType<typeof useGenerateBannerImageMutation>['mutate'];
 type OtherStyleMutate = ReturnType<
   typeof useGenerateOtherStyleImageMutation
+>['mutate'];
+type ProductMutate = ReturnType<
+  typeof useGenerateProductImageMutation
 >['mutate'];
 
 // useGenerateImageRequest에서 진입 경로 별로 payload + mutation을 적절히 구성해 반환
@@ -40,6 +45,11 @@ export type GenerateImageRequestResult =
       kind: 'otherStyle';
       mutate: OtherStyleMutate;
       payload: OtherStyleGenerateImageRequest;
+    }
+  | {
+      kind: 'product';
+      mutate: ProductMutate;
+      payload: ProductGenerateImageRequest;
     }
   | { kind: 'invalid' };
 
@@ -68,9 +78,10 @@ export const useGenerateImageRequest = (): GenerateImageRequestResult => {
   const { mutate: mutateFullFunnel } = useGenerateFullFunnelImageMutation();
   const { mutate: mutateBanner } = useGenerateBannerImageMutation();
   const { mutate: mutateOtherStyle } = useGenerateOtherStyleImageMutation();
+  const { mutate: mutateProduct } = useGenerateProductImageMutation();
 
   // useMemo로 감싸 마운트 시 1회만 이미지 생성 경로 분기 평가 → requestState 객체 ref 고정
-  // (store는 getState()로 스냅샷만 읽음, mutate 3개는 React Query가 컴포넌트 동안 같은 메모리 주소를 유지 → deps가 사실상 안 바뀜)
+  // (store는 getState()로 스냅샷만 읽음, mutate 4개는 React Query가 컴포넌트 동안 같은 메모리 주소를 유지 → deps가 사실상 안 바뀜)
   // → LoadingPage가 requestState를 useEffect 의존성에 넣어도 mutate가 매 렌더 재실행되지 않음
   return useMemo(() => {
     // preset 데이터 가져오기
@@ -145,6 +156,27 @@ export const useGenerateImageRequest = (): GenerateImageRequestResult => {
       };
     }
 
+    // 선택한 상품으로 이미지 생성 (preset의 productsToBeRestored은 UI 복원용이므로 API payload에서는 불필요, 무시)
+    if (preset.type === 'product') {
+      if (
+        !isIntegerArray(preset.productIds) ||
+        preset.productIds.length < 1 ||
+        preset.productIds.length > 6
+      ) {
+        return { kind: 'invalid' };
+      }
+      return {
+        kind: 'product',
+        mutate: mutateProduct,
+        payload: {
+          floorPlanId: floorPlan.floorPlanId,
+          floorPlanView: floorPlan.floorPlanView,
+          isMirror: floorPlan.isMirror,
+          productIds: preset.productIds,
+        },
+      };
+    }
+
     return { kind: 'invalid' };
-  }, [mutateFullFunnel, mutateBanner, mutateOtherStyle]);
+  }, [mutateFullFunnel, mutateBanner, mutateOtherStyle, mutateProduct]);
 };

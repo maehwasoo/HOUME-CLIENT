@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { recipe } from '@vanilla-extract/recipes';
 
 import {
   animationTokens,
@@ -49,10 +50,22 @@ export const imgContainer = style({
   overflow: 'hidden',
 });
 
-export const cardImg = style({
-  objectFit: 'cover',
-  width: '100%',
-  height: '100%',
+export const cardImg = recipe({
+  base: {
+    objectFit: 'cover',
+    width: '100%',
+    height: '100%',
+  },
+  variants: {
+    mirrored: {
+      true: {
+        transform: 'scaleX(-1)',
+      },
+    },
+  },
+  defaultVariants: {
+    mirrored: false,
+  },
 });
 
 export const listCardContainer = style({
