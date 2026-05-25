@@ -5,17 +5,18 @@ import { ROUTES } from '@routes/paths';
 
 import { useUserStore } from '@store/useUserStore';
 
+import { TOAST_TYPE, TOASTER_ID } from '@shared/types/toast';
+
 import type { SocialSignUpV2Request } from '@apis/__generated__/data-contracts';
 import { HTTPMethod, request } from '@apis/config/request';
 
-import { useToast } from '@components/toast/useToast';
+import { useToast } from '@components/v2/toast/useToast';
 
 import { API_ENDPOINT } from '@constants/apiEndpoints';
 import { RESPONSE_MESSAGE, HTTP_STATUS } from '@constants/response';
+import { TOAST_MESSAGE } from '@constants/toastMessage';
 
 import { consumeLoginRedirect } from '@utils/loginRedirect';
-
-import { TOAST_TYPE } from '@/shared/types/toastLegacy';
 
 import type { SignupResponse } from '../../types/apis/signup';
 
@@ -56,6 +57,11 @@ export const usePostSignupMutation = () => {
       setAccessToken(response.accessToken);
       sessionStorage.removeItem('signupToken');
       navigate(ROUTES.WELCOME);
+      notify({
+        text: TOAST_MESSAGE.SIGNUP_SUCCESS,
+        type: TOAST_TYPE.SUCCESS,
+        options: { toasterId: TOASTER_ID.TOP_4 },
+      });
     },
     onError: (error) => {
       console.error('[usePostSignupMutation] 회원가입 실패:', error);
@@ -63,8 +69,9 @@ export const usePostSignupMutation = () => {
       // 가입 실패 시 시작점 복귀 + 에러 토스트
       navigate(consumeLoginRedirect() ?? ROUTES.HOME);
       notify({
-        text: '회원가입이 완료되지 않았습니다',
-        type: TOAST_TYPE.WARNING,
+        text: TOAST_MESSAGE.SIGNUP_ERROR,
+        type: TOAST_TYPE.ERROR,
+        options: { toasterId: TOASTER_ID.TOP_4 },
       });
     },
   });

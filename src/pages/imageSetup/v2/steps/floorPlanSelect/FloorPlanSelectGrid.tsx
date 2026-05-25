@@ -13,6 +13,7 @@ import type { FilterCategory, FloorPlanFilters } from '../../types/floorPlan';
 interface FloorPlanSelectGridProps {
   filterCategories: FilterCategory[];
   floorPlans: ExploreHouseTemplateItemResponse[];
+  isExact: boolean;
   appliedFilters: FloorPlanFilters;
   onCardClick: (floorPlanId: number) => void;
   onFilterChipClick: () => void;
@@ -37,11 +38,28 @@ const getChipLabel = (category: FilterCategory, filterValues: string[]) => {
 const FloorPlanSelectGrid = ({
   filterCategories,
   floorPlans,
+  isExact,
   appliedFilters,
   onCardClick,
   onFilterChipClick,
   onFilterChipClear,
 }: FloorPlanSelectGridProps) => {
+  // 도면 카드 매핑: 정상 그리드와 '이런 공간은 어떠세요?' 유사 섹션 양쪽에서 동일하게 재사용
+  const cards = floorPlans.map((plan) => {
+    if (plan.id === undefined) return null;
+    return (
+      <RoomTypeCard
+        key={plan.id}
+        type="default"
+        size="m"
+        label={plan.name ?? ''}
+        imageSrc={plan.imageUrl ?? ''}
+        showRecentBadge={plan.isLatest}
+        onClick={() => onCardClick(plan.id as number)}
+      />
+    );
+  });
+
   return (
     <div className={styles.container}>
       {/* 필터칩 영역 */}
@@ -77,7 +95,9 @@ const FloorPlanSelectGrid = ({
 
       {/* 카드 그리드 영역 */}
       <div className={styles.gridScroll}>
-        {floorPlans.length === 0 ? (
+        {isExact ? (
+          <div className={styles.grid}>{cards}</div>
+        ) : (
           <>
             {/* 상단 이미지 + 공간없음 텍스트 */}
             <img src={emptyImage} alt="필터 결과 없음" />
@@ -95,31 +115,12 @@ const FloorPlanSelectGrid = ({
             {/* Divider */}
             <div className={styles.divider}></div>
 
-            {/* TODO: API isExact: false일 때 유사 공간 카드 렌더 */}
+            {/* '이런 공간은 어떠세요?' — 서버가 대체로 보내준 유사 도면 그리드 */}
             <div className={styles.similarSection}>
-              <p className={styles.similarTitle}>선택한 필터와 유사한 공간</p>
-              <div className={styles.grid}>
-                {/* 유사 공간 카드 — API 연동 시 데이터 바인딩 */}
-              </div>
+              <p className={styles.similarTitle}>이런 공간은 어떠세요?</p>
+              <div className={styles.grid}>{cards}</div>
             </div>
           </>
-        ) : (
-          <div className={styles.grid}>
-            {floorPlans.map((plan) => {
-              if (plan.id === undefined) return null;
-              return (
-                <RoomTypeCard
-                  key={plan.id}
-                  type="default"
-                  size="m"
-                  label={plan.name ?? ''}
-                  imageSrc={plan.imageUrl ?? ''}
-                  showRecentBadge={plan.isLatest}
-                  onClick={() => onCardClick(plan.id as number)}
-                />
-              );
-            })}
-          </div>
         )}
       </div>
     </div>

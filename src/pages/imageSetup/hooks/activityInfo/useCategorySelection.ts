@@ -1,4 +1,10 @@
+import { TOAST_TYPE, TOASTER_ID } from '@shared/types/toast';
+
 import type { FurnitureCategoryGroup } from '@apis/__generated__/data-contracts';
+
+import { useToast } from '@components/v2/toast/useToast';
+
+import { TOAST_MESSAGE } from '@constants/toastMessage';
 
 import type { useGlobalConstraints } from './useGlobalConstraints';
 import type {
@@ -19,6 +25,8 @@ export const useCategorySelection = (
   setFormData: React.Dispatch<React.SetStateAction<ActivityInfoFormData>>,
   globalConstraints: ReturnType<typeof useGlobalConstraints>
 ) => {
+  // useToast는 early return 전에 호출
+  const { notify } = useToast();
   const furnitures = category?.furnitures ?? [];
 
   // 카테고리가 없는 경우 빈 인터페이스 반환
@@ -46,7 +54,15 @@ export const useCategorySelection = (
 
     // 1. 선택한 값 해제: single/multiple 공통
     if (isSelected) {
-      if (!globalConstraints.canDeselect(furnitureId)) return;
+      if (!globalConstraints.canDeselect(furnitureId)) {
+        // 필수 가구는 해제 불가 — 사용자에게 toast로 피드백
+        notify({
+          text: TOAST_MESSAGE.REQUIRED_ITEM_LOCKED,
+          type: TOAST_TYPE.INFO,
+          options: { toasterId: TOASTER_ID.BOTTOM_4 },
+        });
+        return;
+      }
       const updatedFurnitureIds = currentIds.filter((id) => id !== furnitureId);
       setFormData((prev) => ({ ...prev, furnitureIds: updatedFurnitureIds }));
       return;

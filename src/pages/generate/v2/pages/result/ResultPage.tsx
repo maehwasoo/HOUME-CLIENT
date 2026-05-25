@@ -15,6 +15,8 @@ import InlineError from '@components/inlineError/InlineError';
 import Loading from '@components/loading/Loading';
 import TitleNavBar from '@components/v2/navBar/TitleNavBar';
 
+import { useExitBlocker } from '@hooks/useExitBlocker';
+
 import CurationResult from './components/curation/CurationResult';
 import ListResult from './components/list/ListResult';
 import * as styles from './ResultPage.css';
@@ -41,12 +43,28 @@ const ResultPage = () => {
 
   // LoadingPage/마이페이지에서 navigate state로 전달한 데이터 (새로고침 시 손실 → /meta로 fallback)
   // imageUrl/isMirror는 /meta 응답에 포함되므로 state 손실 시 자동 보충 가능
+  // from은 진입 경로 식별용 — 'loading'인 경우 뒤로가기를 HOME으로 강제 리다이렉트
   const locationState = location.state as {
     imageUrl?: string;
     isMirror?: boolean;
+    from?: 'loading';
   } | null;
   const stateImageUrl = locationState?.imageUrl;
   const stateIsMirror = locationState?.isMirror;
+  const isFromLoading = locationState?.from === 'loading';
+
+  // 뒤로가기 가드 — LoadingPage->ResultPage이고, 사용자 액션이 POP(뒤로가기)일 때만 useExitBlocker 훅이 실행됨
+  // - LoadingPage->ResultPage에서 뒤로가기 시 HOME으로 redirect (이미지 생성 플로우로 재진입 방지)
+  // - MyPage->ResultPage시에는 enabled=false, 따라서 history(-1)
+  // - navigation 액션이 PUSH/REPLACE(자식 컴포넌트에서 다른 페이지로 이동, "다시 만들기"로 상품 탭 이동 등)일 때는 정상적으로 navigate
+  useExitBlocker({
+    enabled: isFromLoading,
+    shouldBlockNavigation: ({ historyAction }) => historyAction === 'POP',
+    onBlocked: ({ reset }) => {
+      reset();
+      navigate(ROUTES.HOME, { replace: true });
+    },
+  });
 
   // state.imageUrl이 비어있는 경우(null/빈 문자열)도 누락으로 간주 -> /meta로 fallback
   const hasStateImageUrl =

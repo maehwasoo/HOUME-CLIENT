@@ -87,7 +87,6 @@ export const similarSection = style({
   display: 'flex',
   flexDirection: 'column',
   gap: unitVars.unit.gapPadding['300'],
-  padding: `${unitVars.unit.gapPadding['400']} ${unitVars.unit.gapPadding['400']} ${unitVars.unit.gapPadding['600']}`,
 });
 
 export const similarTitle = style({

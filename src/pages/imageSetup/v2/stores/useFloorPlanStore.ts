@@ -39,7 +39,12 @@ interface FloorPlanStoreState {
   // 도면 카드를 새로 클릭했을 때 호출, viewIndex/mirror 초기화된 상태로 도면 보여줌
   selectNewFloorPlan: (floorPlanId: number) => void;
   // 로그인 복귀/경로3 진입 시 이전에 선택했던 상태를 그대로 복원
-  restoreFloorPlan: (floorPlanId: number, isMirror: boolean) => void;
+  // viewIndex는 isMultiView 도면에서 사용자가 선택했던 swiper 위치 — useFunnelStore.floorPlan.floorPlanViewIndex 로부터 전달받음
+  restoreFloorPlan: (
+    floorPlanId: number,
+    isMirror: boolean,
+    viewIndex: number
+  ) => void;
   // 도면 카드 선택 해제
   clearFloorPlan: () => void;
   setViewIndex: (idx: number) => void;
@@ -85,8 +90,15 @@ export const useFloorPlanStore = create<FloorPlanStoreState>((set) => ({
 
   selectNewFloorPlan: (floorPlanId) =>
     set({ ...INITIAL_SELECTION, selectedFloorPlanId: floorPlanId }),
-  restoreFloorPlan: (floorPlanId, isMirror) => {
-    set({ selectedFloorPlanId: floorPlanId, isMirror: isMirror });
+  restoreFloorPlan: (floorPlanId, isMirror, viewIndex) => {
+    // store 진입 시점에 0 이상 정수로 정규화 (보정 못하면 0)
+    const normalizedViewIndex =
+      Number.isInteger(viewIndex) && viewIndex >= 0 ? viewIndex : 0;
+    set({
+      selectedFloorPlanId: floorPlanId,
+      isMirror,
+      selectedViewIndex: normalizedViewIndex,
+    });
   },
   clearFloorPlan: () => set(INITIAL_SELECTION),
   // 도면이 여러 장일 경우 선택된 도면 view index 세팅

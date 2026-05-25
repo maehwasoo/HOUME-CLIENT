@@ -27,6 +27,9 @@ export const useLogoutMutation = () => {
     onSettled: () => {
       useUserStore.getState().clearUser();
       queryClient.clear();
+      // 로그아웃 시 sessionStorage까지 clear
+      // sessionStorage는 origin+탭 단위로 관리되므로 다른 사이트/탭에는 영향 X
+      sessionStorage.clear();
       navigate(ROUTES.HOME, { replace: true });
     },
   });

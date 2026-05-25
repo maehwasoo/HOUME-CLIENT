@@ -81,33 +81,32 @@ export const panel = style({
 });
 
 // drag handle 타입에서 상단 핸들을 가운데 배치하는 헤더
+// 시각적 핸들 바보다 큰 영역(padding 포함)을 차지하면서 이 요소 자체가 button →
+// 모바일에서 손가락 hit이 안정적이게 됨 (시각 바는 child element가 가운데 표시)
 export const dragHeader = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  cursor: 'grab',
   touchAction: 'none',
   padding: unitVars.unit.gapPadding['200'],
   width: '100%',
-});
-
-// 드래그 시작 지점이 되는 핸들 버튼
-export const dragHandleButton = style({
-  display: 'inline-flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  border: 0,
-  borderRadius: unitVars.unit.radius.full,
-  backgroundColor: colorVars.color.border.primary,
-  cursor: 'grab',
-  touchAction: 'none',
-  padding: 0,
-  width: '3.5rem',
-  height: '0.4rem',
   selectors: {
     '&:active': {
       cursor: 'grabbing',
     },
   },
+});
+
+// 드래그 핸들의 *시각적* 바 — hit area는 부모 dragHeader(button)가 담당
+export const dragHandleButton = style({
+  display: 'inline-block',
+  border: 0,
+  borderRadius: unitVars.unit.radius.full,
+  backgroundColor: colorVars.color.border.primary,
+  padding: 0,
+  width: '3.5rem',
+  height: '0.4rem',
 });
 
 // close 타입에서 제목과 닫기 버튼을 배치하는 헤더

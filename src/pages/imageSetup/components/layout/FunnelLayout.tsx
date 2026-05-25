@@ -133,9 +133,10 @@ const FunnelLayout = ({ children, currentStep }: FunnelLayoutProps) => {
       <TitleNavBar
         title={NAVBAR_TITLE_BY_STEP[currentStep]}
         backLabel="이전"
-        // step1에서는 navigate(-1) → useExitBlocker가 가로채서 모달 표시
-        // step2/step3에서는 undefined → TitleNavBar 기본 동작(navigate(-1))으로 use-funnel history 자연 처리
-        onBackClick={isStep1 ? () => navigate(-1) : undefined}
+        // 모든 step에서 동일하게 navigate(-1) 호출
+        // - step1: useExitBlocker가 가로채서 이탈 모달 표시 (이미지 생성 플로우 진행 중 보호)
+        // - step2/step3: 이전 step 복귀
+        onBackClick={() => navigate(-1)}
       />
       <div className={styles.content}>{children}</div>
     </div>

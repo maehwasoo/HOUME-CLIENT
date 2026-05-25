@@ -17,6 +17,7 @@ const FloorPlanSelectStep = ({ context, onNext }: FloorPlanSelectStepProps) => {
   const {
     filterCategories,
     floorPlans,
+    isExact,
     selectedFloorPlanName,
     selectedEquilibrium,
     selectedDetailViews,
@@ -35,6 +36,7 @@ const FloorPlanSelectStep = ({ context, onNext }: FloorPlanSelectStepProps) => {
       <FloorPlanSelectGrid
         filterCategories={filterCategories}
         floorPlans={floorPlans}
+        isExact={isExact}
         appliedFilters={grid.appliedFilters}
         onCardClick={handleCardClick}
         onFilterChipClick={grid.onFilterChipClick}

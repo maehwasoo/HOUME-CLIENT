@@ -2,7 +2,11 @@ import { useEffect, useRef } from 'react';
 
 import { useImageFlowStore } from '@store/useImageFlowStore';
 
-import { useToast } from '@components/toast/useToast';
+import { TOAST_TYPE, TOASTER_ID } from '@shared/types/toast';
+
+import { useToast } from '@components/v2/toast/useToast';
+
+import { TOAST_MESSAGE } from '@constants/toastMessage';
 
 import { useFunnelStore } from '../../stores/useFunnelStore';
 import { useHouseTemplateDetailQuery } from '../apis/queries/useHouseTemplateDetailQuery';
@@ -28,6 +32,9 @@ export const useFloorPlanSelect = (
     store.appliedFilters
   );
   const floorPlans = houseTemplatesData?.floorPlans ?? [];
+  // isExact=false: 필터에 정확 매칭 도면이 없어 서버가 비슷한 도면으로 대체 응답 → '이런 공간은 어떠세요?' UI로 분기
+  // undefined일 때는 정상 그리드 fallback (응답 일관성 깨지거나 필드 누락 시 안전)
+  const isExact = houseTemplatesData?.isExact !== false;
 
   // 도면 상세 조회 (카드 선택 -> floorPlanId가 null이 아닐 때 쿼리 enabled)
   const { data: detailData } = useHouseTemplateDetailQuery(
@@ -50,9 +57,12 @@ export const useFloorPlanSelect = (
   useEffect(() => {
     const savedFloorPlan = useFunnelStore.getState().floorPlan;
     if (savedFloorPlan) {
+      // floorPlanViewIndex는 isMultiView 도면의 swiper 위치 복원용
+      // 이전 sessionStorage 데이터에 해당 필드가 없을 수 있어 ?? 0 fallback
       store.restoreFloorPlan(
         savedFloorPlan.floorPlanId,
-        savedFloorPlan.isMirror
+        savedFloorPlan.isMirror,
+        savedFloorPlan.floorPlanViewIndex ?? 0
       );
       store.openFloorPlanSheet();
       return;
@@ -81,7 +91,11 @@ export const useFloorPlanSelect = (
 
     recentHandledRef.current = true;
     store.openRecentSheet();
-    notify({ text: '저장된 내 공간을 불러왔어요.' });
+    notify({
+      text: TOAST_MESSAGE.RECENT_FLOOR_PLAN_LOADED,
+      type: TOAST_TYPE.INFO,
+      options: { toasterId: TOASTER_ID.TOP_4 },
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recentFloorPlan]);
 
@@ -113,12 +127,18 @@ export const useFloorPlanSelect = (
     const floorPlanView =
       selectedDetailViews[store.selectedViewIndex]?.view ?? '';
 
+    // 다음 스텝으로 이동 시에 전달할 데이터 (API payload에 필요한 필드만)
     const floorPlanData: CompletedFloorPlanSelect['floorPlan'] = {
       floorPlanId: store.selectedFloorPlanId,
       isMirror: store.isMirror,
       floorPlanView,
     };
-    useFunnelStore.getState().setFloorPlan(floorPlanData);
+
+    // useFunnelStore에는 UI 복원용 floorPlanViewIndex까지 함께 저장
+    useFunnelStore.getState().setFloorPlan({
+      ...floorPlanData,
+      floorPlanViewIndex: store.selectedViewIndex,
+    });
     onNext({ floorPlan: floorPlanData });
   };
 
@@ -132,13 +152,18 @@ export const useFloorPlanSelect = (
       isMirror: store.isMirror,
       floorPlanView: recentFloorPlan.view ?? '',
     };
-    useFunnelStore.getState().setFloorPlan(floorPlanData);
+    // RecentSheet 진입은 view 선택 단계 없이 즉시 확정 → floorPlanViewIndex 0 기본값
+    useFunnelStore.getState().setFloorPlan({
+      ...floorPlanData,
+      floorPlanViewIndex: 0,
+    });
     onNext({ floorPlan: floorPlanData });
   };
 
   return {
     filterCategories: FILTER_CATEGORIES,
     floorPlans,
+    isExact,
     selectedFloorPlanName,
     selectedEquilibrium,
     selectedDetailViews,

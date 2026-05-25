@@ -33,6 +33,16 @@ interface BottomSheetBaseProps {
   onOverlayClick?: () => void;
   onCloseClick?: () => void;
   handleSlot?: ReactNode;
+
+  // DragHandleBottomSheet의 실제 드래그 영역을 드래그 핸들 버튼을 감싸는 wrapper(DragHeader) 전체로 확장
+  dragHandlerProps?: Pick<
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
+    | 'onPointerDown'
+    | 'onPointerMove'
+    | 'onPointerUp'
+    | 'onPointerCancel'
+    | 'onLostPointerCapture'
+  >;
   /** true일 때 overlay/viewportLayer의 터치 이벤트를 통과시켜 뒷배경 터치 가능하게 함 */
   backgroundInteractable?: boolean;
   /** true일 때 body overflow를 hidden으로 설정하여 뒷배경 스크롤을 막음 (기본: true) */
@@ -55,6 +65,7 @@ const BottomSheetBase = ({
   onOverlayClick,
   onCloseClick,
   handleSlot,
+  dragHandlerProps,
   backgroundInteractable = false,
   preventScroll = true,
 }: BottomSheetBaseProps) => {
@@ -232,7 +243,15 @@ const BottomSheetBase = ({
           onTransitionEnd={handleTransitionEnd}
         >
           {headerType === 'dragHandle' ? (
-            <div className={styles.dragHeader}>{handleSlot}</div>
+            // dragHeader 자체를 button으로 -> 드래그 hit area를 dragHeader 전체로 확장 (모바일 드래그 UX 개선)
+            <button
+              type="button"
+              aria-label="바텀시트 크기 조절"
+              className={styles.dragHeader}
+              {...dragHandlerProps}
+            >
+              {handleSlot}
+            </button>
           ) : (
             <div className={styles.closeHeader}>
               <div className={styles.titleSlot({ align: titleAlign })}>

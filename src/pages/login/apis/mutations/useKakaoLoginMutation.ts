@@ -7,16 +7,17 @@ import { ROUTES } from '@routes/paths';
 
 import { useUserStore } from '@store/useUserStore';
 
+import { TOAST_TYPE, TOASTER_ID } from '@shared/types/toast';
+
 import { HTTPMethod, request } from '@apis/config/request';
 
-import { useToast } from '@components/toast/useToast';
+import { useToast } from '@components/v2/toast/useToast';
 
 import { API_ENDPOINT } from '@constants/apiEndpoints';
 import { RESPONSE_MESSAGE, HTTP_STATUS } from '@constants/response';
+import { TOAST_MESSAGE } from '@constants/toastMessage';
 
 import { consumeLoginRedirect } from '@utils/loginRedirect';
-
-import { TOAST_TYPE } from '@/shared/types/toastLegacy';
 
 import type { KakaoLoginResponse, LoginApiResponse } from '../../types/auth';
 import type { AuthEnvironment } from '../../types/environment';
@@ -102,7 +103,11 @@ export const useKakaoLoginMutation = () => {
       // OAuth callback 페이지가 history에 남지 않도록 replace 사용
       // replace가 없을 시 시작점에서 뒤로가기 했을 때 callback 재진입 -> kakao oauth callback mutation이 재실행됨
       navigate(consumeLoginRedirect() ?? ROUTES.HOME, { replace: true });
-      notify({ text: '로그인이 완료되었어요', type: TOAST_TYPE.INFO });
+      notify({
+        text: TOAST_MESSAGE.LOGIN_SUCCESS,
+        type: TOAST_TYPE.SUCCESS,
+        options: { toasterId: TOASTER_ID.TOP_4 },
+      });
     },
     // 카카오 로그인 실패
     onError: (error) => {
@@ -113,8 +118,9 @@ export const useKakaoLoginMutation = () => {
       // onSuccess와 동일하게 replace: true -> callback 페이지가 history에 남아 뒤로가기 시 callback 재진입했을 떄 mutation 재실행되는 문제 차단
       navigate(consumeLoginRedirect() ?? ROUTES.HOME, { replace: true });
       notify({
-        text: '로그인 처리 중 오류가 발생했어요',
-        type: TOAST_TYPE.WARNING,
+        text: TOAST_MESSAGE.LOGIN_ERROR,
+        type: TOAST_TYPE.ERROR,
+        options: { toasterId: TOASTER_ID.TOP_4 },
       });
     },
   });

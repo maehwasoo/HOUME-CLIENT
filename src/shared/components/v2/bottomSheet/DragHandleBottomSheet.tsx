@@ -263,18 +263,14 @@ const DragHandleBottomSheet = ({
       }
       dimOpacity={computeDimOpacity()}
       preventScroll={!isPersistent || expanded}
-      handleSlot={
-        <button
-          type="button"
-          aria-label="바텀시트 크기 조절"
-          className={styles.dragHandleButton}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={finishDrag}
-          onPointerCancel={finishDrag}
-          onLostPointerCapture={finishDrag}
-        />
-      }
+      handleSlot={<span className={styles.dragHandleButton} aria-hidden />}
+      dragHandlerProps={{
+        onPointerDown: handlePointerDown,
+        onPointerMove: handlePointerMove,
+        onPointerUp: finishDrag,
+        onPointerCancel: finishDrag,
+        onLostPointerCapture: finishDrag,
+      }}
     />
   );
 };
