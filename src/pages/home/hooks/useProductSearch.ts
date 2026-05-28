@@ -78,15 +78,21 @@ const useProductSearch = (baseParams: ProductListQueryVariables) => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isPending,
+    isError,
+    refetch,
   } = useProductListQuery(queryParams);
+
+  const isRecommended = productPages?.pages[0]?.meta?.isRecommended ?? false;
 
   /**
    * sentinel 진입 시 다음 페이지 요청
    * - hasNextPage=false이거나 이미 로딩 중이면 요청하지 않음
+   * - 추천 목록(isRecommended) 응답에서는 추가 페이지를 요청하지 않음
    */
   useEffect(() => {
     const target = loadMoreRef.current;
-    if (!target || !hasNextPage || isFetchingNextPage) return;
+    if (!target || !hasNextPage || isFetchingNextPage || isRecommended) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -98,15 +104,23 @@ const useProductSearch = (baseParams: ProductListQueryVariables) => {
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage, isRecommended]);
 
   /** 페이지 응답을 상품 카드 렌더링 형태로 변환 */
-  const products = useMemo(() => {
+  const { products, recommendedProducts } = useMemo(() => {
     const flatProducts = (productPages?.pages ?? []).flatMap(
       (page) => page.products ?? []
     );
-    return toProductSearchCardItems(flatProducts);
-  }, [productPages?.pages]);
+    const cardItems = toProductSearchCardItems(flatProducts);
+
+    if (isRecommended) {
+      return { products: [], recommendedProducts: cardItems };
+    }
+
+    return { products: cardItems, recommendedProducts: [] };
+  }, [isRecommended, productPages?.pages]);
+
+  const showEmptyState = !isPending && !isError && products.length === 0;
 
   /** SearchBar controlled onChange 핸들러 */
   const handleSearchKeywordChange = useCallback((value: string) => {
@@ -118,6 +132,12 @@ const useProductSearch = (baseParams: ProductListQueryVariables) => {
     loadMoreRef,
     keyword,
     products,
+    recommendedProducts,
+    isRecommended,
+    showEmptyState,
+    isPending,
+    isError,
+    refetch,
     handleSearchKeywordChange,
   };
 };

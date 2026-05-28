@@ -103,6 +103,7 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
                 <ListProductCard
                   key={id}
                   cardSize="m"
+                  enableWholeCardLink
                   product={{
                     title: item.name!,
                     imageUrl: item.imageUrl!,

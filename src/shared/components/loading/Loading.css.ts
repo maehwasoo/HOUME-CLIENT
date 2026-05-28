@@ -18,6 +18,16 @@ export const loadingOverlay = style({
   overflow: 'hidden',
 });
 
+export const loadingInline = style({
+  boxSizing: 'border-box',
+  position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '2.4rem 1.6rem',
+  width: '100%',
+});
+
 export const loadingContainer = style({
   display: 'flex',
   flexDirection: 'column',

@@ -21,6 +21,8 @@ interface DragHandleBottomSheetProps {
   primaryButton: ReactNode;
   secondaryButton?: ReactNode;
   onExpandedChange?: (expanded: boolean) => void;
+  /** 부모에서 expanded가 바뀔 때 패널 높이 동기화 */
+  expanded?: boolean;
   /** 최소 높이 (rem 문자열). 있으면 Persistent 모드, 없으면 Dismissible 모드 */
   collapsedHeight?: string;
   /** Dismissible 모드에서 바텀시트가 닫혀야 할 때 부모에게 알리는 콜백 */
@@ -48,12 +50,20 @@ const DragHandleBottomSheet = ({
   primaryButton,
   secondaryButton,
   onExpandedChange,
+  expanded: expandedFromParent,
   collapsedHeight,
   onDismiss,
 }: DragHandleBottomSheetProps) => {
   const isPersistent = collapsedHeight !== undefined;
 
   const [expanded, setExpanded] = useState(!isPersistent);
+
+  useEffect(() => {
+    if (expandedFromParent !== undefined) {
+      setExpanded(expandedFromParent);
+    }
+  }, [expandedFromParent]);
+
   const [dragPhase, setDragPhase] = useState<DragPhase>('idle');
   const [dragHeight, setDragHeight] = useState<number | null>(null);
 

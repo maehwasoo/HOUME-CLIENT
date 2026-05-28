@@ -90,8 +90,8 @@ const CurationResult = ({
             <h1 className={styles.title}>이 공간에 어울리는 추천 상품</h1>
             <div className={styles.chipList}>
               {isCategoriesLoading ? (
-                <div className={styles.blockSlot}>
-                  <Loading />
+                <div className={styles.categoryLoadingSlot}>
+                  <Loading inline />
                 </div>
               ) : null}
               {isCategoriesError ? (
@@ -132,8 +132,8 @@ const CurationResult = ({
             </div>
             <div className={styles.productList}>
               {selectedCategoryId !== null && isProductsLoading ? (
-                <div className={styles.blockSlot}>
-                  <Loading />
+                <div className={styles.productListLoadingSlot}>
+                  <Loading inline />
                 </div>
               ) : null}
               {selectedCategoryId !== null && isProductsError ? (
@@ -169,6 +169,7 @@ const CurationResult = ({
                     return (
                       <ProductCard
                         key={key}
+                        enableWholeCardLink
                         product={{
                           brand: p.brand ?? p.mallName,
                           title: p.name ?? '',

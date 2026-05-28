@@ -3,6 +3,7 @@ import { useCallback, useMemo, useRef } from 'react';
 import { overlay } from 'overlay-kit';
 
 import ProductDetailOverlay from '@pages/home/components/product/ProductPopup/ProductDetailOverlay';
+import RecommendSection from '@pages/home/components/product/RecommendSection/RecommendSection';
 import { useProductHeaderScroll } from '@pages/home/hooks/useProductHeaderScroll';
 import { useProductSearch } from '@pages/home/hooks/useProductSearch';
 import type {
@@ -15,6 +16,10 @@ import IconButton from '@shared/components/v2/button/IconButton';
 import ProductCard from '@shared/components/v2/productCard/ProductCard';
 import SearchBar from '@shared/components/v2/textField/SearchBar';
 
+import emptyImage from '@assets/v2/images/ImgEmpty.png';
+
+import InlineError from '@components/inlineError/InlineError';
+import Loading from '@components/loading/Loading';
 import Chip from '@components/v2/chip/Chip';
 
 import type { ProductListQueryVariables } from '@constants/queryKey';
@@ -50,8 +55,18 @@ const SearchSection = ({
   const { isFilterSticky, showStickySearchBar, showScrollTopFloatingButton } =
     useProductHeaderScroll({ searchBarRef, filterListRef });
 
-  const { loadMoreRef, keyword, products, handleSearchKeywordChange } =
-    useProductSearch(productListQueryParams);
+  const {
+    loadMoreRef,
+    keyword,
+    products,
+    recommendedProducts,
+    isRecommended,
+    showEmptyState,
+    isPending,
+    isError,
+    refetch,
+    handleSearchKeywordChange,
+  } = useProductSearch(productListQueryParams);
 
   const handleFilterChipCategoryClick = useCallback(
     (category: ProductFilterChipCategory) => {
@@ -67,7 +82,6 @@ const SearchSection = ({
     [onAppliedFilterChipRemove]
   );
 
-  /** 상품 목록 찜 API 미연동 — ProductCard `SaveInfo`용 no-op */
   const handleSaveToggleNoop = useCallback(() => {}, []);
 
   const handleSelectProduct = useCallback(
@@ -142,81 +156,123 @@ const SearchSection = ({
           <div className={styles.filterScroll}>{filterChips}</div>
         </div>
       </div>
-      <div className={styles.productList}>
-        {products.map(
-          ({
-            id,
-            title,
-            brand,
-            imageUrl,
-            discountRate,
-            originalPrice,
-            discountPrice,
-            colorHexes,
-            saveCount,
-            linkUrl,
-          }) => {
-            const isSelected = selectedProductIds.includes(id);
-            const cardProduct = {
+      {isPending || isError || showEmptyState ? (
+        <div className={styles.productListFallback}>
+          {isPending ? (
+            <div className={styles.productListState}>
+              <Loading inline />
+            </div>
+          ) : isError ? (
+            <div className={styles.productListState}>
+              <InlineError
+                message="상품 목록을 불러올 수 없습니다"
+                onRetry={refetch}
+              />
+            </div>
+          ) : (
+            <>
+              <div className={styles.productListEmptyWrap}>
+                <img src={emptyImage} alt="필터 결과 없음" />
+                <div className={styles.emptyContainer}>
+                  <p className={styles.emptyTitle}>
+                    선택한 필터에 맞는 상품이 없어요.
+                  </p>
+                  <p className={styles.emptyDescription}>
+                    조금 더 넓은 조건으로 검색하면 <br /> 더 많은 상품을 만날 수
+                    있어요.
+                  </p>
+                </div>
+              </div>
+              {isRecommended ? (
+                <>
+                  <div className={styles.recommendDivider} role="separator" />
+                  <RecommendSection
+                    products={recommendedProducts}
+                    selectedProductIds={selectedProductIds}
+                    onSelectProduct={handleSelectProduct}
+                  />
+                </>
+              ) : null}
+            </>
+          )}
+        </div>
+      ) : (
+        <div className={styles.productList}>
+          {products.map(
+            ({
+              id,
               title,
               brand,
               imageUrl,
-              colorHexes,
-            };
-            const cardPrice = {
-              original: originalPrice,
               discountRate,
-              discount: discountPrice,
-            };
-            const cardSave = {
-              isSaved: false as const,
-              onToggle: handleSaveToggleNoop,
-              count: saveCount,
-            };
-            const cardLink = { href: linkUrl };
-            const cardShoppingAction = {
-              label: '선택' as const,
-              disabled: isSelected,
-              onClick: () =>
-                handleSelectProduct({
-                  id,
-                  title,
-                  brand,
-                  imageUrl,
-                  originalPrice,
-                  discountPrice,
-                  discountRate,
-                }),
-            };
+              originalPrice,
+              discountPrice,
+              colorHexes,
+              saveCount,
+              linkUrl,
+            }) => {
+              const isSelected = selectedProductIds.includes(id);
+              const cardProduct = {
+                title,
+                brand,
+                imageUrl,
+                colorHexes,
+              };
+              const cardPrice = {
+                original: originalPrice,
+                discountRate,
+                discount: discountPrice,
+              };
+              const cardSave = {
+                isSaved: false as const,
+                onToggle: handleSaveToggleNoop,
+                count: saveCount,
+              };
+              const cardLink = { href: linkUrl };
+              const cardShoppingAction = {
+                label: '선택' as const,
+                disabled: isSelected,
+                onClick: () =>
+                  handleSelectProduct({
+                    id,
+                    title,
+                    brand,
+                    imageUrl,
+                    originalPrice,
+                    discountPrice,
+                    discountRate,
+                  }),
+              };
 
-            return (
-              <ProductCard
-                key={id}
-                cardType="shopping"
-                product={cardProduct}
-                price={cardPrice}
-                save={cardSave}
-                link={cardLink}
-                shoppingAction={cardShoppingAction}
-                onShoppingViewDetailClick={() => {
-                  overlay.open(({ unmount }) => (
-                    <ProductDetailOverlay
-                      unmount={unmount}
-                      id={id}
-                      link={cardLink}
-                      price={cardPrice}
-                      product={cardProduct}
-                      save={cardSave}
-                      shoppingAction={cardShoppingAction}
-                    />
-                  ));
-                }}
-              />
-            );
-          }
-        )}
-        <div ref={loadMoreRef} />
-      </div>
+              return (
+                <ProductCard
+                  key={id}
+                  cardType="shopping"
+                  product={cardProduct}
+                  price={cardPrice}
+                  save={cardSave}
+                  link={cardLink}
+                  shoppingAction={cardShoppingAction}
+                  onShoppingViewDetailClick={() => {
+                    overlay.open(({ unmount }) => (
+                      <ProductDetailOverlay
+                        unmount={unmount}
+                        id={id}
+                        link={cardLink}
+                        price={cardPrice}
+                        product={cardProduct}
+                        save={cardSave}
+                        shoppingAction={cardShoppingAction}
+                      />
+                    ));
+                  }}
+                />
+              );
+            }
+          )}
+          <div ref={loadMoreRef} />
+        </div>
+      )}
 
       <div
         className={`${styles.scrollTopFloatingWrap} ${

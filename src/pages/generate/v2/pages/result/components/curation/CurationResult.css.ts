@@ -65,3 +65,21 @@ export const blockSlot = style({
   justifyContent: 'center',
   width: '100%',
 });
+
+export const categoryLoadingSlot = style([
+  blockSlot,
+  {
+    flexShrink: 0,
+    minWidth: '10rem',
+    minHeight: '4.4rem',
+  },
+]);
+
+export const productListLoadingSlot = style({
+  display: 'flex',
+  gridColumn: '1 / -1',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
+  minHeight: '22rem',
+});

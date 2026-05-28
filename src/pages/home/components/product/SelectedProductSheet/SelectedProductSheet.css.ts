@@ -52,6 +52,7 @@ export const compactSlot = style({
 export const compactSlotFilled = style([
   compactSlot,
   {
+    cursor: 'pointer',
     overflow: 'hidden',
   },
 ]);
@@ -86,31 +87,20 @@ export const compactImageFallback = style({
 
 export const expandedGrid = style({
   display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',
+  gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+  alignItems: 'start',
   gap: unitVars.unit.gapPadding['200'],
   padding: `0 ${unitVars.unit.gapPadding['100']}`,
   width: '100%',
 });
 
-export const addCard = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: unitVars.unit.gapPadding['200'],
+export const expandedGridSlot = style({
   width: '100%',
-});
-
-export const addImageWrap = style({
-  aspectRatio: '1 / 1',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  border: `1px solid ${colorVars.color.border.tertiary}`,
-  borderRadius: unitVars.unit.radius['300'],
-  backgroundColor: colorVars.color.bg.primary,
-  width: '100%',
+  minWidth: 0,
 });
 
 export const addCardSquare = style({
+  boxSizing: 'border-box',
   aspectRatio: '1 / 1',
   display: 'flex',
   alignItems: 'center',
@@ -118,7 +108,9 @@ export const addCardSquare = style({
   border: `1px solid ${colorVars.color.border.tertiary}`,
   borderRadius: unitVars.unit.radius['300'],
   backgroundColor: colorVars.color.bg.primary,
+  cursor: 'pointer',
   width: '100%',
+  maxWidth: '100%',
 });
 
 export const addCardContent = style({
@@ -131,7 +123,7 @@ export const addCardContent = style({
 
 export const addLabel = style({
   margin: 0,
-  textAlign: 'left',
+  textAlign: 'center',
   ...fontVars.font.caption_r_12,
   color: colorVars.color.text.disabled,
 });
@@ -139,14 +131,16 @@ export const addLabel = style({
 export const selectedCard = style({
   display: 'flex',
   flexDirection: 'column',
+  cursor: 'pointer',
   width: '100%',
 });
 
-export const selectedCardContainer = style({
-  position: 'relative',
-  width: '100%',
-  minWidth: 0,
-});
+export const selectedCardContainer = style([
+  expandedGridSlot,
+  {
+    position: 'relative',
+  },
+]);
 
 export const selectedImage = style({
   display: 'block',
@@ -217,15 +211,6 @@ export const selectedTitle = style({
   ...fontVars.font.caption_r_12,
   WebkitBoxOrient: 'vertical',
   WebkitLineClamp: 2,
-});
-
-export const addInfoPlaceholder = style({
-  display: 'flex',
-  alignItems: 'flex-start',
-  justifyContent: 'flex-start',
-  padding: `0 ${unitVars.unit.gapPadding['100']} ${unitVars.unit.gapPadding['100']}`,
-  width: '100%',
-  minHeight: '7.2rem',
 });
 
 export const selectedPriceRow = style({

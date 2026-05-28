@@ -140,6 +140,11 @@ const useProductTabController = ({
     resetDraft();
   }, [resetDraft]);
 
+  /** expanded 상태에서 '상품 추가하기' 클릭 시 선택 시트 접기 */
+  const handleAddProductClick = useCallback(() => {
+    setSheetExpanded(false);
+  }, []);
+
   /**
    * "이 상품들로 우리 집 꾸미기" CTA 핸들러
    * - 기능: 선택된 가구 0개 가드, 도면 선택 퍼널 진입 전 funnel reset, entryRoute/preset 세팅 후 로그인 게이트 분기
@@ -200,6 +205,7 @@ const useProductTabController = ({
     handleFilterSheetClose,
     handleFilterApply,
     handleFilterResetClick,
+    handleAddProductClick,
   };
 };
 

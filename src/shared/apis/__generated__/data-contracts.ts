@@ -1176,6 +1176,7 @@ export interface CurationProductMetaResponse {
   nextCursor?: number;
   hasNext?: boolean;
   appliedFilters?: CurationProductAppliedFilterResponse[];
+  isRecommended?: boolean;
 }
 
 export interface CurationProductResponse {
@@ -2032,6 +2033,18 @@ export interface ApiResponseAdminCurationRawProductListResponse {
   data?: AdminCurationRawProductListResponse;
 }
 
+export interface AdminCurationRawProductColorOptionResponse {
+  label?: string;
+  value?: string;
+}
+
+export interface ApiResponseListAdminCurationRawProductColorOptionResponse {
+  /** @format int32 */
+  code?: number;
+  msg?: string;
+  data?: AdminCurationRawProductColorOptionResponse[];
+}
+
 export interface AdminBannerListResponse {
   banners?: AdminBannerResponse[];
 }
@@ -2357,6 +2370,9 @@ export type GetFurnituresByTypeData =
   ApiResponseAdminFurnitureOptionListResponse;
 
 export type GetFurnitureTagsData = ApiResponseAdminFurnitureTagGetDTO;
+
+export type GetColorOptionsData =
+  ApiResponseListAdminCurationRawProductColorOptionResponse;
 
 export type SearchRawProducts1Data =
   ApiResponseAdminBannerRawProductSearchResponse;

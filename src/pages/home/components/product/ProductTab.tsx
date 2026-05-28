@@ -16,6 +16,7 @@ import IntroSection from './IntroSection/IntroSection';
 import * as styles from './ProductTab.css';
 import SearchSection from './SearchSection/SearchSection';
 import SelectedProductSheet from './SelectedProductSheet/SelectedProductSheet';
+import { PRODUCT_BOTTOM_SHEET_COLLAPSED_HEIGHT } from '../../constants/productTab';
 
 const ProductTab = () => {
   /**
@@ -55,6 +56,7 @@ const ProductTab = () => {
     handleFilterSheetClose,
     handleFilterApply,
     handleFilterResetClick,
+    handleAddProductClick,
   } = useProductTabController({
     initialSelectedProducts: productsToBeRestored,
     initialSheetExpanded: hasProductsToBeRestored,
@@ -76,13 +78,15 @@ const ProductTab = () => {
 
       <DragHandleBottomSheet
         open={!filterSheetOpen}
-        collapsedHeight="24rem"
+        collapsedHeight={PRODUCT_BOTTOM_SHEET_COLLAPSED_HEIGHT}
+        expanded={sheetExpanded}
         onExpandedChange={setSheetExpanded}
         contentSlot={
           <SelectedProductSheet
             expanded={sheetExpanded}
             selectedProducts={selectedProducts}
             onRemoveProduct={handleRemoveSelectedProduct}
+            onAddProductClick={handleAddProductClick}
             maxCount={MAX_SELECTED_PRODUCTS}
           />
         }

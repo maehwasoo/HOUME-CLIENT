@@ -10,6 +10,12 @@ interface UseProductHeaderScrollParams {
   filterListRef: React.RefObject<HTMLDivElement | null>;
 }
 
+/** 필터가 상단에 닿기 전 최소 스크롤 (마운트 시 sticky 오발동 방지) */
+const FILTER_STICKY_SCROLL_MIN_PX = 8;
+
+/** scroll-to-top 노출 최소 스크롤 (sticky 활성 + 아래로 내려온 뒤) */
+const SCROLL_TOP_SHOW_MIN_PX = 120;
+
 const useProductHeaderScroll = ({
   searchBarRef,
   filterListRef,
@@ -21,6 +27,8 @@ const useProductHeaderScroll = ({
   /** 외부에 노출할 sticky 상태 */
   const [isFilterSticky, setIsFilterSticky] = useState(false);
   const [showStickySearchBar, setShowStickySearchBar] = useState(false);
+  const [showScrollTopFloatingButton, setShowScrollTopFloatingButton] =
+    useState(false);
 
   /**
    * window 스크롤 이벤트를 구독해 sticky 헤더 상태를 계산한다.
@@ -39,7 +47,11 @@ const useProductHeaderScroll = ({
       const filterTop = filterListRef.current.getBoundingClientRect().top;
       const searchBarTop = searchBarRef.current.getBoundingClientRect().top;
 
-      if (!isFilterStickyRef.current && filterTop <= 0) {
+      if (
+        !isFilterStickyRef.current &&
+        filterTop <= 0 &&
+        currentY > FILTER_STICKY_SCROLL_MIN_PX
+      ) {
         isFilterStickyRef.current = true;
         setIsFilterSticky(true);
       }
@@ -49,9 +61,13 @@ const useProductHeaderScroll = ({
           isFilterStickyRef.current = false;
           setIsFilterSticky(false);
           setShowStickySearchBar(false);
+          setShowScrollTopFloatingButton(false);
           return;
         }
         setShowStickySearchBar(isScrollUp);
+        setShowScrollTopFloatingButton(currentY > SCROLL_TOP_SHOW_MIN_PX);
+      } else {
+        setShowScrollTopFloatingButton(false);
       }
     };
 
@@ -69,7 +85,7 @@ const useProductHeaderScroll = ({
   return {
     isFilterSticky,
     showStickySearchBar,
-    showScrollTopFloatingButton: showStickySearchBar,
+    showScrollTopFloatingButton,
   };
 };
 

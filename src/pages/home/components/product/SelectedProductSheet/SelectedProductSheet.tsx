@@ -1,23 +1,20 @@
 import { useCallback } from 'react';
 
+import { overlay } from 'overlay-kit';
+
+import ProductDetailOverlay from '@pages/home/components/product/ProductPopup/ProductDetailOverlay';
+import type { SelectedProduct } from '@pages/home/types/productTab';
+
 import IconButton from '@shared/components/v2/button/IconButton';
 import Icon from '@shared/components/v2/icon/Icon';
 
 import * as styles from './SelectedProductSheet.css';
 
-interface SelectedProductItem {
-  id: number;
-  title: string;
-  imageUrl?: string;
-  originalPrice: number;
-  discountPrice: number;
-  discountRate: number;
-}
-
 interface SelectedProductSheetProps {
   expanded: boolean;
-  selectedProducts: SelectedProductItem[];
+  selectedProducts: SelectedProduct[];
   onRemoveProduct: (id: number) => void;
+  onAddProductClick?: () => void;
   maxCount?: number;
 }
 
@@ -25,10 +22,10 @@ const SelectedProductSheet = ({
   expanded,
   selectedProducts,
   onRemoveProduct,
+  onAddProductClick,
   maxCount = 6,
 }: SelectedProductSheetProps) => {
   const selectedCount = selectedProducts.length;
-  const hasSelectedProduct = selectedCount > 0;
   const emptyCount = Math.max(maxCount - selectedCount, 0);
   const visibleProducts = selectedProducts.slice(0, maxCount);
   const formatPrice = (price: number) => price.toLocaleString('ko-KR');
@@ -38,6 +35,40 @@ const SelectedProductSheet = ({
       onRemoveProduct(id);
     },
     [onRemoveProduct]
+  );
+
+  /** 상품 목록 찜 API 미연동 — ProductDetailOverlay `SaveInfo`용 no-op */
+  const handleSaveToggleNoop = useCallback(() => {}, []);
+
+  const handleSelectedCardClick = useCallback(
+    (product: SelectedProduct) => {
+      overlay.open(({ unmount }) => (
+        <ProductDetailOverlay
+          unmount={unmount}
+          id={product.id}
+          product={{
+            title: product.title,
+            brand: product.brand,
+            imageUrl: product.imageUrl,
+          }}
+          price={{
+            original: product.originalPrice,
+            discountRate: product.discountRate,
+            discount: product.discountPrice,
+          }}
+          save={{
+            isSaved: false,
+            onToggle: handleSaveToggleNoop,
+          }}
+          shoppingAction={{
+            label: '선택',
+            disabled: true,
+            onClick: () => {},
+          }}
+        />
+      ));
+    },
+    [handleSaveToggleNoop]
   );
 
   return (
@@ -55,7 +86,18 @@ const SelectedProductSheet = ({
         <div className={styles.expandedGrid}>
           {visibleProducts.map((product) => (
             <div key={product.id} className={styles.selectedCardContainer}>
-              <div className={styles.selectedCard}>
+              <div
+                className={styles.selectedCard}
+                role="button"
+                tabIndex={0}
+                onClick={() => handleSelectedCardClick(product)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleSelectedCardClick(product);
+                  }
+                }}
+              >
                 <div className={styles.selectedImageWrap}>
                   {product.imageUrl ? (
                     <img
@@ -93,26 +135,13 @@ const SelectedProductSheet = ({
             </div>
           ))}
           {Array.from({ length: emptyCount }).map((_, index) => (
-            <div key={`empty-${index}`} className={styles.addCard}>
-              {hasSelectedProduct ? (
-                <>
-                  <div className={styles.addImageWrap}>
-                    <span className={styles.addCardContent} aria-hidden>
-                      <Icon name="PlusFill" size="20" />
-                    </span>
-                  </div>
-                  <div className={styles.addInfoPlaceholder}>
-                    <p className={styles.addLabel}>상품 추가하기</p>
-                  </div>
-                </>
-              ) : (
-                <div className={styles.addCardSquare}>
-                  <div className={styles.addCardContent} aria-hidden>
-                    <Icon name="PlusFill" size="20" />
-                    <p className={styles.addLabel}>상품 추가하기</p>
-                  </div>
+            <div key={`empty-${index}`} className={styles.expandedGridSlot}>
+              <div className={styles.addCardSquare} onClick={onAddProductClick}>
+                <div className={styles.addCardContent} aria-hidden>
+                  <Icon name="PlusFill" size="20" />
+                  <p className={styles.addLabel}>상품 추가하기</p>
                 </div>
-              )}
+              </div>
             </div>
           ))}
         </div>
@@ -120,13 +149,25 @@ const SelectedProductSheet = ({
         <div className={styles.compactRow} aria-label="선택한 상품 미리보기">
           {visibleProducts.map((product) => (
             <div key={product.id} className={styles.compactSlotContainer}>
-              <div className={styles.compactSlotFilled}>
+              <div
+                className={styles.compactSlotFilled}
+                role="button"
+                tabIndex={0}
+                aria-label={`${product.title} 상세 보기`}
+                onClick={() => handleSelectedCardClick(product)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleSelectedCardClick(product);
+                  }
+                }}
+              >
                 <div className={styles.compactImageWrap}>
                   {product.imageUrl ? (
                     <img
                       className={styles.compactImage}
                       src={product.imageUrl}
-                      alt={product.title}
+                      alt=""
                     />
                   ) : (
                     <div className={styles.compactImageFallback} aria-hidden>
