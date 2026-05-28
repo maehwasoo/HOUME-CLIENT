@@ -48,7 +48,7 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
     (item) => item.resultType === 'LIST' || item.resultType === 'RECOMMEND'
   );
   const { mutate: toggleJjym } = useJjymMutation();
-  const savedProductIds = useSavedItemsStore((s) => s.savedProductIds);
+  const getSavedState = useSavedItemsStore((s) => s.getSavedState);
 
   // '상품 다시 선택하기' 클릭 핸들러
   // - listData.products → ProductItem[] 매핑 (상품 탭 바텀시트의 '선택한 상품' 카드용 타입)
@@ -117,7 +117,7 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
                     discountRate: item.discountRate!,
                   }}
                   save={{
-                    isSaved: savedProductIds.has(id),
+                    isSaved: getSavedState(id, item.isLiked),
                     onToggle: () => toggleJjym(id),
                   }}
                   link={{
@@ -159,7 +159,7 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
                     discountRate: item.discountRate!,
                   }}
                   save={{
-                    isSaved: savedProductIds.has(id),
+                    isSaved: getSavedState(id, item.isLiked),
                     onToggle: () => toggleJjym(id),
                     count: item.jjymCount!,
                   }}

@@ -10,7 +10,8 @@ export const likeButton = recipe({
     justifyContent: 'center',
     border: 'none',
     borderRadius: unitVars.unit.radius.full,
-    padding: unitVars.unit.gapPadding['300'],
+    width: '6.8rem',
+    height: '6.8rem',
 
     selectors: {
       '&:active': {

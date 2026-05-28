@@ -33,13 +33,18 @@ const StyleDetailPage = () => {
 
   const {
     data: styleDetailData,
-    isFetching,
+    isLoading,
     isError,
     refetch,
   } = useGetStyleDetailQuery(Number(styleId));
 
   // 찜 해제 토글
-  const { mutate: toggleJjym } = useJjymMutation();
+  const { mutate: toggleJjym } = useJjymMutation({
+    savedToastType: 'move',
+    onSavedAction: () => {
+      navigate(ROUTES.MYPAGE, { state: { activeTab: 'savedItems' } });
+    },
+  });
 
   const handleToggleSave = (id: number) => {
     toggleJjym(id);
@@ -72,7 +77,7 @@ const StyleDetailPage = () => {
         onBackClick={() => navigate(-1)}
       />
       <div className={styles.container}>
-        {isFetching ? (
+        {isLoading ? (
           <Loading />
         ) : isError ? (
           <InlineError

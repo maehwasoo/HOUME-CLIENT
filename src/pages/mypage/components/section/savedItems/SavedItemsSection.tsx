@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useGetJjymListQuery } from '@pages/mypage/apis/queries/useGetJjymListQuery';
 import { logMyPageClickBtnFurnitureCard } from '@pages/mypage/utils/analytics';
 
+import { useSavedItemsStore } from '@store/useSavedItemsStore';
+
 import { useJjymMutation } from '@apis/mutations/useJjymMutation';
 
 import { SESSION_STORAGE_KEYS } from '@constants/bottomSheet';
@@ -17,12 +19,21 @@ import EmptyStateSection from '../emptyState/EmptyStateSection';
 const SavedItemsSection = () => {
   // 스크롤 포커스 id 가져오기
   const [focusItemId, setFocusItemId] = useState<string | null>(null);
+  const [isSavedItemsSynced, setIsSavedItemsSynced] = useState(false);
+  const savedProductIds = useSavedItemsStore((state) => state.savedProductIds);
+  const setSavedProductIds = useSavedItemsStore(
+    (state) => state.setSavedProductIds
+  );
 
   // 찜한 목록 조회
   const { data: savedItems = [], isFetched } = useGetJjymListQuery();
 
   // 찜 해제 토글
-  const { mutate: toggleJjym } = useJjymMutation();
+  const { mutate: toggleJjym } = useJjymMutation({
+    savedToastType: 'none',
+    removedToastType: 'undo',
+    invalidateSavedItemsList: false,
+  });
 
   const handleToggleSave = (id: number) => {
     toggleJjym(id);
@@ -39,6 +50,13 @@ const SavedItemsSection = () => {
       sessionStorage.removeItem(SESSION_STORAGE_KEYS.FOCUS_ITEM_ID);
     }
   }, []);
+
+  useEffect(() => {
+    if (!isFetched) return;
+
+    setSavedProductIds(savedItems.map((item) => item.rawProductId));
+    setIsSavedItemsSynced(true);
+  }, [isFetched, savedItems, setSavedProductIds]);
 
   // 데이터 로드 완료 후 스크롤 실행
   useEffect(() => {
@@ -81,7 +99,9 @@ const SavedItemsSection = () => {
                   discountRate: item.discountRate,
                 }}
                 save={{
-                  isSaved: true,
+                  isSaved: isSavedItemsSynced
+                    ? savedProductIds.has(item.rawProductId)
+                    : true,
                   onToggle: () => handleToggleSave(item.rawProductId),
                   count: item.jjymCount,
                 }}

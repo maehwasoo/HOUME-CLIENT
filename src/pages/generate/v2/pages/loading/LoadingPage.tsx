@@ -4,7 +4,6 @@ import { overlay } from 'overlay-kit';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Navigate, useNavigate } from 'react-router-dom';
 
-import type { CarouselItem } from '@pages/generate/types/generate';
 import { useStackDataQuery } from '@pages/generate/v2/apis/queries/useStackDataQuery';
 import LikeButton from '@pages/generate/v2/components/likeButton/LikeButton';
 import { useGenerateStore } from '@pages/generate/v2/stores/useGenerateStore';
@@ -13,6 +12,8 @@ import { useFunnelStore } from '@pages/imageSetup/stores/useFunnelStore';
 import { ROUTES } from '@routes/paths';
 
 import { useImageFlowStore } from '@store/useImageFlowStore';
+
+import type { GetCarouselResponseDTO } from '@apis/__generated__/data-contracts';
 
 import TestImg from '@assets/v2/images/TestImg.png';
 
@@ -129,31 +130,42 @@ const LoadingPage = () => {
   const isRequestValid = requestState.kind !== 'invalid';
 
   // 캐러셀 페이지네이션 (무한 스크롤) - 스택 UI
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState<number | undefined>(undefined);
+  const [nextCursor, setNextCursor] = useState<number | undefined>(undefined);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // 캐러셀 애니메이션 상태 - 스택 UI
   const [animating, setAnimating] = useState(false);
   const [frontSlot, setFrontSlot] = useState<'A' | 'B'>('A');
-  const [slotAImage, setSlotAImage] = useState<CarouselItem | null>(null);
-  const [slotBImage, setSlotBImage] = useState<CarouselItem | null>(null);
+  const [slotAImage, setSlotAImage] = useState<GetCarouselResponseDTO | null>(
+    null
+  );
+  const [slotBImage, setSlotBImage] = useState<GetCarouselResponseDTO | null>(
+    null
+  );
 
   // 애니메이션 타이머 정리용 ref
   const transitionTimeoutRef = useRef<number | null>(null);
 
   const {
-    data: currentImages,
+    data: currentStack,
     isPending,
     isError,
   } = useStackDataQuery(currentPage, {
     enabled: isRequestValid,
-    onSuccess: () => setCurrentIndex(0), // 새 페이지 로드 시 첫 이미지부터 시작
+    onSuccess: (data) => {
+      setCurrentIndex(0);
+      setNextCursor(data.nextCursor ?? undefined);
+    },
     onError: (err) => handleError(err, 'loading'),
   });
 
-  const { data: nextImages } = useStackDataQuery(currentPage + 1, {
-    enabled: !!currentImages && isRequestValid,
+  const { data: nextStack } = useStackDataQuery(nextCursor, {
+    enabled: nextCursor !== undefined && isRequestValid,
   });
+
+  const currentImages = currentStack?.carousels ?? [];
+  const nextImages = nextStack?.carousels ?? [];
 
   // 스택 UI 좋아요 (찜하기 연동됨)
   const { mutate: postLike, isPending: isJjymLoading } =
@@ -273,6 +285,7 @@ const LoadingPage = () => {
     setIsTooltipOpen(false);
 
     if (isLike) {
+      if (displayCurrentImage?.carouselId == null) return;
       postLike(displayCurrentImage.carouselId, {
         onSuccess: () => {
           goToNext();
@@ -311,8 +324,8 @@ const LoadingPage = () => {
       }
       // 마지막 이미지면 다음 페이지로 이동
       else {
-        if (nextImages && nextImages.length > 0) {
-          setCurrentPage((prev) => prev + 1);
+        if (nextImages && nextImages.length > 0 && nextCursor !== undefined) {
+          setCurrentPage(nextCursor);
           setCurrentIndex(0);
         } else {
           // console.log('마지막 페이지 도달');
@@ -363,7 +376,7 @@ const LoadingPage = () => {
                   </div>
                 ) : (
                   <>
-                    {slotAImage && (
+                    {slotAImage?.url && (
                       <div className={slotAClassName}>
                         <img
                           src={slotAImage.url}
@@ -377,7 +390,7 @@ const LoadingPage = () => {
                       </div>
                     )}
 
-                    {slotBImage && (
+                    {slotBImage?.url && (
                       <div className={slotBClassName}>
                         <img
                           src={slotBImage.url}

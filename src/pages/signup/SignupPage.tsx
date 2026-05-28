@@ -72,6 +72,10 @@ const SignupPage = () => {
   // signupToken이 없으면 useEffect가 LOGIN으로 redirect하므로 가드 비활성화
   useExitBlocker({
     enabled: !!signupToken,
+    shouldBlockNavigation: ({ nextLocation }) => {
+      if (nextLocation.pathname === ROUTES.WELCOME) return false;
+      return true;
+    },
     onBlocked: ({ proceed, reset }) => {
       overlay.open(({ unmount }) => {
         const close = () => {

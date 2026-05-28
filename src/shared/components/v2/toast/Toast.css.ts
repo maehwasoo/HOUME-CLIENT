@@ -61,7 +61,6 @@ export const toastStyle: CSSProperties = {
   boxShadow: 'none',
   backgroundColor: 'transparent',
   width: '100%',
-  maxWidth: unitVars.unit.dimension.wMax,
 };
 
 export const testStyle = style({

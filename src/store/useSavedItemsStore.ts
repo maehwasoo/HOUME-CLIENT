@@ -6,18 +6,22 @@ import { create } from 'zustand';
 
 interface SavedItemsState {
   savedProductIds: Set<number>;
+  touchedProductIds: Set<number>;
   toggleSaveProduct: (rawProductId: number) => void;
+  getSavedState: (rawProductId: number, fallback?: boolean) => boolean;
   setSavedProductIds: (ids: number[] | Set<number>) => void;
 }
 
 export const useSavedItemsStore = create<SavedItemsState>((set, get) => ({
   // 초기 상태 (rawProductId Set)
   savedProductIds: new Set(),
+  touchedProductIds: new Set(),
 
   // 상품ID(rawProductId) 기준으로 저장 상태 토글
   toggleSaveProduct: (rawProductId) =>
     set((state) => {
       const newSavedIds = new Set(state.savedProductIds);
+      const newTouchedIds = new Set(state.touchedProductIds);
 
       if (newSavedIds.has(rawProductId)) {
         newSavedIds.delete(rawProductId); // 저장 취소
@@ -25,8 +29,19 @@ export const useSavedItemsStore = create<SavedItemsState>((set, get) => ({
         newSavedIds.add(rawProductId); // 저장
       }
 
-      return { savedProductIds: newSavedIds };
+      newTouchedIds.add(rawProductId);
+
+      return { savedProductIds: newSavedIds, touchedProductIds: newTouchedIds };
     }),
+
+  // 찜 상태 읽기
+  getSavedState: (rawProductId, fallback = false) => {
+    const { savedProductIds, touchedProductIds } = get();
+
+    return touchedProductIds.has(rawProductId)
+      ? savedProductIds.has(rawProductId)
+      : fallback;
+  },
 
   // 서버 찜 목록으로 전역 상태 초기화(새로고침 시 하트 복구)
   setSavedProductIds: (ids) => {

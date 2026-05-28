@@ -65,7 +65,7 @@ const CurationResult = ({
   const products = productsData?.products ?? [];
   const categories = categoriesData?.categories ?? [];
   const { mutate: toggleJjym } = useJjymMutation();
-  const savedProductIds = useSavedItemsStore((s) => s.savedProductIds);
+  const getSavedState = useSavedItemsStore((s) => s.getSavedState);
 
   const showCategoriesEmptyUnexpected =
     !isCategoriesLoading && !isCategoriesError && categories.length === 0;
@@ -184,7 +184,7 @@ const CurationResult = ({
                           discountRate: p.discountRate,
                         }}
                         save={{
-                          isSaved: savedProductIds.has(rawProductId),
+                          isSaved: getSavedState(rawProductId, p.isLiked),
                           onToggle: () => toggleJjym(rawProductId),
                         }}
                         link={{

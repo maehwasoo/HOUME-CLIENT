@@ -34,7 +34,7 @@ export const carouselSection = style({
 export const buttonGroup = style({
   display: 'flex',
   justifyContent: 'center',
-  gap: unitVars.unit.gapPadding['200'],
+  gap: unitVars.unit.gapPadding['500'],
   padding: unitVars.unit.gapPadding['500'],
   width: '100%',
 });

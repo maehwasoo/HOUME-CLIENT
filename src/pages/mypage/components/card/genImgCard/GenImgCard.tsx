@@ -1,13 +1,18 @@
 import { useState } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
+import { logMyPageClickBtnFurnitureCard } from '@pages/mypage/utils/analytics';
+
+import { ROUTES } from '@routes/paths';
+
 import type { UsedProductResponse } from '@apis/__generated__/data-contracts';
+import { useJjymMutation } from '@apis/mutations/useJjymMutation';
 
 import TestImage from '@assets/v2/images/TestImg.png';
 
-import { logMyPageClickBtnFurnitureCard } from '@/pages/mypage/utils/analytics';
-import { useJjymMutation } from '@/shared/apis/mutations/useJjymMutation';
-import TextButton from '@/shared/components/v2/btnText/TextButton';
-import ListProductCard from '@/shared/components/v2/productCard/ListProductCard';
+import TextButton from '@components/v2/btnText/TextButton';
+import ListProductCard from '@components/v2/productCard/ListProductCard';
 
 import * as styles from './GenImgCard.css';
 
@@ -36,6 +41,7 @@ const GenImgCard = ({
 }: GenImgCardProps) => {
   const isListType = cardType === 'list';
   const [isImageReady, setIsImageReady] = useState(isLoaded); // 이미지 로드 완료 여부
+  const navigate = useNavigate();
 
   const handleImageLoad = () => {
     setIsImageReady(true);
@@ -43,7 +49,12 @@ const GenImgCard = ({
   };
 
   // 찜 토글
-  const { mutate: toggleJjym } = useJjymMutation();
+  const { mutate: toggleJjym } = useJjymMutation({
+    savedToastType: 'stored',
+    onSavedAction: () => {
+      navigate(ROUTES.MYPAGE, { state: { activeTab: 'savedItems' } });
+    },
+  });
 
   const handleToggleSave = (id: number) => {
     toggleJjym(id);
