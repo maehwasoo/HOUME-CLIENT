@@ -52,7 +52,7 @@ export const titleMeta = style({
 });
 
 export const swiperContainer = style({
-  aspectRatio: '1 / 1',
+  aspectRatio: '3 / 2',
   position: 'relative',
   borderRadius: unitVars.unit.radius['600'],
   width: '100%',
@@ -60,9 +60,9 @@ export const swiperContainer = style({
 });
 
 export const slideImage = style({
+  aspectRatio: '3 / 2',
   objectFit: 'cover',
   width: '100%',
-  height: '100%',
 });
 
 const navButtonBase = style({

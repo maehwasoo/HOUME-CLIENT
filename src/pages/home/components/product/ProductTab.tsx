@@ -1,10 +1,13 @@
 import { useEffect, useMemo } from 'react';
 
+import { overlay } from 'overlay-kit';
+
 import ProductFilterSheet from '@pages/home/components/product/ProductFilterSheet/ProductFilterSheet';
 import {
   MAX_SELECTED_PRODUCTS,
   useProductTabController,
 } from '@pages/home/hooks/useProductTabController';
+import { consumeReopenProduct } from '@pages/home/utils/productDetailOverlayReopen';
 
 import { useImageFlowStore } from '@store/useImageFlowStore';
 
@@ -13,6 +16,7 @@ import DragHandleBottomSheet from '@shared/components/v2/bottomSheet/DragHandleB
 import ActionButton from '@shared/components/v2/button/actionButton/ActionButton';
 
 import IntroSection from './IntroSection/IntroSection';
+import ProductDetailOverlay from './ProductPopup/ProductDetailOverlay';
 import * as styles from './ProductTab.css';
 import SearchSection from './SearchSection/SearchSection';
 import SelectedProductSheet from './SelectedProductSheet/SelectedProductSheet';
@@ -62,6 +66,39 @@ const ProductTab = () => {
     initialSheetExpanded: hasProductsToBeRestored,
     resetFiltersOnMount: hasProductsToBeRestored,
   });
+
+  // 로그인 게이트로 상품 상세 모달이 닫힌 채 복귀한 경우, 저장된 정보로 그 모달을 다시 띄움
+  // 리스트(검색/필터/무한스크롤) 상태에 의존하지 않으므로 깊은 페이지/검색 결과의 상품도 복원됨
+  useEffect(() => {
+    const reopen = consumeReopenProduct();
+    if (!reopen) return;
+
+    overlay.open(({ unmount }) => (
+      <ProductDetailOverlay
+        unmount={unmount}
+        id={reopen.id}
+        product={reopen.product}
+        price={reopen.price}
+        link={{ href: reopen.linkHref }}
+        save={{ isSaved: false, onToggle: () => {} }}
+        shoppingAction={{
+          label: '선택',
+          disabled: selectedProducts.some((p) => p.id === reopen.id),
+          onClick: () =>
+            handleSelectProduct({
+              id: reopen.id,
+              title: reopen.product.title,
+              brand: reopen.product.brand ?? '',
+              imageUrl: reopen.product.imageUrl,
+              originalPrice: reopen.price?.original ?? 0,
+              discountPrice: reopen.price?.discount ?? 0,
+              discountRate: reopen.price?.discountRate ?? 0,
+            }),
+        }}
+      />
+    ));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className={styles.container}>

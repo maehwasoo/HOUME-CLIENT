@@ -120,12 +120,7 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
                     isSaved: getSavedState(id, item.isLiked),
                     onToggle: () => toggleJjym(id),
                   }}
-                  link={{
-                    href,
-                    onClick: () =>
-                      href &&
-                      window.open(href, '_blank', 'noopener,noreferrer'),
-                  }}
+                  link={{ href }}
                 />
               );
             })}
@@ -163,12 +158,7 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
                     onToggle: () => toggleJjym(id),
                     count: item.jjymCount!,
                   }}
-                  link={{
-                    href,
-                    onClick: () =>
-                      href &&
-                      window.open(href, '_blank', 'noopener,noreferrer'),
-                  }}
+                  link={{ href }}
                 />
               );
             })}

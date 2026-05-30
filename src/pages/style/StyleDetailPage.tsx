@@ -1,10 +1,9 @@
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { ROUTES } from '@routes/paths';
 
 import { ENTRY_ROUTE, useImageFlowStore } from '@store/useImageFlowStore';
 import { useSavedItemsStore } from '@store/useSavedItemsStore';
-import { useUserStore } from '@store/useUserStore';
 
 import { useJjymMutation } from '@apis/mutations/useJjymMutation';
 
@@ -17,7 +16,8 @@ import TitleNavBar from '@components/v2/navBar/TitleNavBar';
 import ListCardProduct from '@components/v2/productCard/ListProductCard';
 import StyleCard from '@components/v2/styleCard/StyleCard';
 
-import { setLoginRedirect } from '@utils/loginRedirect';
+import { useLoginGate } from '@hooks/useLoginGate';
+
 import { normalizeColorHexes } from '@utils/normalizeColorHexes';
 
 import { useGetStyleDetailQuery } from './apis/useGetStyleDetailQuery';
@@ -26,8 +26,7 @@ import * as styles from './StyleDetailPage.css';
 const StyleDetailPage = () => {
   const { styleId } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
-  const isLoggedIn = !!useUserStore((state) => state.accessToken);
+  const { requireLogin } = useLoginGate();
 
   const savedProductIds = useSavedItemsStore((state) => state.savedProductIds);
 
@@ -60,13 +59,7 @@ const StyleDetailPage = () => {
       preset: { type: 'style', styleId: parsedId },
     });
 
-    if (isLoggedIn) {
-      navigate(ROUTES.IMAGE_SETUP);
-    } else {
-      // pathname과 쿼리 파라미터 모두 저장
-      setLoginRedirect(location.pathname + location.search);
-      navigate(ROUTES.LOGIN);
-    }
+    requireLogin(() => navigate(ROUTES.IMAGE_SETUP));
   };
 
   return (

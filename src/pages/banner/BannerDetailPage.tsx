@@ -1,13 +1,12 @@
 import { useEffect, useId, useState } from 'react';
 
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import { useBannerDetailQuery } from '@pages/home/apis/queries/useBannerDetailQuery';
 
 import { ROUTES } from '@routes/paths';
 
 import { ENTRY_ROUTE, useImageFlowStore } from '@store/useImageFlowStore';
-import { useUserStore } from '@store/useUserStore';
 
 import ActionButton from '@shared/components/v2/button/actionButton/ActionButton';
 import Icon from '@shared/components/v2/icon/Icon';
@@ -16,7 +15,7 @@ import TitleNavBar from '@shared/components/v2/navBar/TitleNavBar';
 import InlineError from '@components/inlineError/InlineError';
 import Loading from '@components/loading/Loading';
 
-import { setLoginRedirect } from '@utils/loginRedirect';
+import { useLoginGate } from '@hooks/useLoginGate';
 
 import StyleCard from '@/shared/components/v2/styleCard/StyleCard';
 
@@ -24,11 +23,10 @@ import * as styles from './BannerDetailPage.css';
 
 const BannerDetailPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { requireLogin } = useLoginGate();
   const { bannerId = '' } = useParams<{ bannerId: string }>();
   const questionId = useId();
   const [selectedAnswerId, setSelectedAnswerId] = useState<number | null>(null);
-  const isLoggedIn = !!useUserStore((state) => state.accessToken);
   const parsedBannerId = Number(bannerId);
   const {
     data: bannerDetail,
@@ -88,13 +86,7 @@ const BannerDetailPage = () => {
       },
     });
 
-    if (isLoggedIn) {
-      navigate(ROUTES.IMAGE_SETUP);
-    } else {
-      // pathname과 쿼리 파라미터 모두 저장
-      setLoginRedirect(location.pathname + location.search);
-      navigate(ROUTES.LOGIN);
-    }
+    requireLogin(() => navigate(ROUTES.IMAGE_SETUP));
   };
 
   return (

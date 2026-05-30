@@ -9,6 +9,8 @@ import type {
 
 import CardImage from '@assets/images/cardExImg.svg?url';
 
+import { useProductLink } from '@hooks/useProductLink';
+
 import {
   createCardClickHandler,
   getColorChips,
@@ -44,6 +46,7 @@ const ListProductCard = ({
 }: ListProductCardProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const linkHref = link?.href;
+  const { openProductLink } = useProductLink();
 
   useEffect(() => {
     setIsLoaded(false);
@@ -53,22 +56,14 @@ const ListProductCard = ({
   const { originalPriceText, discountPriceText, discountRateText } =
     getPriceTexts(price?.original, price?.discount, price?.discountRate);
 
+  const handleLinkButtonClick = () => openProductLink(linkHref, link?.onClick);
+
   const { handleWrapperClick, handleWrapperKeyDown } = createCardClickHandler({
     onCardClick,
     enableWholeCardLink,
     linkHref,
+    onNavigate: handleLinkButtonClick,
   });
-
-  const handleLinkButtonClick = () => {
-    if (link?.onClick) {
-      link.onClick();
-      return;
-    }
-
-    if (linkHref && typeof window !== 'undefined') {
-      window.open(linkHref, '_blank', 'noopener,noreferrer');
-    }
-  };
 
   return (
     <div

@@ -9,6 +9,8 @@ import type {
 
 import CardImage from '@assets/images/cardExImg.svg?url';
 
+import { useProductLink } from '@hooks/useProductLink';
+
 import { getColorChips, getPriceTexts } from '@utils/productCardUtils';
 
 export interface ProductDetailCardProps {
@@ -26,6 +28,7 @@ const ProductDetailCard = ({
   link,
   linkHrefOverride,
 }: ProductDetailCardProps) => {
+  const { openProductLink } = useProductLink();
   const { visibleColors, extraColorCount } = getColorChips(product.colorHexes);
   const { originalPriceText, discountPriceText, discountRateText } =
     getPriceTexts(price?.original, price?.discount, price?.discountRate);
@@ -52,13 +55,7 @@ const ProductDetailCard = ({
               size="XS"
               leftIcon="Link"
               aria-label="공식 사이트로 이동"
-              onClick={() => {
-                if (link?.onClick) {
-                  link.onClick();
-                  return;
-                }
-                window.open(linkHref, '_blank', 'noopener,noreferrer');
-              }}
+              onClick={() => openProductLink(linkHref, link?.onClick)}
             >
               {link?.label || '사이트'}
             </ActionButton>

@@ -1,3 +1,5 @@
+import { useRef, useState } from 'react';
+
 import { overlay } from 'overlay-kit';
 
 import { useActivityInfo } from '@pages/imageSetup/hooks/activityInfo/useActivityInfo';
@@ -8,6 +10,8 @@ import ActionButton from '@components/v2/button/actionButton/ActionButton';
 import Chip from '@components/v2/chip/Chip';
 import Icon from '@components/v2/icon/Icon';
 import TextHeading from '@components/v2/textHeading/TextHeading';
+
+import { useExitBlocker } from '@hooks/useExitBlocker';
 
 import * as styles from './ActivityInfo.css';
 import ActivityTypeSheet from './ActivityTypeSheet';
@@ -35,19 +39,41 @@ const ActivityInfo = ({ context }: ActivityInfoProps) => {
     handleSubmit,
   } = useActivityInfo(context);
 
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const sheetIdRef = useRef<string | null>(null);
+
+  const closeSheet = () => {
+    if (sheetIdRef.current) {
+      overlay.unmount(sheetIdRef.current);
+      sheetIdRef.current = null;
+    }
+    setIsSheetOpen(false);
+  };
+
+  // 바텀시트 열린 동안 뒤로가기(NavBar/브라우저/모바일 스와이프) 가로채서
+  // 페이지 이동 대신 바텀시트만 닫기
+  useExitBlocker({
+    enabled: isSheetOpen,
+    onBlocked: ({ reset }) => {
+      closeSheet();
+      reset();
+    },
+  });
+
   const handleActivityTriggerClick = () => {
-    overlay.open(({ unmount }) => (
+    sheetIdRef.current = overlay.open(() => (
       <ActivityTypeSheet
         open
         activities={activities}
         selectedActivityCode={activitySelection.selectedActivityItem?.code}
         onConfirm={(activityCode) => {
           setFormData((prev) => ({ ...prev, activity: activityCode }));
-          unmount();
+          closeSheet();
         }}
-        onClose={unmount}
+        onClose={closeSheet}
       />
     ));
+    setIsSheetOpen(true);
   };
 
   if (isError) return <InlineError onRetry={refetch} />;

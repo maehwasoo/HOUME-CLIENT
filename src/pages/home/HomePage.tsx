@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { useMyPageUserQuery } from '@pages/mypage/apis/queries/useMyPageUserQuery';
 
@@ -34,6 +34,8 @@ const HomePage = () => {
   const isLoggedIn = !!accessToken;
   const location = useLocation();
   const homeState = location.state as HomeLocationState | undefined;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
 
   // 외부 진입(로그인 복귀/ResultPage 재선택) 흐름 감지:
   // useImageFlowStore.preset.type === 'product'이고 productsToBeRestored이 비어있지 않으면
@@ -45,9 +47,25 @@ const HomePage = () => {
   }, []);
 
   const [activeMenuTab, setActiveMenuTab] = useState<HomeMenuTab>(
-    homeState?.activeTab ??
-      (presetHasProductsToBeRestored ? 'product' : 'explore')
+    tabParam === 'product' || tabParam === 'explore'
+      ? tabParam
+      : (homeState?.activeTab ??
+          (presetHasProductsToBeRestored ? 'product' : 'explore'))
   );
+
+  // 탭 전환 시 URL ?tab= 에 반영 → 로그인 게이트로 이탈했다 복귀해도 같은 탭으로 돌아옴
+  const handleTabChange = (tab: HomeMenuTab) => {
+    setActiveMenuTab(tab);
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (tab === 'product') next.set('tab', 'product');
+        else next.delete('tab');
+        return next;
+      },
+      { replace: true }
+    );
+  };
 
   const scrollDepth50Sent = useRef(false);
   const scrollDepth100Sent = useRef(false);
@@ -127,7 +145,7 @@ const HomePage = () => {
         ]}
         activeTab={activeMenuTab}
         sticky={activeMenuTab === 'explore'}
-        onTabChange={setActiveMenuTab}
+        onTabChange={handleTabChange}
       />
       {activeMenuTab === 'explore' && (
         <ExploreTab exploreSeedBannerId={homeState?.exploreSeedBannerId} />

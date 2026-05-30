@@ -13,6 +13,8 @@ import { useToast } from '@components/v2/toast/useToast';
 import { API_ENDPOINT } from '@constants/apiEndpoints';
 import { TOAST_ACTION_LABEL, TOAST_MESSAGE } from '@constants/toastMessage';
 
+import { useLoginGate } from '@hooks/useLoginGate';
+
 import { invalidateJjymRelatedQueries } from '@utils/invalidateJjymQueries';
 
 import type { AxiosError } from 'axios';
@@ -55,6 +57,7 @@ const getSavedToastContent = (type: JjymSavedToast) => {
 export const useJjymMutation = (options?: UseJjymMutationOptions) => {
   const toggleSaveProduct = useSavedItemsStore((s) => s.toggleSaveProduct);
   const { notify } = useToast();
+  const { requireLogin } = useLoginGate();
   const savedToastType = options?.savedToastType ?? 'move';
   const removedToastType = options?.removedToastType ?? 'info';
   const shouldInvalidateSavedItemsList =
@@ -76,7 +79,7 @@ export const useJjymMutation = (options?: UseJjymMutationOptions) => {
     );
   };
 
-  return useMutation<SaveItemsResponse, AxiosError, number>({
+  const mutation = useMutation<SaveItemsResponse, AxiosError, number>({
     mutationKey: ['jjym'],
     mutationFn: (rawProductId) => postJjym({ rawProductId }),
 
@@ -143,4 +146,11 @@ export const useJjymMutation = (options?: UseJjymMutationOptions) => {
       toggleSaveProduct(rawProductId);
     },
   });
+
+  // 찜 토글 전 로그인 게이트: 비로그인이면 mutate 미실행 → onMutate 낙관적 업데이트도 일어나지 않음
+  const mutate: typeof mutation.mutate = (rawProductId, mutateOptions) => {
+    requireLogin(() => mutation.mutate(rawProductId, mutateOptions));
+  };
+
+  return { ...mutation, mutate };
 };

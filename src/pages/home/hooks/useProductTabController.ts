@@ -16,11 +16,10 @@ import { useFunnelStore } from '@pages/imageSetup/stores/useFunnelStore';
 import { ROUTES } from '@routes/paths';
 
 import { ENTRY_ROUTE, useImageFlowStore } from '@store/useImageFlowStore';
-import { useUserStore } from '@store/useUserStore';
 
 import { useToast } from '@components/toast/useToast';
 
-import { setLoginRedirect } from '@utils/loginRedirect';
+import { useLoginGate } from '@hooks/useLoginGate';
 
 /**
  * 필터 상단 칩 선택 상태 기본값
@@ -54,6 +53,7 @@ const useProductTabController = ({
 }: UseProductTabControllerOptions = {}) => {
   const navigate = useNavigate();
   const { notify } = useToast();
+  const { requireLogin } = useLoginGate();
 
   /** 바텀시트/칩 UI 상태 */
   const [sheetExpanded, setSheetExpanded] = useState(initialSheetExpanded);
@@ -169,17 +169,9 @@ const useProductTabController = ({
       },
     });
 
-    const isLoggedIn = !!useUserStore.getState().accessToken;
-    if (!isLoggedIn) {
-      setLoginRedirect(ROUTES.HOME);
-      navigate(ROUTES.LOGIN);
-      return;
-
-      // 이후 로그인 복귀 시 HOME으로 이동 -> HomePage가 preset.productsToBeRestored 감지해 상품 탭으로 이동, ProductTab이 store 값을 useState 초기값으로 복원
-    }
-
-    navigate(ROUTES.IMAGE_SETUP);
-  }, [navigate, notify, selectedProducts]);
+    // 로그인 복귀 시 HOME으로 이동 -> HomePage가 preset.productsToBeRestored 감지해 상품 탭으로 이동, ProductTab이 store 값을 useState 초기값으로 복원
+    requireLogin(() => navigate(ROUTES.IMAGE_SETUP));
+  }, [navigate, notify, requireLogin, selectedProducts]);
 
   /** ProductTab에서 사용할 공개 값 */
   return {

@@ -129,7 +129,8 @@ const useProductFilterState = () => {
     [colorMeta.allId, furnitureMeta.allId, priceMeta.allId]
   );
 
-  /** allId 확정/변경 시 draft를 정규화 */
+  // allId 확정/변경 시 draft 정규화.
+  // 주의(무한루프): allIds 참조 안정 전제(useFilterListQuery staleTime:Infinity). 불안정해지면 setDraftValues가 매 렌더 새 객체 → 루프. 그땐 값 동일 시 set 생략 가드 추가.
   useEffect(() => {
     setDraftValues((prev) =>
       toDraftFromExternal(toExternalFromDraft(prev, allIds), allIds)

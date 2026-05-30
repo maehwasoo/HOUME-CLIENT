@@ -6,11 +6,12 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { ROUTES } from '@routes/paths';
 
 import { getNextFunnelStep, useImageFlowStore } from '@store/useImageFlowStore';
-import { useUserStore } from '@store/useUserStore';
 
 import FeatureErrorFallback from '@components/errorFallback/FeatureErrorFallback';
 
-import { getLoginRedirect, setLoginRedirect } from '@utils/loginRedirect';
+import { useLoginGate } from '@hooks/useLoginGate';
+
+import { getLoginRedirect } from '@utils/loginRedirect';
 
 import FunnelLayout from './components/layout/FunnelLayout';
 import { useImageSetup } from './hooks/useImageSetup';
@@ -44,6 +45,7 @@ const StepWrapper = ({ step, onMount, children }: StepWrapperProps) => {
 const ImageSetupPage = () => {
   const funnel = useImageSetup();
   const navigate = useNavigate();
+  const { requireLogin } = useLoginGate();
   const [currentStep, setCurrentStep] = useState<StepType>('FloorPlanSelect');
 
   // 퍼널 데이터 정리 방식
@@ -98,18 +100,9 @@ const ImageSetupPage = () => {
                 const nextStep = getNextFunnelStep(entryRoute);
 
                 if (nextStep === 'INTERIOR_STYLE') {
-                  // 풀퍼널 (경로 1, 3): 로그인 체크 후 다음 스텝으로 이동
-                  const isLoggedIn = !!useUserStore.getState().accessToken;
-
-                  if (!isLoggedIn) {
-                    // 미로그인: 도면 선택값은 useFunnelStore persist로 유지됨
-                    setLoginRedirect(ROUTES.IMAGE_SETUP);
-                    navigate(ROUTES.LOGIN);
-                    return;
-                  }
-
-                  // 퍼널 내에서 다음 스텝(InteriorStyle)으로 이동
-                  history.push('InteriorStyle', data);
+                  // 풀퍼널 (경로 1, 3): 로그인 게이트 통과 후 다음 스텝(InteriorStyle)으로 이동
+                  // 미로그인 시 도면 선택값은 useFunnelStore persist로 유지됨
+                  requireLogin(() => history.push('InteriorStyle', data));
                 } else {
                   // 숏퍼널(경로 2, 4, 5): FloorPlanSelect가 마지막 스텝 → 바로 이미지 생성으로 이동
                   // payload는 LoadingPage가 useImageFlowStore.preset + useFunnelStore.floorPlan으로 조립

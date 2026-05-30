@@ -187,12 +187,7 @@ const CurationResult = ({
                           isSaved: getSavedState(rawProductId, p.isLiked),
                           onToggle: () => toggleJjym(rawProductId),
                         }}
-                        link={{
-                          href,
-                          onClick: () =>
-                            href &&
-                            window.open(href, '_blank', 'noopener,noreferrer'),
-                        }}
+                        link={{ href }}
                       />
                     );
                   })

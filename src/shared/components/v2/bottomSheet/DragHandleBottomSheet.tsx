@@ -56,7 +56,12 @@ const DragHandleBottomSheet = ({
 }: DragHandleBottomSheetProps) => {
   const isPersistent = collapsedHeight !== undefined;
 
-  const [expanded, setExpanded] = useState(!isPersistent);
+  // 내부 expanded 초기값을 부모 prop과 똑같이 맞춤
+  // 마운트 시 내부(expanded)와 부모(expandedFromParent)가 어긋나면,
+  // 부모→자식(아래 effect)/자식→부모(onExpandedChange effect) 양방향 동기화가
+  // 서로 반대값으로 끊임없이 진동 -> Maximum update depth 오류 발생
+  // expandedFromParent 미전달(Dismissible 모드)이면 기존과 동일하게 !isPersistent.
+  const [expanded, setExpanded] = useState(expandedFromParent ?? !isPersistent);
 
   useEffect(() => {
     if (expandedFromParent !== undefined) {

@@ -39,10 +39,13 @@ export const createCardClickHandler = ({
   onCardClick,
   enableWholeCardLink,
   linkHref,
+  onNavigate,
 }: {
   onCardClick?: (area?: CardClickArea) => void;
   enableWholeCardLink: boolean;
   linkHref?: string;
+  // 카드 본문(이미지/제목) 클릭 시 실제 이동 동작. 로그인 게이트 + 새 탭 열기는 호출부(useProductLink)가 담당
+  onNavigate?: () => void;
 }) => ({
   handleWrapperClick: (event: React.MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement | null;
@@ -53,18 +56,16 @@ export const createCardClickHandler = ({
 
     onCardClick?.(resolvedArea);
 
-    if (!enableWholeCardLink || !linkHref || typeof window === 'undefined')
-      return;
-    window.open(linkHref, '_blank', 'noopener,noreferrer');
+    if (!enableWholeCardLink || !linkHref) return;
+    onNavigate?.();
   },
 
   handleWrapperKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (!enableWholeCardLink || !linkHref || typeof window === 'undefined')
-      return;
+    if (!enableWholeCardLink || !linkHref) return;
     if (event.key !== 'Enter' && event.key !== ' ') return;
 
     event.preventDefault();
     onCardClick?.('card');
-    window.open(linkHref, '_blank', 'noopener,noreferrer');
+    onNavigate?.();
   },
 });

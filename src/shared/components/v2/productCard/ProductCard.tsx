@@ -9,6 +9,8 @@ import type {
 
 import CardImage from '@assets/images/cardExImg.svg?url';
 
+import { useProductLink } from '@hooks/useProductLink';
+
 import {
   createCardClickHandler,
   getColorChips,
@@ -55,6 +57,7 @@ const ProductCard = ({
   const isDefault = cardType === 'default';
   const [isLoaded, setIsLoaded] = useState(false);
   const linkHref = link?.href;
+  const { openProductLink } = useProductLink();
 
   useEffect(() => {
     setIsLoaded(false);
@@ -64,10 +67,13 @@ const ProductCard = ({
   const { originalPriceText, discountPriceText, discountRateText } =
     getPriceTexts(price?.original, price?.discount, price?.discountRate);
 
+  const handleLinkClick = () => openProductLink(linkHref, link?.onClick);
+
   const { handleWrapperClick, handleWrapperKeyDown } = createCardClickHandler({
     onCardClick,
     enableWholeCardLink,
     linkHref,
+    onNavigate: handleLinkClick,
   });
 
   return (
@@ -105,7 +111,7 @@ const ProductCard = ({
               size="XS"
               leftIcon="Link"
               aria-label={'공식 사이트로 이동'}
-              onClick={link?.onClick}
+              onClick={handleLinkClick}
             >
               {link?.label || '사이트'}
             </ActionButton>

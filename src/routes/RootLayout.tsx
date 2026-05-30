@@ -1,3 +1,4 @@
+import { OverlayProvider } from 'overlay-kit';
 import { Outlet } from 'react-router-dom';
 
 import { useGenerateWarmup } from '@pages/generate/hooks/useGenerateWarmup';
@@ -12,9 +13,11 @@ function RootLayout() {
   useGenerateWarmup();
 
   return (
-    <div className={styles.container}>
-      <Outlet />
-    </div>
+    <OverlayProvider>
+      <div className={styles.container}>
+        <Outlet />
+      </div>
+    </OverlayProvider>
   );
 }
 
