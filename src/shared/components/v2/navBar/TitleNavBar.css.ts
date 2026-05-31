@@ -44,6 +44,11 @@ export const container = recipe({
       primary: {
         backgroundColor: colorVars.color.bg.primary,
       },
+      /** 풀블리드 이미지 위 오버레이용 상단 그라데이션 (grad/navBar) — 뒤로가기 아이콘 가시성 확보 */
+      gradient: {
+        background:
+          'linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.15) 39.71%, rgba(0, 0, 0, 0) 100%)',
+      },
     },
   },
   defaultVariants: {

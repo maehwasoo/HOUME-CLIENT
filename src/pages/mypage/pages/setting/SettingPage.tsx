@@ -14,9 +14,9 @@ import {
 
 import { ROUTES } from '@routes/paths';
 
-import GeneralModal from '@components/overlay/modal/GeneralModal';
 import { useToast } from '@components/toast/useToast';
 import TitleNavBar from '@components/v2/navBar/TitleNavBar';
+import Popup from '@components/v2/popup/Popup';
 
 import TextButton from '@/shared/components/v2/btnText/TextButton';
 import { TOAST_TYPE } from '@/shared/types/toastLegacy';
@@ -70,26 +70,32 @@ const SettingPage = () => {
   const handleWithdraw = () => {
     logMyPageClickBtnSuccession();
     overlay.open(({ unmount }) => (
-      <GeneralModal
-        title="하우미 탈퇴 전 확인하세요"
-        content={
-          '탈퇴 시 생성했던 이미지와 함께\n모든 정보가 삭제되며, 복구가 불가능해요.'
-        }
-        cancelText="탈퇴하기"
-        confirmText="취소하기"
-        cancelVariant="default"
-        confirmVariant="default"
-        onCancel={() => {
-          logMyPageClickSuccessionModalOut();
-          // 모달 닫기
-          unmount();
-          deleteUser();
-        }}
+      <Popup
+        btnStyle="text"
+        topIconName="WarningFillDanger"
+        btnText="취소하기"
+        weakBtnText="탈퇴하기"
         onConfirm={() => {
           logMyPageClickSuccessionModalCancel();
           unmount();
         }}
+        onCancel={() => {
+          logMyPageClickSuccessionModalOut();
+          // 모달 닫고 탈퇴 진행
+          unmount();
+          deleteUser();
+        }}
         onClose={unmount}
+        content={
+          <div className={styles.popupContent}>
+            <h3 className={styles.popupTitle}>하우미 탈퇴 전 확인하세요</h3>
+            <p className={styles.popupDetail}>
+              탈퇴 시 생성했던 이미지와 함께
+              <br />
+              모든 정보가 삭제되며, 복구가 불가능해요.
+            </p>
+          </div>
+        }
       />
     ));
   };

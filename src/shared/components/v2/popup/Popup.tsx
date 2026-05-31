@@ -3,12 +3,14 @@ import type { ReactNode } from 'react';
 import * as styles from './Popup.css.ts';
 import ActionButton from '../button/actionButton/ActionButton';
 import IconButton from '../button/IconButton';
+import Icon from '../icon/Icon';
 
 import type { IconName } from '../icon/Icon';
 
 export type PopupBtnStyle = 'text' | 'solid';
 
 interface PopupProps {
+  topIconName?: IconName;
   content?: ReactNode;
   onCancel: () => void;
   onConfirm: () => void;
@@ -24,6 +26,7 @@ interface PopupProps {
 }
 
 const Popup = ({
+  topIconName,
   content,
   onCancel,
   onConfirm,
@@ -104,6 +107,7 @@ const Popup = ({
         ) : null}
         <div className={styles.contentArea({ btnStyle })}>
           <div className={styles.slotBox}>
+            {topIconName ? <Icon name={topIconName} size="32" /> : null}
             <div className={styles.body}>{content}</div>
           </div>
         </div>

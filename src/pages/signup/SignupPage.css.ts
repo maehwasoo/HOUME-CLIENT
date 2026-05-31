@@ -64,6 +64,26 @@ export const flexbox = style({
   width: '100%',
 });
 
+export const popupContent = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
+export const popupTitle = style({
+  ...fontVars.font.title_sb_16,
+  marginBottom: unitVars.unit.gapPadding['200'],
+  textAlign: 'center',
+  color: colorVars.color.text.primary,
+});
+
+export const popupDetail = style({
+  ...fontVars.font.body_r_14,
+  textAlign: 'center',
+  color: colorVars.color.text.secondary,
+});
+
 export const btnarea = style({
   position: 'fixed',
   bottom: '0',

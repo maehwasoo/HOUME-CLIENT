@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react';
-
 import type {
   ProductInfo,
   PriceInfo,
@@ -9,6 +7,7 @@ import type {
 
 import CardImage from '@assets/images/cardExImg.svg?url';
 
+import { useImageLoaded } from '@hooks/useImageLoaded';
 import { useProductLink } from '@hooks/useProductLink';
 
 import {
@@ -44,13 +43,11 @@ const ListProductCard = ({
   onCardClick,
   enableWholeCardLink = false,
 }: ListProductCardProps) => {
-  const [isLoaded, setIsLoaded] = useState(false);
   const linkHref = link?.href;
   const { openProductLink } = useProductLink();
-
-  useEffect(() => {
-    setIsLoaded(false);
-  }, [product.imageUrl]);
+  const { isLoaded, imgProps } = useImageLoaded(product.imageUrl || CardImage, {
+    fallbackSrc: CardImage,
+  });
 
   const { visibleColors, extraColorCount } = getColorChips(product.colorHexes);
   const { originalPriceText, discountPriceText, discountRateText } =
@@ -84,10 +81,9 @@ const ListProductCard = ({
       >
         {!isLoaded && <div className={styles.skeleton} />}
         <img
+          {...imgProps}
           className={styles.cardImage({ loaded: isLoaded, size: cardSize })}
-          src={product.imageUrl || CardImage}
           alt="카드 이미지"
-          onLoad={() => setIsLoaded(true)}
         />
       </section>
 

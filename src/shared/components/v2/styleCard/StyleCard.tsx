@@ -1,11 +1,13 @@
 import type { ComponentProps } from 'react';
-import { useEffect, useId, useState } from 'react';
+import { useId } from 'react';
 
 import clsx from 'clsx';
 
 import Icon from '@shared/components/v2/icon/Icon';
 
 import fallbackImage from '@assets/v2/images/CardRoomTypeFallback.svg';
+
+import { useImageLoaded } from '@hooks/useImageLoaded';
 
 import * as styles from './StyleCard.css';
 
@@ -41,16 +43,14 @@ const StyleCard = ({
   largeContents,
   ...rest
 }: StyleCardProps) => {
-  const [imageSrc, setImageSrc] = useState(initialImageSrc);
+  const { imgProps } = useImageLoaded(initialImageSrc, {
+    fallbackSrc: fallbackImage,
+  });
   const titleId = useId();
   const hasTitle = title != null && title !== '';
   const isLarge = size === 'L';
   const starIconSize = isLarge ? '24' : '16';
   const showLargeContents = isLarge && largeContents != null;
-
-  useEffect(() => {
-    setImageSrc(initialImageSrc);
-  }, [initialImageSrc]);
 
   return (
     <div className={styles.wrapper({ scaleOnPress })}>
@@ -63,14 +63,13 @@ const StyleCard = ({
         {...rest}
       >
         <img
-          src={imageSrc}
+          {...imgProps}
           alt=""
           aria-hidden
           className={styles.image}
           loading={imageLoading}
           decoding="async"
           draggable={false}
-          onError={() => setImageSrc(fallbackImage)}
         />
         <div className={styles.gradient({ size })} aria-hidden />
         {isLarge ? (

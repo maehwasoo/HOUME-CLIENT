@@ -103,7 +103,7 @@ const FunnelLayout = ({ children, currentStep }: FunnelLayoutProps) => {
         return (
           <Popup
             btnStyle="text"
-            btnText="계속 입력하기"
+            btnText="계속하기"
             weakBtnText="나가기"
             onClose={stay}
             onConfirm={stay}
@@ -111,14 +111,14 @@ const FunnelLayout = ({ children, currentStep }: FunnelLayoutProps) => {
             content={
               <div className={styles.popupContent}>
                 <h3 className={styles.popupTitle}>
-                  지금 나가면 무료로
+                  지금 나가면 선택한
                   <br />
-                  이미지를 생성할 수 없어요
+                  정보가 모두 사라져요.
                 </h3>
                 <p className={styles.popupDetail}>
-                  이 페이지를 떠나면 지금까지 입력한
+                  거의 다왔어요! 공간을 선택하고
                   <br />
-                  정보와 함께 무료 토큰도 사라져요.
+                  원하는 AI 이미지를 받아보세요.
                 </p>
               </div>
             }

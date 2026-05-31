@@ -83,50 +83,28 @@ export const gradient = style({
     'linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0) 39.71%)',
 });
 
-export const optionInfoRow = recipe({
-  base: {
-    position: 'relative',
-    display: 'flex',
-    gap: unitVars.unit.gapPadding['100'],
-    color: colorVars.color.text.inverse,
-  },
-  variants: {
-    size: {
-      s: {
-        alignItems: 'center',
-      },
-      m: {
-        alignItems: 'flex-start',
-        paddingRight: unitVars.unit.gapPadding['100'],
-        width: '100%',
-      },
-    },
-  },
+export const optionInfoRow = style({
+  position: 'relative',
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: unitVars.unit.gapPadding['100'],
+  paddingRight: unitVars.unit.gapPadding['100'],
+  width: '100%',
+  color: colorVars.color.text.inverse,
 });
 
-export const optionTitle = recipe({
-  base: {
-    margin: 0,
-    color: colorVars.color.text.inverse,
-  },
-  variants: {
-    size: {
-      s: {
-        whiteSpace: 'nowrap',
-        ...fontVars.font.body_m_13,
-      },
-      m: {
-        display: '-webkit-box',
-        flex: 1,
-        maxHeight: '4rem',
-        overflow: 'hidden',
-        textOverflow: 'ellipsis',
-        WebkitBoxOrient: 'vertical',
-        WebkitLineClamp: 2,
-        ...fontVars.font.body_m_13,
-      },
-    },
-  },
+// 최대 2줄까지 노출하고, 넘어가면 말줄임(...) 처리
+export const optionTitle = style({
+  display: '-webkit-box',
+  flex: 1,
+  margin: 0,
+  maxHeight: '4rem',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  color: colorVars.color.text.inverse,
+  WebkitBoxOrient: 'vertical',
+  WebkitLineClamp: 2,
+  ...fontVars.font.body_m_13,
 });
 
 export const optionFooter = style({

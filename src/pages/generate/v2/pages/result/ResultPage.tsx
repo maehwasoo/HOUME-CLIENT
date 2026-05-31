@@ -131,7 +131,7 @@ const ResultPage = () => {
   return (
     <main className={styles.pageLayout}>
       <TitleNavBar
-        background="transparent"
+        background="gradient"
         placement="overContent"
         onBackClick={() => navigate(-1)}
       />

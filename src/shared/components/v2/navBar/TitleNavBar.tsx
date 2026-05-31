@@ -6,7 +6,7 @@ import { ROUTES } from '@/routes/paths';
 
 import * as styles from './TitleNavBar.css';
 
-export type TitleNavBarBackground = 'transparent' | 'primary';
+export type TitleNavBarBackground = 'transparent' | 'primary' | 'gradient';
 export type TitleNavBarPlacement = 'sticky' | 'overContent';
 
 interface TitleNavBarProps extends React.ComponentProps<'nav'> {
@@ -31,14 +31,17 @@ const TitleNavBar = ({
   const navigate = useNavigate();
   const displayTitle = title?.trim();
 
+  // 그라데이션 배경은 이미지 위 오버레이용 → 뒤로가기 콘텐츠를 흰색(inverse)으로
+  const isOnGradient = background === 'gradient';
+
   return (
     <nav className={styles.container({ background, placement })} {...props}>
       <div className={styles.leftSlot}>
         <TextButton
-          color="secondary"
+          color={isOnGradient ? 'inverse' : 'secondary'}
           size="m"
           aria-label={backAriaLabel}
-          leftIcon="ArrowLeft"
+          leftIcon={isOnGradient ? 'ArrowLeftStrokeWhite' : 'ArrowLeft'}
           onClick={onBackClick}
         >
           {backLabel}

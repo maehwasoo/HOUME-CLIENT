@@ -67,11 +67,14 @@ export const contentArea = recipe({
 export const slotBox = style({
   display: 'flex',
   flexDirection: 'column',
+  alignItems: 'center',
+  gap: unitVars.unit.gapPadding['400'],
   minHeight: '7.2rem',
   textAlign: 'center',
 });
 
 export const body = style({
+  width: '100%',
   textAlign: 'center',
 });
 

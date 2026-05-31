@@ -40,6 +40,10 @@ export const useGenerateFullFunnelImageMutation = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.generate.image() });
       queryClient.invalidateQueries({ queryKey: queryKeys.mypage.images() });
       queryClient.invalidateQueries({ queryKey: queryKeys.mypage.user() });
+      // 모든 생성 경로는 도면 선택이 필수 → 생성 성공 시 '최근 생성한 도면' 갱신
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.imageSetup.recentFloorPlan(),
+      });
     },
   });
 };

@@ -88,22 +88,23 @@ const LoadingPage = () => {
         return (
           <Popup
             btnStyle="text"
-            btnText="계속 기다리기"
+            btnText="생성 기다리기"
             weakBtnText="나가기"
+            topIconName="WarningFillDanger"
             onClose={stay}
             onConfirm={stay}
             onCancel={exit}
             content={
               <div className={styles.popupContent}>
                 <h3 className={styles.popupTitle}>
-                  지금 나가면 생성 중인
+                  잠깐! 지금 나가면
                   <br />
-                  이미지를 받을 수 없어요
+                  이미지 생성이 중단돼요.
                 </h3>
                 <p className={styles.popupDetail}>
-                  이미지를 받으려면
+                  조금만 더 기다리면 내 취향에 딱 맞는
                   <br />
-                  처음부터 다시 진행해야 해요.
+                  공간을 확인할 수 있어요.
                 </p>
               </div>
             }

@@ -19,7 +19,6 @@ import { useRandomNickname } from '@hooks/useGetRandomNickname';
 import useUserForm from '@hooks/useUserForm';
 
 import { usePostSignupMutation } from './apis/mutations/usePostSignupMutation';
-import SignupExitPopupContent from './components/exitPopupContent/SignupExitPopupContent';
 import * as styles from './SignupPage.css';
 import {
   logSignupFormClickBtnCTA,
@@ -88,6 +87,7 @@ const SignupPage = () => {
             btnStyle="text"
             btnText="계속하기"
             weakBtnText="그만두기"
+            topIconName="WarningFillDanger"
             onClose={close}
             onConfirm={close}
             onCancel={() => {
@@ -96,7 +96,18 @@ const SignupPage = () => {
               // KakaoCallback이 replace로 history에 안 남으므로 자연스럽게 /login(또는 진입점)으로 이동
               proceed();
             }}
-            content={<SignupExitPopupContent />}
+            content={
+              <div className={styles.popupContent}>
+                <h3 className={styles.popupTitle}>
+                  아직 회원가입이 완료되지 않았어요!
+                </h3>
+                <p className={styles.popupDetail}>
+                  지금 나가면 무료로 이미지를 만들 수 있는
+                  <br />
+                  토큰이 사라져요. 가입을 그만두시겠어요?
+                </p>
+              </div>
+            }
           />
         );
       });

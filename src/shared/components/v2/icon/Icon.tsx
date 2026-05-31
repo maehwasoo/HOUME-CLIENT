@@ -1,5 +1,6 @@
 import ArrowLeft from '@assets/v2/svg/ArrowLeft.svg?url';
 import ArrowLeftFill from '@assets/v2/svg/ArrowLeftFill.svg?url';
+import ArrowLeftStrokeWhite from '@assets/v2/svg/ArrowLeftStrokeWhite.svg?url';
 import ArrowRight from '@assets/v2/svg/ArrowRight.svg?url';
 import ArrowRightFill from '@assets/v2/svg/ArrowRightFill.svg?url';
 import ArrowUp from '@assets/v2/svg/ArrowUp.svg?url';
@@ -51,6 +52,7 @@ import * as styles from './Icon.css';
 const IconsName = {
   ArrowLeft,
   ArrowLeftFill,
+  ArrowLeftStrokeWhite,
   ArrowRight,
   ArrowRightFill,
   ArrowUp,

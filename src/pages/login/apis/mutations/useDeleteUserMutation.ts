@@ -42,6 +42,8 @@ export const useDeleteUserMutation = () => {
       setTimeout(() => {
         useUserStore.getState().clearUser();
         queryClient.clear();
+        // 로그아웃과 동일하게 sessionStorage까지 정리 (origin+탭 단위라 다른 사이트/탭 영향 X)
+        sessionStorage.clear();
       }, 100);
     },
     onError: (error) => {
