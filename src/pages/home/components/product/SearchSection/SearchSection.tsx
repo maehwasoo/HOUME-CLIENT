@@ -13,10 +13,10 @@ import type {
 } from '@pages/home/types/productTab';
 
 import IconButton from '@shared/components/v2/button/IconButton';
+import EmptyView from '@shared/components/v2/emptyView/EmptyView';
 import ProductCard from '@shared/components/v2/productCard/ProductCard';
 import SearchBar from '@shared/components/v2/textField/SearchBar';
-
-import emptyImage from '@assets/v2/images/ImgEmpty.png';
+import { EMPTY_VIEW_TEXT } from '@shared/constants/emptyViewText';
 
 import InlineError from '@components/inlineError/InlineError';
 import Loading from '@components/loading/Loading';
@@ -165,24 +165,17 @@ const SearchSection = ({
           ) : isError ? (
             <div className={styles.productListState}>
               <InlineError
-                message="상품 목록을 불러올 수 없습니다"
+                message={EMPTY_VIEW_TEXT.searchSection.loadError}
                 onRetry={refetch}
               />
             </div>
           ) : (
             <>
-              <div className={styles.productListEmptyWrap}>
-                <img src={emptyImage} alt="필터 결과 없음" />
-                <div className={styles.emptyContainer}>
-                  <p className={styles.emptyTitle}>
-                    선택한 필터에 맞는 상품이 없어요.
-                  </p>
-                  <p className={styles.emptyDescription}>
-                    조금 더 넓은 조건으로 검색하면 <br /> 더 많은 상품을 만날 수
-                    있어요.
-                  </p>
-                </div>
-              </div>
+              <EmptyView
+                title={EMPTY_VIEW_TEXT.searchSection.empty}
+                description={EMPTY_VIEW_TEXT.searchSection.emptyDescription}
+                imageAlt="필터 결과 없음"
+              />
               {isRecommended ? (
                 <>
                   <div className={styles.recommendDivider} role="separator" />

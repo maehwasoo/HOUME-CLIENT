@@ -1,6 +1,5 @@
 import ActionButton from '@shared/components/v2/button/actionButton/ActionButton';
 import Icon from '@shared/components/v2/icon/Icon';
-import * as styles from '@shared/components/v2/productCard/ProductCard.css';
 import type {
   LinkInfo,
   PriceInfo,
@@ -12,6 +11,8 @@ import CardImage from '@assets/images/cardExImg.svg?url';
 import { useProductLink } from '@hooks/useProductLink';
 
 import { getColorChips, getPriceTexts } from '@utils/productCardUtils';
+
+import * as styles from './ProductDetailCard.css';
 
 export interface ProductDetailCardProps {
   product: ProductInfo;
@@ -40,10 +41,10 @@ const ProductDetailCard = ({
     price.discountRate > 0;
 
   return (
-    <div className={styles.popupPreviewCard}>
-      <div className={styles.popupPreviewImageWrap}>
+    <div className={styles.card}>
+      <div className={styles.imageWrap}>
         <img
-          className={styles.popupPreviewImage}
+          className={styles.image}
           src={product.imageUrl || CardImage}
           alt={product.title}
         />
@@ -62,11 +63,11 @@ const ProductDetailCard = ({
           </div>
         ) : null}
       </div>
-      <div className={styles.popupPreviewInfo}>
+      <div className={styles.info}>
         {visibleColors.length > 0 ||
         extraColorCount > 0 ||
         (typeof saveCount === 'number' && Number.isFinite(saveCount)) ? (
-          <div className={styles.popupPreviewMetaRow}>
+          <div className={styles.metaRow}>
             {visibleColors.length > 0 || extraColorCount > 0 ? (
               <div className={styles.colorRow}>
                 {visibleColors.map((hex, index) => (
@@ -89,34 +90,28 @@ const ProductDetailCard = ({
               </div>
             ) : null}
             {typeof saveCount === 'number' && Number.isFinite(saveCount) ? (
-              <div className={styles.popupPreviewLikeRow}>
+              <div className={styles.likeRow}>
                 <Icon name="HeartFillGray" size="14" />
-                <span className={styles.popupPreviewLikeCount}>
+                <span className={styles.likeCount}>
                   {saveCount.toLocaleString('ko-KR')}
                 </span>
               </div>
             ) : null}
           </div>
         ) : null}
-        {!!product.brand && (
-          <p className={styles.popupPreviewBrand}>{product.brand}</p>
-        )}
-        <p className={styles.popupPreviewTitle}>{product.title}</p>
+        {!!product.brand && <p className={styles.brand}>{product.brand}</p>}
+        <p className={styles.title}>{product.title}</p>
         {(originalPriceText || discountPriceText) && (
-          <div className={styles.popupPreviewPriceSection}>
+          <div className={styles.priceSection}>
             {hasDiscount && originalPriceText ? (
-              <p className={styles.popupPreviewOriginalPrice}>
-                {originalPriceText}
-              </p>
+              <p className={styles.originalPrice}>{originalPriceText}</p>
             ) : null}
-            <div className={styles.popupPreviewDiscountRow}>
+            <div className={styles.discountRow}>
               {hasDiscount && discountRateText ? (
-                <span className={styles.popupPreviewDiscountRate}>
-                  {discountRateText}
-                </span>
+                <span className={styles.discountRate}>{discountRateText}</span>
               ) : null}
               {discountPriceText && (
-                <span className={styles.popupPreviewDiscountPrice}>
+                <span className={styles.discountPrice}>
                   {discountPriceText}
                 </span>
               )}

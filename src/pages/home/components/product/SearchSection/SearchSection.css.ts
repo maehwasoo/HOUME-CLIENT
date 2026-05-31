@@ -2,7 +2,6 @@ import { style } from '@vanilla-extract/css';
 
 import { zIndex } from '@styles/tokens/zIndex';
 import { colorVars } from '@styles/tokensV2/color.css';
-import { fontVars } from '@styles/tokensV2/font.css';
 import { unitVars } from '@styles/tokensV2/unit.css';
 
 const PRODUCT_BOTTOM_SHEET_COLLAPSED_HEIGHT = '24rem';
@@ -108,42 +107,10 @@ export const productListState = style({
   width: '100%',
 });
 
-export const productListEmptyWrap = style({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  padding: `${unitVars.unit.gapPadding['500']} ${unitVars.unit.gapPadding['000']}`,
-  width: '100%',
-});
-
 export const recommendDivider = style({
   margin: 0,
   backgroundColor: colorVars.color.border.tertiary,
   height: '0.8rem',
-});
-
-export const emptyContainer = style({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  gap: unitVars.unit.gapPadding['000'],
-  padding: unitVars.unit.gapPadding['400'],
-  width: '100%',
-});
-
-export const emptyTitle = style({
-  margin: 0,
-  textAlign: 'center',
-  color: colorVars.color.text.secondary,
-  ...fontVars.font.title_sb_16,
-});
-
-export const emptyDescription = style({
-  margin: 0,
-  textAlign: 'center',
-  whiteSpace: 'pre-line',
-  color: colorVars.color.text.tertiary,
-  ...fontVars.font.body_r_14,
 });
 
 export const scrollTopFloatingWrap = style({

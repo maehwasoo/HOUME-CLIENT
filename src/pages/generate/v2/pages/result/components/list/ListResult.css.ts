@@ -50,3 +50,26 @@ export const gridContent = style({
   gap: unitVars.unit.gapPadding['200'],
   width: '100%',
 });
+
+export const blockSlot = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
+});
+
+export const listLoadingSlot = style([
+  blockSlot,
+  {
+    minHeight: '12rem',
+  },
+]);
+
+export const gridLoadingSlot = style({
+  display: 'flex',
+  gridColumn: '1 / -1',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
+  minHeight: '22rem',
+});

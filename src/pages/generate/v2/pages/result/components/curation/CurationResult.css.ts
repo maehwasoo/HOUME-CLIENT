@@ -75,7 +75,7 @@ export const categoryLoadingSlot = style([
   },
 ]);
 
-export const productListLoadingSlot = style({
+export const productListFallbackSlot = style({
   display: 'flex',
   gridColumn: '1 / -1',
   alignItems: 'center',
@@ -83,3 +83,5 @@ export const productListLoadingSlot = style({
   width: '100%',
   minHeight: '22rem',
 });
+
+export const productListLoadingSlot = style([productListFallbackSlot]);

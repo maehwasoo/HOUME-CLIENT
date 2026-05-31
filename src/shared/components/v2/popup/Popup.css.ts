@@ -30,17 +30,19 @@ export const container = style({
   borderRadius: unitVars.unit.radius['700'],
   backgroundColor: colorVars.color.gray000,
   width: '28.8rem',
+  overflow: 'hidden',
   animation: `${fadeIn} 0.45s cubic-bezier(0.22, 1, 0.36, 1)`,
 });
 
 export const closeButton = style({
   position: 'absolute',
   zIndex: zIndex.sticky,
-  top: '1.2rem',
-  right: '1.2rem',
+  top: '0rem',
+  right: '0rem',
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
+  padding: unitVars.unit.gapPadding['300'],
 });
 
 export const contentArea = recipe({
@@ -55,7 +57,9 @@ export const contentArea = recipe({
         padding: unitVars.unit.gapPadding['700'],
       },
       solid: {
-        padding: `${unitVars.unit.gapPadding['600']} ${unitVars.unit.gapPadding['600']} ${unitVars.unit.gapPadding['200']} ${unitVars.unit.gapPadding['600']}`,
+        // padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['500']} ${unitVars.unit.gapPadding['200']} ${unitVars.unit.gapPadding['500']}`,
+        // 디자인 논의 후 제거 혹은 수정 예정
+        padding: unitVars.unit.gapPadding['000'],
       },
     },
   },
