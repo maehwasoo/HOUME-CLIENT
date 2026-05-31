@@ -21,7 +21,7 @@ export const getMyPageProfile = async (): Promise<MyPageProfileResponse> => {
 
 export const useMyPageProfileQuery = (options?: UseMyPageUserOptions) => {
   return useQuery<MyPageProfileResponse>({
-    queryKey: queryKeys.mypage.user(),
+    queryKey: queryKeys.mypage.profile(),
     queryFn: getMyPageProfile,
     refetchOnWindowFocus: false,
     ...options,

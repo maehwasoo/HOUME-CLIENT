@@ -20,11 +20,9 @@ import { invalidateJjymRelatedQueries } from '@utils/invalidateJjymQueries';
 import type { AxiosError } from 'axios';
 
 type JjymSavedToast = 'move' | 'stored' | 'none';
-type JjymRemovedToast = 'info' | 'undo';
 
 interface UseJjymMutationOptions {
   savedToastType?: JjymSavedToast;
-  removedToastType?: JjymRemovedToast;
   onSavedAction?: () => void;
   invalidateSavedItemsList?: boolean; // 찜 목록 무효화 여부
 }
@@ -49,8 +47,8 @@ const getSavedToastContent = (type: JjymSavedToast) => {
   }
 
   return {
-    text: TOAST_MESSAGE.SAVED_ITEM_MOVE,
-    actionLabel: TOAST_ACTION_LABEL.MOVE,
+    text: TOAST_MESSAGE.SAVED_ITEM_STORED,
+    actionLabel: TOAST_ACTION_LABEL.VIEW,
   };
 };
 
@@ -59,7 +57,6 @@ export const useJjymMutation = (options?: UseJjymMutationOptions) => {
   const { notify } = useToast();
   const { requireLogin } = useLoginGate();
   const savedToastType = options?.savedToastType ?? 'move';
-  const removedToastType = options?.removedToastType ?? 'info';
   const shouldInvalidateSavedItemsList =
     options?.invalidateSavedItemsList !== false;
 
@@ -114,7 +111,7 @@ export const useJjymMutation = (options?: UseJjymMutationOptions) => {
           onClick: options?.onSavedAction,
           options: TOAST_OPTIONS,
         });
-      } else if (removedToastType === 'undo') {
+      } else {
         notify({
           text: TOAST_MESSAGE.SAVED_ITEM_REMOVED,
           type: TOAST_TYPE.ACTION,
@@ -126,12 +123,6 @@ export const useJjymMutation = (options?: UseJjymMutationOptions) => {
               toggleSaveProduct(rawProductId);
             });
           },
-          options: TOAST_OPTIONS,
-        });
-      } else {
-        notify({
-          text: TOAST_MESSAGE.SAVED_ITEM_REMOVED,
-          type: TOAST_TYPE.INFO,
           options: TOAST_OPTIONS,
         });
       }

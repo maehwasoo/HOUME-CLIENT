@@ -26,7 +26,9 @@ export const getPriceTexts = (
     originalPriceText: formatKrw(originalPrice),
     discountPriceText: formatKrw(discountPrice),
     discountRateText:
-      typeof discountRate === 'number' && Number.isFinite(discountRate)
+      typeof discountRate === 'number' &&
+      Number.isFinite(discountRate) &&
+      discountRate > 0
         ? `${discountRate}%`
         : null,
   };

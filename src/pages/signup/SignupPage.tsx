@@ -48,7 +48,8 @@ const SignupPage = () => {
   const isInitialized = useRef(false);
   const nicknameRef = useRef<HTMLInputElement>(null);
   const yearRef = useRef<HTMLInputElement>(null);
-  const [isNameSubmitted, setIsNameSubmitted] = useState(false);
+  const [isNameSubmitted, setIsNameSubmitted] = useState(false); // 생년월일 필드 노출 여부
+  const shouldFocusBirthFieldRef = useRef(false); // 생년월일 필드 노출 후 포커스 이동 여부
 
   const routeSignupToken = isSignupLocationState(location.state)
     ? (location.state.signupToken ?? null)
@@ -182,14 +183,41 @@ const SignupPage = () => {
   // 닉네임 Enter시
   const handleNicknameEnter = () => {
     if (isNameSectionValid) {
+      shouldFocusBirthFieldRef.current = true;
+      setIsNameSubmitted(true);
+
+      // 이미 생년월일 필드가 노출된 상태면 직접 포커스
+      if (isNameSubmitted) {
+        yearRef.current?.focus();
+        shouldFocusBirthFieldRef.current = false;
+      }
+    }
+  };
+
+  const handleNicknameFieldBlur = (e: React.FocusEvent<HTMLDivElement>) => {
+    const nextFocusedElement = e.relatedTarget;
+    if (
+      nextFocusedElement instanceof Node &&
+      e.currentTarget.contains(nextFocusedElement)
+    ) {
+      return;
+    }
+
+    if (isNameSectionValid) {
+      shouldFocusBirthFieldRef.current = false;
       setIsNameSubmitted(true);
     }
   };
 
   // 생년월일 필드 렌더링된 직후 감지해 포커싱
   useEffect(() => {
-    if (isNameSubmitted && isNameSectionValid) {
+    if (
+      isNameSubmitted &&
+      isNameSectionValid &&
+      shouldFocusBirthFieldRef.current
+    ) {
       yearRef.current?.focus();
+      shouldFocusBirthFieldRef.current = false;
     }
   }, [isNameSubmitted, isNameSectionValid]);
 
@@ -256,7 +284,10 @@ const SignupPage = () => {
 
       <div className={styles.container}>
         {/* 닉네임 입력 */}
-        <div className={styles.fieldbox}>
+        <div
+          className={styles.fieldbox}
+          onBlurCapture={handleNicknameFieldBlur}
+        >
           <h2 className={styles.fieldtitle}>닉네임</h2>
           <div className={styles.flexbox}>
             <TextField

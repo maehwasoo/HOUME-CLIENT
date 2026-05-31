@@ -183,7 +183,7 @@ const ProductCard = ({
               {discountRateText ? (
                 // 할인 있을 때
                 <>
-                  {originalPriceText && (
+                  {isDefault && originalPriceText && (
                     <p className={styles.originalPriceText}>
                       {originalPriceText}
                     </p>
@@ -203,9 +203,9 @@ const ProductCard = ({
                 </>
               ) : (
                 // 할인 없을 때
-                originalPriceText && (
+                (discountPriceText || originalPriceText) && (
                   <span className={styles.discountPriceText}>
-                    {originalPriceText}
+                    {discountPriceText ?? originalPriceText}
                   </span>
                 )
               )}

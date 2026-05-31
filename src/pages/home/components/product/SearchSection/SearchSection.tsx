@@ -223,7 +223,7 @@ const SearchSection = ({
               };
               const cardLink = { href: linkUrl };
               const cardShoppingAction = {
-                label: '선택' as const,
+                label: isSelected ? '선택됨' : '선택',
                 disabled: isSelected,
                 onClick: () =>
                   handleSelectProduct({

@@ -126,6 +126,7 @@ export const queryKeys = {
   mypage: {
     all: ['mypage'] as const,
     user: () => [...queryKeys.mypage.all, 'user'] as const,
+    profile: () => [...queryKeys.mypage.all, 'profile'] as const,
     images: () => [...queryKeys.mypage.all, 'images'] as const,
     imageDetail: (houseId: number) =>
       [...queryKeys.mypage.all, 'imageDetail', houseId] as const,

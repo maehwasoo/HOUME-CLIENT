@@ -31,7 +31,6 @@ const SavedItemsSection = () => {
   // 찜 해제 토글
   const { mutate: toggleJjym } = useJjymMutation({
     savedToastType: 'none',
-    removedToastType: 'undo',
     invalidateSavedItemsList: false,
   });
 

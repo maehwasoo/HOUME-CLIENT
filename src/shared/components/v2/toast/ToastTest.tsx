@@ -64,9 +64,9 @@ const SonnerToastTest = () => {
         type="button"
         onClick={() =>
           notify({
-            text: TOAST_MESSAGE.SAVED_ITEM_MOVE,
+            text: TOAST_MESSAGE.SAVED_ITEM_STORED,
             type: TOAST_TYPE.ACTION,
-            actionLabel: TOAST_ACTION_LABEL.MOVE,
+            actionLabel: TOAST_ACTION_LABEL.VIEW,
             onClick: () => {},
             options: {
               toasterId: TOASTER_ID.BOTTOM_4,
