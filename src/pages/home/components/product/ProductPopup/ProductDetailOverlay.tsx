@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from 'react';
 
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useProductDetailQuery } from '@pages/home/apis/queries/useProductDetailQuery';
 import { setReopenProduct } from '@pages/home/utils/productDetailOverlayReopen';
@@ -45,10 +45,15 @@ const ProductDetailOverlay = ({
   link,
   shoppingAction,
 }: ProductDetailOverlayProps) => {
+  const navigate = useNavigate();
   const { data } = useProductDetailQuery(id);
   const detail = data?.product;
-  const { mutate: toggleJjym } = useJjymMutation();
-  const savedProductIds = useSavedItemsStore((s) => s.savedProductIds);
+  const { mutate: toggleJjym } = useJjymMutation({
+    onSavedAction: () => {
+      navigate(ROUTES.MYPAGE, { state: { activeTab: 'savedItems' } });
+    },
+  });
+  const getSavedState = useSavedItemsStore((s) => s.getSavedState);
   const location = useLocation();
   const openedPathRef = useRef(location.pathname);
 
@@ -90,7 +95,7 @@ const ProductDetailOverlay = ({
   const mergedRef = useRef(merged);
   mergedRef.current = merged;
 
-  const isSaved = savedProductIds.has(id);
+  const isSaved = getSavedState(id, detail?.isLiked ?? save.isSaved);
 
   const handleSaveToggle = () => {
     toggleJjym(id);

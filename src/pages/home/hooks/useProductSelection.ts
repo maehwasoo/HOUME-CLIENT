@@ -2,7 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { SelectedProduct } from '@pages/home/types/productTab';
 
-import { useToast } from '@components/toast/useToast';
+import { TOAST_MESSAGE } from '@shared/constants/toastMessage';
+import { TOAST_TYPE, TOASTER_ID } from '@shared/types/toast';
+
+import { useToast } from '@components/v2/toast/useToast';
 
 /**
  * 상품 선택 상한값 - 최대 6개 선택
@@ -52,7 +55,9 @@ const useProductSelection = ({
       if (currentSelected.some((item) => item.id === product.id)) return;
       if (currentSelected.length >= MAX_SELECTED_PRODUCTS) {
         notify({
-          text: `상품은 최대 ${MAX_SELECTED_PRODUCTS}개까지만 선택할 수 있어요`,
+          text: TOAST_MESSAGE.PRODUCT_SELECT_MAX_LIMIT,
+          type: TOAST_TYPE.INFO,
+          options: { toasterId: TOASTER_ID.TOP_4 },
         });
         return;
       }

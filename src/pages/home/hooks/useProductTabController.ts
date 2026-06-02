@@ -17,7 +17,10 @@ import { ROUTES } from '@routes/paths';
 
 import { ENTRY_ROUTE, useImageFlowStore } from '@store/useImageFlowStore';
 
-import { useToast } from '@components/toast/useToast';
+import { TOAST_MESSAGE } from '@shared/constants/toastMessage';
+import { TOAST_TYPE, TOASTER_ID } from '@shared/types/toast';
+
+import { useToast } from '@components/v2/toast/useToast';
 
 import { useLoginGate } from '@hooks/useLoginGate';
 
@@ -152,7 +155,11 @@ const useProductTabController = ({
    */
   const handleDecorateWithProductsClick = useCallback(() => {
     if (selectedProducts.length === 0) {
-      notify({ text: '상품을 1개 이상 선택해주세요' });
+      notify({
+        text: TOAST_MESSAGE.PRODUCT_SELECT_REQUIRED,
+        type: TOAST_TYPE.INFO,
+        options: { toasterId: TOASTER_ID.TOP_4 },
+      });
       return;
     }
 

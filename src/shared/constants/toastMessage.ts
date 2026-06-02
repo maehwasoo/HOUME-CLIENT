@@ -7,6 +7,9 @@ export const TOAST_MESSAGE = {
   RECENT_FLOOR_PLAN_LOADED: '저장된 내 공간을 불러왔어요',
   SAVED_ITEM_STORED: '찜한 상품에 저장했어요!',
   SAVED_ITEM_REMOVED: '찜을 취소했어요',
+  PRODUCT_SELECT_REQUIRED: '상품을 1개 이상 선택해주세요',
+  PRODUCT_SELECT_MAX_LIMIT: '상품은 최대 6개까지만 선택할 수 있어요',
+  IMAGE_FEEDBACK_THANKS: '소중한 의견 감사드려요. 더 나은 서비스로 보답할게요!',
   PROFILE_EDIT_SUCCESS: '변경 사항을 저장했어요',
   ACTION_SERVER_ERROR: '일시적인 오류로 저장에 실패했어요. 다시 시도해 주세요.',
 } as const;

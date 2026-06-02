@@ -1,7 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
 import { useCurationCategoriesQuery } from '@pages/generate/v2/apis/queries/useCurationCategoriesQuery';
 import { useCurationProductsQuery } from '@pages/generate/v2/apis/queries/useCurationProductsQuery';
+
+import { ROUTES } from '@routes/paths';
 
 import { useSavedItemsStore } from '@store/useSavedItemsStore';
 
@@ -107,6 +111,7 @@ const CurationResult = ({
   images,
   onCurrentImgIdChange,
 }: CurationResultProps) => {
+  const navigate = useNavigate();
   const [slideIndex, setSlideIndex] = useState(0);
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
     null
@@ -170,7 +175,11 @@ const CurationResult = ({
           renderableCount: renderableProducts.length,
         });
 
-  const { mutate: toggleJjym } = useJjymMutation();
+  const { mutate: toggleJjym } = useJjymMutation({
+    onSavedAction: () => {
+      navigate(ROUTES.MYPAGE, { state: { activeTab: 'savedItems' } });
+    },
+  });
   const getSavedState = useSavedItemsStore((s) => s.getSavedState);
 
   return (

@@ -6,8 +6,12 @@ import { useFactorPreferenceMutation } from '@pages/generate/v2/apis/mutations/u
 import { useResultPreferenceMutation } from '@pages/generate/v2/apis/mutations/useResultPreferenceMutation';
 import { useFactorsQuery } from '@pages/generate/v2/apis/queries/useFactorsQuery';
 
+import { TOAST_MESSAGE } from '@shared/constants/toastMessage';
+import { TOAST_TYPE, TOASTER_ID } from '@shared/types/toast';
+
 import IconButton from '@components/v2/button/IconButton';
 import Chip from '@components/v2/chip/Chip';
+import { useToast } from '@components/v2/toast/useToast';
 
 import * as styles from './ImgFeedback.css.ts';
 
@@ -32,6 +36,7 @@ const ImgFeedback = memo(({ imageId }: ImgFeedbackProps) => {
   const { mutate: sendPreference } = useResultPreferenceMutation();
   const { mutate: deletePreference } = useDeleteResultPreferenceMutation();
   const { mutate: sendFactorPreference } = useFactorPreferenceMutation();
+  const { notify } = useToast();
   const { data: likeFactorsResponse } = useFactorsQuery(true, {
     enabled: lockedPreference === 'like',
   });
@@ -115,6 +120,13 @@ const ImgFeedback = memo(({ imageId }: ImgFeedbackProps) => {
           if (factorRequestSeqRef.current !== requestSeq) return;
           if (lockedPreferenceRef.current !== expectedPreference) return;
           setSelectedFactorId(isSelected ? null : factorId);
+          if (!isSelected) {
+            notify({
+              text: TOAST_MESSAGE.IMAGE_FEEDBACK_THANKS,
+              type: TOAST_TYPE.INFO,
+              options: { toasterId: TOASTER_ID.BOTTOM_4 },
+            });
+          }
         },
         onSettled: () => {
           if (factorRequestSeqRef.current !== requestSeq) return;

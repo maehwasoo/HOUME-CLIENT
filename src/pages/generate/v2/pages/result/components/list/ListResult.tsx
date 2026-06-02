@@ -213,7 +213,11 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
     ? EMPTY_VIEW_TEXT.listResult.related.titleWithName(userName)
     : EMPTY_VIEW_TEXT.listResult.related.titleFallback;
 
-  const { mutate: toggleJjym } = useJjymMutation();
+  const { mutate: toggleJjym } = useJjymMutation({
+    onSavedAction: () => {
+      navigate(ROUTES.MYPAGE, { state: { activeTab: 'savedItems' } });
+    },
+  });
   const getSavedState = useSavedItemsStore((s) => s.getSavedState);
 
   const handleReselectProducts = () => {
