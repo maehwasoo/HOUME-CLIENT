@@ -1,8 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 
-import { useABTest } from '@pages/generate/hooks/useABTest';
 import { useWelcomePageModelPreload } from '@pages/generate/hooks/useWelcomePageModelPreload';
-import { logGenerateStartClickBtnCTA } from '@pages/generate/utils/analytics';
 
 import { ROUTES } from '@routes/paths';
 
@@ -22,7 +20,6 @@ const WelcomePage = () => {
   // zustand에서 userName 가져오기
   const userName = useUserStore((state) => state.userName);
   const navigate = useNavigate();
-  const { variant } = useABTest();
 
   useWelcomePageModelPreload(); // ONNX 모델 워밍업용 (현재 미사용)
 
@@ -30,8 +27,6 @@ const WelcomePage = () => {
   const isFromMypage = redirectPath?.startsWith(ROUTES.MYPAGE);
 
   const handleCtaClick = () => {
-    logGenerateStartClickBtnCTA(variant);
-
     if (isFromMypage) {
       // 마이페이지 탭 후 로그인 게이트 진입 및 회원가입 완료 → CTA 탭 시 홈으로 이동
       consumeLoginRedirect();

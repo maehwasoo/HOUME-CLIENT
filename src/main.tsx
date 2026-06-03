@@ -11,6 +11,10 @@ import {
   getSentryReactErrorHandlerOptions,
   initSentry,
 } from '@shared/config/sentry';
+import {
+  AB_TEST_STORAGE_KEY,
+  parseDevAbQueryOverride,
+} from '@shared/types/abTest';
 
 import { queryClient } from '@apis/config/queryClient';
 
@@ -23,16 +27,15 @@ import App from './App';
 initSentry();
 initClarity();
 
-// 개발 모드: 최초 진입 시 ?ab=single|multiple 을 로컬스토리지에 저장
+// 개발 모드: ?ab=A|B (useABTest와 동일 — 앱 부트 시 storage 선반영)
 if (import.meta.env.DEV) {
   try {
-    const sp = new URLSearchParams(window.location.search);
-    const ab = sp.get('ab');
-    if (ab === 'single' || ab === 'multiple') {
-      localStorage.setItem('ab_image_variant', ab);
+    const devOverride = parseDevAbQueryOverride();
+    if (devOverride) {
+      localStorage.setItem(AB_TEST_STORAGE_KEY, devOverride);
     }
   } catch {
-    console.error('Error setting ab_image_variant');
+    console.error(`Error setting ${AB_TEST_STORAGE_KEY}`);
   }
 }
 

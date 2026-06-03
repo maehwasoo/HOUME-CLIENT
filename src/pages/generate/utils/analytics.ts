@@ -1,8 +1,8 @@
 // ResultImg 페이지 관련 Firebase Analytics 이벤트
 
-import { logAnalyticsEvent } from '@utils/analytics';
+import type { ImageGenerationVariant } from '@shared/types/abTest';
 
-import type { ImageGenerationVariant } from '../hooks/useABTest';
+import { logAnalyticsEvent } from '@utils/analytics';
 
 /**
  * ResultImg 슬라이드 왼쪽 스와이프 이벤트
