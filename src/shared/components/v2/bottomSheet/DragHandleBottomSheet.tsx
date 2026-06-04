@@ -266,6 +266,7 @@ const DragHandleBottomSheet = ({
     <BottomSheetBase
       open={open}
       headerType="dragHandle"
+      expanded={expanded}
       contentSlot={contentSlot}
       primaryButton={primaryButton}
       secondaryButton={secondaryButton}

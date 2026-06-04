@@ -953,18 +953,18 @@ export interface ApiResponseRecentFloorPlanResponse {
   data?: RecentFloorPlanResponse;
 }
 
-export interface RecentFloorPlanItemResponse {
-  /** @format int64 */
-  id?: number;
-  name?: string;
+export interface ExploreHouseTemplateDetailItemResponse {
   imageUrl?: string;
-  equilibrium?: string;
   view?: string;
 }
 
 export interface RecentFloorPlanResponse {
   hasRecentImage?: boolean;
-  floorPlan?: RecentFloorPlanItemResponse;
+  /** @format int64 */
+  floorPlanId?: number;
+  floorPlanName?: string;
+  equilibrium?: string;
+  floorPlans?: ExploreHouseTemplateDetailItemResponse[];
 }
 
 export interface ApiResponseMyPageGeneratedImageV2Response {
@@ -1068,11 +1068,6 @@ export interface ApiResponseExploreHouseTemplateDetailResponse {
   code?: number;
   msg?: string;
   data?: ExploreHouseTemplateDetailResponse;
-}
-
-export interface ExploreHouseTemplateDetailItemResponse {
-  imageUrl?: string;
-  view?: string;
 }
 
 export interface ExploreHouseTemplateDetailResponse {

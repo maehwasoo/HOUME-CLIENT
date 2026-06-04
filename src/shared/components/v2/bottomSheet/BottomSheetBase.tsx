@@ -47,6 +47,8 @@ interface BottomSheetBaseProps {
   backgroundInteractable?: boolean;
   /** true일 때 body overflow를 hidden으로 설정하여 뒷배경 스크롤을 막음 (기본: true) */
   preventScroll?: boolean;
+  /** dragHandle 시트의 펼침 상태. 본문↔버튼 gap을 collapsed 8px / expanded 20px로 분기 (기본: false) */
+  expanded?: boolean;
 }
 
 const BottomSheetBase = ({
@@ -68,6 +70,7 @@ const BottomSheetBase = ({
   dragHandlerProps,
   backgroundInteractable = false,
   preventScroll = true,
+  expanded = false,
 }: BottomSheetBaseProps) => {
   const [basePhase, setBasePhase] = useState<BasePhase>('closed');
 
@@ -232,7 +235,7 @@ const BottomSheetBase = ({
         <span className={styles.srOnlyTitle}>{accessibleTitle}</span>
         <div
           ref={setPanelRef}
-          className={styles.panel}
+          className={styles.panel({ headerType })}
           style={{
             ...panelStyle,
             transform,
@@ -266,7 +269,7 @@ const BottomSheetBase = ({
               />
             </div>
           )}
-          <div className={styles.body}>
+          <div className={styles.body({ headerType, expanded })}>
             <div className={styles.contentSlot}>{contentSlot}</div>
             <div className={styles.actionRow}>
               {secondaryButton && (

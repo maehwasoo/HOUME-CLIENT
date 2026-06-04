@@ -8,7 +8,7 @@ import { unitVars } from '@styles/tokensV2/unit.css';
 export const container = style({
   display: 'flex',
   flexDirection: 'column',
-  gap: unitVars.unit.gapPadding['300'],
+  gap: unitVars.unit.gapPadding['200'],
   width: '100%',
 });
 

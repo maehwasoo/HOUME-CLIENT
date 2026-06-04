@@ -63,21 +63,38 @@ export const srOnlyTitle = style({
 // 헤더, 본문, 액션 영역을 감싸는 바텀시트 패널 본체
 // transform: open/close 슬라이드 (BottomSheetBase 소유)
 // height: expanded/collapsed/dragging (DragHandleBottomSheet 소유)
-export const panel = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: unitVars.unit.gapPadding['200'],
-  transition: `transform ${SHEET_TRANSITION_MS}ms ${SHEET_TRANSITION_EASING}, height ${SHEET_TRANSITION_MS}ms ${SHEET_TRANSITION_EASING}`,
-  willChange: 'transform, height',
-  borderTopLeftRadius: unitVars.unit.radius['700'],
-  borderTopRightRadius: unitVars.unit.radius['700'],
-  backgroundColor: colorVars.color.bg.primary,
-  padding: `${unitVars.unit.gapPadding['200']} ${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['600']}`,
-  width: '100%',
-  maxHeight: 'calc(100dvh - 10.4rem)',
-  overflow: 'hidden',
-  overscrollBehavior: 'contain',
-  WebkitTapHighlightColor: 'transparent',
+// gap/padding은 헤더 타입별 디자인이 달라 headerType variant로 분기
+export const panel = recipe({
+  base: {
+    display: 'flex',
+    flexDirection: 'column',
+    transition: `transform ${SHEET_TRANSITION_MS}ms ${SHEET_TRANSITION_EASING}, height ${SHEET_TRANSITION_MS}ms ${SHEET_TRANSITION_EASING}`,
+    willChange: 'transform, height',
+    borderTopLeftRadius: unitVars.unit.radius['700'],
+    borderTopRightRadius: unitVars.unit.radius['700'],
+    backgroundColor: colorVars.color.bg.primary,
+    width: '100%',
+    maxHeight: 'calc(100dvh - 10.4rem)',
+    overflow: 'hidden',
+    overscrollBehavior: 'contain',
+    WebkitTapHighlightColor: 'transparent',
+  },
+  variants: {
+    headerType: {
+      // 핸들이 패널 최상단에 붙고(상단 padding 0) 하단 여백 8px, 핸들↔시트본문 간격은 dragHeader padding이 담당(gap 0)
+      dragHandle: {
+        gap: unitVars.unit.gapPadding['000'],
+        padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['200']}`,
+      },
+      close: {
+        gap: unitVars.unit.gapPadding['200'],
+        padding: `${unitVars.unit.gapPadding['200']} ${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['600']}`,
+      },
+    },
+  },
+  defaultVariants: {
+    headerType: 'close',
+  },
 });
 
 // drag handle 타입에서 상단 핸들을 가운데 배치하는 헤더
@@ -89,7 +106,7 @@ export const dragHeader = style({
   justifyContent: 'center',
   cursor: 'grab',
   touchAction: 'none',
-  padding: unitVars.unit.gapPadding['200'],
+  padding: `${unitVars.unit.gapPadding['300']} ${unitVars.unit.gapPadding['200']}`,
   width: '100%',
   selectors: {
     '&:active': {
@@ -164,15 +181,43 @@ export const closeButton = style({
 });
 
 // 본문 콘텐츠와 하단 버튼 감싸는 column 래퍼
-export const body = style({
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'space-between',
-  gap: unitVars.unit.gapPadding['500'],
-  padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['600']}`,
-  width: '100%',
-  height: '100%',
-  minHeight: 0,
+// 본문↔버튼 간격(gap)이 헤더 타입/펼침 상태별 디자인이 달라 variant로 분기
+// - close: 20px 고정
+// - dragHandle: collapsed 8px(컴팩트) / expanded 20px(여유) — compoundVariants에서 지정
+export const body = recipe({
+  base: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['600']}`,
+    width: '100%',
+    height: '100%',
+    minHeight: 0,
+  },
+  variants: {
+    headerType: {
+      dragHandle: {},
+      close: { gap: unitVars.unit.gapPadding['500'] },
+    },
+    expanded: {
+      true: {},
+      false: {},
+    },
+  },
+  compoundVariants: [
+    {
+      variants: { headerType: 'dragHandle', expanded: false },
+      style: { gap: unitVars.unit.gapPadding['200'] },
+    },
+    {
+      variants: { headerType: 'dragHandle', expanded: true },
+      style: { gap: unitVars.unit.gapPadding['500'] },
+    },
+  ],
+  defaultVariants: {
+    headerType: 'close',
+    expanded: false,
+  },
 });
 
 // contentSlot(바텀시트 내부의 실질적인 contents 영역)이 스크롤되도록 하는 슬롯

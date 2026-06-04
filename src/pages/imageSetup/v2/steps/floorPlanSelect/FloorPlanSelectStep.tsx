@@ -67,14 +67,9 @@ const FloorPlanSelectStep = ({ context, onNext }: FloorPlanSelectStepProps) => {
         <FloorPlanSheet
           open={recentSheet.open}
           onClose={recentSheet.onClose}
-          floorPlanName={recentFloorPlan.name ?? ''}
+          floorPlanName={recentFloorPlan.floorPlanName ?? ''}
           equilibrium={recentFloorPlan.equilibrium ?? ''}
-          detailViews={[
-            {
-              imageUrl: recentFloorPlan.imageUrl,
-              view: recentFloorPlan.view,
-            },
-          ]}
+          detailViews={recentFloorPlan.floorPlans ?? []}
           onConfirm={handleConfirmRecentFloorPlan}
         />
       )}

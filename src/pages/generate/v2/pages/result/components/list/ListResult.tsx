@@ -180,8 +180,6 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
         (relatedImage) =>
           relatedImage.id != null &&
           relatedImage.resultType != null &&
-          (relatedImage.resultType === 'LIST' ||
-            relatedImage.resultType === 'RECOMMEND') &&
           Boolean(relatedImage.imageUrl?.trim())
       ),
     [relatedImagesRaw]

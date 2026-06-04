@@ -47,7 +47,7 @@ export const useFloorPlanSelect = (
   // 최근 사용 도면 조회 (RecentSheet 용도)
   const { data: recentFloorPlanData } = useRecentFloorPlanQuery();
   const recentFloorPlan = recentFloorPlanData?.hasRecentImage
-    ? (recentFloorPlanData.floorPlan ?? null)
+    ? recentFloorPlanData
     : null;
 
   // 시트 자동 오픈 우선순위 (마운트 시 1회 평가):
@@ -144,18 +144,21 @@ export const useFloorPlanSelect = (
 
   // 최근 생성 공간 바텀시트 "공간 선택하기" CTA
   const handleConfirmRecentFloorPlan = () => {
-    if (!recentFloorPlan?.id) return;
+    if (!recentFloorPlan?.floorPlanId) return;
     store.closeRecentSheet();
 
+    // 최근 생성한 도면도 multi-view 가능 → 사용자가 선택한 view 반영
+    const floorPlanView =
+      (recentFloorPlan.floorPlans ?? [])[store.selectedViewIndex]?.view ?? '';
+
     const floorPlanData: CompletedFloorPlanSelect['floorPlan'] = {
-      floorPlanId: recentFloorPlan.id,
+      floorPlanId: recentFloorPlan.floorPlanId,
       isMirror: store.isMirror,
-      floorPlanView: recentFloorPlan.view ?? '',
+      floorPlanView,
     };
-    // RecentSheet 진입은 view 선택 단계 없이 즉시 확정 → floorPlanViewIndex 0 기본값
     useFunnelStore.getState().setFloorPlan({
       ...floorPlanData,
-      floorPlanViewIndex: 0,
+      floorPlanViewIndex: store.selectedViewIndex,
     });
     onNext({ floorPlan: floorPlanData });
   };
