@@ -5,10 +5,6 @@ import { colorVars } from '@shared/styles/tokensV2/color.css';
 import { fontVars } from '@shared/styles/tokensV2/font.css';
 import { unitVars } from '@shared/styles/tokensV2/unit.css';
 
-import {
-  SKELETON_GRADIENT,
-  animationTokens,
-} from '@styles/tokens/animation.css';
 import { zIndex } from '@styles/tokens/zIndex';
 
 export const wrapper = recipe({
@@ -44,33 +40,13 @@ export const imgSection = recipe({
   },
 });
 
-export const cardImage = recipe({
-  base: {
-    boxSizing: 'border-box',
-    display: 'block',
-    transition: 'opacity 0.3s ease-in-out',
-    objectFit: 'cover',
-    objectPosition: 'center',
-    width: '100%',
-    height: '100%',
-  },
-  variants: {
-    loaded: {
-      true: { opacity: 1 },
-      false: { opacity: 0 },
-    },
-  },
-  defaultVariants: {
-    loaded: false,
-  },
-});
-
-export const skeleton = style({
-  position: 'absolute',
-  inset: 0,
-  background: SKELETON_GRADIENT,
-  backgroundSize: '200% 100%',
-  animation: `${animationTokens.skeletonWave} 2s linear infinite`,
+export const cardImage = style({
+  boxSizing: 'border-box',
+  display: 'block',
+  objectFit: 'cover',
+  objectPosition: 'center',
+  width: '100%',
+  height: '100%',
 });
 
 export const linkBtnContainer = recipe({

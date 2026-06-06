@@ -1,3 +1,5 @@
+import OptimizedImage from '@components/image/OptimizedImage';
+
 import * as styles from './GeneratedImg.css';
 
 import type { ResultImageMeta } from '../../../types';
@@ -14,10 +16,11 @@ const GeneratedImg = ({ image }: GeneratedImgListProps) => {
   return (
     <div className={styles.container}>
       <div className={styles.listImageFrame}>
-        <img
+        <OptimizedImage
           src={image.imageUrl}
           alt=""
           fetchPriority="high"
+          loading="eager"
           decoding="async"
           className={styles.imgArea({ mirrored: image.isMirror })}
         />

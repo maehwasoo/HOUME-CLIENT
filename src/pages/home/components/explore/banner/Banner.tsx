@@ -9,6 +9,10 @@ import { useBannerListQuery } from '@pages/home/apis/queries/useBannerListQuery'
 
 import Icon from '@shared/components/v2/icon/Icon';
 
+import OptimizedImage from '@components/image/OptimizedImage';
+
+import { IMAGE_SIZES } from '@utils/imageVariant';
+
 import * as styles from './Banner.css';
 
 import type { Swiper as SwiperType } from 'swiper';
@@ -83,8 +87,9 @@ const Banner = ({ seedBannerId, onSlideClick }: BannerProps) => {
               >
                 {slide.imageUrl ? (
                   <div className={styles.wrapper}>
-                    <img
+                    <OptimizedImage
                       src={slide.imageUrl}
+                      sizes={IMAGE_SIZES.full}
                       alt={slide.title}
                       className={styles.image}
                       draggable={false}

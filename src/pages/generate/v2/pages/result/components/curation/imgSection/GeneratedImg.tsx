@@ -9,6 +9,7 @@ import 'swiper/css/pagination';
 
 import generateResultLockedPreview from '@assets/images/generateResultLockedPreview.png';
 
+import OptimizedImage from '@components/image/OptimizedImage';
 import CommunityComingSoonModal from '@components/overlay/modal/CommunityComingSoonModal';
 import ActionButton from '@components/v2/button/actionButton/ActionButton';
 import IconButton from '@components/v2/button/IconButton';
@@ -86,7 +87,7 @@ const GeneratedImg = ({
               key={`${image.imageId}-${index}`}
               className={styles.swiperSlide}
             >
-              <img
+              <OptimizedImage
                 src={image.imageUrl}
                 alt=""
                 loading="lazy"

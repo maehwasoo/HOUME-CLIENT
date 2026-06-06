@@ -18,6 +18,7 @@ import type { GetCarouselResponseDTO } from '@apis/__generated__/data-contracts'
 import TestImg from '@assets/v2/images/TestImg.png';
 
 import FeatureErrorFallback from '@components/errorFallback/FeatureErrorFallback';
+import OptimizedImage from '@components/image/OptimizedImage';
 import Loading from '@components/loading/Loading';
 import { useToast } from '@components/toast/useToast';
 import Popup from '@components/v2/popup/Popup';
@@ -379,7 +380,7 @@ const LoadingPage = () => {
                   <>
                     {slotAImage?.url && (
                       <div className={slotAClassName}>
-                        <img
+                        <OptimizedImage
                           src={slotAImage.url}
                           alt={
                             frontSlot === 'A'
@@ -387,13 +388,14 @@ const LoadingPage = () => {
                               : `다음 가구 이미지 ${slotAImage.carouselId}`
                           }
                           className={styles.imageStyle}
+                          loading="eager"
                         />
                       </div>
                     )}
 
                     {slotBImage?.url && (
                       <div className={slotBClassName}>
-                        <img
+                        <OptimizedImage
                           src={slotBImage.url}
                           alt={
                             frontSlot === 'B'
@@ -401,6 +403,7 @@ const LoadingPage = () => {
                               : `다음 가구 이미지 ${slotBImage.carouselId}`
                           }
                           className={styles.imageStyle}
+                          loading="eager"
                         />
                       </div>
                     )}

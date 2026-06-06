@@ -5,9 +5,10 @@ import type {
   SaveInfo,
 } from '@shared/types/productCard';
 
-import CardImage from '@assets/images/cardExImg.svg?url';
+import emptyImage from '@assets/v2/images/ImgEmpty.png';
 
-import { useImageLoaded } from '@hooks/useImageLoaded';
+import OptimizedImage from '@components/image/OptimizedImage';
+
 import { useProductLink } from '@hooks/useProductLink';
 
 import {
@@ -62,9 +63,6 @@ const ProductCard = ({
 
   const linkHref = link?.href;
   const { openProductLink } = useProductLink();
-  const { isLoaded, imgProps } = useImageLoaded(product.imageUrl || CardImage, {
-    fallbackSrc: CardImage,
-  });
 
   const { visibleColors, extraColorCount } = getColorChips(product.colorHexes);
   const { originalPriceText, discountPriceText, discountRateText } =
@@ -104,10 +102,11 @@ const ProductCard = ({
       {...wrapperA11y}
     >
       <section className={styles.imgSection()} data-click-area="image">
-        {!isLoaded && <div className={styles.skeleton} />}
-        <img
-          {...imgProps}
-          className={styles.cardImage({ loaded: isLoaded })}
+        <OptimizedImage
+          src={product.imageUrl || emptyImage}
+          fallbackSrc={emptyImage}
+          placeholder="skeleton"
+          className={styles.cardImage}
           alt="카드 이미지"
         />
 

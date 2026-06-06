@@ -5,9 +5,11 @@ import clsx from 'clsx';
 
 import Icon from '@shared/components/v2/icon/Icon';
 
-import fallbackImage from '@assets/v2/images/CardRoomTypeFallback.svg';
+import emptyImage from '@assets/v2/images/ImgEmpty.png';
 
-import { useImageLoaded } from '@hooks/useImageLoaded';
+import OptimizedImage from '@components/image/OptimizedImage';
+
+import { IMAGE_SIZES } from '@utils/imageVariant';
 
 import * as styles from './StyleCard.css';
 
@@ -43,9 +45,6 @@ const StyleCard = ({
   largeContents,
   ...rest
 }: StyleCardProps) => {
-  const { imgProps } = useImageLoaded(initialImageSrc, {
-    fallbackSrc: fallbackImage,
-  });
   const titleId = useId();
   const hasTitle = title != null && title !== '';
   const isLarge = size === 'L';
@@ -62,8 +61,10 @@ const StyleCard = ({
         aria-label={hasTitle ? undefined : '스타일 카드 선택'}
         {...rest}
       >
-        <img
-          {...imgProps}
+        <OptimizedImage
+          src={initialImageSrc}
+          sizes={isLarge ? IMAGE_SIZES.full : IMAGE_SIZES.grid}
+          fallbackSrc={emptyImage}
           alt=""
           aria-hidden
           className={styles.image}

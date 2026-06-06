@@ -1,3 +1,7 @@
+import OptimizedImage from '@components/image/OptimizedImage';
+
+import { IMAGE_SIZES } from '@utils/imageVariant';
+
 import * as styles from './MoodboardCard.css';
 
 interface MoodboardCardProps
@@ -30,7 +34,14 @@ const MoodboardCard = ({
       className={`${styles.card({ state: cardState })}${className ? ` ${className}` : ''}`}
       {...rest}
     >
-      <img src={src} alt={alt} className={styles.image} draggable={false} />
+      <OptimizedImage
+        src={src}
+        sizes={IMAGE_SIZES.grid}
+        alt={alt}
+        className={styles.image}
+        draggable={false}
+        decoding="async"
+      />
       {!disabled && (
         <span className={styles.checkbox({ state: checkState })}>
           <span className={styles.circle({ state: checkState })}>

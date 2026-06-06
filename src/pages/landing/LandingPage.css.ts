@@ -1,4 +1,4 @@
-import { keyframes, style } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 
 import { colorVars } from '@styles/tokensV2/color.css';
 import { fontVars } from '@styles/tokensV2/font.css';
@@ -16,24 +16,19 @@ export const page = style({
 
 export const backgroundImage = style({
   position: 'absolute',
+  zIndex: 0,
   inset: 0,
+  transition: 'opacity 600ms ease',
+  opacity: 0,
   objectFit: 'cover',
+  // 모든 배경 이미지를 겹쳐두고 현재 이미지만 opacity 1로 올려 dissolve(크로스페이드). 리마운트 없음.
   width: '100%',
   height: '100%',
 });
 
-const dissolveFadeIn = keyframes({
-  from: { opacity: 0 },
-  to: { opacity: 1 },
-});
-
-export const backgroundImagePrevious = style({
-  zIndex: 0,
-});
-
-export const backgroundImageCurrent = style({
+export const backgroundImageVisible = style({
   zIndex: 1,
-  animation: `${dissolveFadeIn} 300ms ease`,
+  opacity: 1,
 });
 
 export const mainSection = style({

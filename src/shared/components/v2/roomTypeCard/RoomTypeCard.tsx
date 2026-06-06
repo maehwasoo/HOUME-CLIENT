@@ -1,9 +1,12 @@
 import type { ComponentProps } from 'react';
-import { useEffect, useState } from 'react';
 
 import clsx from 'clsx';
 
-import fallbackImage from '@assets/v2/images/CardRoomTypeFallback.svg';
+import emptyImage from '@assets/v2/images/ImgEmpty.png';
+
+import OptimizedImage from '@components/image/OptimizedImage';
+
+import { IMAGE_SIZES } from '@utils/imageVariant';
 
 import * as styles from './RoomTypeCard.css';
 import Icon from '../icon/Icon';
@@ -61,14 +64,6 @@ const RoomTypeOptionCard = ({
   imageLoading = 'lazy',
   ...rest
 }: RoomTypeOptionCardProps) => {
-  // 이미지 로드 실패 시 fallback src를 유지하고,
-  // 부모가 새 imageSrc를 내려주면 그 값으로 다시 동기화
-  const [imageSrc, setImageSrc] = useState(initialImageSrc);
-
-  useEffect(() => {
-    setImageSrc(initialImageSrc);
-  }, [initialImageSrc]);
-
   return (
     <button
       type="button"
@@ -77,15 +72,16 @@ const RoomTypeOptionCard = ({
       onClick={onClick}
       {...rest}
     >
-      <img
-        src={imageSrc}
+      <OptimizedImage
+        src={initialImageSrc}
+        sizes={IMAGE_SIZES.grid}
+        fallbackSrc={emptyImage}
         alt=""
         aria-hidden="true"
         className={styles.image}
         loading={imageLoading}
         decoding="async" // 브라우저 이미지 디코딩 비동기 처리 -> 렌더링 성능. UX 개선
         draggable={false}
-        onError={() => setImageSrc(fallbackImage)}
       />
       <div className={styles.gradient} aria-hidden="true" />
       <div className={styles.optionInfoRow}>
@@ -113,22 +109,17 @@ const RoomTypePreviewCard = ({
   nextButtonLabel = '다음',
   ...rest
 }: RoomTypePreviewCardProps) => {
-  const [imageSrc, setImageSrc] = useState(initialImageSrc);
-
-  useEffect(() => {
-    setImageSrc(initialImageSrc);
-  }, [initialImageSrc]);
-
   return (
     <div className={clsx(styles.previewCard, className)} {...rest}>
-      <img
-        src={imageSrc}
+      <OptimizedImage
+        src={initialImageSrc}
+        sizes={IMAGE_SIZES.full}
+        fallbackSrc={emptyImage}
         alt={imageAlt}
         className={styles.image}
         loading={imageLoading}
         decoding="async"
         draggable={false}
-        onError={() => setImageSrc(fallbackImage)}
       />
       {onPrevClick && (
         <button

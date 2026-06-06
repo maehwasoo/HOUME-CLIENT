@@ -10,22 +10,24 @@ import { ROUTES } from '@routes/paths';
 import ActionButton from '@shared/components/v2/button/actionButton/ActionButton';
 import LogoNavBar from '@shared/components/v2/navBar/LogoNavBar';
 
+import OptimizedImage from '@components/image/OptimizedImage';
+
 import { useABTest } from '@hooks/useABTest';
+
+import { IMAGE_SIZES } from '@utils/imageVariant';
 
 import * as styles from './LandingPage.css';
 
 const DISSOLVE_INTERVAL_MS = 4000;
-const DISSOLVE_DURATION_MS = 300;
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const { variant } = useABTest();
   const { data: landingData } = useLandingQuery();
   const landingItems = landingData?.landings ?? [];
-  const { currentIndex, previousIndex } = useDissolveAnimation({
+  const { currentIndex } = useDissolveAnimation({
     itemCount: landingItems.length,
     intervalMs: DISSOLVE_INTERVAL_MS,
-    durationMs: DISSOLVE_DURATION_MS,
   });
   const selectedLanding = landingItems[currentIndex] ?? landingItems[0];
 
@@ -44,23 +46,21 @@ const LandingPage = () => {
 
   return (
     <main className={styles.page}>
-      {previousIndex !== null && landingItems[previousIndex]?.imageUrl ? (
-        <img
-          src={landingItems[previousIndex].imageUrl}
-          alt="랜딩 배경 이미지"
-          aria-hidden
-          className={`${styles.backgroundImage} ${styles.backgroundImagePrevious}`}
-        />
-      ) : null}
-      {selectedLanding?.imageUrl ? (
-        <img
-          key={selectedLanding.bannerId ?? currentIndex}
-          src={selectedLanding.imageUrl}
-          alt="랜딩 배너 이미지"
-          aria-hidden
-          className={`${styles.backgroundImage} ${styles.backgroundImageCurrent}`}
-        />
-      ) : null}
+      {landingItems.map((item, index) =>
+        item.imageUrl ? (
+          <OptimizedImage
+            key={item.bannerId ?? index}
+            src={item.imageUrl}
+            sizes={IMAGE_SIZES.full}
+            alt="랜딩 배경 이미지"
+            aria-hidden
+            loading={index === 0 ? 'eager' : 'lazy'}
+            className={`${styles.backgroundImage}${
+              index === currentIndex ? ` ${styles.backgroundImageVisible}` : ''
+            }`}
+          />
+        ) : null
+      )}
       <LogoNavBar page="landing" />
       <section className={styles.mainSection}>
         <div className={styles.contentBlock}>

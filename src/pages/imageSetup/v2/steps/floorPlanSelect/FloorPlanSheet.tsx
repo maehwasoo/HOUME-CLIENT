@@ -8,10 +8,15 @@ import 'swiper/css';
 
 import type { ExploreHouseTemplateDetailItemResponse } from '@apis/__generated__/data-contracts';
 
+import emptyImage from '@assets/v2/images/ImgEmpty.png';
+
+import OptimizedImage from '@components/image/OptimizedImage';
 import CloseBottomSheet from '@components/v2/bottomSheet/CloseBottomSheet';
 import ActionButton from '@components/v2/button/actionButton/ActionButton';
 import IconButton from '@components/v2/button/IconButton';
 import Icon from '@components/v2/icon/Icon';
+
+import { IMAGE_SIZES } from '@utils/imageVariant';
 
 import * as styles from './FloorPlanSheet.css';
 import { useFloorPlanSheet } from '../../hooks/useFloorPlanSheet';
@@ -94,8 +99,10 @@ const FloorPlanSheet = ({
               >
                 {detailViews.map((view, index) => (
                   <SwiperSlide key={`view-${index}`}>
-                    <img
-                      src={view.imageUrl}
+                    <OptimizedImage
+                      src={view.imageUrl ?? emptyImage}
+                      sizes={IMAGE_SIZES.full}
+                      fallbackSrc={emptyImage}
                       alt={`${floorPlanName} ${view.view}`}
                       className={clsx(
                         styles.slideImage,
