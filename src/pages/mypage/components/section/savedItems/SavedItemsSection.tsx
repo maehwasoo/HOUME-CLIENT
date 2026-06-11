@@ -26,7 +26,10 @@ const SavedItemsSection = () => {
   );
 
   // 찜한 목록 조회
-  const { data: savedItems = [], isFetched } = useGetJjymListQuery();
+  const { data: savedItems = [], isFetched } = useGetJjymListQuery({
+    gcTime: 0,
+    refetchOnMount: 'always',
+  });
 
   // 찜 해제 토글
   const { mutate: toggleJjym } = useJjymMutation({

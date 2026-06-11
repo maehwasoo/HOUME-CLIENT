@@ -111,6 +111,14 @@ export const button = recipe({
       },
     },
     {
+      variants: { disabled: true, variant: 'outlined' },
+      style: {
+        background: colorVars.color.fill.inverseSecondary,
+        border: `1px solid ${colorVars.color.border.tertiary}`,
+        color: colorVars.color.text.disabled,
+      },
+    },
+    {
       variants: { variant: 'ghost' },
       style: {
         background: `rgba(255, 255, 255, 0.10)`,

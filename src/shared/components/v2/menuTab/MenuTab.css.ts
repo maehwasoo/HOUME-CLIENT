@@ -44,7 +44,7 @@ export const tabButton = recipe({
     marginBottom: '-0.4rem',
     borderBottom: `0.2rem solid transparent`,
     padding: unitVars.unit.gapPadding['200'],
-    ...fontVars.font.title_sb_16,
+
     height: '100%',
   },
   variants: {
@@ -56,9 +56,11 @@ export const tabButton = recipe({
       active: {
         borderBottomColor: colorVars.color.fill.primary,
         color: colorVars.color.text.primary,
+        ...fontVars.font.title_sb_16,
       },
       inactive: {
         color: colorVars.color.text.tertiary,
+        ...fontVars.font.title_m_16,
       },
     },
   },

@@ -17,9 +17,12 @@ export const getJjymList = async (): Promise<JjymsResponse> => {
   });
 };
 
-export const useGetJjymListQuery = (
-  options?: UseQueryOptions<JjymsResponse, unknown, FurnitureItem[]>
-) => {
+type GetJjymListQueryOptions = Omit<
+  UseQueryOptions<JjymsResponse, unknown, FurnitureItem[]>,
+  'queryKey' | 'queryFn' | 'select'
+>;
+
+export const useGetJjymListQuery = (options?: GetJjymListQueryOptions) => {
   return useQuery({
     queryKey: queryKeys.mypage.jjymList(),
     queryFn: getJjymList,

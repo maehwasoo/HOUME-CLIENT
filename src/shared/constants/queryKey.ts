@@ -80,8 +80,8 @@ export const queryKeys = {
   // 이미지 생성
   generate: {
     all: ['generate'] as const,
-    stack: (cursor?: number) =>
-      [...queryKeys.generate.all, 'stack', cursor ?? 'initial'] as const,
+    stack: (param?: number | number[]) =>
+      [...queryKeys.generate.all, 'stack', param ?? 'initial'] as const,
     meta: (imageId: number) =>
       [...queryKeys.generate.all, 'meta', imageId] as const,
     result: (houseId: number) =>

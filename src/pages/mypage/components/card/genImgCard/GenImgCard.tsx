@@ -63,7 +63,18 @@ const GenImgCard = ({
 
   return (
     <div className={styles.wrapper}>
-      <section className={styles.textContainer} onClick={onCurationClick}>
+      <section
+        className={styles.textContainer}
+        role="button"
+        tabIndex={0}
+        onClick={onCurationClick}
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && onCurationClick) {
+            e.preventDefault();
+            onCurationClick();
+          }
+        }}
+      >
         <span className={styles.headingText}>{productSummaryText}</span>
         <TextButton
           color="secondary"
@@ -77,7 +88,7 @@ const GenImgCard = ({
           더보기
         </TextButton>
       </section>
-      <section className={styles.imgContainer}>
+      <section className={styles.imgContainer} onClick={onCurationClick}>
         {/* 이미지 로드 완료 전에는 skeleton, 완료 시 실제 이미지 렌더링 */}
         {!isImageReady && <div className={styles.skeleton} />}
         <OptimizedImage

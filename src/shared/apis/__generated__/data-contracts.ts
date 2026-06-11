@@ -953,9 +953,10 @@ export interface ApiResponseRecentFloorPlanResponse {
   data?: RecentFloorPlanResponse;
 }
 
-export interface ExploreHouseTemplateDetailItemResponse {
+export interface RecentFloorPlanItemResponse {
   imageUrl?: string;
   view?: string;
+  isRecentUsedView?: boolean;
 }
 
 export interface RecentFloorPlanResponse {
@@ -964,7 +965,7 @@ export interface RecentFloorPlanResponse {
   floorPlanId?: number;
   floorPlanName?: string;
   equilibrium?: string;
-  floorPlans?: ExploreHouseTemplateDetailItemResponse[];
+  floorPlans?: RecentFloorPlanItemResponse[];
 }
 
 export interface ApiResponseMyPageGeneratedImageV2Response {
@@ -1068,6 +1069,11 @@ export interface ApiResponseExploreHouseTemplateDetailResponse {
   code?: number;
   msg?: string;
   data?: ExploreHouseTemplateDetailResponse;
+}
+
+export interface ExploreHouseTemplateDetailItemResponse {
+  imageUrl?: string;
+  view?: string;
 }
 
 export interface ExploreHouseTemplateDetailResponse {
@@ -1203,14 +1209,12 @@ export interface ApiResponseGetCarouselV2ListResponseDTO {
 
 export interface GetCarouselResponseDTO {
   /** @format int64 */
-  carouselId?: number;
+  rawProductId?: number;
   url?: string;
 }
 
 export interface GetCarouselV2ListResponseDTO {
   carousels?: GetCarouselResponseDTO[];
-  /** @format int64 */
-  nextCursor?: number;
 }
 
 export interface ApiResponseOtherStyleListResponse {

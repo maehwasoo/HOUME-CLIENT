@@ -22,6 +22,7 @@ export const textContainer = style({
   display: 'flex',
   justifyContent: 'space-between',
   gap: unitVars.unit.gapPadding['200'],
+  cursor: 'pointer',
   width: '100%',
 });
 
@@ -46,6 +47,7 @@ export const imgContainer = style({
   transition: 'transform 100ms ease',
   border: 0,
   borderRadius: unitVars.unit.radius['300'],
+  cursor: 'pointer',
   width: '100%',
   overflow: 'hidden',
 });

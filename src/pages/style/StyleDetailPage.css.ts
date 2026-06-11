@@ -27,6 +27,7 @@ export const productList = style({
 export const sectionTitle = style({
   ...fontVars.font.title_sb_16,
   marginBottom: unitVars.unit.gapPadding['400'],
+  padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['100']}`,
 });
 
 export const products = style({
