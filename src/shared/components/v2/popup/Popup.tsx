@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 
 import * as styles from './Popup.css.ts';
 import ActionButton from '../button/actionButton/ActionButton';
@@ -42,6 +42,15 @@ const Popup = ({
 }: PopupProps) => {
   const hasWeak = weakBtnText != null && weakBtnText !== '';
 
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, []);
+
   const footer =
     btnStyle === 'text' ? (
       <div className={styles.buttonArea({ btnStyle: 'text' })}>
@@ -70,24 +79,32 @@ const Popup = ({
     ) : (
       <div className={styles.buttonArea({ btnStyle: 'solid' })}>
         {sideIconName ? (
-          <IconButton name={sideIconName} size="M" onClick={onCancel} />
+          <IconButton
+            name={sideIconName}
+            size="M"
+            className={styles.sideIconButton}
+            onClick={onCancel}
+          />
         ) : null}
-        <ActionButton
-          variant="solid"
-          color="primary"
-          size="L"
-          leftIcon={btnIcon}
-          fullWidth={!hasWeak}
-          disabled={confirmDisabled}
-          onClick={onConfirm}
-        >
-          {btnText}
-        </ActionButton>
+        <div className={styles.primaryButtonWrap}>
+          <ActionButton
+            variant="solid"
+            color="primary"
+            size="L"
+            leftIcon={btnIcon}
+            fullWidth
+            disabled={confirmDisabled}
+            onClick={onConfirm}
+          >
+            {btnText}
+          </ActionButton>
+        </div>
       </div>
     );
 
   return (
-    <div className={styles.backdrop} onClick={onClose}>
+    <div className={styles.viewportLayer}>
+      <div className={styles.backdrop} onClick={onClose} />
       <div
         className={styles.container}
         role="dialog"

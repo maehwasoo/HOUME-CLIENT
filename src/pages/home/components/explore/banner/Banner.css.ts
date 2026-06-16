@@ -91,7 +91,7 @@ export const content = style({
 export const title = style({
   width: '100%',
   color: colorVars.color.text.inverse,
-  ...fontVars.font.title_sb_16,
+  ...fontVars.font.title_sb_20,
 });
 
 export const cta = style({

@@ -13,7 +13,7 @@ interface UseProductHeaderScrollParams {
 /** 필터가 상단에 닿기 전 최소 스크롤 (마운트 시 sticky 오발동 방지) */
 const FILTER_STICKY_SCROLL_MIN_PX = 8;
 
-/** scroll-to-top 노출 최소 스크롤 (sticky 활성 + 아래로 내려온 뒤) */
+/** scroll-to-top 노출: sticky 활성 + 스크롤 업 + 최소 스크롤 거리 */
 const SCROLL_TOP_SHOW_MIN_PX = 120;
 
 const useProductHeaderScroll = ({
@@ -34,7 +34,7 @@ const useProductHeaderScroll = ({
    * window 스크롤 이벤트를 구독해 sticky 헤더 상태를 계산한다.
    * - 필터 라인이 viewport top에 닿으면 sticky 시작
    * - sticky 중 스크롤 업 + 원본 검색바 복귀 시 sticky 해제
-   * - sticky 중에는 스크롤 업일 때만 상단 검색바 표시
+   * - sticky 중에는 스크롤 업일 때만 상단 검색바·scroll-to-top 버튼 표시
    */
   useEffect(() => {
     const handleScroll = () => {
@@ -65,7 +65,9 @@ const useProductHeaderScroll = ({
           return;
         }
         setShowStickySearchBar(isScrollUp);
-        setShowScrollTopFloatingButton(currentY > SCROLL_TOP_SHOW_MIN_PX);
+        setShowScrollTopFloatingButton(
+          isScrollUp && currentY > SCROLL_TOP_SHOW_MIN_PX
+        );
       } else {
         setShowScrollTopFloatingButton(false);
       }

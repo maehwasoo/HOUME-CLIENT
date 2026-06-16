@@ -74,14 +74,16 @@ const GeneratedImg = ({
           }}
           onSwiper={setSwiper}
         >
-          <IconButton
-            name="ArrowLeftFill"
-            size="M"
-            className={styles.slidePrevBtn}
-            disabled={isPrevDisabled}
-            onClick={() => swiper?.slidePrev()}
-            aria-label="이전 이미지"
-          />
+          <div className={styles.slidePrevBtnWrap}>
+            <IconButton
+              name="ArrowLeftFill"
+              size="M"
+              className={styles.slideNavBtn}
+              disabled={isPrevDisabled}
+              onClick={() => swiper?.slidePrev()}
+              aria-label="이전 이미지"
+            />
+          </div>
           {images.map((image, index) => (
             <SwiperSlide
               key={`${image.imageId}-${index}`}
@@ -119,14 +121,16 @@ const GeneratedImg = ({
               </div>
             </SwiperSlide>
           )}
-          <IconButton
-            name="ArrowRightFill"
-            size="M"
-            className={styles.slideNextBtn}
-            disabled={isNextDisabled}
-            onClick={() => swiper?.slideNext()}
-            aria-label="다음 이미지"
-          />
+          <div className={styles.slideNextBtnWrap}>
+            <IconButton
+              name="ArrowRightFill"
+              size="M"
+              className={styles.slideNavBtn}
+              disabled={isNextDisabled}
+              onClick={() => swiper?.slideNext()}
+              aria-label="다음 이미지"
+            />
+          </div>
         </Swiper>
       </div>
     </div>

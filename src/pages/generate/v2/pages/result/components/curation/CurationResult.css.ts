@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { globalStyle, style } from '@vanilla-extract/css';
 
 import { colorVars } from '@styles/tokensV2/color.css';
 import { fontVars } from '@styles/tokensV2/font.css';
@@ -38,18 +38,29 @@ export const content = style({
 });
 
 export const chipList = style({
+  boxSizing: 'border-box',
   display: 'flex',
   flexDirection: 'row',
   flexWrap: 'nowrap',
-  gap: unitVars.unit.gapPadding['200'],
+  gap: unitVars.unit.gapPadding['100'],
+  touchAction: 'pan-x',
   width: '100%',
+  minWidth: 0,
   overflowX: 'auto',
   overflowY: 'hidden',
+  overscrollBehaviorX: 'contain',
+  scrollbarWidth: 'none',
+  msOverflowStyle: 'none',
+  WebkitOverflowScrolling: 'touch',
   selectors: {
     '&::-webkit-scrollbar': {
       display: 'none',
     },
   },
+});
+
+globalStyle(`${chipList} > button`, {
+  flexShrink: 0,
 });
 
 export const productList = style({

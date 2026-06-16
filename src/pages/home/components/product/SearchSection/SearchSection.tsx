@@ -267,17 +267,21 @@ const SearchSection = ({
         </div>
       )}
 
-      <div
-        className={`${styles.scrollTopFloatingWrap} ${
-          showScrollTopFloatingButton ? styles.scrollTopFloatingWrapVisible : ''
-        }`}
-      >
-        <IconButton
-          name="ArrowUp"
-          size="S"
-          aria-label="페이지 상단으로 이동"
-          onClick={handleScrollToTopClick}
-        />
+      <div className={styles.scrollTopFloatingLayer}>
+        <div
+          className={`${styles.scrollTopFloatingWrap} ${
+            showScrollTopFloatingButton
+              ? styles.scrollTopFloatingWrapVisible
+              : ''
+          }`}
+        >
+          <IconButton
+            name="ArrowUp"
+            size="S"
+            aria-label="페이지 상단으로 이동"
+            onClick={handleScrollToTopClick}
+          />
+        </div>
       </div>
     </section>
   );

@@ -58,19 +58,28 @@ export const imgArea = recipe({
   },
 });
 
-export const slidePrevBtn = style({
+export const slideNavBtnWrap = style({
   position: 'absolute',
   zIndex: 1,
-  bottom: '50%',
-  left: unitVars.unit.gapPadding['100'],
-  padding: unitVars.unit.gapPadding['200'],
+  top: '50%',
+  transform: 'translateY(-50%)',
 });
 
-export const slideNextBtn = style({
-  position: 'absolute',
-  zIndex: 1,
-  right: unitVars.unit.gapPadding['100'],
-  bottom: '50%',
+export const slidePrevBtnWrap = style([
+  slideNavBtnWrap,
+  {
+    left: unitVars.unit.gapPadding['100'],
+  },
+]);
+
+export const slideNextBtnWrap = style([
+  slideNavBtnWrap,
+  {
+    right: unitVars.unit.gapPadding['100'],
+  },
+]);
+
+export const slideNavBtn = style({
   padding: unitVars.unit.gapPadding['200'],
 });
 

@@ -53,6 +53,7 @@ export const optionRow = style({
   cursor: 'pointer',
   padding: `${unitVars.unit.gapPadding['200']} ${unitVars.unit.gapPadding['400']}`,
   width: '100%',
+  height: '4.4rem',
   textAlign: 'left',
   selectors: {
     '&[aria-checked="true"]': {
@@ -72,6 +73,11 @@ export const optionLabel = style({
   padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['100']}`,
   ...fontVars.font.body_r_14,
   color: colorVars.color.text.primary,
+  selectors: {
+    [`${optionRow}[aria-checked="true"] &`]: {
+      ...fontVars.font.body_m_14,
+    },
+  },
 });
 
 export const ctaBar = style({

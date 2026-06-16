@@ -12,6 +12,7 @@ import ChevronUp from '@assets/v2/svg/ChevronUp.svg?url';
 import Close from '@assets/v2/svg/Close.svg?url';
 import CloseFillBlack from '@assets/v2/svg/CloseFillBlack.svg?url';
 import CloseFillDanger from '@assets/v2/svg/CloseFillDanger.svg?url';
+import CloseFillGrayA40 from '@assets/v2/svg/CloseFillGray-a40.svg?url';
 import CloseFillGray from '@assets/v2/svg/CloseFillGray.svg?url';
 import Credit from '@assets/v2/svg/Credit.svg?url';
 import CupBlack from '@assets/v2/svg/CupBlack.svg?url';
@@ -65,6 +66,7 @@ const IconsName = {
   CloseFillBlack,
   CloseFillDanger,
   CloseFillGray,
+  CloseFillGrayA40,
   CupBlack,
   CupGray,
   DeskBlack,

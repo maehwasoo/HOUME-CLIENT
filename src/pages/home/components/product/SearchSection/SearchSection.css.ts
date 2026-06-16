@@ -115,11 +115,23 @@ export const recommendDivider = style({
   height: '0.8rem',
 });
 
-export const scrollTopFloatingWrap = style({
+export const scrollTopFloatingLayer = style({
+  boxSizing: 'border-box',
   position: 'fixed',
   zIndex: zIndex.sticky,
-  right: unitVars.unit.gapPadding['500'],
   bottom: PRODUCT_SCROLL_TOP_FLOATING_BOTTOM,
+  left: '50%',
+  display: 'flex',
+  justifyContent: 'flex-end',
+  transform: 'translateX(-50%)',
+  pointerEvents: 'none',
+  paddingRight: unitVars.unit.gapPadding['500'],
+  width: '100%',
+  minWidth: unitVars.unit.dimension.wMin,
+  maxWidth: unitVars.unit.dimension.wMax,
+});
+
+export const scrollTopFloatingWrap = style({
   transform: 'translateY(0.8rem)',
   transition: 'opacity 240ms ease, transform 240ms ease',
   opacity: 0,

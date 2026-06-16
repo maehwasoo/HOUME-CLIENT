@@ -27,7 +27,7 @@ export const chip = recipe({
   variants: {
     selected: {
       false: {
-        borderColor: colorVars.color.border.primary,
+        borderColor: colorVars.color.border.secondary,
         backgroundColor: colorVars.color.fill.inverse,
         color: colorVars.color.text.tertiary,
       },
