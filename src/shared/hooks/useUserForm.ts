@@ -22,30 +22,39 @@ interface InitialFormData {
 }
 
 const useUserForm = (initialData: InitialFormData = {}) => {
+  const initialValues = useMemo(
+    () => ({
+      nickname: initialData.nickname ?? '',
+      birthYear: initialData.birthYear ?? '',
+      birthMonth: initialData.birthMonth ?? '',
+      birthDay: initialData.birthDay ?? '',
+      gender: initialData.gender ?? null,
+    }),
+    [
+      initialData.nickname,
+      initialData.birthYear,
+      initialData.birthMonth,
+      initialData.birthDay,
+      initialData.gender,
+    ]
+  );
+
   // -------------------------
   // 상태 관리
   // -------------------------
-  const [nickname, setNickname] = useState(initialData.nickname ?? '');
-  const [birthYear, setBirthYear] = useState(initialData.birthYear ?? '');
-  const [birthMonth, setBirthMonth] = useState(initialData.birthMonth ?? '');
-  const [birthDay, setBirthDay] = useState(initialData.birthDay ?? '');
-  const [gender, setGender] = useState<Gender | null>(
-    initialData.gender ?? null
-  );
+  const [nickname, setNickname] = useState(initialValues.nickname);
+  const [birthYear, setBirthYear] = useState(initialValues.birthYear);
+  const [birthMonth, setBirthMonth] = useState(initialValues.birthMonth);
+  const [birthDay, setBirthDay] = useState(initialValues.birthDay);
+  const [gender, setGender] = useState<Gender | null>(initialValues.gender);
 
   useEffect(() => {
-    setNickname(initialData.nickname ?? '');
-    setBirthYear(initialData.birthYear ?? '');
-    setBirthMonth(initialData.birthMonth ?? '');
-    setBirthDay(initialData.birthDay ?? '');
-    setGender(initialData.gender ?? null);
-  }, [
-    initialData.nickname,
-    initialData.birthYear,
-    initialData.birthMonth,
-    initialData.birthDay,
-    initialData.gender,
-  ]);
+    setNickname(initialValues.nickname);
+    setBirthYear(initialValues.birthYear);
+    setBirthMonth(initialValues.birthMonth);
+    setBirthDay(initialValues.birthDay);
+    setGender(initialValues.gender);
+  }, [initialValues]);
 
   // -------------------------
   // 이름 유효성 검사
@@ -149,6 +158,16 @@ const useUserForm = (initialData: InitialFormData = {}) => {
 
   const { isFormValid, hasError } = validationResult;
 
+  const isDirty = useMemo(
+    () =>
+      nickname !== initialValues.nickname ||
+      birthYear !== initialValues.birthYear ||
+      birthMonth !== initialValues.birthMonth ||
+      birthDay !== initialValues.birthDay ||
+      gender !== initialValues.gender,
+    [nickname, birthYear, birthMonth, birthDay, gender, initialValues]
+  );
+
   // -------------------------
   // 입력 핸들러
   // -------------------------
@@ -186,6 +205,7 @@ const useUserForm = (initialData: InitialFormData = {}) => {
     isNameFormatInvalid,
     isNameLengthInvalid,
     isFormValid,
+    isDirty,
     hasError,
     yearFormatError,
     yearAgeError,

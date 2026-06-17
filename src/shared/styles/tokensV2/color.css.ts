@@ -12,6 +12,7 @@ const primitives = createGlobalTheme(':root', {
     gray999: '#000000',
     gray999_a50: 'rgba(0, 0, 0, 0.5)',
     gray999_a30: 'rgba(0, 0, 0, 0.3)',
+    gray999_a10: 'rgba(0, 0, 0, 0.1)',
     gray999_a04: 'rgba(0, 0, 0, 0.04)',
     gray900: '#1B1E22',
     gray800: '#31373F',
@@ -48,7 +49,7 @@ const semantics = createGlobalTheme(':root', {
       secondary: primitives.color.gray200,
       tertiary: primitives.color.gray100,
       strong: primitives.color.gray900,
-      weak: primitives.color.gray999_a30,
+      weak: primitives.color.gray999_a10,
     },
     fill: {
       brand: primitives.color.purple600,

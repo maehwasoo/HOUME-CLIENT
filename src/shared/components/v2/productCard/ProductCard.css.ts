@@ -90,7 +90,7 @@ export const colorChipContainer = style({
 
 export const colorChip = style({
   boxSizing: 'border-box',
-  border: `0.5px solid ${colorVars.color.border.weak}`,
+  border: `1px solid ${colorVars.color.border.weak}`,
   borderRadius: unitVars.unit.radius.full,
   width: '1.2rem',
   height: '1.2rem',

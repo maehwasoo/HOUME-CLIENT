@@ -43,6 +43,7 @@ const ProfileEditPage = () => {
     monthFieldError,
     dayFieldError,
     isFormValid,
+    isDirty,
   } = useUserForm({
     nickname: profile?.nickname,
     birthYear: birthParts[0],
@@ -56,7 +57,7 @@ const ProfileEditPage = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isFormValid || !gender) return;
+    if (!isFormValid || !isDirty || !gender) return;
 
     editProfile({
       nickname,
@@ -161,7 +162,7 @@ const ProfileEditPage = () => {
 
             <div className={styles.btnarea}>
               <ActionButton
-                disabled={!isFormValid || isPending}
+                disabled={!isFormValid || !isDirty || isPending}
                 type="submit"
                 fullWidth
               >
