@@ -286,7 +286,10 @@ const BottomSheetBase = ({
             <div
               ref={contentScrollRef}
               className={styles.contentSlot}
-              style={{ overflowY: contentScrollable ? 'auto' : 'hidden' }}
+              style={{
+                overflowY: contentScrollable ? 'auto' : 'hidden',
+                touchAction: contentScrollable ? 'pan-y' : 'none',
+              }}
               {...contentTouchHandlers}
             >
               {contentSlot}

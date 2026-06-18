@@ -223,8 +223,9 @@ export const body = recipe({
 });
 
 // contentSlot(바텀시트 내부의 실질적인 contents 영역)이 스크롤되도록 하는 슬롯
+// touch-action은 BottomSheetBase에서 contentScrollable에 따라 inline으로 지정
+// (collapsed=none: 뒷배경 스크롤 누수 방지 / scrollable=pan-y: native 세로 스크롤 허용)
 export const contentSlot = style({
-  touchAction: 'pan-y',
   width: '100%',
   minHeight: 0,
   overflow: 'auto',
