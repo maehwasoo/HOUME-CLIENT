@@ -90,6 +90,13 @@ export const useFloorPlanSelect = (
     if (useFloorPlanStore.getState().isFloorPlanSheetOpen) return;
 
     recentHandledRef.current = true;
+
+    // 최근 실제로 사용한 뷰(isRecentUsedView)를 기본 선택으로 열기 (없으면 첫 뷰)
+    const recentUsedIndex = (recentFloorPlan.floorPlans ?? []).findIndex(
+      (view) => view.isRecentUsedView
+    );
+    store.setViewIndex(recentUsedIndex >= 0 ? recentUsedIndex : 0);
+
     store.openRecentSheet();
     notify({
       text: TOAST_MESSAGE.RECENT_FLOOR_PLAN_LOADED,

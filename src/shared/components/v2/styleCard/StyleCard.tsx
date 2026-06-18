@@ -51,45 +51,62 @@ const StyleCard = ({
   const starIconSize = isLarge ? '24' : '16';
   const showLargeContents = isLarge && largeContents != null;
 
-  return (
-    <div className={styles.wrapper({ scaleOnPress })}>
-      <button
-        type="button"
-        className={clsx(styles.card({ size }), className)}
-        onClick={onClick}
-        aria-labelledby={hasTitle ? titleId : undefined}
-        aria-label={hasTitle ? undefined : '스타일 카드 선택'}
-        {...rest}
-      >
-        <OptimizedImage
-          src={initialImageSrc}
-          sizes={isLarge ? IMAGE_SIZES.full : IMAGE_SIZES.grid}
-          fallbackSrc={emptyImage}
-          alt=""
-          aria-hidden
-          className={styles.image}
-          loading={imageLoading}
-          decoding="async"
-          draggable={false}
-        />
-        <div className={styles.gradient({ size })} aria-hidden />
-        {isLarge ? (
-          <div className={styles.largeHeader}>
-            <div className={styles.starIcon({ size: 'L' })} aria-hidden>
-              <Icon name="DoubleStar" size={starIconSize} />
-            </div>
-            {hasTitle ? (
-              <p id={titleId} className={styles.largeInlineTitle}>
-                {title}
-              </p>
-            ) : null}
-          </div>
-        ) : (
-          <div className={styles.starIcon({ size: 's' })} aria-hidden>
+  // onClick이 있을 때만 인터랙티브(버튼)로 렌더. 없으면 클릭/포커스/press 효과 없는 표시용 카드(div)
+  // → 커서(button reset의 cursor:pointer)와 scaleOnPress가 non-interactive StyleCard에 적용되지 않음
+  const isInteractive = onClick != null;
+  const enableScale = isInteractive && scaleOnPress;
+
+  const cardInner = (
+    <>
+      <OptimizedImage
+        src={initialImageSrc}
+        sizes={isLarge ? IMAGE_SIZES.full : IMAGE_SIZES.grid}
+        fallbackSrc={emptyImage}
+        alt=""
+        aria-hidden
+        className={styles.image}
+        loading={imageLoading}
+        decoding="async"
+        draggable={false}
+      />
+      <div className={styles.gradient({ size })} aria-hidden />
+      {isLarge ? (
+        <div className={styles.largeHeader}>
+          <div className={styles.starIcon({ size: 'L' })} aria-hidden>
             <Icon name="DoubleStar" size={starIconSize} />
           </div>
-        )}
-      </button>
+          {hasTitle ? (
+            <p id={titleId} className={styles.largeInlineTitle}>
+              {title}
+            </p>
+          ) : null}
+        </div>
+      ) : (
+        <div className={styles.starIcon({ size: 's' })} aria-hidden>
+          <Icon name="DoubleStar" size={starIconSize} />
+        </div>
+      )}
+    </>
+  );
+
+  return (
+    <div className={styles.wrapper({ scaleOnPress: enableScale })}>
+      {isInteractive ? (
+        <button
+          type="button"
+          className={clsx(styles.card({ size }), className)}
+          onClick={onClick}
+          aria-labelledby={hasTitle ? titleId : undefined}
+          aria-label={hasTitle ? undefined : '스타일 카드 선택'}
+          {...rest}
+        >
+          {cardInner}
+        </button>
+      ) : (
+        <div className={clsx(styles.card({ size }), className)}>
+          {cardInner}
+        </div>
+      )}
       {!isLarge && hasTitle ? (
         <p id={titleId} className={styles.title({ size: 's' })}>
           {title}

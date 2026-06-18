@@ -206,10 +206,7 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
     renderableCount: renderableRelatedImages.length,
   });
 
-  const userName = relatedData?.name?.trim() ?? '';
-  const relatedTitle = userName
-    ? EMPTY_VIEW_TEXT.listResult.related.titleWithName(userName)
-    : EMPTY_VIEW_TEXT.listResult.related.titleFallback;
+  const relatedTitle = EMPTY_VIEW_TEXT.listResult.related.otherImagesTitle;
 
   const { mutate: toggleJjym } = useJjymMutation({
     onSavedAction: () => {
@@ -313,9 +310,7 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
 
         {showSimilarSection ? (
           <div className={styles.section}>
-            <h1 className={styles.sectionTitle}>
-              방금 담은 스타일과 비슷한 상품
-            </h1>
+            <h1 className={styles.sectionTitle}>함께 둘러볼 만한 상품</h1>
             <div className={styles.gridContent}>
               <SectionFallback
                 state={similarState}

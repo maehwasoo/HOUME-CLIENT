@@ -2,12 +2,13 @@ import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
 import { logLoginSocialViewToastLoginError } from '@pages/login/utils/analytics';
+import { resolveLoginToasterId } from '@pages/login/utils/resolveLoginToasterId';
 
 import { ROUTES } from '@routes/paths';
 
 import { useUserStore } from '@store/useUserStore';
 
-import { TOAST_TYPE, TOASTER_ID } from '@shared/types/toast';
+import { TOAST_TYPE } from '@shared/types/toast';
 
 import { HTTPMethod, request } from '@apis/config/request';
 
@@ -102,11 +103,13 @@ export const useKakaoLoginMutation = () => {
       // 기존회원 카카오 로그인 성공 시 시작점 복귀 + 토스트
       // OAuth callback 페이지가 history에 남지 않도록 replace 사용
       // replace가 없을 시 시작점에서 뒤로가기 했을 때 callback 재진입 -> kakao oauth callback mutation이 재실행됨
-      navigate(consumeLoginRedirect() ?? ROUTES.HOME, { replace: true });
+      const destination = consumeLoginRedirect() ?? ROUTES.HOME;
+      navigate(destination, { replace: true });
       notify({
         text: TOAST_MESSAGE.LOGIN_SUCCESS,
         type: TOAST_TYPE.SUCCESS,
-        options: { toasterId: TOASTER_ID.TOP_4 },
+        // 복귀 페이지에 바텀시트가 있으면 상단, 없으면 하단에 토스트 표시
+        options: { toasterId: resolveLoginToasterId(destination) },
       });
     },
     // 카카오 로그인 실패
@@ -116,11 +119,13 @@ export const useKakaoLoginMutation = () => {
 
       // 카카오 로그인 실패 시 시작점 복귀 + 토스트
       // onSuccess와 동일하게 replace: true -> callback 페이지가 history에 남아 뒤로가기 시 callback 재진입했을 떄 mutation 재실행되는 문제 차단
-      navigate(consumeLoginRedirect() ?? ROUTES.HOME, { replace: true });
+      const destination = consumeLoginRedirect() ?? ROUTES.HOME;
+      navigate(destination, { replace: true });
       notify({
         text: TOAST_MESSAGE.LOGIN_ERROR,
         type: TOAST_TYPE.ERROR,
-        options: { toasterId: TOASTER_ID.TOP_4 },
+        // 성공 토스트와 동일하게 복귀 페이지 바텀시트 유무에 따라 위치 결정
+        options: { toasterId: resolveLoginToasterId(destination) },
       });
     },
   });

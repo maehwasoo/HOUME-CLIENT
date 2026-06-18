@@ -81,7 +81,7 @@ const ProgressLoadingBar = ({ onComplete }: ProgressLoadingBarProps) => {
         timeoutRef.current = null;
       }
     };
-  }, [isDone, onComplete]);
+  }, [isDone]);
 
   // API 완료 시 isDone = true
   useEffect(() => {

@@ -72,6 +72,8 @@ export const panel = recipe({
     willChange: 'transform, height',
     borderTopLeftRadius: unitVars.unit.radius['700'],
     borderTopRightRadius: unitVars.unit.radius['700'],
+    // Figma Shadow/bottomSheet: X 0, Y -4, Blur 20, Spread 0
+    boxShadow: `0 -0.4rem 2rem 0 ${colorVars.color.shadow.bottomSheet}`,
     backgroundColor: colorVars.color.bg.primary,
     width: '100%',
     maxHeight: 'calc(100dvh - 10.4rem)',

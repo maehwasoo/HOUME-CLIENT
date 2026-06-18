@@ -52,9 +52,16 @@ globalStyle('#root', {
  * - 스크롤바 숨김으로 모바일 앱 같은 UI 구현
  */
 globalStyle('html', {
-  backgroundColor: colorVars.color.gray100,
+  // 모바일: 흰색. 동적 툴바(Safari/Edge)가 접힐 때 body(100dvh) 아래로 드러나는 영역이 html 배경이므로, 회색(gray100) 대신 앱 배경(흰색)과 맞춰 빈 공간이 보이지 않게 함
+  backgroundColor: colorVars.color.gray000,
   height: '100%', // Firefox 스크롤바 숨김
   scrollbarWidth: 'none',
+  '@media': {
+    // 데스크탑 프레임(>=440px, body box-shadow 분기와 동일)에서만 회색 surround 유지
+    '(min-width: 440px)': {
+      backgroundColor: colorVars.color.gray100,
+    },
+  },
 });
 
 /**

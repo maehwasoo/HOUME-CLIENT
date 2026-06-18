@@ -49,6 +49,13 @@ interface BottomSheetBaseProps {
   preventScroll?: boolean;
   /** dragHandle 시트의 펼침 상태. 본문↔버튼 gap을 collapsed 8px / expanded 20px로 분기 (기본: false) */
   expanded?: boolean;
+  /** 콘텐츠 스크롤 컨테이너(contentSlot) ref. body 드래그 시 scrollTop 측정용 */
+  contentScrollRef?: React.Ref<HTMLDivElement>;
+  /** contentSlot에 부착할 body 터치 드래그 핸들러 (DragHandleBottomSheet에서 시트 expand/collapse 제어) */
+  contentTouchHandlers?: Pick<
+    React.DOMAttributes<HTMLDivElement>,
+    'onTouchStart' | 'onTouchMove' | 'onTouchEnd' | 'onTouchCancel'
+  >;
 }
 
 const BottomSheetBase = ({
@@ -71,6 +78,8 @@ const BottomSheetBase = ({
   backgroundInteractable = false,
   preventScroll = true,
   expanded = false,
+  contentScrollRef,
+  contentTouchHandlers,
 }: BottomSheetBaseProps) => {
   const [basePhase, setBasePhase] = useState<BasePhase>('closed');
 
@@ -207,6 +216,10 @@ const BottomSheetBase = ({
   // closing 중에는 dim도 함께 fade out. 외에는 dimOpacity prop 또는 CSS 기본값 사용
   const overlayOpacity = basePhase === 'closing' ? 0 : dimOpacity;
 
+  // dragHandle 시트가 collapsed일 땐 콘텐츠 스크롤을 막아야(overflow hidden)
+  // body를 위로 끄는 제스처가 native 스크롤과 충돌 없이 expand로만 동작 (close 타입·expanded는 스크롤 허용)
+  const contentScrollable = headerType !== 'dragHandle' || expanded;
+
   return createPortal(
     <div
       className={styles.viewportLayer}
@@ -270,7 +283,14 @@ const BottomSheetBase = ({
             </div>
           )}
           <div className={styles.body({ headerType, expanded })}>
-            <div className={styles.contentSlot}>{contentSlot}</div>
+            <div
+              ref={contentScrollRef}
+              className={styles.contentSlot}
+              style={{ overflowY: contentScrollable ? 'auto' : 'hidden' }}
+              {...contentTouchHandlers}
+            >
+              {contentSlot}
+            </div>
             <div className={styles.actionRow}>
               {secondaryButton && (
                 <div className={styles.secondaryActionSlot}>

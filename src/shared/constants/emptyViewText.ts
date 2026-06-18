@@ -22,9 +22,7 @@ export const EMPTY_VIEW_TEXT = {
       loadError: '관련 이미지를 불러올 수 없습니다.',
       partial: '표시할 수 있는 관련 이미지가 없어요.',
       partialDescription: '다시 시도해주세요.',
-      titleWithName: (name: string) =>
-        `${name}님이 고른 아이템이 포함된 이미지`,
-      titleFallback: '비슷한 구성의 이미지',
+      otherImagesTitle: '이 상품으로 만든 다른 이미지',
     },
   },
   curationResult: {

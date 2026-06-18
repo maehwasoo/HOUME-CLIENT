@@ -37,7 +37,6 @@ export const card = recipe({
     flexShrink: 0,
     alignItems: 'flex-start',
     border: 0,
-    cursor: 'pointer',
     overflow: 'hidden',
   },
   variants: {

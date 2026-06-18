@@ -69,11 +69,15 @@ const DragHandleBottomSheet = ({
     }
   }, [expandedFromParent]);
 
+  // ── 상태 · refs ──
+
   const [dragPhase, setDragPhase] = useState<DragPhase>('idle');
   const [dragHeight, setDragHeight] = useState<number | null>(null);
 
   // BottomSheetBase가 mount하는 panel DOM (PointerDown 시 측정용)
   const panelNodeRef = useRef<HTMLDivElement | null>(null);
+  // BottomSheetBase가 mount하는 스크롤 컨테이너(contentSlot) DOM (body 드래그 시 scrollTop 측정용)
+  const contentScrollRef = useRef<HTMLDivElement | null>(null);
 
   const startYRef = useRef(0);
   const startHeightRef = useRef(0);
@@ -83,6 +87,12 @@ const DragHandleBottomSheet = ({
   const draggedRef = useRef(false);
   const finishedRef = useRef(false);
   const pointerIdRef = useRef<number | null>(null);
+
+  // body(콘텐츠) 영역 터치 드래그용
+  const bodyStartYRef = useRef(0); // 터치 시작 y (방향 판단 기준)
+  const bodyTakenOverRef = useRef(false); // 콘텐츠 스크롤 → 시트 드래그로 takeover 했는지
+
+  // ── effects (부모 expanded 동기화 / snapping 보간) ──
 
   useEffect(() => {
     onExpandedChange?.(expanded);
@@ -115,40 +125,35 @@ const DragHandleBottomSheet = ({
     };
   }, [dragPhase]);
 
-  const handlePointerDown = useCallback(
-    (e: React.PointerEvent<HTMLButtonElement>) => {
-      const panel = panelNodeRef.current;
-      if (!panel) return;
+  // ── 드래그 코어 (핸들 pointer / body touch 공용, 입력 좌표만 받음) ──
 
-      e.stopPropagation();
-
+  // 드래그 시작: 측정값 스냅샷 + 플래그 리셋 (capture는 호출부에서 처리)
+  const beginDrag = useCallback(
+    (clientY: number, panel: HTMLDivElement) => {
       const collapsedPx = isPersistent
         ? parsePxFromRem(collapsedHeight as string)
         : 0;
       const expandedPx = resolveExpandedPx();
       const startHeight = panel.offsetHeight;
 
-      startYRef.current = e.clientY;
+      startYRef.current = clientY;
       startHeightRef.current = startHeight;
       currentHeightRef.current = startHeight;
       collapsedPxRef.current = collapsedPx;
       expandedPxRef.current = expandedPx;
-      pointerIdRef.current = e.pointerId;
       draggedRef.current = false;
       finishedRef.current = false;
-
-      e.currentTarget.setPointerCapture(e.pointerId);
     },
     [isPersistent, collapsedHeight]
   );
 
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent<HTMLButtonElement>) => {
-      if (pointerIdRef.current !== e.pointerId) return;
+  // 드래그 이동: delta → height clamp → setDragHeight
+  const applyDragMove = useCallback(
+    (clientY: number) => {
       if (finishedRef.current) return;
 
       // 위로 끌면 양수 (height 증가 방향)
-      const delta = startYRef.current - e.clientY;
+      const delta = startYRef.current - clientY;
 
       if (!draggedRef.current) {
         if (Math.abs(delta) < DRAG_THRESHOLD_PX) return;
@@ -156,12 +161,10 @@ const DragHandleBottomSheet = ({
         setDragPhase('dragging');
       }
 
-      const collapsedPx = collapsedPxRef.current;
-      const expandedPx = expandedPxRef.current;
-      const minH = isPersistent ? collapsedPx : 0;
+      const minH = isPersistent ? collapsedPxRef.current : 0;
       const next = Math.max(
         minH,
-        Math.min(expandedPx, startHeightRef.current + delta)
+        Math.min(expandedPxRef.current, startHeightRef.current + delta)
       );
 
       currentHeightRef.current = next;
@@ -170,16 +173,11 @@ const DragHandleBottomSheet = ({
     [isPersistent]
   );
 
-  const finishDrag = useCallback(
-    (e: React.PointerEvent<HTMLButtonElement>) => {
+  // 드래그 종료: expand/collapse/dismiss 판정 (cancelled=true면 원위치 복귀)
+  const endDrag = useCallback(
+    (cancelled: boolean) => {
       if (finishedRef.current) return;
       finishedRef.current = true;
-
-      const target = e.currentTarget;
-      if (target.hasPointerCapture(e.pointerId)) {
-        target.releasePointerCapture(e.pointerId);
-      }
-      pointerIdRef.current = null;
 
       // 단순 탭 (임계 미통과)
       if (!draggedRef.current) {
@@ -187,8 +185,8 @@ const DragHandleBottomSheet = ({
         return;
       }
 
-      // pointercancel: 원위치 복귀
-      if (e.type === 'pointercancel') {
+      // cancel: 원위치 복귀
+      if (cancelled) {
         currentHeightRef.current = startHeightRef.current;
         setDragHeight(null);
         setDragPhase('idle');
@@ -230,6 +228,93 @@ const DragHandleBottomSheet = ({
     },
     [isPersistent, onDismiss, expanded]
   );
+
+  // ── 핸들(dragHeader) pointer 핸들러 ──
+
+  const handlePointerDown = useCallback(
+    (e: React.PointerEvent<HTMLButtonElement>) => {
+      const panel = panelNodeRef.current;
+      if (!panel) return;
+
+      e.stopPropagation();
+      beginDrag(e.clientY, panel);
+      pointerIdRef.current = e.pointerId;
+      e.currentTarget.setPointerCapture(e.pointerId);
+    },
+    [beginDrag]
+  );
+
+  const handlePointerMove = useCallback(
+    (e: React.PointerEvent<HTMLButtonElement>) => {
+      if (pointerIdRef.current !== e.pointerId) return;
+      applyDragMove(e.clientY);
+    },
+    [applyDragMove]
+  );
+
+  const finishDrag = useCallback(
+    (e: React.PointerEvent<HTMLButtonElement>) => {
+      const target = e.currentTarget;
+      if (target.hasPointerCapture(e.pointerId)) {
+        target.releasePointerCapture(e.pointerId);
+      }
+      pointerIdRef.current = null;
+      endDrag(e.type === 'pointercancel');
+    },
+    [endDrag]
+  );
+
+  // ── body(콘텐츠) 영역 touch 핸들러 ──
+  // pointer는 contentSlot의 touch-action:pan-y 때문에 스크롤 시 pointercancel로 끊김 →
+  // body 드래그는 touch 이벤트로 구현. 조건 충족 시에만 시트 드래그로 takeover (그 외 native 스크롤).
+  const handleBodyTouchStart = useCallback((e: React.TouchEvent) => {
+    if (e.touches.length !== 1) return;
+    bodyStartYRef.current = e.touches[0].clientY;
+    bodyTakenOverRef.current = false;
+  }, []);
+
+  const handleBodyTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      const y = e.touches[0].clientY;
+
+      // 이미 takeover 했으면 계속 시트 드래그
+      if (bodyTakenOverRef.current) {
+        applyDragMove(y);
+        return;
+      }
+
+      const panel = panelNodeRef.current;
+      if (!panel) return;
+
+      const dir = y - bodyStartYRef.current; // + = 아래로
+      const atTop = (contentScrollRef.current?.scrollTop ?? 0) <= 0;
+
+      // collapsed: 위로 끌면 expand / expanded: 맨 위에서 아래로 끌면 collapse·dismiss
+      const shouldExpand = !expanded && dir < -DRAG_THRESHOLD_PX;
+      const shouldCollapse = expanded && dir > DRAG_THRESHOLD_PX && atTop;
+      if (!shouldExpand && !shouldCollapse) return;
+
+      // takeover: 현재 y 기준으로 드래그 시작 (점프 없이 이 지점부터 시트 이동)
+      bodyTakenOverRef.current = true;
+      beginDrag(y, panel);
+      draggedRef.current = true;
+      setDragPhase('dragging');
+      applyDragMove(y);
+    },
+    [expanded, beginDrag, applyDragMove]
+  );
+
+  const handleBodyTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      if (!bodyTakenOverRef.current) return;
+      bodyTakenOverRef.current = false;
+      endDrag(e.type === 'touchcancel');
+    },
+    [endDrag]
+  );
+
+  // ── 뷰 파생값 · 오버레이 핸들러 ──
 
   const computeDimOpacity = (): number => {
     if (dragPhase !== 'dragging' || dragHeight === null) {
@@ -286,6 +371,13 @@ const DragHandleBottomSheet = ({
         onPointerUp: finishDrag,
         onPointerCancel: finishDrag,
         onLostPointerCapture: finishDrag,
+      }}
+      contentScrollRef={contentScrollRef}
+      contentTouchHandlers={{
+        onTouchStart: handleBodyTouchStart,
+        onTouchMove: handleBodyTouchMove,
+        onTouchEnd: handleBodyTouchEnd,
+        onTouchCancel: handleBodyTouchEnd,
       }}
     />
   );
