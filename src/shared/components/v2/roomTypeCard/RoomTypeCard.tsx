@@ -51,8 +51,6 @@ type RoomTypeCardProps =
   | RoomTypePreviewCardProps
   | RoomTypeMoreCardProps;
 
-// TODO: API 연동 시 skeleton 등 적용
-
 const RoomTypeOptionCard = ({
   type: _variant,
   className,
@@ -79,6 +77,7 @@ const RoomTypeOptionCard = ({
         alt=""
         aria-hidden="true"
         className={styles.image}
+        placeholder="skeleton"
         loading={imageLoading}
         decoding="async" // 브라우저 이미지 디코딩 비동기 처리 -> 렌더링 성능. UX 개선
         draggable={false}
@@ -117,6 +116,7 @@ const RoomTypePreviewCard = ({
         fallbackSrc={emptyImage}
         alt={imageAlt}
         className={styles.image}
+        placeholder="color"
         loading={imageLoading}
         decoding="async"
         draggable={false}

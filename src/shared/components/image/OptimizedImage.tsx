@@ -1,5 +1,5 @@
 import type { ComponentProps, ReactEventHandler } from 'react';
-import { useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import clsx from 'clsx';
 
@@ -17,10 +17,17 @@ type OptimizedImageProps = Omit<ComponentProps<'img'>, 'src' | 'srcSet'> & {
   /** variant·원본이 모두 실패했을 때 마지막으로 보여줄 정적 이미지 */
   fallbackSrc?: string;
   /**
-   * 로딩 중 표시: 'skeleton'(shimmer) | 'color'(중립 단색) | 'none'(없음, 기본).
+   * 로딩 중 표시: 'skeleton'(단색 → shimmer) | 'color'(단색만) | 'none'(없음, 기본).
+   * 'none'이 아니면 로드 전까지 항상 단색이 깔려 이미지 영역 배경이 통일되고,
+   * 로드 완료 시 이미지 전체가 한 번에 페이드인되어 이미지가 위에서부터 아래로 끊기며 렌더링되지 않음
    * 'none'이 아니면 부모가 position: relative 여야 한다(placeholder가 absolute로 덮음).
    */
   placeholder?: Placeholder;
+  /**
+   * skeleton의 shimmer를 켜기까지의 지연(ms, 기본 200). 이 시간 안에 로드되면 shimmer 없이 단색만 보였다가 이미지가 페이드인되어, 빠른 네트워크에서 shimmer 깜빡임이 안 생긴다.
+   * color 모드엔 영향이 없다(항상 단색). 0이면 shimmer를 즉시 표시.
+   */
+  placeholderDelay?: number;
 };
 
 /**
@@ -40,6 +47,7 @@ const OptimizedImage = ({
   sizes,
   fallbackSrc,
   placeholder = 'none',
+  placeholderDelay = 200,
   className,
   onLoad,
   ...rest
@@ -51,6 +59,8 @@ const OptimizedImage = ({
   );
   const [currentSrc, setCurrentSrc] = useState(src);
   const [isLoaded, setIsLoaded] = useState(false);
+  // skeleton의 shimmer는 delay 후에만 켠다(빠른 네트워크에서 shimmer flash 방지)
+  const [delayPassed, setDelayPassed] = useState(placeholderDelay <= 0);
 
   // 부모가 새 src를 내려주면 페인트 전에 동기화 (옛 이미지가 한 프레임 노출되는 것 방지)
   useLayoutEffect(() => {
@@ -65,6 +75,23 @@ const OptimizedImage = ({
     const img = ref.current;
     setIsLoaded(Boolean(img?.complete && img.naturalWidth > 0));
   }, [currentSrc, srcSet, hasPlaceholder]);
+
+  // skeleton일 때만 delay 후 단색 → shimmer로 전환.
+  // 그 안에 로드되면 isLoaded=true가 되어 shimmer 없이 단색만 보이고 끝난다.
+  useEffect(() => {
+    if (placeholder !== 'skeleton') return;
+    // delay가 0 이하면 단색 단계 없이 즉시 shimmer (delay가 양수→0으로 바뀌어도 보장)
+    if (placeholderDelay <= 0) {
+      setDelayPassed(true);
+      return;
+    }
+    setDelayPassed(false);
+    const timer = window.setTimeout(
+      () => setDelayPassed(true),
+      placeholderDelay
+    );
+    return () => window.clearTimeout(timer);
+  }, [currentSrc, srcSet, placeholder, placeholderDelay]);
 
   const handleLoad: ReactEventHandler<HTMLImageElement> = (event) => {
     if (hasPlaceholder) setIsLoaded(true);
@@ -87,7 +114,7 @@ const OptimizedImage = ({
         <span
           aria-hidden
           className={
-            placeholder === 'skeleton'
+            placeholder === 'skeleton' && delayPassed
               ? styles.skeletonPlaceholder
               : styles.colorPlaceholder
           }

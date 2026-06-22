@@ -19,6 +19,7 @@ const GeneratedImg = ({ image }: GeneratedImgListProps) => {
         <OptimizedImage
           src={image.imageUrl}
           alt=""
+          placeholder="color"
           fetchPriority="high"
           loading="eager"
           decoding="async"

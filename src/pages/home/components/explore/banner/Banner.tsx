@@ -92,6 +92,7 @@ const Banner = ({ seedBannerId, onSlideClick }: BannerProps) => {
                       sizes={IMAGE_SIZES.full}
                       alt={slide.title}
                       className={styles.image}
+                      placeholder="color"
                       draggable={false}
                       loading={index === 0 ? 'eager' : 'lazy'}
                       decoding="async"

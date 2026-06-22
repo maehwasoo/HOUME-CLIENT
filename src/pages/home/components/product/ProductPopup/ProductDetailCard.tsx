@@ -50,6 +50,7 @@ const ProductDetailCard = ({
           src={product.imageUrl || emptyImage}
           fallbackSrc={emptyImage}
           alt={product.title}
+          placeholder="color"
         />
         {linkHref ? (
           <div className={styles.linkBtnContainer()}>

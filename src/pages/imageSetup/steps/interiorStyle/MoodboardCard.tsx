@@ -39,6 +39,7 @@ const MoodboardCard = ({
         sizes={IMAGE_SIZES.grid}
         alt={alt}
         className={styles.image}
+        placeholder="skeleton"
         draggable={false}
         decoding="async"
       />

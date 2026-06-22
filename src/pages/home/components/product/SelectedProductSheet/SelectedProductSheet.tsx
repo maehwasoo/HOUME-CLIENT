@@ -109,6 +109,7 @@ const SelectedProductSheet = ({
                       src={product.imageUrl}
                       fallbackSrc={emptyImage}
                       alt={product.title}
+                      placeholder="color"
                     />
                   ) : (
                     <div className={styles.selectedImageFallback} aria-hidden>
@@ -174,6 +175,7 @@ const SelectedProductSheet = ({
                       src={product.imageUrl}
                       fallbackSrc={emptyImage}
                       alt=""
+                      placeholder="color"
                     />
                   ) : (
                     <div className={styles.compactImageFallback} aria-hidden>

@@ -92,7 +92,8 @@ const GeneratedImg = ({
               <OptimizedImage
                 src={image.imageUrl}
                 alt=""
-                loading="lazy"
+                placeholder="color"
+                loading={index === 0 ? 'eager' : 'lazy'}
                 decoding="async"
                 className={styles.imgArea({ mirrored: image.isMirror })}
               />

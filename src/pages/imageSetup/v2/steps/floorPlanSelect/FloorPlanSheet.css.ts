@@ -59,6 +59,10 @@ export const swiperContainer = style({
   overflow: 'hidden',
 });
 
+export const slide = style({
+  position: 'relative', // OptimizedImage placeholder(absolute)의 기준
+});
+
 export const slideImage = style({
   aspectRatio: '3 / 2',
   objectFit: 'cover',

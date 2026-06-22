@@ -8,6 +8,8 @@ export const page = style({
   position: 'relative',
   display: 'flex',
   flexDirection: 'column',
+  // 배경 이미지 로드 전 단색. 텍스트가 흰색이므로 배경은 gray900(어두운 회색)
+  backgroundColor: colorVars.color.gray900,
   padding: `${unitVars.unit.gapPadding['300']} ${unitVars.unit.gapPadding['000']}`,
   width: '100%',
   minHeight: '100vh',

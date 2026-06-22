@@ -65,6 +65,7 @@ const StyleCard = ({
         alt=""
         aria-hidden
         className={styles.image}
+        placeholder={isLarge ? 'color' : 'skeleton'}
         loading={imageLoading}
         decoding="async"
         draggable={false}

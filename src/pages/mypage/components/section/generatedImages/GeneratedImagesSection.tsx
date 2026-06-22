@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
@@ -34,17 +34,6 @@ const GeneratedImagesSection = () => {
 
   const { prefetchDetection } = useDetectionPrefetch();
   const prefetchedImageIdsRef = useRef<Set<number>>(new Set<number>());
-  const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>(
-    () => {
-      if (typeof window === 'undefined') return {};
-      try {
-        const stored = sessionStorage.getItem('mypage-image-loaded');
-        return stored ? (JSON.parse(stored) as Record<number, boolean>) : {};
-      } catch {
-        return {};
-      }
-    }
-  );
 
   const primaryImageId =
     imagesListData?.groups?.[0]?.items?.[0]?.imageId ?? null;
@@ -133,18 +122,10 @@ const GeneratedImagesSection = () => {
   };
 
   /**
-   * 이미지 로드 완료 시 로컬 캐시를 갱신하고 프리패치 스케줄
+   * 이미지 로드 완료 시 감지 데이터 프리패치 스케줄
    */
   const handleImageLoad = useCallback(
     (imageId: number, imageUrl?: string) => {
-      setLoadedImages((prev) => {
-        if (prev[imageId]) return prev;
-        const next = { ...prev, [imageId]: true };
-        if (typeof window !== 'undefined') {
-          sessionStorage.setItem('mypage-image-loaded', JSON.stringify(next));
-        }
-        return next;
-      });
       if (imageUrl) {
         scheduleDetectionPrefetch(imageId, imageUrl, {
           immediate: primaryImageId === imageId,
@@ -192,7 +173,6 @@ const GeneratedImagesSection = () => {
                     imageUrl={item.generatedImageUrl}
                     isMirror={item.isMirror}
                     usedProducts={item.usedProducts}
-                    isLoaded={loadedImages[item.imageId]}
                     onCurationClick={() => handleViewResult(item)}
                     onImageLoad={() =>
                       handleImageLoad(item.imageId!, item.generatedImageUrl)

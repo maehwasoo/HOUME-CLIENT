@@ -98,7 +98,7 @@ const FloorPlanSheet = ({
                 }}
               >
                 {detailViews.map((view, index) => (
-                  <SwiperSlide key={`view-${index}`}>
+                  <SwiperSlide key={`view-${index}`} className={styles.slide}>
                     <OptimizedImage
                       src={view.imageUrl ?? emptyImage}
                       sizes={IMAGE_SIZES.full}
@@ -108,6 +108,7 @@ const FloorPlanSheet = ({
                         styles.slideImage,
                         isMirror && styles.mirrored
                       )}
+                      placeholder="color"
                       draggable={false}
                       decoding="async"
                     />

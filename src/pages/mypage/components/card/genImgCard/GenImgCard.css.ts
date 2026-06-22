@@ -1,11 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
-import {
-  animationTokens,
-  SKELETON_GRADIENT,
-} from '@styles/tokens/animation.css';
-
 import { colorVars } from '@/shared/styles/tokensV2/color.css';
 import { fontVars } from '@/shared/styles/tokensV2/font.css';
 import { unitVars } from '@/shared/styles/tokensV2/unit.css';
@@ -70,6 +65,7 @@ export const cardImg = recipe({
   },
 });
 
+// 가로 스크롤되는 상품 카드 리스트 (list 타입 카드 하단)
 export const listCardContainer = style({
   display: 'flex',
   alignItems: 'center',
@@ -91,13 +87,4 @@ export const listCardContainer = style({
       display: 'none',
     },
   },
-});
-
-export const skeleton = style({
-  position: 'absolute',
-  inset: 0,
-  borderRadius: '0.8rem',
-  background: SKELETON_GRADIENT,
-  backgroundSize: '200% 100%',
-  animation: `${animationTokens.skeletonWave} 2s linear infinite`,
 });

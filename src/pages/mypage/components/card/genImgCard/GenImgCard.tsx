@@ -1,5 +1,3 @@
-import { useState } from 'react';
-
 import { useNavigate } from 'react-router-dom';
 
 import { logMyPageClickBtnFurnitureCard } from '@pages/mypage/utils/analytics';
@@ -24,7 +22,6 @@ interface GenImgCardProps {
   imageUrl?: string;
   isMirror?: boolean;
   usedProducts?: UsedProductResponse[];
-  isLoaded?: boolean;
   onCurationClick?: () => void;
   onImageLoad?: (imageId: number, imageUrl?: string) => void;
 }
@@ -36,16 +33,13 @@ const GenImgCard = ({
   imageUrl,
   isMirror = false,
   usedProducts = [],
-  isLoaded = false,
   onCurationClick,
   onImageLoad,
 }: GenImgCardProps) => {
   const isListType = cardType === 'list';
-  const [isImageReady, setIsImageReady] = useState(isLoaded); // 이미지 로드 완료 여부
   const navigate = useNavigate();
 
   const handleImageLoad = () => {
-    setIsImageReady(true);
     onImageLoad?.(imageId, imageUrl);
   };
 
@@ -89,13 +83,12 @@ const GenImgCard = ({
         </TextButton>
       </section>
       <section className={styles.imgContainer} onClick={onCurationClick}>
-        {/* 이미지 로드 완료 전에는 skeleton, 완료 시 실제 이미지 렌더링 */}
-        {!isImageReady && <div className={styles.skeleton} />}
         <OptimizedImage
           src={imageUrl || emptyImage}
           fallbackSrc={emptyImage}
           alt={productSummaryText ?? '생성 이미지'}
           className={styles.cardImg({ mirrored: isMirror })}
+          placeholder="skeleton"
           onLoad={handleImageLoad}
         />
       </section>

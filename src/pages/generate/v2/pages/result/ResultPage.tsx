@@ -62,7 +62,8 @@ const ResultPage = () => {
     shouldBlockNavigation: ({ historyAction }) => historyAction === 'POP',
     onBlocked: ({ reset }) => {
       reset();
-      navigate(ROUTES.HOME, { replace: true });
+      // 브라우저 히스토리 꼬임 방지 - 복원 popstate가 처리된 다음 task에서 replace해야 Result 엔트리를 정확히 대체한다
+      setTimeout(() => navigate(ROUTES.HOME, { replace: true }), 0);
     },
   });
 

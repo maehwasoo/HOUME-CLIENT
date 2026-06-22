@@ -364,6 +364,7 @@ const LoadingPage = () => {
                               : `다음 가구 이미지`
                           }
                           className={styles.imageStyle}
+                          placeholder="color"
                           loading="eager"
                         />
                       </div>
@@ -379,6 +380,7 @@ const LoadingPage = () => {
                               : `다음 가구 이미지`
                           }
                           className={styles.imageStyle}
+                          placeholder="color"
                           loading="eager"
                         />
                       </div>

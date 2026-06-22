@@ -17,6 +17,7 @@ const FloorPlanItem = ({ src, selected = false }: FloorPlanItemProps) => {
         sizes={IMAGE_SIZES.grid}
         className={styles.floorimg}
         alt="카드 이미지"
+        placeholder="skeleton"
         decoding="async"
       />
     </div>
