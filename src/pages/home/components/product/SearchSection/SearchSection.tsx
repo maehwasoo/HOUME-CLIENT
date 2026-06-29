@@ -278,6 +278,7 @@ const SearchSection = ({
           <IconButton
             name="ArrowUp"
             size="S"
+            className={styles.scrollTopFloatingButton}
             aria-label="페이지 상단으로 이동"
             onClick={handleScrollToTopClick}
           />

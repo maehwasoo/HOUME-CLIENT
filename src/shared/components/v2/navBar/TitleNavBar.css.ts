@@ -7,18 +7,23 @@ import { unitVars } from '@styles/tokensV2/unit.css';
 
 import { zIndex } from '@/shared/styles/tokens/zIndex';
 
+const NAV_BAR_CONTENT_HEIGHT = '4.8rem';
+const SAFE_AREA_INSET_TOP = 'env(safe-area-inset-top, 0px)';
+
 export const container = recipe({
   base: {
+    boxSizing: 'border-box',
     zIndex: zIndex.navBar,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingTop: SAFE_AREA_INSET_TOP,
     paddingRight: unitVars.unit.gapPadding['400'],
     paddingLeft: unitVars.unit.gapPadding['300'],
     width: '100%',
     minWidth: unitVars.unit.dimension.wMin,
     maxWidth: unitVars.unit.dimension.wMax,
-    height: '4.8rem',
+    height: `calc(${NAV_BAR_CONTENT_HEIGHT} + ${SAFE_AREA_INSET_TOP})`,
   },
   variants: {
     placement: {
@@ -96,7 +101,7 @@ export const label = style({
 
 export const title = style({
   position: 'absolute',
-  top: '50%',
+  top: `calc(${SAFE_AREA_INSET_TOP} + ${NAV_BAR_CONTENT_HEIGHT} / 2)`,
   left: '50%',
   transform: 'translate(-50%, -50%)',
   margin: 0,

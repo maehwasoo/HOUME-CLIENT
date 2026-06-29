@@ -6,15 +6,19 @@ import { colorVars } from '@styles/tokensV2/color.css';
 import { fontVars } from '@styles/tokensV2/font.css';
 import { unitVars } from '@styles/tokensV2/unit.css';
 
+const NAV_BAR_CONTENT_HEIGHT = '4.8rem';
+
 export const container = style({
+  boxSizing: 'border-box',
   zIndex: zIndex.navBar,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
+  paddingTop: 'env(safe-area-inset-top, 0px)',
   width: '100%',
   minWidth: unitVars.unit.dimension.wMin,
   maxWidth: unitVars.unit.dimension.wMax,
-  height: '4.8rem',
+  height: `calc(${NAV_BAR_CONTENT_HEIGHT} + env(safe-area-inset-top, 0px))`,
 });
 
 export const leftContainer = style({

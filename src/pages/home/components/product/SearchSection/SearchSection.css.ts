@@ -28,7 +28,7 @@ export const searchHeader = style({
 export const stickyHeader = style({
   position: 'fixed',
   zIndex: zIndex.navigation,
-  top: 0,
+  top: 'env(safe-area-inset-top, 0px)',
   margin: '0 auto',
   background: colorVars.color.bg.primary,
   width: '100%',
@@ -132,13 +132,28 @@ export const scrollTopFloatingLayer = style({
 });
 
 export const scrollTopFloatingWrap = style({
+  boxSizing: 'border-box',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   transform: 'translateY(0.8rem)',
   transition: 'opacity 240ms ease, transform 240ms ease',
   opacity: 0,
-  border: `1px solid ${colorVars.color.border.tertiary}`,
+  border: `1px solid ${colorVars.color.border.secondary}`,
   borderRadius: unitVars.unit.radius['full'],
-  backgroundColor: colorVars.color.bg.primary,
+  backgroundColor: colorVars.color.fill.inverse,
   pointerEvents: 'none',
+  width: '4rem',
+  height: '4rem',
+});
+
+export const scrollTopFloatingButton = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: 0,
+  width: '100%',
+  height: '100%',
 });
 
 export const scrollTopFloatingWrapVisible = style({

@@ -5,7 +5,17 @@ import { colorVars } from '@shared/styles/tokensV2/color.css';
 import { fontVars } from '@shared/styles/tokensV2/font.css';
 import { unitVars } from '@shared/styles/tokensV2/unit.css';
 
+import {
+  SKELETON_GRADIENT,
+  animationTokens,
+} from '@styles/tokens/animation.css';
 import { zIndex } from '@styles/tokens/zIndex';
+
+const skeletonShimmer = style({
+  background: SKELETON_GRADIENT,
+  backgroundSize: '200% 100%',
+  animation: `${animationTokens.skeletonWave} 2s linear infinite`,
+});
 
 export const card = style({
   display: 'flex',
@@ -16,6 +26,7 @@ export const card = style({
 export const imageWrap = style({
   aspectRatio: '1 / 1',
   position: 'relative',
+  flexShrink: 0,
   borderTopLeftRadius: unitVars.unit.radius['300'],
   borderTopRightRadius: unitVars.unit.radius['300'],
   width: '100%',
@@ -52,6 +63,7 @@ export const metaRow = style({
   alignItems: 'center',
   justifyContent: 'space-between',
   width: '100%',
+  minHeight: '1.4rem',
 });
 
 export const colorRow = style({
@@ -139,3 +151,36 @@ export const discountPrice = style({
   ...fontVars.font.title_sb_15,
   color: colorVars.color.text.primary,
 });
+
+export const skeletonBrand = style([
+  skeletonShimmer,
+  brand,
+  {
+    display: 'block',
+    width: '30%',
+    minHeight: '1.56rem',
+    color: 'transparent',
+  },
+]);
+
+export const skeletonOriginalPrice = style([
+  skeletonShimmer,
+  originalPrice,
+  {
+    display: 'block',
+    width: '28%',
+    minHeight: '1.43rem',
+    color: 'transparent',
+  },
+]);
+
+export const skeletonDiscountPrice = style([
+  skeletonShimmer,
+  discountPrice,
+  {
+    display: 'block',
+    width: '40%',
+    minHeight: '2.25rem',
+    color: 'transparent',
+  },
+]);

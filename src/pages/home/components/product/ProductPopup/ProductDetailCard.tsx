@@ -22,6 +22,7 @@ export interface ProductDetailCardProps {
   saveCount?: number;
   link?: LinkInfo;
   linkHrefOverride?: string;
+  isLoading?: boolean;
 }
 
 const ProductDetailCard = ({
@@ -30,6 +31,7 @@ const ProductDetailCard = ({
   saveCount,
   link,
   linkHrefOverride,
+  isLoading = false,
 }: ProductDetailCardProps) => {
   const { openProductLink } = useProductLink();
   const { visibleColors, extraColorCount } = getColorChips(product.colorHexes);
@@ -42,15 +44,26 @@ const ProductDetailCard = ({
     Number.isFinite(price.discountRate) &&
     price.discountRate > 0;
 
+  const hasColors = visibleColors.length > 0 || extraColorCount > 0;
+  const hasSaveCount =
+    typeof saveCount === 'number' && Number.isFinite(saveCount);
+  const hasMetaRow = hasColors || hasSaveCount;
+  const reserveMetaRow = isLoading && !hasMetaRow;
+
+  const hasPrice = Boolean(originalPriceText || discountPriceText);
+  const showBrandSkeleton = isLoading && !product.brand;
+  const showPriceSkeleton = isLoading && !hasPrice;
+
   return (
-    <div className={styles.card}>
+    <div className={styles.card} aria-busy={isLoading}>
       <div className={styles.imageWrap}>
         <OptimizedImage
           className={styles.image}
           src={product.imageUrl || emptyImage}
           fallbackSrc={emptyImage}
           alt={product.title}
-          placeholder="color"
+          placeholder="skeleton"
+          loading="eager"
         />
         {linkHref ? (
           <div className={styles.linkBtnContainer()}>
@@ -68,11 +81,9 @@ const ProductDetailCard = ({
         ) : null}
       </div>
       <div className={styles.info}>
-        {visibleColors.length > 0 ||
-        extraColorCount > 0 ||
-        (typeof saveCount === 'number' && Number.isFinite(saveCount)) ? (
-          <div className={styles.metaRow}>
-            {visibleColors.length > 0 || extraColorCount > 0 ? (
+        {(hasMetaRow || reserveMetaRow) && (
+          <div className={styles.metaRow} aria-hidden={reserveMetaRow}>
+            {hasColors ? (
               <div className={styles.colorRow}>
                 {visibleColors.map((hex, index) => (
                   <div
@@ -93,7 +104,7 @@ const ProductDetailCard = ({
                 ) : null}
               </div>
             ) : null}
-            {typeof saveCount === 'number' && Number.isFinite(saveCount) ? (
+            {hasSaveCount ? (
               <div className={styles.likeRow}>
                 <Icon name="HeartFillGray" size="14" />
                 <span className={styles.likeCount}>
@@ -102,10 +113,14 @@ const ProductDetailCard = ({
               </div>
             ) : null}
           </div>
+        )}
+        {product.brand ? (
+          <p className={styles.brand}>{product.brand}</p>
+        ) : showBrandSkeleton ? (
+          <span className={styles.skeletonBrand} aria-hidden />
         ) : null}
-        {!!product.brand && <p className={styles.brand}>{product.brand}</p>}
         <p className={styles.title}>{product.title}</p>
-        {(originalPriceText || discountPriceText) && (
+        {hasPrice ? (
           <div className={styles.priceSection}>
             {hasDiscount && originalPriceText ? (
               <p className={styles.originalPrice}>{originalPriceText}</p>
@@ -121,7 +136,14 @@ const ProductDetailCard = ({
               )}
             </div>
           </div>
-        )}
+        ) : showPriceSkeleton ? (
+          <div className={styles.priceSection} aria-hidden>
+            {hasDiscount ? (
+              <span className={styles.skeletonOriginalPrice} />
+            ) : null}
+            <span className={styles.skeletonDiscountPrice} />
+          </div>
+        ) : null}
       </div>
     </div>
   );

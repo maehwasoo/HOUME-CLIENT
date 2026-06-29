@@ -46,7 +46,7 @@ const ProductDetailOverlay = ({
   shoppingAction,
 }: ProductDetailOverlayProps) => {
   const navigate = useNavigate();
-  const { data } = useProductDetailQuery(id);
+  const { data, isPending } = useProductDetailQuery(id);
   const detail = data?.product;
   const { mutate: toggleJjym } = useJjymMutation({
     onSavedAction: () => {
@@ -134,6 +134,7 @@ const ProductDetailOverlay = ({
           saveCount={merged.saveCount}
           link={link}
           linkHrefOverride={merged.linkHrefOverride}
+          isLoading={isPending}
         />
       }
     />

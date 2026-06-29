@@ -22,7 +22,7 @@ export const menuTabBar = recipe({
       true: {
         position: 'sticky',
         zIndex: zIndex.sticky,
-        top: 0,
+        top: 'env(safe-area-inset-top, 0px)',
       },
       false: {
         position: 'static',
