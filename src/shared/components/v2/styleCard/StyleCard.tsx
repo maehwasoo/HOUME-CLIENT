@@ -91,7 +91,7 @@ const StyleCard = ({
   );
 
   return (
-    <div className={styles.wrapper({ scaleOnPress: enableScale })}>
+    <div className={styles.wrapper({ scaleOnPress: enableScale, size })}>
       {isInteractive ? (
         <button
           type="button"

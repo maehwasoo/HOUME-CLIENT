@@ -4,6 +4,8 @@ import { Toaster } from 'sonner';
 
 import { TOASTER_CONFIGS, TOASTER_DEFAULTS } from '@shared/types/toast';
 
+import './Sonner.css';
+
 import { unitVars } from '@styles/tokensV2/unit.css';
 
 const TOASTER_SIDE_MARGIN = '2rem';

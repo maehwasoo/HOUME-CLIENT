@@ -1,4 +1,4 @@
-import { memo, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 
 import type { ResultPageLikeState } from '@pages/generate/types/generate';
 import { useDeleteResultPreferenceMutation } from '@pages/generate/v2/apis/mutations/useDeleteResultPreferenceMutation';
@@ -6,6 +6,7 @@ import { useFactorPreferenceMutation } from '@pages/generate/v2/apis/mutations/u
 import { useResultPreferenceMutation } from '@pages/generate/v2/apis/mutations/useResultPreferenceMutation';
 import { useFactorsQuery } from '@pages/generate/v2/apis/queries/useFactorsQuery';
 
+import type { FactorItem } from '@shared/apis/__generated__/data-contracts';
 import { TOAST_MESSAGE } from '@shared/constants/toastMessage';
 import { TOAST_TYPE, TOASTER_ID } from '@shared/types/toast';
 
@@ -27,6 +28,8 @@ const ImgFeedback = memo(({ imageId }: ImgFeedbackProps) => {
   const [isFactorSubmitting, setIsFactorSubmitting] = useState(false);
   const factorRequestSeqRef = useRef(0);
   const lockedPreferenceRef = useRef<ResultPageLikeState>(lockedPreference);
+  const likeFactorsCacheRef = useRef<FactorItem[]>([]);
+  const dislikeFactorsCacheRef = useRef<FactorItem[]>([]);
 
   const commitLockedPreference = (next: ResultPageLikeState) => {
     lockedPreferenceRef.current = next;
@@ -43,8 +46,20 @@ const ImgFeedback = memo(({ imageId }: ImgFeedbackProps) => {
   const { data: dislikeFactorsResponse } = useFactorsQuery(false, {
     enabled: lockedPreference === 'dislike',
   });
-  const likeFactorsData = likeFactorsResponse?.factors ?? [];
-  const dislikeFactorsData = dislikeFactorsResponse?.factors ?? [];
+  const likeFactorsData = likeFactorsResponse?.factors;
+  const dislikeFactorsData = dislikeFactorsResponse?.factors;
+
+  useEffect(() => {
+    if (likeFactorsData && likeFactorsData.length > 0) {
+      likeFactorsCacheRef.current = likeFactorsData;
+    }
+  }, [likeFactorsData]);
+
+  useEffect(() => {
+    if (dislikeFactorsData && dislikeFactorsData.length > 0) {
+      dislikeFactorsCacheRef.current = dislikeFactorsData;
+    }
+  }, [dislikeFactorsData]);
 
   const submitPreference = (
     targetImageId: number,
@@ -138,9 +153,13 @@ const ImgFeedback = memo(({ imageId }: ImgFeedbackProps) => {
 
   const activeFactors =
     lockedPreference === 'like'
-      ? likeFactorsData
+      ? likeFactorsData && likeFactorsData.length > 0
+        ? likeFactorsData
+        : likeFactorsCacheRef.current
       : lockedPreference === 'dislike'
-        ? dislikeFactorsData
+        ? dislikeFactorsData && dislikeFactorsData.length > 0
+          ? dislikeFactorsData
+          : dislikeFactorsCacheRef.current
         : [];
 
   const factorRows =
@@ -183,26 +202,24 @@ const ImgFeedback = memo(({ imageId }: ImgFeedbackProps) => {
             />
           </div>
         </div>
-        {factorRows.length > 0 && (
-          <div className={styles.tagGroup}>
-            {factorRows.map((rowFactors, rowIndex) => (
-              <div key={rowIndex} className={styles.tagRow}>
-                {rowFactors.map((factor) => (
-                  <Chip
-                    key={factor.id}
-                    selected={selectedFactorId === factor.id}
-                    onClick={() =>
-                      factor.id !== undefined && handleFactorClick(factor.id)
-                    }
-                    disabled={isFactorSubmitting || isPreferenceSubmitting}
-                  >
-                    {factor.text}
-                  </Chip>
-                ))}
-              </div>
-            ))}
-          </div>
-        )}
+        <div className={styles.tagGroup({ opened: lockedPreference !== null })}>
+          {factorRows.map((rowFactors, rowIndex) => (
+            <div key={rowIndex} className={styles.tagRow}>
+              {rowFactors.map((factor) => (
+                <Chip
+                  key={factor.id}
+                  selected={selectedFactorId === factor.id}
+                  onClick={() =>
+                    factor.id !== undefined && handleFactorClick(factor.id)
+                  }
+                  disabled={isFactorSubmitting || isPreferenceSubmitting}
+                >
+                  {factor.text}
+                </Chip>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );

@@ -2,13 +2,15 @@ import { style } from '@vanilla-extract/css';
 
 import { colorVars } from '@styles/tokensV2/color.css';
 import { fontVars } from '@styles/tokensV2/font.css';
+import { pressInteraction } from '@styles/tokensV2/interaction/presets';
 import { unitVars } from '@styles/tokensV2/unit.css';
 
 export const trigger = style({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'space-between',
-  transition: 'transform 120ms ease',
+  transformOrigin: 'center center',
+  ...pressInteraction(0.97),
   border: 'none',
   borderRadius: unitVars.unit.radius.full,
   backgroundColor: colorVars.color.fill.weak,
@@ -16,11 +18,6 @@ export const trigger = style({
   padding: `${unitVars.unit.gapPadding['300']} ${unitVars.unit.gapPadding['400']}`,
   width: '100%',
   height: '4.8rem',
-  selectors: {
-    '&:active': {
-      transform: 'scale(0.95)',
-    },
-  },
 });
 
 export const leftContainer = style({

@@ -5,13 +5,9 @@ import { overlay } from 'overlay-kit';
 import ProductDetailOverlay from '@pages/home/components/product/ProductPopup/ProductDetailOverlay';
 import type { SelectedProduct } from '@pages/home/types/productTab';
 
-import IconButton from '@shared/components/v2/button/IconButton';
 import Icon from '@shared/components/v2/icon/Icon';
 
-import emptyImage from '@assets/v2/images/ImgEmpty.png';
-
-import OptimizedImage from '@components/image/OptimizedImage';
-
+import ProductSheetCard from './ProductSheetCard';
 import * as styles from './SelectedProductSheet.css';
 
 interface SelectedProductSheetProps {
@@ -32,7 +28,6 @@ const SelectedProductSheet = ({
   const selectedCount = selectedProducts.length;
   const emptyCount = Math.max(maxCount - selectedCount, 0);
   const visibleProducts = selectedProducts.slice(0, maxCount);
-  const formatPrice = (price: number) => price.toLocaleString('ko-KR');
 
   const handleRemoveProductClick = useCallback(
     (id: number) => {
@@ -89,56 +84,13 @@ const SelectedProductSheet = ({
       {expanded ? (
         <div className={styles.expandedGrid}>
           {visibleProducts.map((product) => (
-            <div key={product.id} className={styles.selectedCardContainer}>
-              <div
-                className={styles.selectedCard}
-                role="button"
-                tabIndex={0}
-                onClick={() => handleSelectedCardClick(product)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    handleSelectedCardClick(product);
-                  }
-                }}
-              >
-                <div className={styles.selectedImageWrap}>
-                  {product.imageUrl ? (
-                    <OptimizedImage
-                      className={styles.selectedImage}
-                      src={product.imageUrl}
-                      fallbackSrc={emptyImage}
-                      alt={product.title}
-                      placeholder="color"
-                    />
-                  ) : (
-                    <div className={styles.selectedImageFallback} aria-hidden>
-                      <Icon name="PlusFill" size="20" />
-                    </div>
-                  )}
-                </div>
-                <div className={styles.selectedInfoSection}>
-                  <p className={styles.selectedTitle}>{product.title}</p>
-                  <div className={styles.selectedPriceRow}>
-                    {product.discountRate > 0 && (
-                      <span className={styles.selectedDiscountRate}>
-                        {product.discountRate}%
-                      </span>
-                    )}
-                    <span className={styles.selectedPrice}>
-                      {formatPrice(product.discountPrice)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-              <IconButton
-                name="CloseFillBlack"
-                size="M"
-                className={styles.closeButton({ layout: 'expanded' })}
-                aria-label={`${product.title} 선택 해제`}
-                onClick={() => handleRemoveProductClick(product.id)}
-              />
-            </div>
+            <ProductSheetCard
+              key={product.id}
+              layout="expanded"
+              product={product}
+              onCardClick={handleSelectedCardClick}
+              onRemoveClick={handleRemoveProductClick}
+            />
           ))}
           {Array.from({ length: emptyCount }).map((_, index) => (
             <div key={`empty-${index}`} className={styles.expandedGridSlot}>
@@ -154,44 +106,13 @@ const SelectedProductSheet = ({
       ) : (
         <div className={styles.compactRow} aria-label="선택한 상품 미리보기">
           {visibleProducts.map((product) => (
-            <div key={product.id} className={styles.compactSlotContainer}>
-              <div
-                className={styles.compactSlotFilled}
-                role="button"
-                tabIndex={0}
-                aria-label={`${product.title} 상세 보기`}
-                onClick={() => handleSelectedCardClick(product)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    event.preventDefault();
-                    handleSelectedCardClick(product);
-                  }
-                }}
-              >
-                <div className={styles.compactImageWrap}>
-                  {product.imageUrl ? (
-                    <OptimizedImage
-                      className={styles.compactImage}
-                      src={product.imageUrl}
-                      fallbackSrc={emptyImage}
-                      alt=""
-                      placeholder="color"
-                    />
-                  ) : (
-                    <div className={styles.compactImageFallback} aria-hidden>
-                      <Icon name="PlusFill" size="14" />
-                    </div>
-                  )}
-                </div>
-              </div>
-              <IconButton
-                name="CloseFillBlack"
-                size="S"
-                className={styles.closeButton({ layout: 'compact' })}
-                aria-label={`${product.title} 선택 해제`}
-                onClick={() => handleRemoveProductClick(product.id)}
-              />
-            </div>
+            <ProductSheetCard
+              key={product.id}
+              layout="compact"
+              product={product}
+              onCardClick={handleSelectedCardClick}
+              onRemoveClick={handleRemoveProductClick}
+            />
           ))}
           {Array.from({ length: emptyCount }).map((_, index) => (
             <div key={`empty-${index}`} className={styles.compactSlot} />

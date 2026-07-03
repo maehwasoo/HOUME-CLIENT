@@ -5,6 +5,8 @@ import { colorVars } from '@shared/styles/tokensV2/color.css';
 import { fontVars } from '@shared/styles/tokensV2/font.css';
 import { unitVars } from '@shared/styles/tokensV2/unit.css';
 
+import { pressInteraction } from '@styles/tokensV2/interaction/presets';
+
 export const wrapper = recipe({
   base: {
     position: 'relative',
@@ -38,6 +40,10 @@ export const clickable = style({
       borderRadius: '0.8rem',
     },
   },
+});
+
+export const pressable = style({
+  ...pressInteraction(0.95, '&:active:not(:has(button:active))'),
 });
 
 export const imgSection = recipe({

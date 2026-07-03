@@ -2,6 +2,7 @@ import { globalStyle, createGlobalTheme } from '@vanilla-extract/css';
 
 import { colorVars } from '@styles/tokensV2/color.css';
 import { fontVars } from '@styles/tokensV2/font.css';
+import '@styles/tokensV2/interaction/tokens.css';
 import { unitVars } from '@styles/tokensV2/unit.css';
 import '@styles/reset.css';
 import '@styles/fontFace.css';

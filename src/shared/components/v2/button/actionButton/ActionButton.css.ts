@@ -2,6 +2,7 @@ import { recipe } from '@vanilla-extract/recipes';
 
 import { colorVars } from '@styles/tokensV2/color.css';
 import { fontVars } from '@styles/tokensV2/font.css';
+import { pressTransformInteraction } from '@styles/tokensV2/interaction/presets';
 import { unitVars } from '@styles/tokensV2/unit.css';
 
 const sizeVariantStyles = {
@@ -38,14 +39,14 @@ const sizeVariantStyles = {
     padding: `${unitVars.unit.gapPadding['200']} ${unitVars.unit.gapPadding['400']}`,
     minWidth: '6.4rem',
     height: '4.8rem',
-    ':active': { transform: 'scale(0.98)' },
+    ':active': { transform: 'scale(0.95)' },
   },
   '2XL': {
     ...fontVars.font.title_m_16,
     padding: `${unitVars.unit.gapPadding['300']} ${unitVars.unit.gapPadding['500']}`,
     minWidth: '8rem',
     height: '5.6rem',
-    ':active': { transform: 'scale(0.98)' },
+    ':active': { transform: 'scale(0.97)' },
   },
 } as const;
 
@@ -55,8 +56,7 @@ export const button = recipe({
     alignItems: 'center',
     justifyContent: 'center',
     transformOrigin: 'center center',
-    transition:
-      'background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease',
+    transition: pressTransformInteraction,
     border: 'none',
     borderRadius: unitVars.unit.radius['full'],
     cursor: 'pointer',

@@ -11,6 +11,8 @@ import { createPortal } from 'react-dom';
 
 import IconButton from '@components/v2/button/IconButton';
 
+import { sheetSlideOutOpacityInteraction } from '@styles/tokensV2/interaction/presets';
+
 import * as styles from './BottomSheetBase.css';
 import { SHEET_TRANSITION_MS } from './constants';
 
@@ -137,7 +139,7 @@ const BottomSheetBase = ({
     }
   }, [open]);
 
-  // opening: 측정 → rAF*2 → 'open' (transition으로 슬라이드 인)
+  // opening: 측정 → rAF×2 → 'open' (transition으로 슬라이드 인)
   useLayoutEffect(() => {
     if (basePhase !== 'opening') return undefined;
     const panel = internalPanelRef.current;
@@ -177,7 +179,7 @@ const BottomSheetBase = ({
     };
   }, [basePhase]);
 
-  // panel transitionend 가드 (closeButton의 transform 100ms transition bubble 차단)
+  // panel transitionend 가드 (closeButton scale transition bubble 차단)
   const handleTransitionEnd = useCallback(
     (e: React.TransitionEvent<HTMLDivElement>) => {
       if (e.target !== internalPanelRef.current) return;
@@ -191,7 +193,6 @@ const BottomSheetBase = ({
 
   if (basePhase === 'closed') return null;
 
-  // transform/transition 합성
   const transform =
     basePhase === 'opening'
       ? 'translateY(100%)'
@@ -232,7 +233,7 @@ const BottomSheetBase = ({
           pointerEvents: backgroundInteractable ? 'none' : 'auto',
           transition:
             basePhase === 'closing'
-              ? `opacity ${SHEET_TRANSITION_MS}ms ease-out`
+              ? sheetSlideOutOpacityInteraction
               : undefined,
         }}
         onClick={onOverlayClick}

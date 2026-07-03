@@ -1,9 +1,10 @@
+import { useEffect, useState } from 'react';
+
 import { useNavigate } from 'react-router-dom';
 
 import type { HomeLocationState } from '@pages/home/HomePage';
 import { useLandingQuery } from '@pages/landing/apis/queries/useLandingQuery';
 import { LANDING_CTA_BY_VARIANT } from '@pages/landing/constants/landingCtaAbTest';
-import { useDissolveAnimation } from '@pages/landing/hooks/useDissolveAnimation';
 
 import { ROUTES } from '@routes/paths';
 
@@ -18,17 +19,30 @@ import { IMAGE_SIZES } from '@utils/imageVariant';
 
 import * as styles from './LandingPage.css';
 
-const DISSOLVE_INTERVAL_MS = 4000;
+const LANDING_BANNER_AFTER_DELAY_MS = 2000;
 
 const LandingPage = () => {
   const navigate = useNavigate();
   const { variant } = useABTest();
   const { data: landingData } = useLandingQuery();
   const landingItems = landingData?.landings ?? [];
-  const { currentIndex } = useDissolveAnimation({
-    itemCount: landingItems.length,
-    intervalMs: DISSOLVE_INTERVAL_MS,
-  });
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const itemCount = landingItems.length;
+    if (itemCount <= 1) {
+      setCurrentIndex(0);
+      return;
+    }
+
+    setCurrentIndex((prev) => (prev >= itemCount ? 0 : prev));
+
+    const intervalId = window.setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % itemCount);
+    }, LANDING_BANNER_AFTER_DELAY_MS);
+
+    return () => window.clearInterval(intervalId);
+  }, [landingItems.length]);
   const selectedLanding = landingItems[currentIndex] ?? landingItems[0];
 
   const handleNavigateHome = () => {

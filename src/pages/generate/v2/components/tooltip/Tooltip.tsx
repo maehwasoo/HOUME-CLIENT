@@ -24,7 +24,7 @@ const Tooltip = ({ content, children, isOpen, onClose }: TooltipProps) => {
               name="Close"
               size="XXS"
               onClick={onClose}
-              aria-label={'툴팁 닫기'}
+              aria-label="툴팁 닫기"
             />
             <span className={styles.arrow}>
               <Arrow className={styles.arrowIcon} />

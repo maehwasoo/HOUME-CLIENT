@@ -3,10 +3,11 @@ import { recipe } from '@vanilla-extract/recipes';
 
 import { zIndex } from '@styles/tokens/zIndex';
 import { colorVars } from '@styles/tokensV2/color.css';
+import {
+  pressInteraction,
+  sheetSlideInteraction,
+} from '@styles/tokensV2/interaction/presets';
 import { unitVars } from '@styles/tokensV2/unit.css';
-
-import { SHEET_TRANSITION_EASING, SHEET_TRANSITION_MS } from './constants';
-
 // dim과 바텀시트를 동일한 모바일 프레임 폭으로 맞추기 위한 공통 폭 제한
 const mobileFrame = style({
   width: '100%',
@@ -61,18 +62,16 @@ export const srOnlyTitle = style({
 });
 
 // 헤더, 본문, 액션 영역을 감싸는 바텀시트 패널 본체
-// transform: open/close 슬라이드 (BottomSheetBase 소유)
+// transform: open/close transition (BottomSheetBase 소유)
 // height: expanded/collapsed/dragging (DragHandleBottomSheet 소유)
-// gap/padding은 헤더 타입별 디자인이 달라 headerType variant로 분기
 export const panel = recipe({
   base: {
     display: 'flex',
     flexDirection: 'column',
-    transition: `transform ${SHEET_TRANSITION_MS}ms ${SHEET_TRANSITION_EASING}, height ${SHEET_TRANSITION_MS}ms ${SHEET_TRANSITION_EASING}`,
+    transition: sheetSlideInteraction,
     willChange: 'transform, height',
     borderTopLeftRadius: unitVars.unit.radius['700'],
     borderTopRightRadius: unitVars.unit.radius['700'],
-    // Figma Shadow/bottomSheet: X 0, Y -4, Blur 20, Spread 0
     boxShadow: `0 -0.4rem 2rem 0 ${colorVars.color.shadow.bottomSheet}`,
     backgroundColor: colorVars.color.bg.primary,
     width: '100%',
@@ -84,6 +83,7 @@ export const panel = recipe({
   variants: {
     headerType: {
       // 핸들이 패널 최상단에 붙고(상단 padding 0) 하단 여백 8px, 핸들↔시트본문 간격은 dragHeader padding이 담당(gap 0)
+
       dragHandle: {
         gap: unitVars.unit.gapPadding['000'],
         padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['200']}`,
@@ -169,17 +169,12 @@ export const closeButton = style({
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  transition: 'transform 100ms ease',
+  ...pressInteraction(0.95),
   border: 0,
   background: 'transparent',
   padding: unitVars.unit.gapPadding['300'],
   width: '4.8rem',
   height: '4.8rem',
-  selectors: {
-    '&:active': {
-      transform: 'scale(0.95)',
-    },
-  },
 });
 
 // 본문 콘텐츠와 하단 버튼 감싸는 column 래퍼

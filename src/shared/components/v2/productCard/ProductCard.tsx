@@ -96,7 +96,9 @@ const ProductCard = ({
 
   return (
     <div
-      className={`${styles.wrapper()} ${isClickable ? styles.clickable : ''}`}
+      className={`${styles.wrapper()} ${isClickable ? styles.clickable : ''} ${
+        isClickable && !disabled ? styles.pressable : ''
+      }`}
       onClick={handleWrapperClick}
       onKeyDown={handleWrapperKeyDown}
       {...wrapperA11y}

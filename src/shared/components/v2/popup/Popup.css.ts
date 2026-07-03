@@ -1,16 +1,21 @@
-import { keyframes, style } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
 import { colorVars } from '@styles/tokensV2/color.css';
+import {
+  popupFadeInInteraction,
+  popupFadeInOpacityInteraction,
+} from '@styles/tokensV2/interaction/presets';
 
 import { zIndex } from '@/shared/styles/tokens/zIndex';
 import { fontVars } from '@/shared/styles/tokensV2/font.css';
 import { unitVars } from '@/shared/styles/tokensV2/unit.css';
+const motionHidden = {
+  opacity: 0,
+} as const;
 
-const fadeIn = keyframes({
-  from: { opacity: 0 },
-  to: { opacity: 1 },
-});
+const containerHiddenTransform = 'translate(-50%, -50%) scale(0.9)';
+const containerVisibleTransform = 'translate(-50%, -50%) scale(1)';
 
 export const viewportLayer = style({
   position: 'fixed',
@@ -26,25 +31,60 @@ export const viewportLayer = style({
   overscrollBehavior: 'none',
 });
 
-export const backdrop = style({
-  position: 'absolute',
-  inset: 0,
-  background: 'rgba(0, 0, 0, 0.2)',
-  animation: `${fadeIn} 0.45s cubic-bezier(0.22, 1, 0.36, 1)`,
+export const backdrop = recipe({
+  base: {
+    position: 'absolute',
+    inset: 0,
+    willChange: 'opacity',
+    background: 'rgba(0, 0, 0, 0.2)',
+  },
+  variants: {
+    motion: {
+      opening: {
+        ...motionHidden,
+        transition: 'none',
+      },
+      open: {
+        transition: popupFadeInOpacityInteraction,
+        opacity: 1,
+      },
+    },
+  },
+  defaultVariants: {
+    motion: 'opening',
+  },
 });
 
-export const container = style({
-  position: 'absolute',
-  zIndex: zIndex.popup + 1,
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  willChange: 'opacity',
-  borderRadius: unitVars.unit.radius['700'],
-  backgroundColor: colorVars.color.gray000,
-  width: '24rem',
-  overflow: 'hidden',
-  animation: `${fadeIn} 0.45s cubic-bezier(0.22, 1, 0.36, 1)`,
+export const container = recipe({
+  base: {
+    position: 'absolute',
+    zIndex: zIndex.popup + 1,
+    top: '50%',
+    left: '50%',
+    transformOrigin: 'center center',
+    willChange: 'opacity, transform',
+    borderRadius: unitVars.unit.radius['700'],
+    backgroundColor: colorVars.color.gray000,
+    width: '24rem',
+    overflow: 'hidden',
+  },
+  variants: {
+    motion: {
+      opening: {
+        ...motionHidden,
+        transform: containerHiddenTransform,
+        transition: 'none',
+      },
+      open: {
+        transform: containerVisibleTransform,
+        transition: popupFadeInInteraction,
+        opacity: 1,
+      },
+    },
+  },
+  defaultVariants: {
+    motion: 'opening',
+  },
 });
 
 export const closeButton = style({

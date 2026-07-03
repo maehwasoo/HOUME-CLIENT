@@ -46,6 +46,7 @@ const ListProductCard = ({
 }: ListProductCardProps) => {
   const linkHref = link?.href;
   const { openProductLink } = useProductLink();
+  const isWholeCardLink = enableWholeCardLink && Boolean(linkHref);
 
   const { visibleColors, extraColorCount } = getColorChips(product.colorHexes);
   const { originalPriceText, discountPriceText, discountRateText } =
@@ -63,14 +64,14 @@ const ListProductCard = ({
   return (
     <div
       className={`${styles.wrapper({ size: cardSize })} ${
-        enableWholeCardLink ? styles.clickable : ''
-      }`}
+        isWholeCardLink ? styles.clickable : ''
+      } ${isWholeCardLink && !disabled ? styles.pressable : ''}`}
       onClick={handleWrapperClick}
       onKeyDown={handleWrapperKeyDown}
-      role={enableWholeCardLink && linkHref ? 'link' : undefined}
-      tabIndex={enableWholeCardLink && linkHref ? 0 : undefined}
+      role={isWholeCardLink ? 'link' : undefined}
+      tabIndex={isWholeCardLink ? 0 : undefined}
       aria-label={
-        enableWholeCardLink ? `${product.title} 상품 링크로 이동` : undefined
+        isWholeCardLink ? `${product.title} 상품 링크로 이동` : undefined
       }
     >
       <section

@@ -23,7 +23,7 @@ export type BannerSlide = {
   imageUrl: string;
 };
 
-const AUTO_PLAY_DELAY_MS = 4000;
+const AUTO_PLAY_DELAY_MS = 2000;
 
 type BannerProps = {
   seedBannerId: number;

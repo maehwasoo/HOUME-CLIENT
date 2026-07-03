@@ -1,4 +1,4 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useState, type ReactNode } from 'react';
 
 import * as styles from './Popup.css.ts';
 import ActionButton from '../button/actionButton/ActionButton';
@@ -41,6 +41,20 @@ const Popup = ({
   confirmDisabled = false,
 }: PopupProps) => {
   const hasWeak = weakBtnText != null && weakBtnText !== '';
+  const [motion, setMotion] = useState<'opening' | 'open'>('opening');
+
+  // 첫 프레임 hidden → rAF×2 후 open (enter transition 트리거)
+  useLayoutEffect(() => {
+    let raf2: number | null = null;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => setMotion('open'));
+    });
+
+    return () => {
+      cancelAnimationFrame(raf1);
+      if (raf2 !== null) cancelAnimationFrame(raf2);
+    };
+  }, []);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;
@@ -104,9 +118,13 @@ const Popup = ({
 
   return (
     <div className={styles.viewportLayer}>
-      <div className={styles.backdrop} onClick={onClose} />
       <div
-        className={styles.container}
+        className={styles.backdrop({ motion })}
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div
+        className={styles.container({ motion })}
         role="dialog"
         aria-modal="true"
         aria-label={ariaLabel ?? '안내 팝업'}

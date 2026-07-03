@@ -3,6 +3,7 @@ import { style } from '@vanilla-extract/css';
 import { animationTokens } from '@styles/tokens/animation.css';
 import { colorVars } from '@styles/tokensV2/color.css';
 import { fontVars } from '@styles/tokensV2/font.css';
+import { pressInteraction } from '@styles/tokensV2/interaction/presets';
 
 import { unitVars } from '@/shared/styles/tokensV2/unit.css';
 
@@ -86,7 +87,8 @@ export const btn = style({
   alignItems: 'center',
   justifyContent: 'center',
   gap: unitVars.unit.gapPadding['200'],
-  transition: 'all 0.2s ease-in-out',
+  transformOrigin: 'center center',
+  ...pressInteraction(0.97),
   border: 'none',
   borderRadius: unitVars.unit.radius.full,
   backgroundColor: '#FEE500',
@@ -98,10 +100,6 @@ export const btn = style({
   whiteSpace: 'nowrap',
   ...fontVars.font.title_m_16,
   color: colorVars.color.text.primary,
-
-  ':active': {
-    transform: 'scale(0.98)',
-  },
 });
 
 export const kakaoIcon = style({

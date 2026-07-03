@@ -3,16 +3,21 @@ import { recipe } from '@vanilla-extract/recipes';
 
 import { colorVars } from '@styles/tokensV2/color.css';
 import { fontVars } from '@styles/tokensV2/font.css';
+import { pressTransformInteraction } from '@styles/tokensV2/interaction/presets';
 import { unitVars } from '@styles/tokensV2/unit.css';
-
 export const chip = recipe({
   base: {
     display: 'inline-flex',
     alignItems: 'center',
     justifyContent: 'center',
     gap: unitVars.unit.gapPadding['050'],
-    transition:
-      'transform 120ms ease, background-color 120ms ease, color 120ms ease, border-color 120ms ease',
+    transformOrigin: 'center center',
+    transition: [
+      pressTransformInteraction,
+      'background-color 120ms ease',
+      'color 120ms ease',
+      'border-color 120ms ease',
+    ].join(', '),
     borderWidth: '1px',
     borderStyle: 'solid',
     borderRadius: unitVars.unit.gapPadding.full,
@@ -126,7 +131,8 @@ export const suffixButton = style({
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
-  transition: 'transform 100ms ease',
+  transformOrigin: 'center center',
+  transition: pressTransformInteraction,
   paddingTop: unitVars.unit.gapPadding['200'],
   paddingRight: unitVars.unit.gapPadding['300'],
   paddingBottom: unitVars.unit.gapPadding['200'],

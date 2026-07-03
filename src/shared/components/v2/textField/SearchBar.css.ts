@@ -1,6 +1,8 @@
 import { style } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 
+import { pressTransformInteraction } from '@styles/tokensV2/interaction/presets';
+
 import { colorVars } from '@/shared/styles/tokensV2/color.css';
 import { fontVars } from '@/shared/styles/tokensV2/font.css';
 import { unitVars } from '@/shared/styles/tokensV2/unit.css';
@@ -10,6 +12,8 @@ export const wrapper = recipe({
     display: 'flex',
     alignItems: 'center',
     gap: unitVars.unit.gapPadding['200'],
+    transformOrigin: 'center center',
+    transition: pressTransformInteraction,
     borderRadius: unitVars.unit.radius.full,
     backgroundColor: colorVars.color.fill.weak,
     padding: unitVars.unit.gapPadding['200'],
@@ -19,7 +23,7 @@ export const wrapper = recipe({
   variants: {
     state: {
       default: {},
-      pressed: { transform: 'scale(0.98)' },
+      pressed: { transform: 'scale(0.97)' },
       focused: {},
       typing: {},
       typed: {},

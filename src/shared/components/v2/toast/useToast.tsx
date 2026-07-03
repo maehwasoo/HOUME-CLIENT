@@ -52,7 +52,6 @@ export const useToast = () => {
           ),
           {
             ...options,
-
             style: {
               ...toastStyle,
               ...options?.style,
