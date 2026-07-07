@@ -1,3 +1,5 @@
+import { useCallback } from 'react';
+
 import { useGenerateStore } from '@pages/generate/v2/stores/useGenerateStore';
 import { useFunnelStore } from '@pages/imageSetup/stores/useFunnelStore';
 
@@ -12,9 +14,9 @@ import { useImageFlowStore } from '@store/useImageFlowStore';
 export const useExitImageFlow = () => {
   const resetGenerate = useGenerateStore((s) => s.resetGenerate);
 
-  return () => {
+  return useCallback(() => {
     useFunnelStore.getState().reset();
     useImageFlowStore.getState().reset();
     resetGenerate();
-  };
+  }, [resetGenerate]);
 };

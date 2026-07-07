@@ -9,6 +9,7 @@ import { getNextFunnelStep, useImageFlowStore } from '@store/useImageFlowStore';
 
 import FeatureErrorFallback from '@components/errorFallback/FeatureErrorFallback';
 
+import { useCreditGuard } from '@hooks/useCreditGuard';
 import { useLoginGate } from '@hooks/useLoginGate';
 
 import { getLoginRedirect } from '@utils/loginRedirect';
@@ -46,6 +47,7 @@ const ImageSetupPage = () => {
   const funnel = useImageSetup();
   const navigate = useNavigate();
   const { requireLogin } = useLoginGate();
+  const { checkCredit } = useCreditGuard(1);
   const [currentStep, setCurrentStep] = useState<StepType>('FloorPlanSelect');
 
   // 퍼널 데이터 정리 방식
@@ -91,7 +93,7 @@ const ImageSetupPage = () => {
         <funnel.Render
           FloorPlanSelect={funnel.Render.with({
             events: {
-              selectedFloorPlan: (
+              selectedFloorPlan: async (
                 data: CompletedFloorPlanSelect,
                 { history }
               ) => {
@@ -106,6 +108,9 @@ const ImageSetupPage = () => {
                 } else {
                   // 숏퍼널(경로 2, 4, 5): FloorPlanSelect가 마지막 스텝 → 바로 이미지 생성으로 이동
                   // payload는 LoadingPage가 useImageFlowStore.preset + useFunnelStore.floorPlan으로 조립
+                  const hasCredit = await checkCredit();
+                  if (!hasCredit) return;
+
                   navigate(ROUTES.GENERATE);
                 }
               },

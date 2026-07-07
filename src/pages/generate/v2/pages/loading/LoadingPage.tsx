@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { isAxiosError } from 'axios';
 import { overlay } from 'overlay-kit';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Navigate, useNavigate } from 'react-router-dom';
@@ -13,6 +14,8 @@ import { ROUTES } from '@routes/paths';
 
 import { useImageFlowStore } from '@store/useImageFlowStore';
 
+import { TOASTER_ID, TOAST_TYPE } from '@shared/types/toast';
+
 import type { GetCarouselResponseDTO } from '@apis/__generated__/data-contracts';
 
 import TestImg from '@assets/v2/images/TestImg.png';
@@ -20,13 +23,12 @@ import TestImg from '@assets/v2/images/TestImg.png';
 import FeatureErrorFallback from '@components/errorFallback/FeatureErrorFallback';
 import OptimizedImage from '@components/image/OptimizedImage';
 import Loading from '@components/loading/Loading';
-import { useToast } from '@components/toast/useToast';
 import Popup from '@components/v2/popup/Popup';
+import { useToast } from '@components/v2/toast/useToast';
 
-import { useErrorHandler } from '@hooks/useErrorHandler';
+import { TOAST_MESSAGE } from '@constants/toastMessage';
+
 import { useExitBlocker } from '@hooks/useExitBlocker';
-
-import { TOAST_TYPE } from '@/shared/types/toastLegacy';
 
 import { useExitImageFlow } from './hooks/useExitImageFlow';
 import { useGenerateImageRequest } from './hooks/useGenerateImageRequest';
@@ -36,11 +38,19 @@ import { usePostCarouselLikeMutation } from '../../apis/mutations/useCarouselLik
 import Tooltip from '../../components/tooltip/Tooltip';
 
 const ANIMATION_DURATION = 600; // 캐러셀 애니메이션 지속 시간 (ms)
+const IMAGE_GENERATION_ERROR_CODES = new Set([50013, 50017, 50400]);
+
+const isImageGenerationServerError = (error: unknown) => {
+  if (!isAxiosError(error)) return false;
+
+  const code = error.response?.data?.code;
+
+  return typeof code === 'number' && IMAGE_GENERATION_ERROR_CODES.has(code);
+};
 
 // TODO: 커스텀 훅, 유틸함수로 빼기, 기능 별 커스텀 훅 분할 시급
 const LoadingPage = () => {
   const navigate = useNavigate();
-  const { handleError } = useErrorHandler('generate');
   const { notify } = useToast();
 
   // 툴팁
@@ -150,7 +160,6 @@ const LoadingPage = () => {
     data: currentStack,
     isPending,
     isError,
-    error,
   } = useStackDataQuery(isRequestValid);
 
   const currentImages = currentStack?.carousels ?? [];
@@ -159,11 +168,38 @@ const LoadingPage = () => {
   const { mutate: postLike, isPending: isJjymLoading } =
     usePostCarouselLikeMutation();
 
+  const notifyImageGenerationError = useCallback(() => {
+    notify({
+      text: TOAST_MESSAGE.IMAGE_GENERATION_SERVER_ERROR,
+      type: TOAST_TYPE.ERROR,
+      hasIcon: false,
+      options: { toasterId: TOASTER_ID.TOP_4 },
+    });
+  }, [notify]);
+
+  const notifyActionServerError = useCallback(() => {
+    notify({
+      text: TOAST_MESSAGE.ACTION_SERVER_ERROR,
+      type: TOAST_TYPE.ERROR,
+      options: { toasterId: TOASTER_ID.BOTTOM_4 },
+    });
+  }, [notify]);
+
+  const recoverFromImageGenerationError = useCallback(() => {
+    exitImageFlow();
+    navigate(ROUTES.HOME, { replace: true });
+  }, [exitImageFlow, navigate]);
+
   // 진입경로별 mutation 호출 (풀퍼널 / banner / otherStyle / product 분기)
   useEffect(() => {
-    const onMutationError = (error: Error) => {
-      console.error('이미지 생성 실패:', error);
-      handleError(error, 'loading');
+    const onMutationError = (error: unknown) => {
+      if (isImageGenerationServerError(error)) {
+        notifyImageGenerationError();
+      } else {
+        notifyActionServerError();
+      }
+
+      recoverFromImageGenerationError();
     };
 
     // mutation 응답 시(성공/실패 모두) 퍼널/프리셋 데이터 즉시 정리
@@ -198,13 +234,12 @@ const LoadingPage = () => {
         requestState.mutate(requestState.payload, mutateOptions);
         return;
     }
-  }, [handleError, requestState]);
-
-  useEffect(() => {
-    if (isError && error) {
-      handleError(error, 'loading');
-    }
-  }, [error, handleError, isError]);
+  }, [
+    notifyActionServerError,
+    notifyImageGenerationError,
+    recoverFromImageGenerationError,
+    requestState,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -276,13 +311,6 @@ const LoadingPage = () => {
       postLike(displayCurrentImage.rawProductId, {
         onSuccess: () => {
           goToNext();
-        },
-        onError: () => {
-          notify({
-            //TODO: 서버 에러 토스트 구현
-            text: '잠시 오류가 발생했어요. 다시 시도해주세요.',
-            type: TOAST_TYPE.WARNING,
-          });
         },
       });
     } else {

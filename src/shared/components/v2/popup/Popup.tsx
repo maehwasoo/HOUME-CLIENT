@@ -8,6 +8,7 @@ import Icon from '../icon/Icon';
 import type { IconName } from '../icon/Icon';
 
 export type PopupBtnStyle = 'text' | 'solid';
+type PopupContainerSize = 'default' | 'creditRequest';
 
 interface PopupProps {
   topIconName?: IconName;
@@ -23,6 +24,7 @@ interface PopupProps {
   sideIconName?: IconName;
   ariaLabel?: string;
   confirmDisabled?: boolean;
+  containerSize?: PopupContainerSize;
 }
 
 const Popup = ({
@@ -39,6 +41,7 @@ const Popup = ({
   sideIconName,
   ariaLabel,
   confirmDisabled = false,
+  containerSize = 'default',
 }: PopupProps) => {
   const hasWeak = weakBtnText != null && weakBtnText !== '';
   const [motion, setMotion] = useState<'opening' | 'open'>('opening');
@@ -124,7 +127,7 @@ const Popup = ({
         aria-hidden="true"
       />
       <div
-        className={styles.container({ motion })}
+        className={styles.container({ motion, containerSize })}
         role="dialog"
         aria-modal="true"
         aria-label={ariaLabel ?? '안내 팝업'}

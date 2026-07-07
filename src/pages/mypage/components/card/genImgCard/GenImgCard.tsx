@@ -4,6 +4,8 @@ import { logMyPageClickBtnFurnitureCard } from '@pages/mypage/utils/analytics';
 
 import { ROUTES } from '@routes/paths';
 
+import { useSavedItemsStore } from '@store/useSavedItemsStore';
+
 import type { UsedProductResponse } from '@apis/__generated__/data-contracts';
 import { useJjymMutation } from '@apis/mutations/useJjymMutation';
 
@@ -38,6 +40,10 @@ const GenImgCard = ({
 }: GenImgCardProps) => {
   const isListType = cardType === 'list';
   const navigate = useNavigate();
+  const savedProductIds = useSavedItemsStore((state) => state.savedProductIds);
+  const touchedProductIds = useSavedItemsStore(
+    (state) => state.touchedProductIds
+  );
 
   const handleImageLoad = () => {
     onImageLoad?.(imageId, imageUrl);
@@ -97,6 +103,10 @@ const GenImgCard = ({
         <section className={styles.listCardContainer}>
           {usedProducts.map((item) => {
             if (item.rawProductId == null) return null;
+            const isSaved = touchedProductIds.has(item.rawProductId)
+              ? savedProductIds.has(item.rawProductId)
+              : (item.isJjym ?? false);
+
             return (
               <ListProductCard
                 key={item.rawProductId}
@@ -111,7 +121,7 @@ const GenImgCard = ({
                   discountRate: item.discountRate ?? 0,
                 }}
                 save={{
-                  isSaved: item.isJjym ?? false,
+                  isSaved,
                   onToggle: () => handleToggleSave(item.rawProductId!),
                 }}
                 link={{

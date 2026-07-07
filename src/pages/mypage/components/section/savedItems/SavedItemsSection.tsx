@@ -81,6 +81,12 @@ const SavedItemsSection = () => {
         {savedItems.map((item) => {
           const isTargetItem =
             String(item.rawProductId) === String(focusItemId);
+          const isSaved = isSavedItemsSynced
+            ? savedProductIds.has(item.rawProductId)
+            : true;
+          const jjymCount = isSaved
+            ? item.jjymCount
+            : Math.max(0, item.jjymCount - 1);
 
           return (
             <div
@@ -101,11 +107,9 @@ const SavedItemsSection = () => {
                   discountRate: item.discountRate,
                 }}
                 save={{
-                  isSaved: isSavedItemsSynced
-                    ? savedProductIds.has(item.rawProductId)
-                    : true,
+                  isSaved,
                   onToggle: () => handleToggleSave(item.rawProductId),
-                  count: item.jjymCount,
+                  count: jjymCount,
                 }}
                 link={{
                   href: item.productSiteUrl,

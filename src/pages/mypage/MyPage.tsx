@@ -10,9 +10,8 @@ import { useUserStore } from '@store/useUserStore';
 import FeatureErrorFallback from '@components/errorFallback/FeatureErrorFallback';
 import InlineError from '@components/inlineError/InlineError';
 import Loading from '@components/loading/Loading';
+import MenuTab from '@components/v2/menuTab/MenuTab';
 import TitleNavBar from '@components/v2/navBar/TitleNavBar';
-
-import MenuTab from '@/shared/components/v2/menuTab/MenuTab';
 
 import { useMyPageProfileQuery } from './apis/queries/useEditProfileQuery';
 import { useMyPageUserQuery } from './apis/queries/useMyPageUserQuery';
@@ -23,13 +22,34 @@ import * as styles from './MyPage.css';
 
 export type MypageMenuTab = 'generatedImages' | 'savedItems';
 
+const DEFAULT_MENU_TAB: MypageMenuTab = 'generatedImages';
+
+const getMypageMenuTab = (tab: unknown) => {
+  if (tab === 'generatedImages' || tab === 'savedItems') {
+    return tab;
+  }
+
+  return undefined;
+};
+
 const MyPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const [activeMenuTab, setActiveMenuTab] = useState<MypageMenuTab>(
-    location.state?.activeTab ?? 'generatedImages' // TODO: 결과 페이지에서 수정 필요
+    () => getMypageMenuTab(location.state?.activeTab) ?? DEFAULT_MENU_TAB
   );
+
+  useEffect(() => {
+    const nextTab = getMypageMenuTab(location.state?.activeTab);
+
+    if (!nextTab) {
+      return;
+    }
+
+    setActiveMenuTab(nextTab);
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.key, location.pathname, location.state?.activeTab, navigate]);
 
   // 탭 상태 관리 (찜 토스트로 들어온 경우 찜 탭으로 이동을 위해 추가했었음.)
   // // sessionStorage에서 탭 정보 가져오기

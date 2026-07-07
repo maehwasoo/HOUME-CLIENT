@@ -1,18 +1,23 @@
 import { createElement } from 'react';
 
-import { toast } from 'react-toastify';
+import { toast } from 'sonner';
 
 import { ROUTES } from '@routes/paths';
 
-import Toast from '@components/toast/Toast';
+import { TOASTER_ID, TOAST_TYPE } from '@shared/types/toast';
 
-import { TOAST_TYPE, toastStyle } from '@/shared/types/toastLegacy';
+import Toast from '@components/v2/toast/Toast';
+import { toastStyle } from '@components/v2/toast/Toast.css';
 
 // React 외부 toast 유틸 (훅을 쓸 수 없는 모듈 스코프에서 사용)
-const showGlobalToast = (text: string) => {
-  toast(createElement(Toast, { text, type: TOAST_TYPE.WARNING }), {
-    style: toastStyle,
-  });
+const showGlobalToast = (text: string, hasIcon = true) => {
+  toast.custom(
+    () => createElement(Toast, { text, type: TOAST_TYPE.ERROR, hasIcon }),
+    {
+      toasterId: TOASTER_ID.BOTTOM_4,
+      style: toastStyle,
+    }
+  );
 };
 
 // React 외부 navigate (dynamic import로 순환 참조 방지)
@@ -39,7 +44,10 @@ const handleSessionExpired = () => {
 };
 
 /** QueryCache/MutationCache의 onError에서 호출 */
-export const handleGlobalError = (error: Error) => {
+export const handleGlobalError = (error: unknown) => {
   if (import.meta.env.DEV) console.error('[QueryClient Error]', error);
-  if (isSessionExpiredError(error)) handleSessionExpired();
+
+  if (isSessionExpiredError(error)) {
+    handleSessionExpired();
+  }
 };

@@ -12,6 +12,7 @@ import { toastStyle } from './Toast.css';
 interface UseToastParams {
   text: string;
   type?: ToastType;
+  hasIcon?: boolean;
   options?: ExternalToast;
   onClick?: () => void;
   actionLabel?: string;
@@ -26,6 +27,7 @@ export const useToast = () => {
     ({
       text,
       type = TOAST_TYPE.INFO,
+      hasIcon,
       options,
       onClick,
       actionLabel,
@@ -62,14 +64,17 @@ export const useToast = () => {
         return;
       }
 
-      toastId.current = toast.custom(() => <Toast text={text} type={type} />, {
-        ...options,
+      toastId.current = toast.custom(
+        () => <Toast text={text} type={type} hasIcon={hasIcon} />,
+        {
+          ...options,
 
-        style: {
-          ...toastStyle,
-          ...options?.style,
-        },
-      });
+          style: {
+            ...toastStyle,
+            ...options?.style,
+          },
+        }
+      );
     },
     []
   );

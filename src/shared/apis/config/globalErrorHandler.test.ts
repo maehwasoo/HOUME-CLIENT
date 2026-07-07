@@ -1,13 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // 외부 의존성 모킹 (실제 모듈 동작과 독립적으로 로직만 검증)
-vi.mock('react-toastify', () => ({ toast: vi.fn() }));
+vi.mock('sonner', () => ({ toast: { custom: vi.fn() } }));
 vi.mock('@routes/paths', () => ({ ROUTES: { LOGIN: '/login' } }));
 vi.mock('@shared/types/toast', () => ({
-  TOAST_TYPE: { WARNING: 'warning' },
-  toastStyle: {},
+  TOAST_TYPE: { ERROR: 'error' },
+  TOASTER_ID: { BOTTOM_4: 'bottom-4' },
 }));
-vi.mock('@components/toast/Toast', () => ({ default: vi.fn() }));
+vi.mock('@components/v2/toast/Toast', () => ({ default: vi.fn() }));
+vi.mock('@components/v2/toast/Toast.css', () => ({ toastStyle: {} }));
 vi.mock('@/routes/router', () => ({ router: { navigate: vi.fn() } }));
 
 import { handleGlobalError, isSessionExpiredError } from './globalErrorHandler';
@@ -33,19 +34,39 @@ describe('isSessionExpiredError', () => {
 describe('handleGlobalError', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    window.history.replaceState(null, '', '/');
   });
 
-  // SESSION_EXPIRED가 아닌 에러는 toast를 띄우지 않아야 함
-  it('SESSION_EXPIRED가 아닌 에러는 toast를 호출하지 않는다', async () => {
-    const { toast } = await import('react-toastify');
+  it('쿼리 실패의 네트워크 에러는 전역 toast를 호출하지 않는다', async () => {
+    const { toast } = await import('sonner');
+
     handleGlobalError(new Error('Network Error'));
-    expect(toast).not.toHaveBeenCalled();
+
+    expect(toast.custom).not.toHaveBeenCalled();
   });
 
-  // SESSION_EXPIRED 에러는 toast를 호출해야 함
-  it('SESSION_EXPIRED 에러는 toast를 호출한다', async () => {
-    const { toast } = await import('react-toastify');
+  it('이미지 생성 예외 코드는 LoadingPage에서만 처리하도록 전역 toast를 호출하지 않는다', async () => {
+    const { toast } = await import('sonner');
+
+    handleGlobalError({
+      isAxiosError: true,
+      response: {
+        status: 500,
+        data: {
+          code: 50013,
+          message: 'GENERATED_IMAGE_EXCEPTION',
+        },
+      },
+    });
+
+    expect(toast.custom).not.toHaveBeenCalled();
+  });
+
+  it('SESSION_EXPIRED 에러는 v2 sonner toast를 호출한다', async () => {
+    const { toast } = await import('sonner');
+
     handleGlobalError(new Error('SESSION_EXPIRED'));
-    expect(toast).toHaveBeenCalledTimes(1);
+
+    expect(toast.custom).toHaveBeenCalledTimes(1);
   });
 });

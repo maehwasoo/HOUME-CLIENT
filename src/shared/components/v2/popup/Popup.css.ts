@@ -65,10 +65,17 @@ export const container = recipe({
     willChange: 'opacity, transform',
     borderRadius: unitVars.unit.radius['700'],
     backgroundColor: colorVars.color.gray000,
-    width: '24rem',
     overflow: 'hidden',
   },
   variants: {
+    containerSize: {
+      default: {
+        width: '24rem',
+      },
+      creditRequest: {
+        width: '28.8rem',
+      },
+    },
     motion: {
       opening: {
         ...motionHidden,
@@ -83,6 +90,7 @@ export const container = recipe({
     },
   },
   defaultVariants: {
+    containerSize: 'default',
     motion: 'opening',
   },
 });

@@ -6,9 +6,10 @@ import Icon from '../icon/Icon';
 interface ToastProps {
   text: string;
   type?: Exclude<ToastType, 'action'>;
+  hasIcon?: boolean;
 }
 
-const Toast = ({ text, type = 'info' }: ToastProps) => {
+const Toast = ({ text, type = 'info', hasIcon = true }: ToastProps) => {
   const isError = type === 'error';
 
   return (
@@ -17,7 +18,7 @@ const Toast = ({ text, type = 'info' }: ToastProps) => {
       aria-live={isError ? 'assertive' : 'polite'}
       className={styles.container({ type })}
     >
-      {isError ? <Icon name="CloseFillDanger" size="20" /> : null}
+      {isError && hasIcon ? <Icon name="CloseFillDanger" size="20" /> : null}
       <span className={styles.message({ type: 'default' })}>{text}</span>
     </div>
   );
