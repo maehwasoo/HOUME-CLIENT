@@ -28,6 +28,11 @@ export const imgbox = style({
   width: '100%',
 });
 
+export const signupLottie = style({
+  width: '37.5rem',
+  height: '37.5rem',
+});
+
 export const textbox = style({
   display: 'flex',
   flexDirection: 'column',

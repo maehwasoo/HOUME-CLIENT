@@ -62,7 +62,7 @@ const sheetSlideInSpec = {
   trigger: 'tap',
   action: 'motion.slideIn',
   duration: 'base',
-  easing: 'bezier.back',
+  easing: 'bezier.out',
   property: 'transform',
 } as const satisfies InteractionSpec;
 
@@ -70,7 +70,7 @@ const sheetSlideOutSpec = {
   trigger: 'tap',
   action: 'motion.slideOut',
   duration: 'base',
-  easing: 'bezier.back',
+  easing: 'bezier.out',
   property: 'transform',
 } as const satisfies InteractionSpec;
 

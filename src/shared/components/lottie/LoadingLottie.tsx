@@ -1,17 +1,15 @@
-import Lottie from 'lottie-react';
+import { LOTTIE_SPEED } from '@assets/lottie/lottieAssets';
 
-import loadingAnimation from '../../assets/lottie/loading.json';
+import DotLottiePlayer from './DotLottiePlayer';
 
 const LoadingLottie = () => {
   return (
-    <div>
-      <Lottie
-        animationData={loadingAnimation}
-        style={{ width: 200, height: 200 }}
-        loop={true}
-        autoplay={true}
-      />
-    </div>
+    <DotLottiePlayer
+      variant="loading"
+      speed={LOTTIE_SPEED.LOADING}
+      size="loading"
+      ariaLabel="로딩 애니메이션"
+    />
   );
 };
 
