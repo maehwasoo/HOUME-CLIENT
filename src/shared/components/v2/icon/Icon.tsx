@@ -24,6 +24,10 @@ import DislikeSelected from '@assets/v2/svg/DislikeSelected.svg?url';
 import DislikeWhite from '@assets/v2/svg/DislikeWhite.svg?url';
 import DoubleStar from '@assets/v2/svg/DoubleStar.svg?url';
 import FlipHorizontal from '@assets/v2/svg/FlipHorizontal.svg?url';
+import Grid1ColDefault from '@assets/v2/svg/Grid1ColDefault.svg?url';
+import Grid1ColSelected from '@assets/v2/svg/Grid1ColSelected.svg?url';
+import Grid2ColDefault from '@assets/v2/svg/Grid2ColDefault.svg?url';
+import Grid2ColSelected from '@assets/v2/svg/Grid2ColSelected.svg?url';
 import HeartFillColor from '@assets/v2/svg/HeartFillColor.svg?url';
 import HeartFillGray from '@assets/v2/svg/HeartFillGray.svg?url';
 import HeartFillWhite from '@assets/v2/svg/HeartFillWhite.svg?url';
@@ -73,6 +77,10 @@ const IconsName = {
   DeskGray,
   DoubleStar,
   FlipHorizontal,
+  Grid1ColDefault,
+  Grid1ColSelected,
+  Grid2ColDefault,
+  Grid2ColSelected,
   HeartFillColor,
   HeartFillGray,
   HeartStrokeGray,

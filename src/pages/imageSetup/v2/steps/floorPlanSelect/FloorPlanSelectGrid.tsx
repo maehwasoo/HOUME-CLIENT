@@ -2,12 +2,14 @@ import type { ExploreHouseTemplateItemResponse } from '@apis/__generated__/data-
 
 import emptyImage from '@assets/v2/images/ImgEmpty.png';
 
+import IconButton from '@components/v2/button/IconButton';
 import Chip from '@components/v2/chip/Chip';
 import Icon from '@components/v2/icon/Icon';
 import RoomTypeCard from '@components/v2/roomTypeCard/RoomTypeCard';
 
 import * as styles from './FloorPlanSelectGrid.css';
 
+import type { FloorPlanAspectRatio } from '../../stores/useFloorPlanRatioStore';
 import type { FilterCategory, FloorPlanFilters } from '../../types/floorPlan';
 
 interface FloorPlanSelectGridProps {
@@ -15,9 +17,11 @@ interface FloorPlanSelectGridProps {
   floorPlans: ExploreHouseTemplateItemResponse[];
   isExact: boolean;
   appliedFilters: FloorPlanFilters;
+  aspectRatio: FloorPlanAspectRatio;
   onCardClick: (floorPlanId: number) => void;
   onFilterChipClick: () => void;
   onFilterChipClear: (key: keyof FloorPlanFilters) => void;
+  onAspectRatioChange: (ratio: FloorPlanAspectRatio) => void;
 }
 
 const getChipLabel = (category: FilterCategory, filterValues: string[]) => {
@@ -40,9 +44,11 @@ const FloorPlanSelectGrid = ({
   floorPlans,
   isExact,
   appliedFilters,
+  aspectRatio,
   onCardClick,
   onFilterChipClick,
   onFilterChipClear,
+  onAspectRatioChange,
 }: FloorPlanSelectGridProps) => {
   // 도면 카드 매핑: 정상 그리드와 '이런 공간은 어떠세요?' 유사 섹션 양쪽에서 동일하게 재사용
   const cards = floorPlans.map((plan) => {
@@ -52,6 +58,7 @@ const FloorPlanSelectGrid = ({
         key={plan.id}
         type="default"
         size="m"
+        ratio={aspectRatio}
         label={plan.name ?? ''}
         imageSrc={plan.imageUrl ?? ''}
         showRecentBadge={plan.isLatest}
@@ -93,10 +100,35 @@ const FloorPlanSelectGrid = ({
         })}
       </div>
 
+      {/* 개수 + 비율 토글 (listControl) */}
+      <div className={styles.listControl}>
+        {/* 정확 매칭 없음(isExact=false)이면 유사 도면 개수 대신 0개로 표시 */}
+        <p className={styles.countText}>{isExact ? floorPlans.length : 0}개</p>
+        <div className={styles.ratioToggle}>
+          <IconButton
+            name={
+              aspectRatio === '1:1' ? 'Grid2ColSelected' : 'Grid2ColDefault'
+            }
+            aria-label="2열로 보기"
+            aria-pressed={aspectRatio === '1:1'}
+            onClick={() => onAspectRatioChange('1:1')}
+          />
+          <span className={styles.toggleDivider} aria-hidden="true" />
+          <IconButton
+            name={
+              aspectRatio === '3:2' ? 'Grid1ColSelected' : 'Grid1ColDefault'
+            }
+            aria-label="1열로 보기"
+            aria-pressed={aspectRatio === '3:2'}
+            onClick={() => onAspectRatioChange('3:2')}
+          />
+        </div>
+      </div>
+
       {/* 카드 그리드 영역 */}
       <div className={styles.gridScroll}>
         {isExact ? (
-          <div className={styles.grid}>{cards}</div>
+          <div className={styles.grid({ ratio: aspectRatio })}>{cards}</div>
         ) : (
           <>
             {/* 상단 이미지 + 공간없음 텍스트 */}
@@ -118,7 +150,7 @@ const FloorPlanSelectGrid = ({
             {/* '이런 공간은 어떠세요?' — 서버가 대체로 보내준 유사 도면 그리드 */}
             <div className={styles.similarSection}>
               <p className={styles.similarTitle}>이런 공간은 어떠세요?</p>
-              <div className={styles.grid}>{cards}</div>
+              <div className={styles.grid({ ratio: aspectRatio })}>{cards}</div>
             </div>
           </>
         )}

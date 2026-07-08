@@ -13,6 +13,7 @@ import { useHouseTemplateDetailQuery } from '../apis/queries/useHouseTemplateDet
 import { useHouseTemplatesQuery } from '../apis/queries/useHouseTemplatesQuery';
 import { useRecentFloorPlanQuery } from '../apis/queries/useRecentFloorPlanQuery';
 import { FILTER_CATEGORIES } from '../constants/floorPlanFilters';
+import { useFloorPlanRatioStore } from '../stores/useFloorPlanRatioStore';
 import { useFloorPlanStore } from '../stores/useFloorPlanStore';
 
 import type {
@@ -25,6 +26,8 @@ export const useFloorPlanSelect = (
   onNext: (data: CompletedFloorPlanSelect) => void
 ) => {
   const store = useFloorPlanStore();
+  // 비율은 별도 sessionStorage persist 스토어 — 퍼널 이탈/OAuth 리로드에도 탭 세션 동안 유지
+  const { aspectRatio, setAspectRatio } = useFloorPlanRatioStore();
   const { notify } = useToast();
 
   // 도면 전체 조회 (필터 변경 시 자동 refetch — queryKey에 appliedFilters 포함)
@@ -187,6 +190,8 @@ export const useFloorPlanSelect = (
       appliedFilters: store.appliedFilters,
       onFilterChipClick: store.openFilterSheet,
       onFilterChipClear: store.clearAppliedFilter,
+      aspectRatio,
+      onAspectRatioChange: setAspectRatio,
     },
 
     // FilterSheet props

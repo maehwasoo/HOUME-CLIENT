@@ -33,18 +33,24 @@ export const optionCard = recipe({
     },
     size: {
       s: {
-        aspectRatio: '1 / 1',
         padding: unitVars.unit.gapPadding['300'],
         width: '100%',
         minWidth: '16rem',
       },
       m: {
-        aspectRatio: '1 / 1',
         padding: unitVars.unit.gapPadding['300'],
         width: '100%',
         minWidth: '16.4rem',
       },
     },
+    // 카드 비율 — 도면 그리드에서 1:1 / 3:2 토글에 사용. 미전달 시 defaultVariants로 1:1 유지
+    ratio: {
+      '1:1': { aspectRatio: '1 / 1' },
+      '3:2': { aspectRatio: '3 / 2' },
+    },
+  },
+  defaultVariants: {
+    ratio: '1:1',
   },
 });
 

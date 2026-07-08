@@ -38,9 +38,11 @@ const FloorPlanSelectStep = ({ context, onNext }: FloorPlanSelectStepProps) => {
         floorPlans={floorPlans}
         isExact={isExact}
         appliedFilters={grid.appliedFilters}
+        aspectRatio={grid.aspectRatio}
         onCardClick={handleCardClick}
         onFilterChipClick={grid.onFilterChipClick}
         onFilterChipClear={grid.onFilterChipClear}
+        onAspectRatioChange={grid.onAspectRatioChange}
       />
 
       <FilterSheet

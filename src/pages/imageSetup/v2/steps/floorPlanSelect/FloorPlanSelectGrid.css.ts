@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { recipe } from '@vanilla-extract/recipes';
 
 import { colorVars } from '@styles/tokensV2/color.css';
 import { fontVars } from '@styles/tokensV2/font.css';
@@ -36,6 +37,35 @@ export const gridScroll = style({
   overflow: 'auto',
 });
 
+// 개수 표시 + 비율 토글 행 (chipBar와 gridScroll 사이)
+export const listControl = style({
+  display: 'flex',
+  flexShrink: 0,
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  backgroundColor: colorVars.color.bg.primary,
+  padding: `0 ${unitVars.unit.gapPadding['500']}`,
+});
+
+export const countText = style({
+  margin: 0,
+  padding: `0 ${unitVars.unit.gapPadding['100']}`,
+  color: colorVars.color.text.tertiary,
+  ...fontVars.font.body_r_13,
+});
+
+export const ratioToggle = style({
+  display: 'flex',
+  alignItems: 'center',
+});
+
+export const toggleDivider = style({
+  flexShrink: 0,
+  backgroundColor: colorVars.color.border.primary,
+  width: '0.1rem', // 1px (1rem=10px)
+  height: '1.4rem', // 14px
+});
+
 export const divider = style({
   margin: `${unitVars.unit.gapPadding['800']} calc(${unitVars.unit.gapPadding['500']} * -1)`,
   backgroundColor: colorVars.color.border.secondary,
@@ -43,11 +73,20 @@ export const divider = style({
   height: '0.8rem',
 });
 
-export const grid = style({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(2, 1fr)',
-  justifyItems: 'center',
-  gap: unitVars.unit.gapPadding['200'],
+export const grid = recipe({
+  base: {
+    display: 'grid',
+    justifyItems: 'center',
+    gap: unitVars.unit.gapPadding['200'],
+  },
+  variants: {
+    // 1:1: 2열 / 3:2: 1열(한 장씩)
+    ratio: {
+      '1:1': { gridTemplateColumns: 'repeat(2, 1fr)' },
+      '3:2': { gridTemplateColumns: '1fr' },
+    },
+  },
+  defaultVariants: { ratio: '1:1' },
 });
 
 export const chipIcon = style({

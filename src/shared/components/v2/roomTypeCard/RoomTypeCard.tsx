@@ -21,6 +21,7 @@ type DivProps = Omit<ComponentProps<'div'>, 'children'>;
 type RoomTypeOptionCardProps = ButtonProps & {
   type: 'default';
   size: 's' | 'm';
+  ratio?: '1:1' | '3:2';
   label: string;
   imageSrc: string;
   showRecentBadge?: boolean;
@@ -55,6 +56,7 @@ const RoomTypeOptionCard = ({
   type: _variant,
   className,
   size,
+  ratio = '1:1',
   label,
   imageSrc: initialImageSrc,
   showRecentBadge = false,
@@ -66,7 +68,10 @@ const RoomTypeOptionCard = ({
     <button
       type="button"
       // clsx: 부모로부터 받은 클래스(className)를 기존 클래스에 합치는 역할
-      className={clsx(styles.optionCard({ kind: 'default', size }), className)}
+      className={clsx(
+        styles.optionCard({ kind: 'default', size, ratio }),
+        className
+      )}
       onClick={onClick}
       {...rest}
     >
