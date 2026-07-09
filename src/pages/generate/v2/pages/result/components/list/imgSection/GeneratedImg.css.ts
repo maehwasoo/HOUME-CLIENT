@@ -35,6 +35,7 @@ export const swiperSlide = style({
 
 export const listImageFrame = style({
   position: 'relative', // OptimizedImage placeholder(absolute)의 기준
+  cursor: 'zoom-in',
   width: '100%',
   height: '26rem',
   overflow: 'hidden',

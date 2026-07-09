@@ -13,6 +13,7 @@ import OptimizedImage from '@components/image/OptimizedImage';
 import CommunityComingSoonModal from '@components/overlay/modal/CommunityComingSoonModal';
 import ActionButton from '@components/v2/button/actionButton/ActionButton';
 import IconButton from '@components/v2/button/IconButton';
+import { openImageZoom } from '@components/v2/imageZoom/openImageZoom';
 
 import * as styles from './GeneratedImg.css';
 
@@ -58,6 +59,11 @@ const GeneratedImg = ({
     ));
   };
 
+  const handleOpenZoom = (target: ResultImageMeta) => {
+    if (!target.imageUrl) return;
+    openImageZoom({ src: target.imageUrl, isMirror: target.isMirror });
+  };
+
   if (images.length === 0) {
     return null;
   }
@@ -89,14 +95,28 @@ const GeneratedImg = ({
               key={`${image.imageId}-${index}`}
               className={styles.swiperSlide}
             >
-              <OptimizedImage
-                src={image.imageUrl}
-                alt=""
-                placeholder="color"
-                loading={index === 0 ? 'eager' : 'lazy'}
-                decoding="async"
-                className={styles.imgArea({ mirrored: image.isMirror })}
-              />
+              <div
+                className={styles.zoomTrigger}
+                role="button"
+                tabIndex={0}
+                aria-label="생성된 이미지 확대해서 보기"
+                onClick={() => handleOpenZoom(image)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleOpenZoom(image);
+                  }
+                }}
+              >
+                <OptimizedImage
+                  src={image.imageUrl}
+                  alt=""
+                  placeholder="color"
+                  loading={index === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  className={styles.imgArea({ mirrored: image.isMirror })}
+                />
+              </div>
             </SwiperSlide>
           ))}
           {lastImage && (

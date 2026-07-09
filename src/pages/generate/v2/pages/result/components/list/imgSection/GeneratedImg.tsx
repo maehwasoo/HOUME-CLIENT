@@ -1,4 +1,5 @@
 import OptimizedImage from '@components/image/OptimizedImage';
+import { openImageZoom } from '@components/v2/imageZoom/openImageZoom';
 
 import * as styles from './GeneratedImg.css';
 
@@ -13,9 +14,26 @@ export interface GeneratedImgListProps {
  * 목록형 결과
  */
 const GeneratedImg = ({ image }: GeneratedImgListProps) => {
+  const handleOpenZoom = () => {
+    if (!image.imageUrl) return;
+    openImageZoom({ src: image.imageUrl, isMirror: image.isMirror });
+  };
+
   return (
     <div className={styles.container}>
-      <div className={styles.listImageFrame}>
+      <div
+        className={styles.listImageFrame}
+        role="button"
+        tabIndex={0}
+        aria-label="생성된 이미지 확대해서 보기"
+        onClick={handleOpenZoom}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleOpenZoom();
+          }
+        }}
+      >
         <OptimizedImage
           src={image.imageUrl}
           alt=""

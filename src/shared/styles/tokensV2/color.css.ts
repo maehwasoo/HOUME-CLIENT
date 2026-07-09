@@ -10,6 +10,7 @@ import { createGlobalTheme } from '@vanilla-extract/css';
 const primitives = createGlobalTheme(':root', {
   color: {
     gray999: '#000000',
+    gray999_a80: 'rgba(0, 0, 0, 0.8)',
     gray999_a50: 'rgba(0, 0, 0, 0.5)',
     gray999_a30: 'rgba(0, 0, 0, 0.3)',
     gray999_a10: 'rgba(0, 0, 0, 0.1)',

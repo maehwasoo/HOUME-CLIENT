@@ -73,6 +73,9 @@ importers:
       react-toastify:
         specifier: ^11.0.5
         version: 11.0.5(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
+      react-zoom-pan-pinch:
+        specifier: ^4.0.3
+        version: 4.0.3(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       remark-gfm:
         specifier: ^4.0.1
         version: 4.0.1
@@ -6530,6 +6533,16 @@ packages:
       react: ^18 || ^19
       react-dom: ^18 || ^19
 
+  react-zoom-pan-pinch@4.0.3:
+    resolution:
+      {
+        integrity: sha512-N2Hi6L78fFmhRra+ORpFSW7WST5x6kxpOPplIvtB0b7b+U2anpo1z1wLgaWRPS2kUSqcraRG+JgBCIlDJnqqAg==,
+      }
+    engines: { node: '>=8', npm: '>=5' }
+    peerDependencies:
+      react: '*'
+      react-dom: '*'
+
   react@19.2.0:
     resolution:
       {
@@ -12264,6 +12277,11 @@ snapshots:
   react-toastify@11.0.5(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
     dependencies:
       clsx: 2.1.1
+      react: 19.2.0
+      react-dom: 19.2.0(react@19.2.0)
+
+  react-zoom-pan-pinch@4.0.3(react-dom@19.2.0(react@19.2.0))(react@19.2.0):
+    dependencies:
       react: 19.2.0
       react-dom: 19.2.0(react@19.2.0)
 

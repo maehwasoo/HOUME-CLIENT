@@ -36,6 +36,13 @@ export const swiperSlide = style({
   overflow: 'hidden',
 });
 
+export const zoomTrigger = style({
+  position: 'relative',
+  cursor: 'zoom-in',
+  width: '100%',
+  height: '100%',
+});
+
 export const imgArea = recipe({
   base: {
     objectFit: 'cover',
