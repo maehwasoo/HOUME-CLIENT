@@ -1,79 +1,22 @@
-import { TOAST_TYPE } from '@shared/types/toast';
-
-import Toast from '@components/toast/Toast';
+import SonnerToastTest from '@components/v2/toast/ToastTest';
 
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
 const meta = {
-  title: 'shared/toast/Toast',
-  component: Toast,
-  tags: ['autodocs'],
-  argTypes: {
-    text: { control: 'text', description: '토스트 메시지 텍스트' },
-    type: {
-      control: { type: 'radio' },
-      options: Object.values(TOAST_TYPE),
-      description: '토스트 종류',
-    },
-  },
+  title: 'shared/v2/toast/Toast',
+  component: SonnerToastTest,
   parameters: {
     layout: 'centered',
     docs: {
       description: {
         component:
-          'react-toastify로 구현한 토스트 컴포넌트입니다.\n' +
-          'toast type을 설정해 상황에 적절한 토스트 컴포넌트를 렌더링합니다.',
+          'Sonner 기반 토스트 수동 확인용 스토리입니다. 버튼을 눌러 위치와 액션 케이스를 직접 확인할 수 있습니다.',
       },
     },
   },
-} satisfies Meta<typeof Toast>;
-export default meta;
+} satisfies Meta<typeof SonnerToastTest>;
 
+export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Info: Story = {
-  args: {
-    text: '정보 토스트 예시입니다',
-    type: TOAST_TYPE.INFO,
-  },
-};
-
-export const Warning: Story = {
-  args: {
-    text: '결제는 아직 준비 중인 기능이에요',
-    type: TOAST_TYPE.WARNING,
-  },
-};
-
-export const Navigate: Story = {
-  argTypes: {
-    onClick: { action: 'navigate' },
-  },
-  args: {
-    text: '상품을 찜했어요! 찜한 가구로 이동할까요?',
-    type: TOAST_TYPE.NAVIGATE,
-  },
-};
-
-export const CustomMargin: Story = {
-  args: {
-    text: '하단 여백이 변경된 토스트 예시',
-    type: TOAST_TYPE.WARNING,
-  },
-  parameters: {
-    controls: { exclude: ['style'] },
-    docs: {
-      source: {
-        code: `toast(
-    <Toast
-      text="하단 여백이 변경된 토스트 예시"
-      type={TOAST_TYPE.WARNING}
-    />,
-    {
-      style: { marginBottom: '5rem', ...toastStyle },
-    }
-  );`,
-      },
-    },
-  },
-};
+export const Default: Story = {};

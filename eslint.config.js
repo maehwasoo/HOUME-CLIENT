@@ -16,7 +16,14 @@ import vanillaExtract from '@antebudimir/eslint-plugin-vanilla-extract';
 
 export default [
   {
-    ignores: ['dist', 'storybook-static/**', 'node_modules/', '*.js', '*.d.ts'],
+    ignores: [
+      'dist',
+      'storybook-static/**',
+      'node_modules/',
+      '*.js',
+      '*.d.ts',
+      'src/shared/apis/__generated__/**',
+    ],
   },
   {
     files: ['**/*.{ts,tsx}'],
@@ -58,6 +65,8 @@ export default [
       // 기본 ESLint 규칙
       ...js.configs.recommended.rules,
       'no-undef': 'off',
+      'no-redeclare': 'off',
+      '@typescript-eslint/no-redeclare': 'error',
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': [
         'warn',

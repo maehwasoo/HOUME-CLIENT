@@ -1,17 +1,21 @@
-import { useActivityOptionsQuery } from '@pages/imageSetup/apis/queries/useActivityOptionsQuery';
-import { FUNNELHEADER_IMAGES } from '@pages/imageSetup/constants/headerImages';
-import { useActivityInfo } from '@pages/imageSetup/hooks/activityInfo/useActivityInfo';
-import { useCreditCheck } from '@pages/imageSetup/hooks/useCreditCheck';
+import { useRef, useState } from 'react';
 
-import CtaButton from '@components/button/ctaButton/CtaButton';
+import { overlay } from 'overlay-kit';
+
+import { useActivityInfo } from '@pages/imageSetup/hooks/activityInfo/useActivityInfo';
+
 import InlineError from '@components/inlineError/InlineError';
 import Loading from '@components/loading/Loading';
+import ActionButton from '@components/v2/button/actionButton/ActionButton';
+import Chip from '@components/v2/chip/Chip';
+import Icon from '@components/v2/icon/Icon';
+import TextHeading from '@components/v2/textHeading/TextHeading';
+
+import { useExitBlocker } from '@hooks/useExitBlocker';
 
 import * as styles from './ActivityInfo.css';
-import ButtonGroup from '../../components/buttonGroup/ButtonGroup';
-import Caption from '../../components/caption/Caption';
-import FunnelHeader from '../../components/header/FunnelHeader';
-import HeadingText from '../../components/headingText/HeadingText';
+import ActivityTypeSheet from './ActivityTypeSheet';
+import SelectTrigger from './SelectTrigger';
 
 import type { ImageSetupSteps } from '../../types/funnel/steps';
 
@@ -21,166 +25,160 @@ interface ActivityInfoProps {
 
 const ActivityInfo = ({ context }: ActivityInfoProps) => {
   const {
-    data: activityOptionsData,
     isPending,
     isError,
     refetch,
-  } = useActivityOptionsQuery();
-
-  // console.log(activityOptionsData);
-
-  const {
-    handleSubmit,
+    setFormData,
     isFormCompleted,
-    selectedActivityLabel,
-    getRequiredFurnitureLabels,
     activitySelection,
+    selectedActivityLabel,
+    activities,
+    categories,
     categorySelections,
-  } = useActivityInfo(context, activityOptionsData);
+    globalConstraints,
+    handleSubmit,
+  } = useActivityInfo(context);
 
-  // 크레딧 체크 훅
-  const { hasCredit, isCreditChecked, checkCredit } = useCreditCheck();
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const sheetIdRef = useRef<string | null>(null);
 
-  // 이미지 생성 핸들러
-  const handleImageGeneration = () => {
-    const isValid = checkCredit(); // 크레딧 확인 및 CTA 버튼 상태 관리
-
-    if (isValid) {
-      handleSubmit();
+  const closeSheet = () => {
+    if (sheetIdRef.current) {
+      overlay.unmount(sheetIdRef.current);
+      sheetIdRef.current = null;
     }
+    setIsSheetOpen(false);
   };
 
-  const isReady =
-    !isError && !isPending && activityOptionsData && categorySelections;
+  // 바텀시트 열린 동안 뒤로가기(NavBar/브라우저/모바일 스와이프) 가로채서
+  // 페이지 이동 대신 바텀시트만 닫기
+  useExitBlocker({
+    enabled: isSheetOpen,
+    onBlocked: ({ reset }) => {
+      closeSheet();
+      reset();
+    },
+  });
+
+  const handleActivityTriggerClick = () => {
+    sheetIdRef.current = overlay.open(() => (
+      <ActivityTypeSheet
+        open
+        activities={activities}
+        selectedActivityCode={activitySelection.selectedActivityItem?.code}
+        onConfirm={(activityCode) => {
+          setFormData((prev) => ({ ...prev, activity: activityCode }));
+          closeSheet();
+        }}
+        onClose={closeSheet}
+      />
+    ));
+    setIsSheetOpen(true);
+  };
+
+  if (isError) return <InlineError onRetry={refetch} />;
+  if (isPending || !categorySelections) return <Loading />;
+
+  // nameEng → selection 매핑
+  const selectionByNameEng: Record<string, typeof categorySelections.bed> = {
+    BED: categorySelections.bed,
+    SOFA: categorySelections.sofa,
+    STORAGE: categorySelections.storage,
+    TABLE: categorySelections.table,
+    SELECTIVE: categorySelections.selective,
+    LIGHTING: categorySelections.lighting,
+  };
 
   return (
     <div className={styles.container}>
-      <FunnelHeader
-        title={`마지막 단계예요!`}
-        detail={`집에서 주로 하는 활동과\n배치가 필요한 가구에 대해 알려주세요.`}
-        currentStep={4}
-        image={FUNNELHEADER_IMAGES[4]}
-      />
+      <div className={styles.mainArea}>
+        <TextHeading
+          title="마지막 단계예요!"
+          caption={
+            '생활 패턴과 필요한 가구를 알려주시면\n꼭 맞는 인테리어를 추천해드릴게요.'
+          }
+        />
 
-      {isError ? (
-        <InlineError onRetry={refetch} />
-      ) : !isReady ? (
-        <Loading />
-      ) : (
-        <div className={styles.contents}>
-          <div>
-            <HeadingText
-              title="주요 활동"
-              subtitle="선택한 활동에 최적화된 동선을 알려드려요."
-            />
-            <div className={styles.activityButton}>
-              <ButtonGroup<string>
-                options={activityOptionsData.activities}
-                selectedValues={activitySelection.selectedValues}
-                onSelectionChange={activitySelection.handleActivityChange}
-                keyExtractor={(option) => option.code}
-                selectionMode="single"
-                buttonSize="large"
-                layout="grid-2"
-              />
-            </div>
-            {selectedActivityLabel && (
-              <div className={styles.caption}>
-                <Caption
-                  code={selectedActivityLabel}
-                  option={getRequiredFurnitureLabels()}
-                />
-              </div>
-            )}
-          </div>
+        <div className={styles.activitySection}>
+          <TextHeading
+            type="sub"
+            title="주요 활동"
+            caption="선택한 활동에 필요한 가구와 함께 이미지를 생성해요."
+          />
+          <SelectTrigger
+            selectedActivity={activitySelection.selectedActivityItem}
+            onClick={handleActivityTriggerClick}
+          />
+        </div>
 
-          <div className={styles.furnitures}>
-            <HeadingText
+        {selectedActivityLabel && (
+          <div className={styles.furnitureSection}>
+            <TextHeading
+              type="sub"
               title="가구"
-              subtitle={`선택한 가구들로 이미지를 생성해드려요. (${
-                categorySelections.bed.selectedValues.length +
-                categorySelections.sofa.selectedValues.length +
-                categorySelections.storage.selectedValues.length +
-                categorySelections.table.selectedValues.length +
-                categorySelections.selective.selectedValues.length
-              }/6)`}
+              caption="선택한 가구들로 이미지를 생성해드려요. (최대 6개)"
             />
-            <ButtonGroup<number>
-              title={activityOptionsData.categories[0].nameKr}
-              titleSize="small"
-              hasBorder={true}
-              options={activityOptionsData.categories[0].furnitures}
-              selectedValues={categorySelections.bed.selectedValues}
-              onSelectionChange={categorySelections.bed.handleChange}
-              keyExtractor={(option) => option.id!}
-              selectionMode="single"
-              buttonSize="xsmall"
-              layout="grid-4"
-              buttonStatuses={categorySelections.bed.furnitureStatus}
-            />
+            <div className={styles.furList}>
+              {/* TODO: 추후 Chip 최신화하기 (아이콘 포함 Chip 반영) */}
+              {categories.map((category) => {
+                const selection = selectionByNameEng[category.nameEng!];
+                if (!selection) return null;
 
-            <ButtonGroup<number>
-              title={activityOptionsData.categories[1].nameKr}
-              titleSize="small"
-              hasBorder={true}
-              options={activityOptionsData.categories[1].furnitures}
-              selectedValues={categorySelections.sofa.selectedValues}
-              onSelectionChange={categorySelections.sofa.handleChange}
-              keyExtractor={(option) => option.id!}
-              selectionMode="single"
-              buttonSize="medium"
-              layout="grid-2"
-              buttonStatuses={categorySelections.sofa.furnitureStatus}
-            />
+                return (
+                  <div
+                    key={category.categoryId}
+                    className={styles.categoryGroup}
+                  >
+                    <span className={styles.furTitle}>{category.nameKr}</span>
+                    <div className={styles.chipList}>
+                      {category.furnitures!.map((furniture) => {
+                        const isSelected = selection.selectedValues.includes(
+                          furniture.id!
+                        );
+                        const status = selection.furnitureStatus.find(
+                          (s) => s.id === furniture.id
+                        );
+                        const isRequired =
+                          globalConstraints.isRequiredFurniture(furniture.id!);
 
-            <ButtonGroup<number>
-              title={activityOptionsData.categories[2].nameKr}
-              titleSize="small"
-              options={activityOptionsData.categories[2].furnitures}
-              selectedValues={categorySelections.storage.selectedValues}
-              onSelectionChange={categorySelections.storage.handleChange}
-              keyExtractor={(option) => option.id!}
-              selectionMode="multiple"
-              buttonSize="large"
-              layout="grid-2"
-              buttonStatuses={categorySelections.storage.furnitureStatus}
-            />
-
-            <ButtonGroup<number>
-              title={activityOptionsData.categories[3].nameKr}
-              titleSize="small"
-              options={activityOptionsData.categories[3].furnitures}
-              selectedValues={categorySelections.table.selectedValues}
-              onSelectionChange={categorySelections.table.handleChange}
-              keyExtractor={(option) => option.id!}
-              selectionMode="multiple"
-              buttonSize="small"
-              layout="grid-3"
-              buttonStatuses={categorySelections.table.furnitureStatus}
-            />
-
-            <ButtonGroup<number>
-              title={activityOptionsData.categories[4].nameKr}
-              titleSize="small"
-              options={activityOptionsData.categories[4].furnitures}
-              selectedValues={categorySelections.selective.selectedValues}
-              onSelectionChange={categorySelections.selective.handleChange}
-              keyExtractor={(option) => option.id!}
-              selectionMode="multiple"
-              buttonSize="large"
-              layout="grid-2"
-              buttonStatuses={categorySelections.selective.furnitureStatus}
-            />
+                        return (
+                          <Chip
+                            key={furniture.id}
+                            selected={isSelected}
+                            color="weak"
+                            disabled={!status?.isActive && !isSelected}
+                            suffixIcon={
+                              isRequired ? (
+                                <Icon name="Lock" size="16" />
+                              ) : undefined
+                            }
+                            onClick={() =>
+                              selection.toggleFurniture(furniture.id!)
+                            }
+                          >
+                            {furniture.label}
+                          </Chip>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
+        )}
+      </div>
 
-          <div>
-            <CtaButton
-              isActive={isFormCompleted && (!isCreditChecked || hasCredit)}
-              onClick={handleImageGeneration}
-            >
-              이미지 생성하기
-            </CtaButton>
-          </div>
+      {selectedActivityLabel && (
+        <div className={styles.buttonWrapper}>
+          <ActionButton
+            size="2XL"
+            fullWidth
+            disabled={!isFormCompleted}
+            onClick={handleSubmit}
+          >
+            이미지 생성하기
+          </ActionButton>
         </div>
       )}
     </div>

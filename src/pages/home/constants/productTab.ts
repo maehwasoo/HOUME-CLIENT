@@ -1,0 +1,1 @@
+export const PRODUCT_BOTTOM_SHEET_COLLAPSED_HEIGHT = '20rem';

@@ -1,63 +1,105 @@
+import { TOAST_TYPE, TOASTER_ID } from '@shared/types/toast';
+
+import type { FurnitureCategoryGroup } from '@apis/__generated__/data-contracts';
+
+import { useToast } from '@components/v2/toast/useToast';
+
+import { TOAST_MESSAGE } from '@constants/toastMessage';
+
 import type { useGlobalConstraints } from './useGlobalConstraints';
-import type { FurnitureCategory } from '../../types/apis/activityInfo';
-import type { ActivityInfoFormData } from '../../types/funnel/activityInfo';
+import type {
+  ActivityInfoFormData,
+  CategorySelectionMode,
+} from '../../types/funnel/activityInfo';
 
 /**
  * 특정 카테고리의 가구 선택 로직을 관리하는 훅
+ * Chip 가구 토글 인터페이스 제공
+ * - single모드: 카테고리 내 하나만 선택 가능 (재선택 시 해제, 다른 항목 선택 시 기존 항목 교체)
+ * - multiple모드: 카테고리 내 여러 개 선택 가능 (전역 최대 6개 + 필수 가구 제약 적용)
  */
 export const useCategorySelection = (
-  category: FurnitureCategory | null,
+  category: FurnitureCategoryGroup | null,
+  mode: CategorySelectionMode,
   formData: ActivityInfoFormData,
   setFormData: React.Dispatch<React.SetStateAction<ActivityInfoFormData>>,
-  globalConstraints: ReturnType<typeof useGlobalConstraints> // 훅의 반환타입
-  // +) globalConstraints의 applyConstraints(), canSelectFurniture() 두 가지 함수만 사용하므로 Duck Typing을 사용한 globalConstraints의 타입 선언도 가능(유연성 증가, 안전성 감소)
+  globalConstraints: ReturnType<typeof useGlobalConstraints>
 ) => {
-  // 카테고리가 없는 경우 빈 배열 반환
+  // useToast는 early return 전에 호출
+  const { notify } = useToast();
+  const furnitures = category?.furnitures ?? [];
+
+  // 카테고리가 없는 경우 빈 인터페이스 반환
   if (!category) {
     return {
-      selectedValues: [],
-      handleChange: () => {},
-      furnitureStatus: [],
+      selectedValues: [] as number[],
+      toggleFurniture: () => {},
+      furnitureStatus: [] as { id: number; isActive: boolean }[],
     };
   }
 
   // 현재 카테고리에서 선택된 가구 ID들
   const selectedValues =
-    formData.selectiveIds?.filter((id) =>
-      category.furnitures.some((f) => f.id === id)
+    formData.furnitureIds?.filter((id) =>
+      furnitures.some((f) => f.id === id)
     ) || [];
 
-  // 카테고리 가구 선택 변경 핸들러
-  // ButtonGroup 내부 로직에서 단일/다중 선택 분기처리 후 ids파라미터에 선택된 값이 전달됨
-  const handleChange = (ids: number[]) => {
-    // ids: 해당 카테고리에서 선택한 모든 가구들(ButtonGroup에서 전달)
+  // 가구 토글
+  // - 이미 선택된 가구: 선택 해제 (필수 가구는 해제 불가)
+  // - 미선택 가구 + single: 같은 카테고리 기존 선택 제거 후 추가
+  // - 미선택 가구 + multiple: 추가 후 전역 제약(최대 6개 + 필수 가구 포함) 적용
+  const toggleFurniture = (furnitureId: number) => {
+    const currentIds = formData.furnitureIds || [];
+    const isSelected = currentIds.includes(furnitureId);
 
-    // 현재 선택된 모든 가구들
-    const currentIds = formData.selectiveIds || [];
+    // 1. 선택한 값 해제: single/multiple 공통
+    if (isSelected) {
+      if (!globalConstraints.canDeselect(furnitureId)) {
+        // 필수 가구는 해제 불가 — 사용자에게 toast로 피드백
+        notify({
+          text: TOAST_MESSAGE.REQUIRED_ITEM_LOCKED,
+          type: TOAST_TYPE.INFO,
+          options: { toasterId: TOASTER_ID.BOTTOM_4 },
+        });
+        return;
+      }
+      const updatedFurnitureIds = currentIds.filter((id) => id !== furnitureId);
+      setFormData((prev) => ({ ...prev, furnitureIds: updatedFurnitureIds }));
+      return;
+    }
 
-    // 현재 카테고리 이외의 카테고리에서 선택된 모든 가구들
-    const otherCategoryIds = currentIds.filter(
-      (id) => !category.furnitures.some((f) => f.id === id)
-    );
+    // 2. 선택값 추가: single/multiple 분기
+    if (mode === 'single') {
+      // 이 카테고리에 속한 기존 선택을 모두 제거하고 새 항목만 추가
+      const preservedIds = currentIds.filter(
+        (id) => !furnitures.some((f) => f.id === id)
+      );
+      const updatedFurnitureIds = globalConstraints.applyConstraints([
+        ...preservedIds,
+        furnitureId,
+      ]);
+      setFormData((prev) => ({ ...prev, furnitureIds: updatedFurnitureIds }));
+      return;
+    }
 
-    // 기존에 선택한 가구와 새롭게 선택한 가구를 합치고, 제약조건 적용
-    const updatedIds = globalConstraints.applyConstraints([
-      ...otherCategoryIds,
-      ...ids,
+    // multiple: 현재 선택에 새 항목 추가 후 전역 제약 적용
+    const updatedFurnitureIds = globalConstraints.applyConstraints([
+      ...currentIds,
+      furnitureId,
     ]);
-
-    setFormData((prev) => ({ ...prev, selectiveIds: updatedIds }));
+    setFormData((prev) => ({ ...prev, furnitureIds: updatedFurnitureIds }));
   };
 
-  // 각 가구별 활성화 상태 정보
-  const furnitureStatus = category.furnitures.map((furniture) => ({
-    id: furniture.id,
-    isActive: globalConstraints.canSelectFurniture(furniture.id),
+  // 각 가구별 활성화 상태 정보 (Chip의 disabled 매핑)
+  // swagger optional이지만 백엔드 명세상 id는 항상 옴 → non-null assertion 사용
+  const furnitureStatus = furnitures.map((furniture) => ({
+    id: furniture.id!,
+    isActive: globalConstraints.canSelectFurniture(furniture.id!),
   }));
 
   return {
     selectedValues,
-    handleChange,
+    toggleFurniture,
     furnitureStatus,
   };
 };

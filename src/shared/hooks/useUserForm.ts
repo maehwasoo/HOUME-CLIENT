@@ -1,0 +1,217 @@
+import { useState, useMemo, useCallback, useEffect } from 'react';
+
+import type { Gender } from '@shared/types/formOptions';
+
+import {
+  VALIDATION_RULES,
+  isMinLength,
+  isValidNicknameFormat,
+  isValidYearFormat,
+  isValidMonthFormat,
+  isValidDayFormat,
+  isMinimumAge,
+  isValidDate,
+} from '../utils/userFormValidation';
+
+interface InitialFormData {
+  nickname?: string;
+  birthYear?: string;
+  birthMonth?: string;
+  birthDay?: string;
+  gender?: Gender | null;
+}
+
+const useUserForm = (initialData: InitialFormData = {}) => {
+  const initialValues = useMemo(
+    () => ({
+      nickname: initialData.nickname ?? '',
+      birthYear: initialData.birthYear ?? '',
+      birthMonth: initialData.birthMonth ?? '',
+      birthDay: initialData.birthDay ?? '',
+      gender: initialData.gender ?? null,
+    }),
+    [
+      initialData.nickname,
+      initialData.birthYear,
+      initialData.birthMonth,
+      initialData.birthDay,
+      initialData.gender,
+    ]
+  );
+
+  // -------------------------
+  // 상태 관리
+  // -------------------------
+  const [nickname, setNickname] = useState(initialValues.nickname);
+  const [birthYear, setBirthYear] = useState(initialValues.birthYear);
+  const [birthMonth, setBirthMonth] = useState(initialValues.birthMonth);
+  const [birthDay, setBirthDay] = useState(initialValues.birthDay);
+  const [gender, setGender] = useState<Gender | null>(initialValues.gender);
+
+  useEffect(() => {
+    setNickname(initialValues.nickname);
+    setBirthYear(initialValues.birthYear);
+    setBirthMonth(initialValues.birthMonth);
+    setBirthDay(initialValues.birthDay);
+    setGender(initialValues.gender);
+  }, [initialValues]);
+
+  // -------------------------
+  // 이름 유효성 검사
+  // -------------------------
+  // 최소 길이 이상
+  const isNameValid = isMinLength(nickname, VALIDATION_RULES.NAME_MIN_LENGTH);
+
+  // 한글, 영어, 숫자 허용
+  const isNameFormatInvalid =
+    nickname !== '' && !isValidNicknameFormat(nickname);
+
+  // 길이 부족 에러
+  const isNameLengthInvalid =
+    nickname !== '' && !isMinLength(nickname, VALIDATION_RULES.NAME_MIN_LENGTH);
+
+  // -------------------------
+  // 생년월일 숫자 변환
+  // -------------------------
+  const yearNum = Number.parseInt(birthYear, 10);
+  const monthNum = Number.parseInt(birthMonth, 10);
+  const dayNum = Number.parseInt(birthDay, 10);
+
+  // -------------------------
+  // 생년월일 유효성 검사
+  // -------------------------
+  // 연도 형식 에러
+  const yearFormatError = birthYear !== '' && !isValidYearFormat(birthYear);
+
+  // 만 나이(14세 이상) 에러
+  const yearAgeError = useMemo(() => {
+    if (birthYear === '' || yearFormatError) return false;
+    return !isMinimumAge(yearNum, monthNum, dayNum, VALIDATION_RULES.MIN_AGE);
+  }, [birthYear, yearFormatError, yearNum, monthNum, dayNum]);
+
+  // 월 형식/범위 에러
+  const monthFieldError = useMemo(() => {
+    if (birthMonth === '') return false;
+    return !isValidMonthFormat(birthMonth) || monthNum < 1 || monthNum > 12;
+  }, [birthMonth, monthNum]);
+
+  // 일 형식/존재 에러
+  const dayFieldError = useMemo(() => {
+    if (birthDay === '') return false;
+    if (!isValidDayFormat(birthDay)) return true;
+    if (!isValidMonthFormat(birthMonth) || !isValidYearFormat(birthYear)) {
+      return dayNum < 1 || dayNum > 31;
+    }
+    return !isValidDate(yearNum, monthNum, dayNum);
+  }, [birthDay, birthMonth, birthYear, dayNum, monthNum, yearNum]);
+
+  // -------------------------
+  // 폼 전체 유효성 검사
+  // -------------------------
+  const validationResult = useMemo(() => {
+    // 모든 필드가 입력되었는지
+    const allFieldsFilled =
+      nickname !== '' &&
+      birthYear !== '' &&
+      birthMonth !== '' &&
+      birthDay !== '' &&
+      gender !== null;
+
+    // 모든 에러가 없는지
+    const noErrors =
+      isNameValid &&
+      !yearFormatError &&
+      !yearAgeError &&
+      !monthFieldError &&
+      !dayFieldError;
+
+    // 에러가 있는지 확인
+    const hasError = Boolean(
+      isNameFormatInvalid ||
+        isNameLengthInvalid ||
+        yearFormatError ||
+        yearAgeError ||
+        monthFieldError ||
+        dayFieldError
+    );
+
+    return {
+      allFieldsFilled,
+      noErrors,
+      isFormValid: allFieldsFilled && noErrors,
+      hasError,
+    };
+  }, [
+    nickname,
+    birthYear,
+    birthMonth,
+    birthDay,
+    gender,
+    isNameValid,
+    isNameFormatInvalid,
+    isNameLengthInvalid,
+    yearFormatError,
+    yearAgeError,
+    monthFieldError,
+    dayFieldError,
+  ]);
+
+  const { isFormValid, hasError } = validationResult;
+
+  const isDirty = useMemo(
+    () =>
+      nickname !== initialValues.nickname ||
+      birthYear !== initialValues.birthYear ||
+      birthMonth !== initialValues.birthMonth ||
+      birthDay !== initialValues.birthDay ||
+      gender !== initialValues.gender,
+    [nickname, birthYear, birthMonth, birthDay, gender, initialValues]
+  );
+
+  // -------------------------
+  // 입력 핸들러
+  // -------------------------
+  // 닉네임 입력 핸들러
+  const handleNicknameChange = useCallback((input: string) => {
+    setNickname(input);
+  }, []);
+
+  // 숫자만 입력받도록 처리하는 핸들러 생성 함수
+  const handleNumericChange =
+    (setter: (val: string) => void) => (val: string) => {
+      const numeric = val.replace(/\D/g, '');
+      setter(numeric);
+    };
+
+  // 각각의 생년/월/일 핸들러
+  const handleBirthYearChange = handleNumericChange(setBirthYear);
+  const handleBirthMonthChange = handleNumericChange(setBirthMonth);
+  const handleBirthDayChange = handleNumericChange(setBirthDay);
+
+  // -------------------------
+  // 반환값: 상태, 핸들러, 검증 결과
+  // -------------------------
+  return {
+    nickname,
+    birthYear,
+    birthMonth,
+    birthDay,
+    gender,
+    handleNicknameChange,
+    handleBirthYearChange,
+    handleBirthMonthChange,
+    handleBirthDayChange,
+    setGender,
+    isNameFormatInvalid,
+    isNameLengthInvalid,
+    isFormValid,
+    isDirty,
+    hasError,
+    yearFormatError,
+    yearAgeError,
+    monthFieldError,
+    dayFieldError,
+  };
+};
+
+export default useUserForm;

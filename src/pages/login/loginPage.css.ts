@@ -1,11 +1,16 @@
 import { style } from '@vanilla-extract/css';
 
-import { fontStyle } from '@styles/fontStyle';
 import { animationTokens } from '@styles/tokens/animation.css';
-import { colorVars } from '@styles/tokens/color.css';
+import { colorVars } from '@styles/tokensV2/color.css';
+import { fontVars } from '@styles/tokensV2/font.css';
+import { pressInteraction } from '@styles/tokensV2/interaction/presets';
+
+import { unitVars } from '@/shared/styles/tokensV2/unit.css';
 
 export const container = style({
-  background: colorVars.color.bg_grad,
+  gap: unitVars.unit.gapPadding['200'],
+  background: colorVars.color.bg.primary,
+  paddingTop: unitVars.unit.gapPadding['500'],
 });
 
 export const textbox = style({
@@ -13,22 +18,23 @@ export const textbox = style({
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '0.8rem',
-  padding: '4rem 2rem 2rem 2rem',
+  gap: unitVars.unit.gapPadding['300'],
+  marginTop: unitVars.unit.gapPadding['200'],
+  padding: `${unitVars.unit.gapPadding['300']} ${unitVars.unit.gapPadding['500']}`,
+  ...fontVars.font.title_sb_20,
   width: '100%',
-  ...fontStyle('title_m_16'),
   animation: animationTokens.fadeInUpFast,
   textAlign: 'center',
 });
 
 export const title = style({
-  ...fontStyle('heading_sb_20'),
-  color: colorVars.color.gray900,
+  ...fontVars.font.title_sb_20,
+  color: colorVars.color.text.primary,
 });
 
 export const content = style({
-  ...fontStyle('body_r_14'),
-  color: colorVars.color.gray600,
+  ...fontVars.font.body_r_14,
+  color: colorVars.color.text.secondary,
 });
 
 export const imgbox = style({
@@ -40,8 +46,19 @@ export const imgbox = style({
 
 export const loginImg = style({
   width: '37.5rem',
-  height: '34.4rem',
+  height: '37.5rem',
   animation: animationTokens.fadeInUpFast,
+});
+
+export const aside = style({
+  ...fontVars.font.caption_r_11,
+  color: colorVars.color.gray500,
+});
+
+export const link = style({
+  cursor: 'pointer',
+  textDecoration: 'underline',
+  textUnderlineOffset: '2px',
 });
 
 export const btnarea = style({
@@ -51,19 +68,42 @@ export const btnarea = style({
   flexDirection: 'column',
   alignItems: 'center',
   justifyContent: 'center',
-  gap: '1rem',
-  padding: '0 2rem 2rem 2rem',
+  gap: unitVars.unit.gapPadding['200'],
+  background: `linear-gradient(180deg, rgba(255, 255, 255, 0.00) 0%, #FFF 100%)`,
+  padding: unitVars.unit.gapPadding['500'],
   width: '100%',
-  maxWidth: '430px',
+  maxWidth: unitVars.unit.dimension.wMax,
 });
 
-export const aside = style({
-  ...fontStyle('caption_r_12'),
-  color: colorVars.color.gray500,
+export const buttonWrapper = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
 });
 
-export const link = style({
-  cursor: 'pointer',
-  textDecoration: 'underline',
-  textUnderlineOffset: '2px',
+export const btn = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  gap: unitVars.unit.gapPadding['200'],
+  transformOrigin: 'center center',
+  ...pressInteraction(0.97),
+  border: 'none',
+  borderRadius: unitVars.unit.radius.full,
+  backgroundColor: '#FEE500',
+
+  padding: `${unitVars.unit.gapPadding['400']} ${unitVars.unit.gapPadding['600']}`,
+  width: '100%',
+  minWidth: '16.4rem',
+  height: '5.6rem',
+  whiteSpace: 'nowrap',
+  ...fontVars.font.title_m_16,
+  color: colorVars.color.text.primary,
 });
+
+export const kakaoIcon = style({
+  flexShrink: 0,
+});
+
+export const kakaoText = style({});

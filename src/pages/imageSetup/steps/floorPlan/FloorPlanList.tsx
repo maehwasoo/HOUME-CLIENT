@@ -14,13 +14,13 @@ import {
   logSelectFloorPlanViewModalReversed,
 } from '@pages/imageSetup/utils/analytics';
 
-import { TOAST_TYPE } from '@shared/types/toast';
-
 import FlipSheet from '@components/bottomSheet/flipSheet/FlipSheet';
 import NoMatchSheet from '@components/bottomSheet/noMatchSheet/NoMatchSheet';
 import NoMatchButton from '@components/button/noMatchButton/NoMatchButton';
 import FloorPlanItem from '@components/card/floorCard/FloorCard';
 import { useToast } from '@components/toast/useToast';
+
+import { TOAST_TYPE } from '@/shared/types/toastLegacy';
 
 import * as styles from './FloorPlanList.css';
 

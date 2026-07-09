@@ -1,19 +1,15 @@
 // Step 3
 import { useMoodBoardQuery } from '@pages/imageSetup/apis/queries/useMoodBoardQuery';
-import { FUNNELHEADER_IMAGES } from '@pages/imageSetup/constants/headerImages';
 import { useInteriorStyle } from '@pages/imageSetup/hooks/useInteriorStyle';
-import {
-  logSelectMoodboardClickBtnCTA,
-  logSelectMoodboardClickBtnCTAInactive,
-} from '@pages/imageSetup/utils/analytics';
+import { logSelectMoodboardClickBtnCTA } from '@pages/imageSetup/utils/analytics';
 
-import CtaButton from '@components/button/ctaButton/CtaButton';
 import InlineError from '@components/inlineError/InlineError';
 import Loading from '@components/loading/Loading';
+import ActionButton from '@components/v2/button/actionButton/ActionButton';
+import TextHeading from '@components/v2/textHeading/TextHeading';
 
 import * as styles from './InteriorStyle.css';
 import MoodBoard from './MoodBoard';
-import FunnelHeader from '../../components/header/FunnelHeader';
 
 import type {
   CompletedInteriorStyle,
@@ -37,26 +33,22 @@ const InteriorStyle = ({ context, onNext }: InteriorStyleProps) => {
   } = useMoodBoardQuery();
   const images = moodBoardData?.moodBoardResponseList || [];
 
-  // CTA 버튼 클릭 핸들러
+  // CTA 버튼 클릭 핸들러 (현재 native disabled로 비활성 시 클릭 자체가 차단됨)
+  // TODO: ActionButton에 visuallyDisabled prop이 추가되면(별도 PR)
+  // logSelectMoodboardClickBtnCTAInactive 로깅을 다시 복원할 것
   const handleCtaButtonClick = () => {
-    if (isDataComplete) {
-      // 활성 상태 버튼 클릭
-      logSelectMoodboardClickBtnCTA();
-      handleNext();
-    } else {
-      // 비활성 상태 버튼 클릭
-      logSelectMoodboardClickBtnCTAInactive();
-    }
+    logSelectMoodboardClickBtnCTA();
+    handleNext();
   };
 
   return (
     <div className={styles.container}>
-      <FunnelHeader
-        title={`인테리어 취향을 알려주세요`}
-        detail={`인테리어 취향에 맞는 이미지를\n최대 5개까지 선택해주세요.`}
-        currentStep={3}
-        image={FUNNELHEADER_IMAGES[3]}
-      />
+      <div className={styles.headingWrapper}>
+        <TextHeading
+          title="인테리어 취향을 알려주세요"
+          caption={`인테리어 취향에 맞는 이미지를\n최대 5개까지 선택해주세요.`}
+        />
+      </div>
 
       {isError ? (
         <InlineError
@@ -73,9 +65,15 @@ const InteriorStyle = ({ context, onNext }: InteriorStyleProps) => {
             onImageSelect={handleImageSelect}
           />
           <div className={styles.buttonWrapper}>
-            <CtaButton isActive={isDataComplete} onClick={handleCtaButtonClick}>
-              주요 활동 선택하기
-            </CtaButton>
+            <ActionButton
+              variant="solid"
+              color="primary"
+              size="2XL"
+              disabled={!isDataComplete}
+              onClick={handleCtaButtonClick}
+            >
+              다음
+            </ActionButton>
           </div>
         </>
       )}

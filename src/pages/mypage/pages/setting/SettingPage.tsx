@@ -14,11 +14,12 @@ import {
 
 import { ROUTES } from '@routes/paths';
 
-import { TOAST_TYPE } from '@shared/types/toast';
-
-import TitleNavBar from '@components/navBar/TitleNavBar';
-import GeneralModal from '@components/overlay/modal/GeneralModal';
 import { useToast } from '@components/toast/useToast';
+import TitleNavBar from '@components/v2/navBar/TitleNavBar';
+import Popup from '@components/v2/popup/Popup';
+
+import TextButton from '@/shared/components/v2/btnText/TextButton';
+import { TOAST_TYPE } from '@/shared/types/toastLegacy';
 
 import * as styles from './SettingPage.css';
 
@@ -35,6 +36,10 @@ const SettingPage = () => {
 
   const handlePrivacyPolicy = () => {
     navigate(ROUTES.SETTING_PRIVACY);
+  };
+
+  const handleProfileEdit = () => {
+    navigate(ROUTES.SETTING_PROFILE_EDIT);
   };
 
   const handleLogout = () => {
@@ -65,26 +70,32 @@ const SettingPage = () => {
   const handleWithdraw = () => {
     logMyPageClickBtnSuccession();
     overlay.open(({ unmount }) => (
-      <GeneralModal
-        title="하우미 탈퇴 전 확인하세요"
-        content={
-          '탈퇴 시 생성했던 이미지와 함께\n모든 정보가 삭제되며, 복구가 불가능해요.'
-        }
-        cancelText="탈퇴하기"
-        confirmText="취소하기"
-        cancelVariant="default"
-        confirmVariant="default"
-        onCancel={() => {
-          logMyPageClickSuccessionModalOut();
-          // 모달 닫기
-          unmount();
-          deleteUser();
-        }}
+      <Popup
+        btnStyle="text"
+        topIconName="WarningFillDanger"
+        btnText="취소하기"
+        weakBtnText="탈퇴하기"
         onConfirm={() => {
           logMyPageClickSuccessionModalCancel();
           unmount();
         }}
+        onCancel={() => {
+          logMyPageClickSuccessionModalOut();
+          // 모달 닫고 탈퇴 진행
+          unmount();
+          deleteUser();
+        }}
         onClose={unmount}
+        content={
+          <div className={styles.popupContent}>
+            <h3 className={styles.popupTitle}>하우미 탈퇴 전 확인하세요</h3>
+            <p className={styles.popupDetail}>
+              탈퇴 시 생성했던 이미지와 함께
+              <br />
+              모든 정보가 삭제되며, 복구가 불가능해요.
+            </p>
+          </div>
+        }
       />
     ));
   };
@@ -93,35 +104,50 @@ const SettingPage = () => {
     <>
       <TitleNavBar
         title="설정"
-        isBackIcon
-        isLoginBtn={false}
+        backLabel="이전"
         onBackClick={() => navigate(-1)}
       />
-
       <div className={styles.container}>
+        {/* 프로필 */}
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>프로필</h2>
+          <ul aria-label="프로필 설정 목록">
+            <li className={styles.buttonItem}>
+              <TextButton
+                color="primary"
+                size="s"
+                onClick={handleProfileEdit}
+                aria-label="프로필 수정"
+              >
+                프로필 수정
+              </TextButton>
+            </li>
+          </ul>
+        </section>
+
         {/* 약관 및 정책 섹션 */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>약관 및 정책</h2>
-          <ul className={styles.buttonArea} aria-label="약관 및 정책 목록">
+          <ul aria-label="약관 및 정책 목록">
             <li className={styles.buttonItem}>
-              <button
-                type="button"
-                className={styles.settingButton}
+              <TextButton
+                color="primary"
+                size="s"
                 onClick={handleServicePolicy}
                 aria-label="서비스 이용 약관"
               >
-                <span className={styles.buttonText}>서비스 이용 약관</span>
-              </button>
+                서비스 이용 약관
+              </TextButton>
             </li>
             <li className={styles.buttonItem}>
-              <button
-                type="button"
-                className={styles.settingButton}
+              <TextButton
+                color="primary"
+                size="s"
                 onClick={handlePrivacyPolicy}
                 aria-label="개인정보 처리방침"
               >
-                <span className={styles.buttonText}>개인정보 처리방침</span>
-              </button>
+                개인정보 처리방침
+              </TextButton>
             </li>
           </ul>
         </section>
@@ -129,26 +155,26 @@ const SettingPage = () => {
         {/* 계정 설정 섹션 */}
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>계정 설정</h2>
-          <ul className={styles.buttonArea} aria-label="계정 설정 목록">
+          <ul aria-label="계정 설정 목록">
             <li className={styles.buttonItem}>
-              <button
-                type="button"
-                className={styles.settingButton}
+              <TextButton
+                color="primary"
+                size="s"
                 onClick={handleLogout}
                 aria-label="로그아웃"
               >
-                <span className={styles.buttonText}>로그아웃</span>
-              </button>
+                로그아웃
+              </TextButton>
             </li>
             <li className={styles.buttonItem}>
-              <button
-                type="button"
-                className={styles.settingButton}
+              <TextButton
+                color="primary"
+                size="s"
                 onClick={handleWithdraw}
-                aria-label="탈퇴하기"
+                aria-label="계정탈퇴"
               >
-                <span className={styles.buttonText}>탈퇴하기</span>
-              </button>
+                계정 탈퇴
+              </TextButton>
             </li>
           </ul>
         </section>

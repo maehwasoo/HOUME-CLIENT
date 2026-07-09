@@ -3,9 +3,10 @@
 // 값 유니온 타입(RoutePath)을 자동으로 얻어 타입 안전성을 확보할 수 있습니다.
 export const ROUTES = {
   HOME: '/',
+  LANDING: '/landing',
   LOGIN: '/login',
   SIGNUP: '/signup',
-  GENERATE_START: '/generate/start',
+  WELCOME: '/welcome',
   IMAGE_SETUP: '/imageSetup',
   GENERATE: '/generate',
   GENERATE_RESULT: '/generate/result',
@@ -13,7 +14,11 @@ export const ROUTES = {
   SETTING: '/mypage/setting',
   SETTING_SERVICE: '/mypage/setting/service',
   SETTING_PRIVACY: '/mypage/setting/privacy',
+  SETTING_PROFILE_EDIT: '/mypage/setting/profileEdit',
   OAUTH: '/oauth/kakao/callback',
+  STYLE_LIST: '/styles',
+  STYLE_DETAIL: '/styles/:styleId',
+  BANNER_DETAIL: '/banner/:bannerId',
 } as const;
 
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];

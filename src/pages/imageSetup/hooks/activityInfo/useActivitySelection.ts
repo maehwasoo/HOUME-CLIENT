@@ -1,61 +1,35 @@
-import { MAIN_ACTIVITY_VALIDATION } from '../../types/funnel/validation';
-
-import type { ActivityOptionsResponse } from '../../types/apis/activityInfo';
+import type { ActivityWithFurnitureResponse } from '@apis/__generated__/data-contracts';
 
 /**
  * 주요활동 선택 로직을 담당하는 훅
+ *
+ * swagger 자동 생성 타입은 모든 필드를 optional로 표기하지만,
+ * 백엔드 명세상 활동/가구 응답 필드는 모두 필수로 옴 → non-null assertion(!) 사용
  */
 export const useActivitySelection = (
-  activityOptionsData?: ActivityOptionsResponse,
-  selectedActivity?: string,
-  onActivityChange?: (activityType?: string) => void
+  activities: ActivityWithFurnitureResponse[] | undefined,
+  selectedActivity: string | undefined
 ) => {
-  // 타입 가드: 유효한 '주요활동' 카테고리 내의 값인지 체크
-  const isValidActivityKey = (
-    usage: string
-  ): usage is keyof typeof MAIN_ACTIVITY_VALIDATION.combinationRules => {
-    return usage in MAIN_ACTIVITY_VALIDATION.combinationRules;
-  };
+  // 현재 선택된 주요활동 객체
+  const selectedActivityItem = selectedActivity
+    ? activities?.find((activity) => activity.code === selectedActivity)
+    : undefined;
 
-  // 현재 선택된 활동의 필수 가구 ID 리스트 반환
+  // 선택된 활동의 필수 가구 ID 리스트
   const getRequiredFurnitureIds = (): number[] => {
-    if (
-      !selectedActivity ||
-      !isValidActivityKey(selectedActivity) ||
-      !activityOptionsData
-    )
-      return [];
-
-    const requiredFurnitureCodes =
-      MAIN_ACTIVITY_VALIDATION.combinationRules[selectedActivity]
-        ?.requiredFurnitures || [];
-
-    // 모든 카테고리의 모든 가구에서 필수 가구 찾기
-    return requiredFurnitureCodes
-      .map((code) => {
-        for (const category of activityOptionsData.categories) {
-          const furniture = category.furnitures.find((f) => f.code === code);
-          if (furniture) return furniture.id;
-        }
-        return undefined;
-      })
-      .filter((id): id is number => id !== undefined); // API 데이터와 로컬 validation 데이터 불일치 시 undefined 반환, 해당 케이스 처리하는 로직
+    if (!selectedActivityItem?.furnitures) return [];
+    return selectedActivityItem.furnitures.map((furniture) => furniture.id!);
   };
 
-  // ButtonGroup 배열 인터페이스와 단일 선택 비즈니스 로직 간 어댑터
-  const handleActivityChange = (values: string[]) => {
-    // 주요활동은 단일선택만 가능하지만, ButtonGroup의 onSelectionChange를 다중선택 기준으로 설계(T[]) → values의 타입을 배열로 선언, 메서드 내에서 values[0]으로 단일값으로 처리
-    const newActivity = values[0] || undefined;
-    onActivityChange?.(newActivity);
+  // 선택된 활동의 필수 가구 label 리스트 (토스트/안내 문구 용도)
+  const getRequiredFurnitureLabels = (): string[] => {
+    if (!selectedActivityItem?.furnitures) return [];
+    return selectedActivityItem.furnitures.map((furniture) => furniture.label!);
   };
-
-  // ButtonGroup에서 사용할 selectedValues
-  const selectedValues = selectedActivity ? [selectedActivity] : []; // 단일 값을 ButtonGroup 인터페이스에 맞게 배열로 변환
 
   return {
-    selectedValues,
-    handleActivityChange,
+    selectedActivityItem,
     getRequiredFurnitureIds,
-    isValidActivityKey,
+    getRequiredFurnitureLabels,
   };
 };

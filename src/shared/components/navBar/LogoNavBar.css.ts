@@ -22,7 +22,6 @@ export const leftdiv = style({
 });
 
 export const profileicon = style({
-  cursor: 'pointer',
   padding: '0 1.6rem',
 });
 

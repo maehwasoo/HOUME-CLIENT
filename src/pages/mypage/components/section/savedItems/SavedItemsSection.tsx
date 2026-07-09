@@ -3,11 +3,15 @@ import { useEffect, useRef, useState } from 'react';
 import { useGetJjymListQuery } from '@pages/mypage/apis/queries/useGetJjymListQuery';
 import { logMyPageClickBtnFurnitureCard } from '@pages/mypage/utils/analytics';
 
+import { useSavedItemsStore } from '@store/useSavedItemsStore';
+
 import { useJjymMutation } from '@apis/mutations/useJjymMutation';
 
-import CardProduct from '@components/card/cardProduct/CardProduct';
-
 import { SESSION_STORAGE_KEYS } from '@constants/bottomSheet';
+
+import { normalizeColorHexes } from '@utils/normalizeColorHexes';
+
+import ProductCard from '@/shared/components/v2/productCard/ProductCard';
 
 import * as styles from './SavedItemsSection.css';
 import EmptyStateSection from '../emptyState/EmptyStateSection';
@@ -15,12 +19,23 @@ import EmptyStateSection from '../emptyState/EmptyStateSection';
 const SavedItemsSection = () => {
   // 스크롤 포커스 id 가져오기
   const [focusItemId, setFocusItemId] = useState<string | null>(null);
+  const [isSavedItemsSynced, setIsSavedItemsSynced] = useState(false);
+  const savedProductIds = useSavedItemsStore((state) => state.savedProductIds);
+  const setSavedProductIds = useSavedItemsStore(
+    (state) => state.setSavedProductIds
+  );
 
   // 찜한 목록 조회
-  const { data: savedItems = [], isFetched } = useGetJjymListQuery();
+  const { data: savedItems = [], isFetched } = useGetJjymListQuery({
+    gcTime: 0,
+    refetchOnMount: 'always',
+  });
 
   // 찜 해제 토글
-  const { mutate: toggleJjym } = useJjymMutation();
+  const { mutate: toggleJjym } = useJjymMutation({
+    savedToastType: 'none',
+    invalidateSavedItemsList: false,
+  });
 
   const handleToggleSave = (id: number) => {
     toggleJjym(id);
@@ -37,6 +52,13 @@ const SavedItemsSection = () => {
       sessionStorage.removeItem(SESSION_STORAGE_KEYS.FOCUS_ITEM_ID);
     }
   }, []);
+
+  useEffect(() => {
+    if (!isFetched) return;
+
+    setSavedProductIds(savedItems.map((item) => item.rawProductId));
+    setIsSavedItemsSynced(true);
+  }, [isFetched, savedItems, setSavedProductIds]);
 
   // 데이터 로드 완료 후 스크롤 실행
   useEffect(() => {
@@ -57,21 +79,44 @@ const SavedItemsSection = () => {
     <section className={styles.container}>
       <div className={styles.gridContainer}>
         {savedItems.map((item) => {
-          const isTargetItem = String(item.id) === String(focusItemId);
+          const isTargetItem =
+            String(item.rawProductId) === String(focusItemId);
+          const isSaved = isSavedItemsSynced
+            ? savedProductIds.has(item.rawProductId)
+            : true;
+          const jjymCount = isSaved
+            ? item.jjymCount
+            : Math.max(0, item.jjymCount - 1);
 
           return (
             <div
-              key={item.furnitureProductId}
+              key={item.rawProductId}
               ref={isTargetItem ? itemFocusRef : null}
+              className={styles.cardWrapper}
             >
-              <CardProduct
-                size="small"
-                title={item.furnitureProductName}
-                imageUrl={item.furnitureProductImageUrl}
-                linkHref={item.furnitureProductSiteUrl}
-                isSaved={true}
-                onToggleSave={() => handleToggleSave(item.id)}
-                onLinkClick={logMyPageClickBtnFurnitureCard}
+              <ProductCard
+                product={{
+                  title: item.productName,
+                  brand: item.brandName,
+                  imageUrl: item.productImageUrl,
+                  colorHexes: normalizeColorHexes(item.colors),
+                }}
+                price={{
+                  original: item.listPrice,
+                  discount: item.discountPrice,
+                  discountRate: item.discountRate,
+                }}
+                save={{
+                  isSaved,
+                  onToggle: () => handleToggleSave(item.rawProductId),
+                  count: jjymCount,
+                }}
+                link={{
+                  href: item.productSiteUrl,
+                  onClick: logMyPageClickBtnFurnitureCard,
+                  label: '사이트',
+                }}
+                enableWholeCardLink={true}
               />
             </div>
           );

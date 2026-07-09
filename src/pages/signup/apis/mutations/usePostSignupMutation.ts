@@ -5,23 +5,27 @@ import { ROUTES } from '@routes/paths';
 
 import { useUserStore } from '@store/useUserStore';
 
-import { TOAST_TYPE } from '@shared/types/toast';
+import { TOAST_TYPE, TOASTER_ID } from '@shared/types/toast';
 
+import type { SocialSignUpV2Request } from '@apis/__generated__/data-contracts';
 import { HTTPMethod, request } from '@apis/config/request';
 
-import { useToast } from '@components/toast/useToast';
+import { useToast } from '@components/v2/toast/useToast';
 
 import { API_ENDPOINT } from '@constants/apiEndpoints';
 import { RESPONSE_MESSAGE, HTTP_STATUS } from '@constants/response';
+import { TOAST_MESSAGE } from '@constants/toastMessage';
 
-import type { SignupRequest, SignupResponse } from '../../types/apis/signup';
+import { consumeLoginRedirect } from '@utils/loginRedirect';
+
+import type { SignupResponse } from '../../types/apis/signup';
 
 export const postSignup = async (
-  data: SignupRequest
+  data: SocialSignUpV2Request
 ): Promise<SignupResponse> => {
   const response = await request<string>({
     method: HTTPMethod.POST,
-    url: API_ENDPOINT.USER.SIGN_UP,
+    url: API_ENDPOINT.USER.SIGN_UP_V2,
     body: data,
     rawResponse: true,
   });
@@ -45,20 +49,29 @@ export const usePostSignupMutation = () => {
   const setUserName = useUserStore((state) => state.setUserName);
   const setAccessToken = useUserStore((state) => state.setAccessToken);
 
-  return useMutation<SignupResponse, Error, SignupRequest>({
+  return useMutation<SignupResponse, Error, SocialSignUpV2Request>({
     mutationFn: postSignup,
     retry: false,
     onSuccess: (response) => {
       setUserName(response.userName);
       setAccessToken(response.accessToken);
       sessionStorage.removeItem('signupToken');
-      navigate(ROUTES.GENERATE_START);
+      navigate(ROUTES.WELCOME);
+      notify({
+        text: TOAST_MESSAGE.SIGNUP_SUCCESS,
+        type: TOAST_TYPE.SUCCESS,
+        options: { toasterId: TOASTER_ID.TOP_4 },
+      });
     },
     onError: (error) => {
       console.error('[usePostSignupMutation] 회원가입 실패:', error);
+
+      // 가입 실패 시 시작점 복귀 + 에러 토스트
+      navigate(consumeLoginRedirect() ?? ROUTES.HOME);
       notify({
-        text: '회원가입에 실패했어요. 다시 시도해주세요.',
-        type: TOAST_TYPE.WARNING,
+        text: TOAST_MESSAGE.SIGNUP_ERROR,
+        type: TOAST_TYPE.ERROR,
+        options: { toasterId: TOASTER_ID.TOP_4 },
       });
     },
   });

@@ -19,3 +19,8 @@ declare module '*.svg?react' {
   >;
   export default ReactComponent;
 }
+
+declare module '*.lottie' {
+  const src: string;
+  export default src;
+}

@@ -7,7 +7,6 @@ const meta = {
   component: Loading,
   tags: ['autodocs'],
   argTypes: {
-    text: { control: 'text' },
     show: { control: 'boolean' },
   },
   parameters: {
@@ -26,14 +25,12 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    text: '로딩 중입니다',
     show: true,
   },
 };
 
 export const Hidden: Story = {
   args: {
-    text: '보이지 않음',
     show: false,
   },
 };

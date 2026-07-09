@@ -1,7 +1,9 @@
 import { globalStyle, createGlobalTheme } from '@vanilla-extract/css';
 
-import { colorVars } from '@styles/tokens/color.css';
-import { fontVars } from '@styles/tokens/font.css';
+import { colorVars } from '@styles/tokensV2/color.css';
+import { fontVars } from '@styles/tokensV2/font.css';
+import '@styles/tokensV2/interaction/tokens.css';
+import { unitVars } from '@styles/tokensV2/unit.css';
 import '@styles/reset.css';
 import '@styles/fontFace.css';
 
@@ -19,14 +21,15 @@ import '@styles/fontFace.css';
 /**
  * 반응형 레이아웃을 위한 전역 CSS 변수
  * 모바일 앱과 같은 고정 너비 레이아웃 구현
+ * minWidth/maxWidth는 unit 토큰(dimension) 단일 소스 참조
  *
- * @property minWidth - 최소 너비 (iPhone SE 기준)
- * @property maxWidth - 최대 너비 (대형 모바일 기준)
+ * @property minWidth - unit.dimension.wMin (37.5rem)
+ * @property maxWidth - unit.dimension.wMax (44rem)
  * @property height - 뷰포트 높이 (동적 뷰포트 단위 사용)
  */
 export const layoutVars = createGlobalTheme(':root', {
-  minWidth: '375px',
-  maxWidth: '440px',
+  minWidth: unitVars.unit.dimension.wMin,
+  maxWidth: unitVars.unit.dimension.wMax,
   height: '100dvh',
   titleNavBarHeight: '4.8rem',
 });
@@ -50,9 +53,16 @@ globalStyle('#root', {
  * - 스크롤바 숨김으로 모바일 앱 같은 UI 구현
  */
 globalStyle('html', {
-  backgroundColor: colorVars.color.gray100,
+  // 모바일: 흰색. 동적 툴바(Safari/Edge)가 접힐 때 body(100dvh) 아래로 드러나는 영역이 html 배경이므로, 회색(gray100) 대신 앱 배경(흰색)과 맞춰 빈 공간이 보이지 않게 함
+  backgroundColor: colorVars.color.gray000,
   height: '100%', // Firefox 스크롤바 숨김
   scrollbarWidth: 'none',
+  '@media': {
+    // 데스크탑 프레임(>=440px, body box-shadow 분기와 동일)에서만 회색 surround 유지
+    '(min-width: 440px)': {
+      backgroundColor: colorVars.color.gray100,
+    },
+  },
 });
 
 /**
@@ -97,7 +107,7 @@ globalStyle('body', {
   scrollbarWidth: 'none',
   scrollBehavior: 'smooth',
   color: colorVars.color.gray999,
-  fontFamily: fontVars.family.pretendard,
+  fontFamily: fontVars.font.family.pretendard,
   WebkitFontSmoothing: 'antialiased',
   MozOsxFontSmoothing: 'grayscale',
   '@media': {

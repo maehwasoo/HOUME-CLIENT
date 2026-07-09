@@ -35,7 +35,7 @@ type ModelCacheEntry = {
 
 type ProgressCallback = (value: number) => void;
 
-const WASM_ASSET_BASE = '/onnxruntime/';
+const WASM_ASSET_BASE = '/onnxruntime/ort-wasm-simd-threaded.wasm';
 const modelCache = new Map<string, ModelCacheEntry>();
 
 const ensureModelBufferIsBinary = (arrayBuffer: ArrayBuffer) => {
@@ -79,7 +79,7 @@ const loadOnnxModel = async (
   onProgress?.(10);
   const ort = await import('onnxruntime-web/wasm');
   onProgress?.(20);
-  ort.env.wasm.wasmPaths = WASM_ASSET_BASE;
+  ort.env.wasm.wasmPaths = { wasm: WASM_ASSET_BASE };
   if (isIOS) {
     ort.env.wasm.numThreads = 1;
   }

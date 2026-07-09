@@ -1,44 +1,30 @@
 interface FloorPlan {
   floorPlanId: number;
   isMirror: boolean;
+  floorPlanView: string; // ex: '창문뷰'
 }
 
-// Funnel Step 정의
+// Funnel Step 정의 (v2: HouseInfo + FloorPlan → FloorPlanSelect)
 export type ImageSetupSteps = {
-  // TODO(지성): 재사용 가능한 타입들 재사용하기
-  HouseInfo: {
-    houseType?: string;
-    roomType?: string;
-    areaType?: string;
-    houseId?: number;
-  };
-  FloorPlan: {
-    houseType: string;
-    roomType: string;
-    areaType: string;
-    houseId: number;
+  // FloorPlanSelect: 도면 선택 결과만 관리
+  FloorPlanSelect: {
     floorPlan?: FloorPlan;
   };
+  // 이전 단계 입력값 누적 + moodBoardIds
   InteriorStyle: {
-    houseType: string;
-    roomType: string;
-    areaType: string;
-    houseId: number;
     floorPlan: FloorPlan;
     moodBoardIds?: number[];
   };
+  // 이전 단계 입력값 누적 + activity, furnitureIds
   ActivityInfo: {
-    houseType: string;
-    roomType: string;
-    areaType: string;
-    houseId: number;
     floorPlan: FloorPlan;
     moodBoardIds: number[];
-    activityType?: string;
-    selectiveIds?: number[];
+    activity?: string;
+    furnitureIds?: number[];
   };
 };
 
-// TODO(지성): FloorPlan, InteriorStyle 리팩토링 후 제거
-export type CompletedFloorPlan = Required<ImageSetupSteps['FloorPlan']>;
+export type CompletedFloorPlanSelect = Required<
+  ImageSetupSteps['FloorPlanSelect']
+>;
 export type CompletedInteriorStyle = Required<ImageSetupSteps['InteriorStyle']>;

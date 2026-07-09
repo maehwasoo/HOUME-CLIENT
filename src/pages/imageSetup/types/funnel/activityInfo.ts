@@ -1,42 +1,20 @@
-// ActivityInfo 도메인 관련 모든 타입 통합 관리
-
-// 폼 데이터 타입 (사용자 입력값)
+// ActivityInfo 스텝 폼 데이터 타입 (사용자 입력값)
 export type ActivityInfoFormData = {
-  activityType?: string;
-  selectiveIds?: number[];
+  activity?: string;
+  furnitureIds?: number[];
 };
 
-// funnel 스텝 컨텍스트 타입
-export type ActivityInfoContext = {
-  houseType: string;
-  roomType: string;
-  areaType: string;
-  houseId: number;
-  floorPlan: {
-    floorPlanId: number;
-    isMirror: boolean;
-  };
-  moodBoardIds: number[];
-  activityType?: string;
-  selectiveIds?: number[];
-};
-
-// 완성된 ActivityInfo 데이터 타입
-export type CompletedActivityInfo = Required<ActivityInfoContext>;
-
-// 에러 타입
-export type ActivityInfoErrors = {
-  activityType?: string;
-  selectiveIds?: string;
-};
-
-// 카테고리별 선택 설정
+// 가구 카테고리별 선택 모드
+// - single: 하나만 선택 가능 (재선택 시 해제)
+// - multiple: 여러 개 선택 가능
 export type CategorySelectionMode = 'single' | 'multiple';
 
-export const CATEGORY_SELECTION_CONFIG = {
-  BED: 'single' as CategorySelectionMode, // 침대
-  SOFA: 'single' as CategorySelectionMode, // 소파
-  STORAGE: 'multiple' as CategorySelectionMode, // 수납
-  TABLE: 'multiple' as CategorySelectionMode, // 테이블
-  ETC: 'multiple' as CategorySelectionMode, // 그외
-} as const;
+// 가구 카테고리별 선택 모드 매핑 (API 응답의 nameEng를 키로 사용)
+export const CATEGORY_SELECTION_MODE: Record<string, CategorySelectionMode> = {
+  BED: 'single',
+  SOFA: 'multiple',
+  STORAGE: 'multiple',
+  TABLE: 'multiple',
+  SELECTIVE: 'multiple',
+  LIGHTING: 'multiple',
+};

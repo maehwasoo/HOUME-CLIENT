@@ -11,9 +11,8 @@ import {
   type MoodBoardImageItem,
 } from '@pages/imageSetup/types/apis/interiorStyle';
 
-import CardImage from '@components/card/cardImage/CardImage';
-
 import * as styles from './MoodBoard.css';
+import MoodboardCard from './MoodboardCard';
 
 interface MoodBoardProps {
   images: MoodBoardImageItem[];
@@ -48,7 +47,7 @@ const MoodBoard = ({
               !isSelected;
 
             return (
-              <CardImage
+              <MoodboardCard
                 key={image.id}
                 src={image.imageUrl}
                 alt={'선택 가능한 무드보드 이미지'}

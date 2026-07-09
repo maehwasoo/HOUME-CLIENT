@@ -5,14 +5,14 @@ import { ROUTES } from '@routes/paths';
 
 import { useUserStore } from '@store/useUserStore';
 
-import { TOAST_TYPE } from '@shared/types/toast';
-
 import { queryClient } from '@apis/config/queryClient';
 import { HTTPMethod, request } from '@apis/config/request';
 
 import { useToast } from '@components/toast/useToast';
 
 import { API_ENDPOINT } from '@constants/apiEndpoints';
+
+import { TOAST_TYPE } from '@/shared/types/toastLegacy';
 
 export type DeleteUserResponse = string;
 
@@ -42,6 +42,8 @@ export const useDeleteUserMutation = () => {
       setTimeout(() => {
         useUserStore.getState().clearUser();
         queryClient.clear();
+        // 로그아웃과 동일하게 sessionStorage까지 정리 (origin+탭 단위라 다른 사이트/탭 영향 X)
+        sessionStorage.clear();
       }, 100);
     },
     onError: (error) => {

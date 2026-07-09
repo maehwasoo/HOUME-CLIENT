@@ -3,7 +3,7 @@
 // ------------------------------
 // React Router v6.4(Data Router)의 createBrowserRouter 패턴을 사용하여
 // 1) RootLayout       : 모든 페이지의 공통 레이아웃(헤더·푸터) + <Outlet />
-// 2) 공개 라우트      : Home, Login, Signup, ServicePolicy, PrivacyPolicy
+// 2) 공개 라우트      : Home, Landing, Login, Signup, BannerDetail, ServicePolicy, PrivacyPolicy
 // 3) ProtectedRoute   : 인증이 필요한 하위 라우트 묶음
 //    - 인증 실패 시 ROUTES.LOGIN 으로 리다이렉트
 // ------------------------------
@@ -12,6 +12,7 @@ import { createBrowserRouter } from 'react-router-dom';
 
 import HomePage from '@pages/home/HomePage';
 import ImageSetupPage from '@pages/imageSetup/ImageSetupPage';
+import LandingPage from '@pages/landing/LandingPage';
 import KakaoCallbackPage from '@pages/login/KakaoCallbackPage';
 import LoginPage from '@pages/login/LoginPage';
 
@@ -29,6 +30,10 @@ const publicRoutes = [
     // 별도의 path 없이 부모 경로 자신에 매칭되며, HomePage 가 루트("/") 요청에 렌더링됩니다.
     index: true,
     element: <HomePage />,
+  },
+  {
+    path: ROUTES.LANDING,
+    element: <LandingPage />,
   },
   {
     path: ROUTES.LOGIN,
@@ -63,19 +68,47 @@ const publicRoutes = [
       return { Component: PrivacyPolicyPage };
     },
   },
+  {
+    path: ROUTES.STYLE_LIST,
+    lazy: async () => {
+      const { default: StyleListPage } = await import(
+        '@pages/style/StyleListPage'
+      );
+      return { Component: StyleListPage };
+    },
+  },
+  {
+    path: ROUTES.STYLE_DETAIL,
+    lazy: async () => {
+      const { default: StyleDetailPage } = await import(
+        '@pages/style/StyleDetailPage'
+      );
+      return { Component: StyleDetailPage };
+    },
+  },
+  {
+    path: ROUTES.BANNER_DETAIL,
+    lazy: async () => {
+      const { default: BannerDetailPage } = await import(
+        '@pages/banner/BannerDetailPage'
+      );
+      return { Component: BannerDetailPage };
+    },
+  },
+  // 경로 1,3에서 비로그인도 도면 선택까지 허용. 로그인 게이트는 "공간 선택하기" CTA에서 실행
+  {
+    path: ROUTES.IMAGE_SETUP,
+    element: <ImageSetupPage />,
+  },
 ];
 
 // 보호된 라우트 그룹 (인증 필요)
 const protectedRoutes = [
   {
-    path: ROUTES.IMAGE_SETUP,
-    element: <ImageSetupPage />,
-  },
-  {
     path: ROUTES.GENERATE,
     lazy: async () => {
       const { default: LoadingPage } = await import(
-        '@pages/generate/pages/loading/LoadingPage'
+        '@pages/generate/v2/pages/loading/LoadingPage'
       );
       return { Component: LoadingPage };
     },
@@ -84,7 +117,7 @@ const protectedRoutes = [
     path: ROUTES.GENERATE_RESULT,
     lazy: async () => {
       const { default: ResultPage } = await import(
-        '@pages/generate/pages/result/ResultPage'
+        '@pages/generate/v2/pages/result/ResultPage'
       );
       return { Component: ResultPage };
     },
@@ -106,12 +139,21 @@ const protectedRoutes = [
     },
   },
   {
-    path: ROUTES.GENERATE_START,
+    path: ROUTES.SETTING_PROFILE_EDIT,
     lazy: async () => {
-      const { default: StartPage } = await import(
-        '@pages/generate/pages/start/StartPage'
+      const { default: ProfileEditPage } = await import(
+        '@pages/mypage/pages/setting/ProfileEditPage'
       );
-      return { Component: StartPage };
+      return { Component: ProfileEditPage };
+    },
+  },
+  {
+    path: ROUTES.WELCOME,
+    lazy: async () => {
+      const { default: WelcomePage } = await import(
+        '@pages/generate/pages/welcome/WelcomePage'
+      );
+      return { Component: WelcomePage };
     },
   },
 ];

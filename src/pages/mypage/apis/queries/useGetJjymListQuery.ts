@@ -13,15 +13,18 @@ import type {
 export const getJjymList = async (): Promise<JjymsResponse> => {
   return request<JjymsResponse>({
     method: HTTPMethod.GET,
-    url: API_ENDPOINT.GENERATE.MYPAGE_JJYM_LIST,
+    url: API_ENDPOINT.GENERATE.MYPAGE_JJYM_LIST_V2,
   });
 };
 
-export const useGetJjymListQuery = (
-  options?: UseQueryOptions<JjymsResponse, unknown, FurnitureItem[]>
-) => {
+type GetJjymListQueryOptions = Omit<
+  UseQueryOptions<JjymsResponse, unknown, FurnitureItem[]>,
+  'queryKey' | 'queryFn' | 'select'
+>;
+
+export const useGetJjymListQuery = (options?: GetJjymListQueryOptions) => {
   return useQuery({
-    queryKey: queryKeys.jjym.list(),
+    queryKey: queryKeys.mypage.jjymList(),
     queryFn: getJjymList,
     select: (data) => data.items,
     ...options,

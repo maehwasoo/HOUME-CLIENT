@@ -2,13 +2,14 @@ import { style } from '@vanilla-extract/css';
 
 import { fontStyle } from '@styles/fontStyle';
 import { colorVars } from '@styles/tokens/color.css';
+import { pressInteraction } from '@styles/tokensV2/interaction/presets';
 
 export const smallButton = style({
   display: 'inline-flex',
   alignItems: 'center',
   justifyContent: 'center',
   gap: '1rem',
-  transition: 'all 0.2s ease',
+  ...pressInteraction(0.98),
   border: 'none',
   borderRadius: '99.9rem',
   backgroundColor: colorVars.color.gray999,
@@ -20,9 +21,5 @@ export const smallButton = style({
 
   ':hover': {
     opacity: 0.8,
-  },
-
-  ':active': {
-    transform: 'scale(0.98)',
   },
 });

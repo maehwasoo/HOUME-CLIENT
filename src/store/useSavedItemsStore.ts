@@ -1,32 +1,47 @@
 /*
-가구 큐레이션 - 찜하기 
+찜하기 
 */
 
 import { create } from 'zustand';
 
 interface SavedItemsState {
   savedProductIds: Set<number>;
-  toggleSaveProduct: (recommendId: number) => void;
+  touchedProductIds: Set<number>;
+  toggleSaveProduct: (rawProductId: number) => void;
+  getSavedState: (rawProductId: number, fallback?: boolean) => boolean;
   setSavedProductIds: (ids: number[] | Set<number>) => void;
 }
 
 export const useSavedItemsStore = create<SavedItemsState>((set, get) => ({
-  // 초기 상태 (recommendId Set)
+  // 초기 상태 (rawProductId Set)
   savedProductIds: new Set(),
+  touchedProductIds: new Set(),
 
-  // 추천ID(recommendId) 기준으로 저장 상태 토글
-  toggleSaveProduct: (recommendId) =>
+  // 상품ID(rawProductId) 기준으로 저장 상태 토글
+  toggleSaveProduct: (rawProductId) =>
     set((state) => {
       const newSavedIds = new Set(state.savedProductIds);
+      const newTouchedIds = new Set(state.touchedProductIds);
 
-      if (newSavedIds.has(recommendId)) {
-        newSavedIds.delete(recommendId); // 저장 취소
+      if (newSavedIds.has(rawProductId)) {
+        newSavedIds.delete(rawProductId); // 저장 취소
       } else {
-        newSavedIds.add(recommendId); // 저장
+        newSavedIds.add(rawProductId); // 저장
       }
 
-      return { savedProductIds: newSavedIds };
+      newTouchedIds.add(rawProductId);
+
+      return { savedProductIds: newSavedIds, touchedProductIds: newTouchedIds };
     }),
+
+  // 찜 상태 읽기
+  getSavedState: (rawProductId, fallback = false) => {
+    const { savedProductIds, touchedProductIds } = get();
+
+    return touchedProductIds.has(rawProductId)
+      ? savedProductIds.has(rawProductId)
+      : fallback;
+  },
 
   // 서버 찜 목록으로 전역 상태 초기화(새로고침 시 하트 복구)
   setSavedProductIds: (ids) => {
@@ -36,7 +51,10 @@ export const useSavedItemsStore = create<SavedItemsState>((set, get) => ({
     // 현재와 가져온 set 비교 (크기, 원소)
     const isEqual =
       prev.size === next.size && [...next].every((id) => prev.has(id));
-    if (isEqual) return; // no-op (아무 동작 X)
-    set({ savedProductIds: next }); // 내용이 달라진 경우에만 새로운 set으로 갱신
+    if (isEqual && get().touchedProductIds.size === 0) return; // no-op (아무 동작 X)
+    set({
+      savedProductIds: next,
+      touchedProductIds: new Set(),
+    }); // 서버 스냅샷으로 재동기화되면 임시 토글 상태는 초기화
   },
 }));
