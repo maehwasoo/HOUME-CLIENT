@@ -9,6 +9,7 @@ import type { FilterCategory, FloorPlanFilters } from '../../types/floorPlan';
 interface FilterSheetProps {
   open: boolean;
   onClose: () => void;
+  onOverlayClose?: () => void;
   filterCategories: FilterCategory[];
   pendingFilters: FloorPlanFilters;
   onFilterChange: (key: keyof FloorPlanFilters, value: string) => void;
@@ -19,6 +20,7 @@ interface FilterSheetProps {
 const FilterSheet = ({
   open,
   onClose,
+  onOverlayClose,
   filterCategories,
   pendingFilters,
   onFilterChange,
@@ -29,6 +31,8 @@ const FilterSheet = ({
     <CloseBottomSheet
       open={open}
       onClose={onClose}
+      onOverlayClick={onOverlayClose}
+      onCloseButtonClick={onClose}
       titleSlot={<p className={styles.title}>필터</p>}
       titleAlign="left"
       contentSlot={

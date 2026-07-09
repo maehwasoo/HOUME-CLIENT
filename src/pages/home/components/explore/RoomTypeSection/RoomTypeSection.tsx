@@ -1,38 +1,127 @@
+import { useEffect, useMemo, useRef } from 'react';
+
+import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
+import {
+  getHomeSpaceCardParamsFromDetail,
+  trackHomeSpaceCardClick,
+  trackHomeSpaceCardSlideScroll,
+  trackHomeSpaceMoreCardClick,
+  trackHomeSpaceMoreClick,
+} from '@pages/home/analytics/homeAnalytics';
+import { getHouseTemplateDetail } from '@pages/imageSetup/v2/apis/queries/useHouseTemplateDetailQuery';
 import { useHouseTemplatesQuery } from '@pages/imageSetup/v2/apis/queries/useHouseTemplatesQuery';
 
 import { ROUTES } from '@routes/paths';
 
 import { ENTRY_ROUTE, useImageFlowStore } from '@store/useImageFlowStore';
 
+import type { ExploreHouseTemplateDetailResponse } from '@apis/__generated__/data-contracts';
+
 import RoomTypeCard from '@components/v2/roomTypeCard/RoomTypeCard';
+
+import { queryKeys } from '@constants/queryKey';
 
 import TextButton from '@/shared/components/v2/btnText/TextButton';
 
 import * as styles from './RoomTypeSection.css';
 
-const RoomTypeSection = () => {
-  const navigate = useNavigate();
-  const { data } = useHouseTemplatesQuery({ size: 4 });
-  const floorPlans = data?.floorPlans ?? [];
+type RoomTypeSectionProps = {
+  hasPreviousImage?: boolean;
+  hasPreviousSpace?: boolean;
+};
 
-  // "더보기" / "more" 카드: floorPlanId 없이 진입, 사용자가 그리드에서 도면을 직접 선택
-  const handleMoreClick = () => {
+const RoomTypeSection = ({
+  hasPreviousImage = false,
+  hasPreviousSpace = false,
+}: RoomTypeSectionProps) => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const scrollDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { data } = useHouseTemplatesQuery({ size: 4 });
+  const floorPlans = useMemo(() => data?.floorPlans ?? [], [data?.floorPlans]);
+
+  useEffect(() => {
+    floorPlans.forEach((plan) => {
+      if (plan.id == null) return;
+
+      void queryClient.prefetchQuery({
+        queryKey: queryKeys.imageSetup.houseTemplateDetail(plan.id),
+        queryFn: () => getHouseTemplateDetail(plan.id as number),
+      });
+    });
+  }, [floorPlans, queryClient]);
+
+  const navigateToImageSetup = () => {
     useImageFlowStore
       .getState()
       .setFlow({ entryRoute: ENTRY_ROUTE.FLOOR_PLAN });
     navigate(ROUTES.IMAGE_SETUP);
   };
 
-  // 홈에서 도면 카드 클릭: floorPlanId를 preset으로 전달 → 퍼널 진입 즉시 해당 도면 시트 자동 오픈
-  const handleFloorPlanClick = (floorPlanId: number | undefined) => {
+  const handleMoreClick = () => {
+    trackHomeSpaceMoreClick();
+    navigateToImageSetup();
+  };
+
+  const handleMoreCardClick = () => {
+    trackHomeSpaceMoreCardClick();
+    navigateToImageSetup();
+  };
+
+  const handleFloorPlanClick = async (floorPlanId: number | undefined) => {
     if (floorPlanId === undefined) return;
+
+    const floorPlan = floorPlans.find((item) => item.id === floorPlanId);
+
+    let detail = queryClient.getQueryData<ExploreHouseTemplateDetailResponse>(
+      queryKeys.imageSetup.houseTemplateDetail(floorPlanId)
+    );
+
+    if (!detail) {
+      try {
+        detail = await queryClient.fetchQuery({
+          queryKey: queryKeys.imageSetup.houseTemplateDetail(floorPlanId),
+          queryFn: () => getHouseTemplateDetail(floorPlanId),
+        });
+      } catch {
+        detail = undefined;
+      }
+    }
+
+    trackHomeSpaceCardClick({
+      spaceId: floorPlanId,
+      spaceName: floorPlan?.name ?? detail?.floorPlanName,
+      ...getHomeSpaceCardParamsFromDetail(detail),
+      hasPreviousImage,
+      hasPreviousSpace,
+    });
+
     useImageFlowStore.getState().setFlow({
       entryRoute: ENTRY_ROUTE.FLOOR_PLAN,
       preset: { type: 'floorPlan', floorPlanId },
     });
     navigate(ROUTES.IMAGE_SETUP);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (scrollDebounceRef.current) {
+        clearTimeout(scrollDebounceRef.current);
+      }
+    };
+  }, []);
+
+  const handleCardScroll = () => {
+    if (scrollDebounceRef.current) {
+      clearTimeout(scrollDebounceRef.current);
+    }
+
+    scrollDebounceRef.current = setTimeout(() => {
+      const firstFloorPlanId = floorPlans[0]?.id;
+      trackHomeSpaceCardSlideScroll(firstFloorPlanId);
+    }, 300);
   };
 
   return (
@@ -48,7 +137,7 @@ const RoomTypeSection = () => {
           더보기
         </TextButton>
       </div>
-      <div className={styles.cardScroll}>
+      <div className={styles.cardScroll} onScroll={handleCardScroll}>
         <div className={styles.cardList}>
           {floorPlans.map((floorPlan) => (
             <div key={floorPlan.id} className={styles.cardItem}>
@@ -62,7 +151,7 @@ const RoomTypeSection = () => {
             </div>
           ))}
           <div className={styles.cardItem}>
-            <RoomTypeCard type="more" size="s" onClick={handleMoreClick} />
+            <RoomTypeCard type="more" size="s" onClick={handleMoreCardClick} />
           </div>
         </div>
       </div>

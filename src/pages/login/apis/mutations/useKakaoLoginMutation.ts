@@ -1,13 +1,18 @@
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 
-import { logLoginSocialViewToastLoginError } from '@pages/login/utils/analytics';
 import { resolveLoginToasterId } from '@pages/login/utils/resolveLoginToasterId';
 
 import { ROUTES } from '@routes/paths';
 
 import { useUserStore } from '@store/useUserStore';
 
+import { GA_EVENTS } from '@shared/analytics/events';
+import { GA_TOAST_TYPE } from '@shared/analytics/params/toast';
+import { trackEvent } from '@shared/analytics/track';
+import { clearLoginEntryRoute } from '@shared/analytics/utils/loginEntryRoute';
+import { loginStatusParams } from '@shared/analytics/utils/loginStatus';
+import { resolveScreenName } from '@shared/analytics/utils/screenName';
 import { TOAST_TYPE } from '@shared/types/toast';
 
 import { HTTPMethod, request } from '@apis/config/request';
@@ -105,6 +110,7 @@ export const useKakaoLoginMutation = () => {
       // replace가 없을 시 시작점에서 뒤로가기 했을 때 callback 재진입 -> kakao oauth callback mutation이 재실행됨
       const destination = consumeLoginRedirect() ?? ROUTES.HOME;
       navigate(destination, { replace: true });
+      clearLoginEntryRoute();
       notify({
         text: TOAST_MESSAGE.LOGIN_SUCCESS,
         type: TOAST_TYPE.SUCCESS,
@@ -115,12 +121,18 @@ export const useKakaoLoginMutation = () => {
     // 카카오 로그인 실패
     onError: (error) => {
       console.error('[useKakaoLoginMutation] login error:', error);
-      logLoginSocialViewToastLoginError();
 
       // 카카오 로그인 실패 시 시작점 복귀 + 토스트
       // onSuccess와 동일하게 replace: true -> callback 페이지가 history에 남아 뒤로가기 시 callback 재진입했을 떄 mutation 재실행되는 문제 차단
       const destination = consumeLoginRedirect() ?? ROUTES.HOME;
+      trackEvent(GA_EVENTS.loginSocial.TOAST_LOGIN_ERROR_VIEW, {
+        screen_name: resolveScreenName(destination),
+        ...loginStatusParams(),
+        toast_type: GA_TOAST_TYPE.LOGIN_FAIL,
+        error_code: error.message,
+      });
       navigate(destination, { replace: true });
+      clearLoginEntryRoute();
       notify({
         text: TOAST_MESSAGE.LOGIN_ERROR,
         type: TOAST_TYPE.ERROR,

@@ -2,6 +2,10 @@ import ReactMarkdown from 'react-markdown';
 import { useNavigate } from 'react-router-dom';
 import remarkGfm from 'remark-gfm';
 
+import { GA_EVENTS } from '@shared/analytics/events';
+import { useAnalyticsPageView } from '@shared/analytics/hooks';
+import { SCREEN_NAME } from '@shared/analytics/screenNames';
+
 import TitleNavBar from '@/shared/components/v2/navBar/TitleNavBar';
 
 import { SERVICE_TERMS } from './constants/policies';
@@ -9,6 +13,11 @@ import * as styles from './PolicyPage.css';
 
 const ServicePolicyPage = () => {
   const navigate = useNavigate();
+
+  useAnalyticsPageView(
+    GA_EVENTS.serviceTerm.PAGE_VIEW,
+    SCREEN_NAME.SERVICE_TERM
+  );
 
   return (
     <div className={styles.container}>

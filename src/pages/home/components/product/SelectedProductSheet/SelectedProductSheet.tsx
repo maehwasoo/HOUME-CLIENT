@@ -15,6 +15,7 @@ interface SelectedProductSheetProps {
   selectedProducts: SelectedProduct[];
   onRemoveProduct: (id: number) => void;
   onAddProductClick?: () => void;
+  onItemClick?: (product: SelectedProduct) => void;
   maxCount?: number;
 }
 
@@ -23,6 +24,7 @@ const SelectedProductSheet = ({
   selectedProducts,
   onRemoveProduct,
   onAddProductClick,
+  onItemClick,
   maxCount = 6,
 }: SelectedProductSheetProps) => {
   const selectedCount = selectedProducts.length;
@@ -36,11 +38,12 @@ const SelectedProductSheet = ({
     [onRemoveProduct]
   );
 
-  /** 상품 목록 찜 API 미연동 — ProductDetailOverlay `SaveInfo`용 no-op */
   const handleSaveToggleNoop = useCallback(() => {}, []);
 
   const handleSelectedCardClick = useCallback(
     (product: SelectedProduct) => {
+      onItemClick?.(product);
+
       overlay.open(({ unmount }) => (
         <ProductDetailOverlay
           unmount={unmount}
@@ -59,15 +62,18 @@ const SelectedProductSheet = ({
             isSaved: false,
             onToggle: handleSaveToggleNoop,
           }}
+          // 선택시트에서 연 상세에서도 사이트 이동(shop_feedDetailMDGoSite_click)이 추적되도록 link 전달
+          // (href는 오버레이가 상품 상세 조회로 resolve — 다른 진입로와 동일)
+          link={{}}
           shoppingAction={{
-            label: '선택',
+            label: '선택됨',
             disabled: true,
-            onClick: () => {},
           }}
+          listCategoryName={product.categoryName}
         />
       ));
     },
-    [handleSaveToggleNoop]
+    [handleSaveToggleNoop, onItemClick]
   );
 
   return (

@@ -8,6 +8,8 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 import { ROUTES } from '@routes/paths';
 
+import { clearLoginEntryRoute } from '@shared/analytics/utils/loginEntryRoute';
+
 import { useUserSync } from '@hooks/useUserSync';
 
 import { setLoginRedirect } from '@utils/loginRedirect';
@@ -30,6 +32,8 @@ function ProtectedRoute({
   if (!authenticated) {
     // pathname: 경로, search: 쿼리 파라미터 -> 전체경로
     setLoginRedirect(location.pathname + location.search);
+    // 로그인 게이트를 거치지 않은 진입이므로 이전 GA login_entry_route 잔존값 제거
+    clearLoginEntryRoute();
     return <Navigate to={redirectTo} replace />;
   }
 

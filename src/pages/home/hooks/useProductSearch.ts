@@ -14,6 +14,7 @@ interface ProductSearchCardItem {
   id: number;
   title: string;
   brand: string;
+  categoryName?: string;
   imageUrl: string;
   discountRate: number;
   originalPrice: number;
@@ -35,6 +36,7 @@ const toProductSearchCardItems = (
       id: product.id as number,
       title: product.name ?? '',
       brand: product.brand ?? '',
+      categoryName: product.categoryName,
       imageUrl: product.imageUrl ?? '',
       discountRate: product.discountRate ?? 0,
       originalPrice: product.originalPrice ?? 0,
@@ -131,6 +133,7 @@ const useProductSearch = (baseParams: ProductListQueryVariables) => {
   return {
     loadMoreRef,
     keyword,
+    debouncedKeyword,
     products,
     recommendedProducts,
     isRecommended,

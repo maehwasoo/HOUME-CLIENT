@@ -11,6 +11,8 @@ export interface SelectedProduct {
   id: number;
   title: string;
   brand: string;
+  categoryName?: string;
+  subCategoryName?: string;
   imageUrl?: string;
   originalPrice: number;
   discountPrice: number;

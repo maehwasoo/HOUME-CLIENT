@@ -1,5 +1,10 @@
 import { generatePath, useNavigate } from 'react-router-dom';
 
+import {
+  trackHomeStyleCardClick,
+  trackHomeStyleMoreClick,
+} from '@pages/home/analytics/homeAnalytics';
+
 import { ROUTES } from '@routes/paths';
 
 import FallbackImage from '@assets/v2/images/bannerFallback.svg';
@@ -18,13 +23,15 @@ const EXPLORE_STYLE_GRID_SIZE = 4;
 const StyleSection = () => {
   const navigate = useNavigate();
 
-  const handleStyleClick = (styleId: number) => {
+  const handleStyleClick = (styleId: number, styleName?: string) => {
+    trackHomeStyleCardClick({ id: styleId, name: styleName });
     navigate(
       generatePath(ROUTES.STYLE_DETAIL, { styleId: styleId.toString() })
     );
   };
 
   const handleMoreClick = () => {
+    trackHomeStyleMoreClick();
     navigate(ROUTES.STYLE_LIST);
   };
 
@@ -64,7 +71,7 @@ const StyleSection = () => {
                 key={style.id}
                 imageSrc={style.imageUrl || FallbackImage}
                 title={style.name}
-                onClick={() => handleStyleClick(style.id)}
+                onClick={() => handleStyleClick(style.id, style.name)}
                 imageLoading="eager"
               />
             ))}

@@ -6,6 +6,12 @@ import { ROUTES } from '@routes/paths';
 
 import { useUserStore } from '@store/useUserStore';
 
+import type { LoginEntryRoute } from '@shared/analytics/params/gate';
+import {
+  clearLoginEntryRoute,
+  persistLoginEntryRoute,
+} from '@shared/analytics/utils/loginEntryRoute';
+
 import { setLoginRedirect } from '@utils/loginRedirect';
 
 /**
@@ -19,11 +25,16 @@ export const useLoginGate = () => {
   const navigate = useNavigate();
 
   const requireLogin = useCallback(
-    (action: () => void) => {
+    (action: () => void, entryRoute?: LoginEntryRoute) => {
       const isLoggedIn = !!useUserStore.getState().accessToken;
 
       if (!isLoggedIn) {
         setLoginRedirect(window.location.pathname + window.location.search);
+        if (entryRoute) {
+          persistLoginEntryRoute(entryRoute);
+        } else {
+          clearLoginEntryRoute();
+        }
         navigate(ROUTES.LOGIN);
         return;
       }

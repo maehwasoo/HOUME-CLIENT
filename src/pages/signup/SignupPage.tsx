@@ -1,7 +1,20 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { overlay } from 'overlay-kit';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+import {
+  trackSignupBirthFocus,
+  trackSignupCtaClick,
+  trackSignupGenderClick,
+  trackSignupNickClearClick,
+  trackSignupNickRandomClick,
+  trackSignupNicknameFocus,
+  trackSignupNotCompModalKeepClick,
+  trackSignupNotCompModalQuitClick,
+  trackSignupNotCompModalView,
+} from '@pages/signup/analytics/signupFormAnalytics';
+import { useSignupFormAnalytics } from '@pages/signup/analytics/useSignupFormAnalytics';
 
 import { ROUTES } from '@routes/paths';
 
@@ -20,16 +33,11 @@ import useUserForm from '@hooks/useUserForm';
 
 import { usePostSignupMutation } from './apis/mutations/usePostSignupMutation';
 import * as styles from './SignupPage.css';
-import {
-  logSignupFormClickBtnCTA,
-  logSignupFormViewError,
-} from './utils/analytics';
 
 interface SignupLocationState {
   signupToken?: string | null;
 }
 
-// Type Guard: SignupLocationState 검증
 const isSignupLocationState = (
   value: unknown
 ): value is SignupLocationState => {
@@ -48,8 +56,8 @@ const SignupPage = () => {
   const isInitialized = useRef(false);
   const nicknameRef = useRef<HTMLInputElement>(null);
   const yearRef = useRef<HTMLInputElement>(null);
-  const [isNameSubmitted, setIsNameSubmitted] = useState(false); // 생년월일 필드 노출 여부
-  const shouldFocusBirthFieldRef = useRef(false); // 생년월일 필드 노출 후 포커스 이동 여부
+  const [isNameSubmitted, setIsNameSubmitted] = useState(false);
+  const shouldFocusBirthFieldRef = useRef(false);
 
   const routeSignupToken = isSignupLocationState(location.state)
     ? (location.state.signupToken ?? null)
@@ -68,15 +76,62 @@ const SignupPage = () => {
     }
   }, [signupToken, navigate]);
 
-  // 이탈 방지 팝업 (NavBar 뒤로가기/브라우저 뒤로가기/모바일 뒤로가기 스와이프 모두 가로챔)
-  // signupToken이 없으면 useEffect가 LOGIN으로 redirect하므로 가드 비활성화
+  const {
+    nickname,
+    birthYear,
+    birthMonth,
+    birthDay,
+    gender,
+    handleNicknameChange,
+    handleBirthYearChange,
+    handleBirthMonthChange,
+    handleBirthDayChange,
+    setGender,
+    isNameFormatInvalid,
+    isNameLengthInvalid,
+    yearFormatError,
+    yearAgeError,
+    monthFieldError,
+    dayFieldError,
+    isFormValid,
+  } = useUserForm();
+
+  const isNameSectionValid =
+    nickname !== '' && !isNameFormatInvalid && !isNameLengthInvalid;
+
+  const isBirthSectionValid =
+    birthYear !== '' &&
+    birthMonth !== '' &&
+    birthDay !== '' &&
+    !yearFormatError &&
+    !yearAgeError &&
+    !monthFieldError &&
+    !dayFieldError;
+
+  const { signupStep, trackBrowserBack } = useSignupFormAnalytics({
+    enabled: !!signupToken,
+    isNameSectionValid,
+    isNameSubmitted,
+    isBirthSectionValid,
+    isNameFormatInvalid,
+    isNameLengthInvalid,
+    yearFormatError,
+    yearAgeError,
+    monthFieldError,
+    dayFieldError,
+  });
+
   useExitBlocker({
     enabled: !!signupToken,
-    shouldBlockNavigation: ({ nextLocation }) => {
+    shouldBlockNavigation: ({ nextLocation, historyAction }) => {
       if (nextLocation.pathname === ROUTES.WELCOME) return false;
+
+      trackBrowserBack(historyAction);
       return true;
     },
     onBlocked: ({ proceed, reset }) => {
+      trackSignupNotCompModalView(signupStep);
+
       overlay.open(({ unmount }) => {
         const close = () => {
           reset();
@@ -89,12 +144,17 @@ const SignupPage = () => {
             btnText="계속하기"
             weakBtnText="그만두기"
             topIconName="WarningFillDanger"
-            onClose={close}
-            onConfirm={close}
+            onClose={() => {
+              trackSignupNotCompModalKeepClick(signupStep);
+              close();
+            }}
+            onConfirm={() => {
+              trackSignupNotCompModalKeepClick(signupStep);
+              close();
+            }}
             onCancel={() => {
+              trackSignupNotCompModalQuitClick(signupStep);
               unmount();
-              // 모달 unmount 직후 proceed → 사용자가 시도한 navigation(뒤로가기 등) 진행
-              // KakaoCallback이 replace로 history에 안 남으므로 자연스럽게 /login(또는 진입점)으로 이동
               proceed();
             }}
             content={
@@ -115,50 +175,20 @@ const SignupPage = () => {
     },
   });
 
-  const {
-    nickname,
-    birthYear,
-    birthMonth,
-    birthDay,
-    gender,
-    handleNicknameChange,
-    handleBirthYearChange,
-    handleBirthMonthChange,
-    handleBirthDayChange,
-    setGender,
-    isNameFormatInvalid,
-    isNameLengthInvalid,
-    yearFormatError,
-    yearAgeError,
-    monthFieldError,
-    dayFieldError,
-    isFormValid,
-    hasError,
-  } = useUserForm();
-
   const { mutate: signUp } = usePostSignupMutation();
-
-  // 랜덤 닉네임 GET 쿼리
   const { randomNickname, refresh } = useRandomNickname(handleNicknameChange);
 
-  // 닉네임 필드 유효
-  const isNameSectionValid =
-    nickname !== '' && !isNameFormatInvalid && !isNameLengthInvalid;
-
-  // 닉네임이 유효하지 않으면 isNameSubmitted 초기화
   useEffect(() => {
     if (!isNameSectionValid) {
       setIsNameSubmitted(false);
     }
   }, [isNameSectionValid]);
 
-  // 페이지 로드 시 랜덤 닉네임으로 초기값 설정 (첫 마운트, 랜덤닉네임 존재, 초기화 전)
   useEffect(() => {
     if (randomNickname && !isInitialized.current && nickname === '') {
       handleNicknameChange(randomNickname);
       isInitialized.current = true;
 
-      // 닉네임 들어온 뒤 포커스 처리
       const el = nicknameRef.current;
       if (el) {
         el.focus();
@@ -167,26 +197,11 @@ const SignupPage = () => {
     }
   }, [randomNickname, nickname, handleNicknameChange]);
 
-  const errorSentRef = useRef(false);
-
-  // 에러가 표시될 때 이벤트 전송 (최초 1회)
-  useEffect(() => {
-    if (hasError && !errorSentRef.current) {
-      logSignupFormViewError();
-      errorSentRef.current = true;
-    } else if (!hasError) {
-      // 에러가 사라지면 ref 초기화 (다시 에러가 발생하면 이벤트 전송)
-      errorSentRef.current = false;
-    }
-  }, [hasError]);
-
-  // 닉네임 Enter시
   const handleNicknameEnter = () => {
     if (isNameSectionValid) {
       shouldFocusBirthFieldRef.current = true;
       setIsNameSubmitted(true);
 
-      // 이미 생년월일 필드가 노출된 상태면 직접 포커스
       if (isNameSubmitted) {
         yearRef.current?.focus();
         shouldFocusBirthFieldRef.current = false;
@@ -209,7 +224,6 @@ const SignupPage = () => {
     }
   };
 
-  // 생년월일 필드 렌더링된 직후 감지해 포커싱
   useEffect(() => {
     if (
       isNameSubmitted &&
@@ -221,44 +235,43 @@ const SignupPage = () => {
     }
   }, [isNameSubmitted, isNameSectionValid]);
 
+  const handleRandomNicknameRefresh = useCallback(() => {
+    trackSignupNickRandomClick();
+    refresh();
+  }, [refresh]);
+
+  const handleGenderSelect = useCallback(
+    (nextGender: NonNullable<typeof gender>) => {
+      trackSignupGenderClick();
+      setGender(nextGender);
+    },
+    [setGender]
+  );
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // CTA 버튼 클릭 시 GA 이벤트 전송
-    logSignupFormClickBtnCTA();
 
     if (!isFormValid || !gender || !signupToken) return;
 
     const formattedBirthday = `${birthYear}-${birthMonth}-${birthDay}`;
 
+    trackSignupCtaClick();
     signUp({
       signupToken,
       nickname,
-      gender: gender,
+      gender,
       birthday: formattedBirthday,
     });
   };
 
   if (!signupToken) return null;
 
-  // 생년월일 필드 유효
-  const isBirthSectionValid =
-    birthYear !== '' &&
-    birthMonth !== '' &&
-    birthDay !== '' &&
-    !yearFormatError &&
-    !yearAgeError &&
-    !monthFieldError &&
-    !dayFieldError;
-
-  // 닉네임 에러 메시지
   const nameErrorMessage = (() => {
     if (isNameFormatInvalid) return ERROR_MESSAGES.NAME_INVALID;
     if (isNameLengthInvalid) return ERROR_MESSAGES.LENGTH_INVALID;
     return '';
   })();
 
-  // 생년월일 에러 메시지
   const birthErrorMessage = (() => {
     if (yearAgeError) return ERROR_MESSAGES.AGE_INVALID;
     if (yearFormatError || monthFieldError || dayFieldError)
@@ -283,7 +296,6 @@ const SignupPage = () => {
       </header>
 
       <div className={styles.container}>
-        {/* 닉네임 입력 */}
         <div
           className={styles.fieldbox}
           onBlurCapture={handleNicknameFieldBlur}
@@ -297,13 +309,14 @@ const SignupPage = () => {
               isError={isNameFormatInvalid || isNameLengthInvalid}
               errorMessage={nameErrorMessage}
               maxLength={18}
-              onRefresh={refresh}
+              onFocus={trackSignupNicknameFocus}
+              onRefresh={handleRandomNicknameRefresh}
+              onClear={trackSignupNickClearClick}
               onEnter={handleNicknameEnter}
             />
           </div>
         </div>
 
-        {/* 생년월일 입력 */}
         {isNameSectionValid && isNameSubmitted && (
           <div className={styles.fieldbox}>
             <h2 className={styles.fieldtitle}>생년월일</h2>
@@ -318,12 +331,12 @@ const SignupPage = () => {
                 }}
                 error={dateErrorStatus}
                 errorMessage={birthErrorMessage}
+                onFocus={trackSignupBirthFocus}
               />
             </div>
           </div>
         )}
 
-        {/* 성별 선택 */}
         {isNameSectionValid && isNameSubmitted && isBirthSectionValid && (
           <div className={styles.fieldbox}>
             <h2 className={styles.fieldtitle}>성별</h2>
@@ -331,21 +344,21 @@ const SignupPage = () => {
               <Chip
                 selected={gender === 'MALE'}
                 color="weak"
-                onClick={() => setGender('MALE')}
+                onClick={() => handleGenderSelect('MALE')}
               >
                 남성
               </Chip>
               <Chip
                 selected={gender === 'FEMALE'}
                 color="weak"
-                onClick={() => setGender('FEMALE')}
+                onClick={() => handleGenderSelect('FEMALE')}
               >
                 여성
               </Chip>
               <Chip
                 selected={gender === 'NONBINARY'}
                 color="weak"
-                onClick={() => setGender('NONBINARY')}
+                onClick={() => handleGenderSelect('NONBINARY')}
               >
                 밝히고 싶지 않음
               </Chip>

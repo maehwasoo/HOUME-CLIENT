@@ -4,6 +4,8 @@ import { useImageFlowStore } from '@store/useImageFlowStore';
 
 import { TOAST_TYPE, TOASTER_ID } from '@shared/types/toast';
 
+import type { ExploreHouseTemplateItemResponse } from '@apis/__generated__/data-contracts';
+
 import { useToast } from '@components/v2/toast/useToast';
 
 import { TOAST_MESSAGE } from '@constants/toastMessage';
@@ -21,6 +23,8 @@ import type {
   ImageSetupSteps,
 } from '../../types/funnel/steps';
 
+const EMPTY_FLOOR_PLANS: ExploreHouseTemplateItemResponse[] = [];
+
 export const useFloorPlanSelect = (
   _context: ImageSetupSteps['FloorPlanSelect'],
   onNext: (data: CompletedFloorPlanSelect) => void
@@ -31,10 +35,9 @@ export const useFloorPlanSelect = (
   const { notify } = useToast();
 
   // 도면 전체 조회 (필터 변경 시 자동 refetch — queryKey에 appliedFilters 포함)
-  const { data: houseTemplatesData } = useHouseTemplatesQuery(
-    store.appliedFilters
-  );
-  const floorPlans = houseTemplatesData?.floorPlans ?? [];
+  const { data: houseTemplatesData, isFetched: isHouseTemplatesFetched } =
+    useHouseTemplatesQuery(store.appliedFilters);
+  const floorPlans = houseTemplatesData?.floorPlans ?? EMPTY_FLOOR_PLANS;
   // isExact=false: 필터에 정확 매칭 도면이 없어 서버가 비슷한 도면으로 대체 응답 → '이런 공간은 어떠세요?' UI로 분기
   // undefined일 때는 정상 그리드 fallback (응답 일관성 깨지거나 필드 누락 시 안전)
   const isExact = houseTemplatesData?.isExact !== false;
@@ -48,7 +51,8 @@ export const useFloorPlanSelect = (
   const selectedDetailViews = detailData?.floorPlans ?? []; // [{imageUrl, view}]
 
   // 최근 사용 도면 조회 (RecentSheet 용도)
-  const { data: recentFloorPlanData } = useRecentFloorPlanQuery();
+  const { data: recentFloorPlanData, isFetched: isRecentFloorPlanFetched } =
+    useRecentFloorPlanQuery();
   const recentFloorPlan = recentFloorPlanData?.hasRecentImage
     ? recentFloorPlanData
     : null;
@@ -177,10 +181,12 @@ export const useFloorPlanSelect = (
     filterCategories: FILTER_CATEGORIES,
     floorPlans,
     isExact,
+    isHouseTemplatesFetched,
     selectedFloorPlanName,
     selectedEquilibrium,
     selectedDetailViews,
     recentFloorPlan,
+    isRecentFloorPlanFetched,
     handleCardClick,
     handleConfirmFloorPlan,
     handleConfirmRecentFloorPlan,

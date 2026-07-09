@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 
-import { logMyPageClickBtnMakeImg } from '@pages/mypage/utils/analytics';
+import { useMypageEmptyStateAnalytics } from '@pages/mypage/analytics/useMypageAnalytics';
+import { useGetJjymListQuery } from '@pages/mypage/apis/queries/useGetJjymListQuery';
 
 import { ROUTES } from '@routes/paths';
 
@@ -18,13 +19,22 @@ interface EmptyStateSectionProps {
 
 const EmptyStateSection = ({ type }: EmptyStateSectionProps) => {
   const navigate = useNavigate();
+  const { data: savedItems = [], isFetched: isJjymFetched } =
+    useGetJjymListQuery();
+
+  const { wrapPrimaryClick, wrapSecondaryClick } = useMypageEmptyStateAnalytics(
+    {
+      type,
+      savedItemsForParams: savedItems,
+      enabled: isJjymFetched,
+    }
+  );
 
   const handleGoProductClick = () => {
     navigate(ROUTES.HOME, { state: { activeTab: 'product' } });
   };
 
   const handleGoRoomTypeClick = () => {
-    logMyPageClickBtnMakeImg();
     useImageFlowStore
       .getState()
       .setFlow({ entryRoute: ENTRY_ROUTE.GENERATE_BUTTON });
@@ -37,8 +47,8 @@ const EmptyStateSection = ({ type }: EmptyStateSectionProps) => {
       description: '집 구조와 취향을 반영한 우리 집을\n지금 바로 상상해보세요.',
       buttonText: '우리 집 상상해보기',
       lineBtnText: '상품 먼저 둘러보기',
-      onPrimaryClick: handleGoRoomTypeClick,
-      onSecondaryClick: handleGoProductClick,
+      onPrimaryClick: wrapPrimaryClick(handleGoRoomTypeClick),
+      onSecondaryClick: wrapSecondaryClick(handleGoProductClick),
     },
     savedItems: {
       title: '아직 찜한 상품이 없어요.',
@@ -46,8 +56,8 @@ const EmptyStateSection = ({ type }: EmptyStateSectionProps) => {
         '마음에 드는 상품을 찜해두고\n우리 집에 두면 어떨지 상상해보세요.',
       buttonText: '상품 둘러보기',
       lineBtnText: '우리 집 먼저 상상하기',
-      onPrimaryClick: handleGoProductClick,
-      onSecondaryClick: handleGoRoomTypeClick,
+      onPrimaryClick: wrapPrimaryClick(handleGoProductClick),
+      onSecondaryClick: wrapSecondaryClick(handleGoRoomTypeClick),
     },
   };
 
@@ -77,7 +87,6 @@ const EmptyStateSection = ({ type }: EmptyStateSectionProps) => {
           >
             {buttonText}
           </ActionButton>
-          {/* 컴포넌트 변경 가능성 있음 */}
           <TextButton
             color="secondary"
             size="s"

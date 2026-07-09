@@ -7,6 +7,7 @@ export const ENTRY_ROUTE = {
   FLOOR_PLAN: 'FLOOR_PLAN', // 경로3: "우리 집 공간으로 시작하기" 도면 클릭
   STYLE_RESTYLE: 'STYLE_RESTYLE', // 경로4: "다른 스타일로 꾸며보기"
   PRODUCT_SELECTION: 'PRODUCT_SELECTION', // 경로5: "상품" 탭 담기 → CTA
+  PRODUCT_REGENERATE: 'PRODUCT_REGENERATE', // 경로5-재: 결과 → "다시 선택하기" → 상품 탭
 } as const;
 
 export type EntryRoute = (typeof ENTRY_ROUTE)[keyof typeof ENTRY_ROUTE];
@@ -54,12 +55,23 @@ export type PresetData =
       productsToBeRestored: ProductItem[];
     }; // 경로5
 
+/** mutation 이후 funnel clear되어도 결과 GA에 쓸 퍼널 입력값 */
+export interface FlowAnalyticsSnapshot {
+  floorPlanId?: number;
+  moodBoardIds?: number[];
+  activityCode?: string;
+  furnitureChipCodes?: string;
+  productIds?: number[];
+}
+
 interface ImageFlowState {
   entryRoute: EntryRoute | null;
   resultType: ResultType | null;
   preset: PresetData | null;
+  flowSnapshot: FlowAnalyticsSnapshot | null;
   // 퍼널 진입 시 호출, 진입경로 + 프리셋 세팅 및 resultType 자동 매핑
   setFlow: (params: { entryRoute: EntryRoute; preset?: PresetData }) => void;
+  setFlowSnapshot: (snapshot: FlowAnalyticsSnapshot) => void;
   // preset만 선택적으로 비움 (entryRoute/resultType은 ResultPage에서 사용하므로 유지해야 하는 케이스에 사용)
   clearPreset: () => void;
   // 퍼널 완료/이탈 시 호출
@@ -72,6 +84,7 @@ const RESULT_TYPE_MAP: Record<EntryRoute, ResultType> = {
   [ENTRY_ROUTE.FLOOR_PLAN]: RESULT_TYPE.FULL_FUNNEL,
   [ENTRY_ROUTE.STYLE_RESTYLE]: RESULT_TYPE.STYLE,
   [ENTRY_ROUTE.PRODUCT_SELECTION]: RESULT_TYPE.PRODUCT,
+  [ENTRY_ROUTE.PRODUCT_REGENERATE]: RESULT_TYPE.PRODUCT,
 };
 
 export const useImageFlowStore = create<ImageFlowState>()(
@@ -80,14 +93,22 @@ export const useImageFlowStore = create<ImageFlowState>()(
       entryRoute: null,
       resultType: null,
       preset: null,
+      flowSnapshot: null,
       setFlow: ({ entryRoute, preset }) =>
         set({
           entryRoute,
           resultType: RESULT_TYPE_MAP[entryRoute], // 결과 페이지 타입 자동 매핑
           preset: preset ?? null,
         }),
+      setFlowSnapshot: (flowSnapshot) => set({ flowSnapshot }),
       clearPreset: () => set({ preset: null }),
-      reset: () => set({ entryRoute: null, resultType: null, preset: null }),
+      reset: () =>
+        set({
+          entryRoute: null,
+          resultType: null,
+          preset: null,
+          flowSnapshot: null,
+        }),
     }),
     {
       name: 'image-flow',
@@ -108,4 +129,20 @@ export const getNextFunnelStep = (
     return 'INTERIOR_STYLE';
   }
   return 'IMAGE_LOADING';
+};
+
+/**
+ * ImageSetup → /generate 이동 시 unmount cleanup에서 entryRoute clear 생략
+ * (LoadingPage·ResultPage GA image_entry_route 유지, useExitImageFlow.reset()까지)
+ */
+let entryRouteHeld = false;
+
+export const holdEntryRoute = (): void => {
+  entryRouteHeld = true;
+};
+
+export const consumeEntryRouteHold = (): boolean => {
+  const held = entryRouteHeld;
+  entryRouteHeld = false;
+  return held;
 };

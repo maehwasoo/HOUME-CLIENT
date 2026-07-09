@@ -2,8 +2,6 @@ import { useCallback, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import { logLoginSocialViewToastLoginError } from '@pages/login/utils/analytics';
-
 import { ROUTES } from '@routes/paths';
 
 import type { ErrorType, PageContext } from '@shared/types/error';
@@ -105,11 +103,6 @@ export const useErrorHandler = (context: PageContext) => {
       }
 
       lastErrorRef.current = { message, timestamp: now };
-
-      // 로그인 컨텍스트에서 에러 토스트 표시 시 GA 이벤트 전송
-      if (context === 'login') {
-        logLoginSocialViewToastLoginError();
-      }
 
       notify({
         text: message,

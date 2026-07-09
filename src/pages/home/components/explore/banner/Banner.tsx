@@ -28,9 +28,10 @@ const AUTO_PLAY_DELAY_MS = 2000;
 type BannerProps = {
   seedBannerId: number;
   onSlideClick?: (slide: BannerSlide) => void;
+  onBannerSwipe?: (direction: 'left' | 'right', slide: BannerSlide) => void;
 };
 
-const Banner = ({ seedBannerId, onSlideClick }: BannerProps) => {
+const Banner = ({ seedBannerId, onSlideClick, onBannerSwipe }: BannerProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const { data } = useBannerListQuery(seedBannerId);
 
@@ -74,6 +75,21 @@ const Banner = ({ seedBannerId, onSlideClick }: BannerProps) => {
             }
             onSlideChange={(swiper: SwiperType) => {
               setActiveIndex(swiper.realIndex);
+            }}
+            onTouchEnd={(swiper: SwiperType) => {
+              if (!onBannerSwipe || slides.length <= 1) return;
+              // 임계값 미만 드래그(스냅백)는 슬라이드가 바뀌지 않음
+              if (swiper.realIndex === swiper.previousIndex) return;
+
+              const slide = slides[swiper.realIndex];
+              if (!slide) return;
+
+              const touchDiff = swiper.touches.diff;
+              // 터치 이동 방향: 오른쪽 드래그 → 이전 배너, 왼쪽 드래그 → 다음 배너
+              const direction: 'left' | 'right' =
+                touchDiff > 0 ? 'left' : 'right';
+
+              onBannerSwipe(direction, slide);
             }}
             onSwiper={(swiper: SwiperType) => {
               setActiveIndex(swiper.realIndex);

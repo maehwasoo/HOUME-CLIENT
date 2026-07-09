@@ -1,7 +1,8 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { overlay } from 'overlay-kit';
 
+import { useProductShopAnalytics } from '@pages/home/analytics/useProductShopAnalytics';
 import ProductFilterSheet from '@pages/home/components/product/ProductFilterSheet/ProductFilterSheet';
 import {
   MAX_SELECTED_PRODUCTS,
@@ -22,17 +23,11 @@ import SelectedProductSheet from './SelectedProductSheet/SelectedProductSheet';
 import { PRODUCT_BOTTOM_SHEET_COLLAPSED_HEIGHT } from '../../constants/productTab';
 
 const ProductTab = () => {
-  /**
-   * 외부 진입 시 ProductTab 상태 복원
-   * - useImageFlowStore.preset.type === 'product'면 로그인 게이트 복귀 또는 ResultPage '상품 다시 선택하기' 흐름 이라는 의미
-   * - mount 시 1회 캡처 (useMemo deps []) — 이후 사용자 편집은 controller의 selectedProducts로만 진행 !!
-   * - mount effect에서 clearPreset를 호출해 sessionStorage stale 데이터 제거 !!
-   */
   const productsToBeRestored = useMemo(() => {
     const preset = useImageFlowStore.getState().preset;
     return preset?.type === 'product' ? preset.productsToBeRestored : [];
-    // mount 시 1회만 평가 (store는 ref 안정)
   }, []);
+
   const hasProductsToBeRestored = productsToBeRestored.length > 0;
 
   useEffect(() => {
@@ -42,32 +37,57 @@ const ProductTab = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const {
-    sheetExpanded,
-    setSheetExpanded,
-    filterSheetOpen,
-    chipSelected,
-    appliedFilterChips,
-    selectedProducts,
-    filterSheetProps,
-    productListQueryParams,
-    handleFilterChipClick,
-    handleRemoveAppliedChip,
-    handleSelectProduct,
-    handleRemoveSelectedProduct,
-    handleDecorateWithProductsClick,
-    handleFilterSheetClose,
-    handleFilterApply,
-    handleFilterResetClick,
-    handleAddProductClick,
-  } = useProductTabController({
+  const [productCountViewed, setProductCountViewed] = useState(0);
+
+  const controller = useProductTabController({
     initialSelectedProducts: productsToBeRestored,
     initialSheetExpanded: hasProductsToBeRestored,
     resetFiltersOnMount: hasProductsToBeRestored,
   });
 
-  // 로그인 게이트로 상품 상세 모달이 닫힌 채 복귀한 경우, 저장된 정보로 그 모달을 다시 띄움
-  // 리스트(검색/필터/무한스크롤) 상태에 의존하지 않으므로 깊은 페이지/검색 결과의 상품도 복원됨
+  const {
+    shopListContext,
+    setSheetExpanded,
+    handleProductListRender,
+    handleFilterChipClick,
+    handleFilterApply,
+    handleFilterResetClick,
+    handleSelectProduct,
+    handleSelectProductFromDetailModal,
+    handleRemoveSelectedProduct,
+    handleAddProductClick,
+    handleDecorateWithProductsClick,
+    handleSearchBarClick,
+    handleSearchSubmit,
+    handleSearchClear,
+    handleSelectSheetItemClick,
+  } = useProductShopAnalytics(controller, {
+    productCountViewed,
+    onProductViewedCountChange: setProductCountViewed,
+  });
+
+  const {
+    sheetExpanded,
+    filterSheetOpen,
+    chipSelected,
+    appliedFilterChips,
+    selectedProducts,
+    furnitureSubCategoryByNameKr,
+    filterSheetProps,
+    keyword,
+    products,
+    recommendedProducts,
+    isRecommended,
+    showEmptyState,
+    isPending,
+    isError,
+    refetch,
+    loadMoreRef,
+    handleSearchKeywordChange,
+    handleRemoveAppliedChip,
+    handleFilterSheetClose,
+  } = controller;
+
   useEffect(() => {
     const reopen = consumeReopenProduct();
     if (!reopen) return;
@@ -83,16 +103,19 @@ const ProductTab = () => {
         shoppingAction={{
           label: '선택',
           disabled: selectedProducts.some((p) => p.id === reopen.id),
-          onClick: () =>
-            handleSelectProduct({
-              id: reopen.id,
-              title: reopen.product.title,
-              brand: reopen.product.brand ?? '',
-              imageUrl: reopen.product.imageUrl,
-              originalPrice: reopen.price?.original ?? 0,
-              discountPrice: reopen.price?.discount ?? 0,
-              discountRate: reopen.price?.discountRate ?? 0,
-            }),
+        }}
+        onConfirmSelect={() => {
+          if (selectedProducts.some((p) => p.id === reopen.id)) return;
+
+          handleSelectProductFromDetailModal({
+            id: reopen.id,
+            title: reopen.product.title,
+            brand: reopen.product.brand ?? '',
+            imageUrl: reopen.product.imageUrl,
+            originalPrice: reopen.price?.original ?? 0,
+            discountPrice: reopen.price?.discount ?? 0,
+            discountRate: reopen.price?.discountRate ?? 0,
+          });
         }}
       />
     ));
@@ -109,7 +132,23 @@ const ProductTab = () => {
         onAppliedFilterChipRemove={handleRemoveAppliedChip}
         selectedProductIds={selectedProducts.map((product) => product.id)}
         onSelectProduct={handleSelectProduct}
-        productListQueryParams={productListQueryParams}
+        onSelectProductFromDetailModal={handleSelectProductFromDetailModal}
+        furnitureSubCategoryByNameKr={furnitureSubCategoryByNameKr}
+        keyword={keyword}
+        products={products}
+        recommendedProducts={recommendedProducts}
+        isRecommended={isRecommended}
+        showEmptyState={showEmptyState}
+        isPending={isPending}
+        isError={isError}
+        refetch={refetch}
+        loadMoreRef={loadMoreRef}
+        shopListContext={shopListContext}
+        onSearchKeywordChange={handleSearchKeywordChange}
+        onSearchBarClick={handleSearchBarClick}
+        onSearchSubmit={handleSearchSubmit}
+        onSearchClear={handleSearchClear}
+        onProductListRender={handleProductListRender}
       />
 
       <DragHandleBottomSheet
@@ -123,6 +162,7 @@ const ProductTab = () => {
             selectedProducts={selectedProducts}
             onRemoveProduct={handleRemoveSelectedProduct}
             onAddProductClick={handleAddProductClick}
+            onItemClick={handleSelectSheetItemClick}
             maxCount={MAX_SELECTED_PRODUCTS}
           />
         }

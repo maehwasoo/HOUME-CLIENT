@@ -1,10 +1,18 @@
 import { useNavigate } from 'react-router-dom';
 
+import {
+  getSignupCompPageViewParams,
+  trackSignupCompCtaClick,
+} from '@pages/generate/analytics/signupCompAnalytics';
 import { useWelcomePageModelPreload } from '@pages/generate/hooks/useWelcomePageModelPreload';
 
 import { ROUTES } from '@routes/paths';
 
 import { useUserStore } from '@store/useUserStore';
+
+import { GA_EVENTS } from '@shared/analytics/events';
+import { useAnalyticsPageView } from '@shared/analytics/hooks';
+import { SCREEN_NAME } from '@shared/analytics/screenNames';
 
 import { LOTTIE_SPEED } from '@assets/lottie/lottieAssets';
 
@@ -24,10 +32,18 @@ const WelcomePage = () => {
 
   useWelcomePageModelPreload(); // ONNX 모델 워밍업용 (현재 미사용)
 
+  useAnalyticsPageView(
+    GA_EVENTS.signupComp.PAGE_VIEW,
+    SCREEN_NAME.SIGNUP_COMP,
+    getSignupCompPageViewParams()
+  );
+
   const redirectPath = getLoginRedirect();
   const isFromMypage = redirectPath?.startsWith(ROUTES.MYPAGE);
 
   const handleCtaClick = () => {
+    trackSignupCompCtaClick();
+
     if (isFromMypage) {
       // 마이페이지 탭 후 로그인 게이트 진입 및 회원가입 완료 → CTA 탭 시 홈으로 이동
       consumeLoginRedirect();

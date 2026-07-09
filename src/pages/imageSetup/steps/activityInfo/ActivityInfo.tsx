@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 
 import { overlay } from 'overlay-kit';
 
-import { useActivityInfo } from '@pages/imageSetup/hooks/activityInfo/useActivityInfo';
+import { useSelectFurnitureAnalytics } from '@pages/imageSetup/analytics/useSelectFurnitureAnalytics';
 
 import InlineError from '@components/inlineError/InlineError';
 import Loading from '@components/loading/Loading';
@@ -37,7 +37,10 @@ const ActivityInfo = ({ context }: ActivityInfoProps) => {
     categorySelections,
     globalConstraints,
     handleSubmit,
-  } = useActivityInfo(context);
+    trackDropDownActivityClick,
+    trackActivitySheetView,
+    trackActivitySheetCtaClick,
+  } = useSelectFurnitureAnalytics(context);
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const sheetIdRef = useRef<string | null>(null);
@@ -61,12 +64,14 @@ const ActivityInfo = ({ context }: ActivityInfoProps) => {
   });
 
   const handleActivityTriggerClick = () => {
+    trackDropDownActivityClick();
     sheetIdRef.current = overlay.open(() => (
       <ActivityTypeSheet
         open
         activities={activities}
         selectedActivityCode={activitySelection.selectedActivityItem?.code}
         onConfirm={(activityCode) => {
+          trackActivitySheetCtaClick(activityCode);
           setFormData((prev) => ({ ...prev, activity: activityCode }));
           closeSheet();
         }}
@@ -74,6 +79,7 @@ const ActivityInfo = ({ context }: ActivityInfoProps) => {
       />
     ));
     setIsSheetOpen(true);
+    trackActivitySheetView();
   };
 
   if (isError) return <InlineError onRetry={refetch} />;

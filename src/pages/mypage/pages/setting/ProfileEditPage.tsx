@@ -1,9 +1,14 @@
 import { ErrorBoundary } from 'react-error-boundary';
 import { useNavigate } from 'react-router-dom';
 
+import { trackEditProfileCtaClick } from '@pages/mypage/analytics/editProfileAnalytics';
 import { useEditProfileMutation } from '@pages/mypage/apis/mutations/useEditProfileMutation';
 import { useMyPageProfileQuery } from '@pages/mypage/apis/queries/useEditProfileQuery';
 import * as styles from '@pages/signup/SignupPage.css';
+
+import { GA_EVENTS } from '@shared/analytics/events';
+import { useAnalyticsPageView } from '@shared/analytics/hooks';
+import { SCREEN_NAME } from '@shared/analytics/screenNames';
 
 import FeatureErrorFallback from '@components/errorFallback/FeatureErrorFallback';
 import Loading from '@components/loading/Loading';
@@ -55,9 +60,18 @@ const ProfileEditPage = () => {
   const { refresh } = useRandomNickname(handleNicknameChange);
   const { mutate: editProfile, isPending } = useEditProfileMutation();
 
+  useAnalyticsPageView(
+    GA_EVENTS.editProfile.PAGE_VIEW,
+    SCREEN_NAME.EDIT_PROFILE,
+    undefined,
+    { enabled: !isProfilePending }
+  );
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isFormValid || !isDirty || !gender) return;
+
+    trackEditProfileCtaClick();
 
     editProfile({
       nickname,

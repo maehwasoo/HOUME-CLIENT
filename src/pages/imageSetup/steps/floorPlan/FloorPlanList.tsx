@@ -1,18 +1,9 @@
 // FloorPlan.tsx
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useUserAddressMutation } from '@pages/imageSetup/apis/mutations/useUserAddressMutation';
 import { type FloorPlanData } from '@pages/imageSetup/types/apis/floorPlan';
 import type { OpenSheetKey } from '@pages/imageSetup/types/OpenSheet';
-import {
-  logSelectFloorPlanClickBtnCTASelect,
-  logSelectFloorPlanClickBtnCTASubmit,
-  logSelectFloorPlanClickBtnNoPlan,
-  logSelectFloorPlanClickBtnReversed,
-  logSelectFloorPlanClickDeemded,
-  logSelectFloorPlanViewModalNoPlan,
-  logSelectFloorPlanViewModalReversed,
-} from '@pages/imageSetup/utils/analytics';
 
 import FlipSheet from '@components/bottomSheet/flipSheet/FlipSheet';
 import NoMatchSheet from '@components/bottomSheet/noMatchSheet/NoMatchSheet';
@@ -48,16 +39,9 @@ const FloorPlanList = ({
   const { notify } = useToast();
   const { mutate: postAddress } = useUserAddressMutation();
 
-  // 모달 뷰 이벤트 중복 전송 방지를 위한 ref
-  const noPlanModalSentRef = useRef(false);
-  const reversedModalSentRef = useRef(false);
-
   // toast를 NoMatchSheet의 상위 컴포넌트인 FloorPlan에서 호출해야
   // toast의 option에 준 autoClose가 정상적으로 적용됨
   const handleAddressSubmit = (region: string, address: string) => {
-    // Submit CTA 버튼 클릭 시 GA 이벤트 전송
-    logSelectFloorPlanClickBtnCTASubmit();
-
     postAddress(
       { sigungu: region, roadName: address },
       {
@@ -82,8 +66,6 @@ const FloorPlanList = ({
   };
 
   const handleImageClick = (id: number) => {
-    // 도면 클릭 시 GA 이벤트 전송
-    logSelectFloorPlanClickDeemded();
     onImageSelect(id);
     handleOpenSheet('flip');
   };
@@ -92,11 +74,6 @@ const FloorPlanList = ({
   // 같은 타입을 다시 열면 일단 '닫힘 상태'로 만들고(open=false) DOM에서 제거한 뒤(null),
   // 다음 프레임에 다시 타입을 세팅해 리마운트 → 항상 열림 애니메이션과 초기 상태가 보장됨.
   const handleOpenSheet = (type: 'noMatch' | 'flip') => {
-    if (type === 'noMatch') {
-      // NoPlan 버튼 클릭 시 GA 이벤트 전송
-      logSelectFloorPlanClickBtnNoPlan();
-    }
-
     if (openSheet === type) {
       setIsSheetOpen(false);
       setOpenSheet(null);
@@ -118,47 +95,20 @@ const FloorPlanList = ({
     }
   }, [openSheet]);
 
-  // 모달이 열릴 때 이벤트 전송 (최초 1회)
-  useEffect(() => {
-    if (isSheetOpen && openSheet === 'noMatch' && !noPlanModalSentRef.current) {
-      // NoPlan 모달 뷰 이벤트 전송
-      logSelectFloorPlanViewModalNoPlan();
-      noPlanModalSentRef.current = true;
-    } else if (
-      isSheetOpen &&
-      openSheet === 'flip' &&
-      !reversedModalSentRef.current
-    ) {
-      // Reversed 모달 뷰 이벤트 전송
-      logSelectFloorPlanViewModalReversed();
-      reversedModalSentRef.current = true;
-    }
-  }, [isSheetOpen, openSheet]);
-
   const handleCloseSheet = () => {
     setIsSheetOpen(false); // 닫힘 애니메이션 시작
   };
 
   const handleExited = () => {
-    // 모달이 완전히 닫히면 ref 초기화 (다시 열 때 이벤트 전송)
-    if (openSheet === 'noMatch') {
-      noPlanModalSentRef.current = false;
-    } else if (openSheet === 'flip') {
-      reversedModalSentRef.current = false;
-    }
     setOpenSheet(null); // 애니메이션 끝나면 DOM에서 제거
   };
 
   const handleChooseClick = () => {
-    // Select CTA 버튼 클릭 시 GA 이벤트 전송
-    logSelectFloorPlanClickBtnCTASelect();
     handleCloseSheet();
     onFloorPlanSelection();
   };
 
   const handleFlipClick = () => {
-    // Reversed 버튼 클릭 시 GA 이벤트 전송
-    logSelectFloorPlanClickBtnReversed();
     onFlipToggle();
   };
 

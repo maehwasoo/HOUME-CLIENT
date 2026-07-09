@@ -14,6 +14,7 @@ interface TitleNavBarProps extends React.ComponentProps<'nav'> {
   backLabel?: string;
   isSettingBtn?: boolean;
   onBackClick?: () => void;
+  onSettingClick?: () => void;
   background?: TitleNavBarBackground;
   placement?: TitleNavBarPlacement;
 }
@@ -22,6 +23,7 @@ const TitleNavBar = ({
   title,
   backLabel,
   onBackClick,
+  onSettingClick,
   isSettingBtn = false,
   background = 'primary',
   placement = 'sticky',
@@ -52,7 +54,7 @@ const TitleNavBar = ({
         {isSettingBtn && (
           <TextButton
             size="m"
-            onClick={() => navigate(ROUTES.SETTING)}
+            onClick={onSettingClick ?? (() => navigate(ROUTES.SETTING))}
             aria-label="설정으로 이동"
           >
             설정

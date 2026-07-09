@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { useResultListAnalytics } from '@pages/generate/analytics/useResultListAnalytics';
 import { useGenerateListResultQuery } from '@pages/generate/v2/apis/queries/useGenerateListResultQuery';
 import { useRelatedImagesQuery } from '@pages/generate/v2/apis/queries/useRelatedImagesQuery';
 import { useSimilarItemsQuery } from '@pages/generate/v2/apis/queries/useSimilarItemsQuery';
@@ -12,6 +13,7 @@ import { ROUTES } from '@routes/paths';
 import { ENTRY_ROUTE, useImageFlowStore } from '@store/useImageFlowStore';
 import { useSavedItemsStore } from '@store/useSavedItemsStore';
 
+import { LOGIN_ENTRY_ROUTE } from '@shared/analytics/params/gate';
 import ActionButton from '@shared/components/v2/button/actionButton/ActionButton';
 import EmptyView from '@shared/components/v2/emptyView/EmptyView';
 import { EMPTY_VIEW_TEXT } from '@shared/constants/emptyViewText';
@@ -208,6 +210,25 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
 
   const relatedTitle = EMPTY_VIEW_TEXT.listResult.related.otherImagesTitle;
 
+  const {
+    wrapReselectClick,
+    handleSelectedListCardClick,
+    handleSelectedListCardGoSiteClick,
+    handleSelectedListCardSaveToggle,
+    handleSimilarFeedCardClick,
+    handleSimilarFeedCardGoSiteClick,
+    handleSimilarFeedCardSaveToggle,
+    handleRelatedImageClick,
+  } = useResultListAnalytics({
+    genImgId: image.imageId,
+    selectedState,
+    similarState,
+    relatedState,
+    renderableSelectedProducts,
+    renderableSimilarProducts,
+    renderableRelatedImages,
+  });
+
   const { mutate: toggleJjym } = useJjymMutation({
     onSavedAction: () => {
       navigate(ROUTES.MYPAGE, { state: { activeTab: 'savedItems' } });
@@ -215,7 +236,7 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
   });
   const getSavedState = useSavedItemsStore((s) => s.getSavedState);
 
-  const handleReselectProducts = () => {
+  const handleReselectProducts = wrapReselectClick(() => {
     const mapped = selectedProductsRaw
       .filter((product) => product.id != null)
       .map(toProductItem);
@@ -227,7 +248,7 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
 
     useFunnelStore.getState().reset();
     useImageFlowStore.getState().setFlow({
-      entryRoute: ENTRY_ROUTE.PRODUCT_SELECTION,
+      entryRoute: ENTRY_ROUTE.PRODUCT_REGENERATE,
       preset: {
         type: 'product',
         productIds: mapped.map((p) => p.id),
@@ -236,7 +257,7 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
     });
 
     navigate(ROUTES.HOME, { state: { activeTab: 'product' } });
-  };
+  });
 
   const showSimilarSection = similarState !== 'empty';
   const showRelatedSection = relatedState !== 'empty';
@@ -284,6 +305,7 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
                       key={id}
                       cardSize="m"
                       enableWholeCardLink={Boolean(href)}
+                      onCardClick={() => handleSelectedListCardClick(item)}
                       product={{
                         title: item.name ?? '',
                         imageUrl: item.imageUrl ?? '',
@@ -298,9 +320,25 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
                       }}
                       save={{
                         isSaved: getSavedState(id, item.isLiked),
-                        onToggle: () => toggleJjym(id),
+                        onToggle: () => {
+                          const isSaved = getSavedState(id, item.isLiked);
+                          handleSelectedListCardSaveToggle(item, isSaved);
+                          toggleJjym(id, {
+                            loginEntryRoute:
+                              LOGIN_ENTRY_ROUTE.PRODUCT_LIST_SAVE,
+                            productName: item.name,
+                          });
+                        },
                       }}
-                      link={href ? { href } : undefined}
+                      link={
+                        href
+                          ? {
+                              href,
+                              onClick: () =>
+                                handleSelectedListCardGoSiteClick(item),
+                            }
+                          : undefined
+                      }
                     />
                   );
                 })
@@ -331,6 +369,7 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
                       <ProductCard
                         key={id}
                         enableWholeCardLink={Boolean(href)}
+                        onCardClick={() => handleSimilarFeedCardClick(item)}
                         product={{
                           brand: item.brand ?? '',
                           title: item.name ?? '',
@@ -346,10 +385,26 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
                         }}
                         save={{
                           isSaved: getSavedState(id, item.isLiked),
-                          onToggle: () => toggleJjym(id),
+                          onToggle: () => {
+                            const isSaved = getSavedState(id, item.isLiked);
+                            handleSimilarFeedCardSaveToggle(item, isSaved);
+                            toggleJjym(id, {
+                              loginEntryRoute:
+                                LOGIN_ENTRY_ROUTE.PRODUCT_CARD_SAVE,
+                              productName: item.name,
+                            });
+                          },
                           count: item.jjymCount,
                         }}
-                        link={href ? { href } : undefined}
+                        link={
+                          href
+                            ? {
+                                href,
+                                onClick: () =>
+                                  handleSimilarFeedCardGoSiteClick(item),
+                              }
+                            : undefined
+                        }
                       />
                     );
                   })
@@ -380,6 +435,8 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
                       size="s"
                       onClick={() => {
                         if (item.id == null || item.resultType == null) return;
+
+                        handleRelatedImageClick(item.id);
 
                         navigate(
                           getGenerateResultPath(item.id, item.resultType),

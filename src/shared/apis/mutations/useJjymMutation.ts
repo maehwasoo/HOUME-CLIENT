@@ -1,7 +1,16 @@
+import { useRef } from 'react';
+
 import { useMutation } from '@tanstack/react-query';
 
 import { useSavedItemsStore } from '@store/useSavedItemsStore';
 
+import {
+  trackSaveToastCancelClick,
+  trackSaveToastToSeeClick,
+  trackToastSaveView,
+} from '@shared/analytics/componentAnalytics';
+import type { LoginEntryRoute } from '@shared/analytics/params/gate';
+import { resolveScreenName } from '@shared/analytics/utils/screenName';
 import type { SaveItemsRequest, SaveItemsResponse } from '@shared/types/jjym';
 import { TOAST_TYPE, TOASTER_ID } from '@shared/types/toast';
 
@@ -25,6 +34,7 @@ interface UseJjymMutationOptions {
   savedToastType?: JjymSavedToast;
   onSavedAction?: () => void;
   invalidateSavedItemsList?: boolean; // 찜 목록 무효화 여부
+  loginEntryRoute?: LoginEntryRoute;
 }
 
 export const postJjym = async (
@@ -52,10 +62,16 @@ const getSavedToastContent = (type: JjymSavedToast) => {
   };
 };
 
+const getCurrentScreenName = () =>
+  resolveScreenName(window.location.pathname + window.location.search);
+
 export const useJjymMutation = (options?: UseJjymMutationOptions) => {
   const toggleSaveProduct = useSavedItemsStore((s) => s.toggleSaveProduct);
   const { notify } = useToast();
   const { requireLogin } = useLoginGate();
+  const pendingJjymContextRef = useRef<
+    Map<number, { productName?: string; screenName: string }>
+  >(new Map());
   const savedToastType = options?.savedToastType ?? 'move';
   const shouldInvalidateSavedItemsList =
     options?.invalidateSavedItemsList !== false;
@@ -86,6 +102,10 @@ export const useJjymMutation = (options?: UseJjymMutationOptions) => {
     },
 
     onSuccess: async (data, rawProductId) => {
+      const pendingContext = pendingJjymContextRef.current.get(rawProductId);
+      pendingJjymContextRef.current.delete(rawProductId);
+      const productName = pendingContext?.productName;
+      const screenName = pendingContext?.screenName ?? getCurrentScreenName();
       const isSavedNow = useSavedItemsStore
         .getState()
         .savedProductIds.has(rawProductId);
@@ -104,19 +124,37 @@ export const useJjymMutation = (options?: UseJjymMutationOptions) => {
         }
 
         const toastContent = getSavedToastContent(savedToastType);
+        const toastInput = {
+          screenName,
+          rawProductId,
+          productName,
+        };
+
+        trackToastSaveView(toastInput);
+
         notify({
           text: toastContent.text,
           type: TOAST_TYPE.ACTION,
           actionLabel: toastContent.actionLabel,
-          onClick: options?.onSavedAction,
+          onClick: () => {
+            trackSaveToastToSeeClick(toastInput);
+            options?.onSavedAction?.();
+          },
           options: TOAST_OPTIONS,
         });
       } else {
+        const toastInput = {
+          screenName,
+          rawProductId,
+          productName,
+        };
+
         notify({
           text: TOAST_MESSAGE.SAVED_ITEM_REMOVED,
           type: TOAST_TYPE.ACTION,
           actionLabel: TOAST_ACTION_LABEL.UNDO,
           onClick: () => {
+            trackSaveToastCancelClick(toastInput);
             toggleSaveProduct(rawProductId);
 
             void syncSavedStateWithServer(rawProductId).catch(() => {
@@ -134,13 +172,28 @@ export const useJjymMutation = (options?: UseJjymMutationOptions) => {
     },
 
     onError: (_error, rawProductId) => {
+      pendingJjymContextRef.current.delete(rawProductId);
       toggleSaveProduct(rawProductId);
     },
   });
 
   // 찜 토글 전 로그인 게이트: 비로그인이면 mutate 미실행 → onMutate 낙관적 업데이트도 일어나지 않음
-  const mutate: typeof mutation.mutate = (rawProductId, mutateOptions) => {
-    requireLogin(() => mutation.mutate(rawProductId, mutateOptions));
+  type JjymMutateOptions = Parameters<typeof mutation.mutate>[1] & {
+    loginEntryRoute?: LoginEntryRoute;
+    productName?: string;
+  };
+
+  const mutate = (rawProductId: number, mutateOptions?: JjymMutateOptions) => {
+    const { loginEntryRoute, productName, ...restOptions } =
+      mutateOptions ?? {};
+
+    requireLogin(() => {
+      pendingJjymContextRef.current.set(rawProductId, {
+        productName,
+        screenName: getCurrentScreenName(),
+      });
+      mutation.mutate(rawProductId, restOptions);
+    }, loginEntryRoute ?? options?.loginEntryRoute);
   };
 
   return { ...mutation, mutate };
