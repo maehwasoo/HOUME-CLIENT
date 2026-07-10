@@ -2,9 +2,9 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { useMypageGeneratedImagesAnalytics } from '@pages/mypage/analytics/useMypageAnalytics';
 import { useGetGeneratedImageListQuery } from '@pages/mypage/apis/queries/useMyPageImagesQuery';
 import { useDetectionPrefetch } from '@pages/mypage/hooks/useDetectionPrefetch';
-import { logMyPageClickBtnImgCard } from '@pages/mypage/utils/analytics';
 import { formatDate } from '@pages/mypage/utils/formatting';
 
 import { ROUTES } from '@routes/paths';
@@ -32,15 +32,21 @@ const GeneratedImagesSection = () => {
     isError,
   } = useGetGeneratedImageListQuery();
 
+  const groups = imagesListData?.groups ?? [];
+  const isListReady = !isPending && !isError && !!imagesListData;
+
+  const { trackCardGenImgClick, trackMoreGenImgClick } =
+    useMypageGeneratedImagesAnalytics({
+      groups,
+      isListReady,
+    });
+
   const { prefetchDetection } = useDetectionPrefetch();
   const prefetchedImageIdsRef = useRef<Set<number>>(new Set<number>());
 
   const primaryImageId =
     imagesListData?.groups?.[0]?.items?.[0]?.imageId ?? null;
 
-  /**
-   * 모든 이미지 감지 데이터 백그라운드 prefetch
-   */
   useEffect(() => {
     if (!imagesListData?.groups) return;
 
@@ -58,10 +64,6 @@ const GeneratedImagesSection = () => {
     });
   }, [imagesListData, prefetchDetection]);
 
-  /**
-   * 감지 프리패치를 브라우저 idle 시간에 스케줄링
-   * - 우선순위(immediate) 요청은 즉시 수행
-   */
   const scheduleDetectionPrefetch = useCallback(
     (
       imageId: number,
@@ -93,18 +95,10 @@ const GeneratedImagesSection = () => {
     [prefetchDetection]
   );
 
-  /**
-   * - url에 imageId(houseId)와 viewType을 전달
-   *   - houseId: ResultPage가 /meta API 호출에 사용
-   *   - viewType: ResultPage의 CurationResult/ListResult 분기 기준 + '상품 다시 선택하기' 버튼 분기 기준
-   * - state로 imageUrl + isMirror 전달
-   */
   const handleViewResult = (item: ItemResponse) => {
-    // viewType 누락 시 URL에 `viewType=undefined` 문자열이 그대로 들어가 ResultPage 분기가 의도와 다르게 동작 → 가드로 차단
     if (item.imageId == null || !item.generatedImageUrl || !item.viewType) {
       return;
     }
-    logMyPageClickBtnImgCard();
     navigate(
       `${ROUTES.GENERATE_RESULT}?houseId=${item.imageId}&viewType=${item.viewType}`,
       {
@@ -114,16 +108,12 @@ const GeneratedImagesSection = () => {
         },
       }
     );
-    // 네비게이션 직후 우선순위 감지 프리페치 실행
     scheduleDetectionPrefetch(item.imageId, item.generatedImageUrl, {
       immediate: true,
       persistAfterUnmount: true,
     });
   };
 
-  /**
-   * 이미지 로드 완료 시 감지 데이터 프리패치 스케줄
-   */
   const handleImageLoad = useCallback(
     (imageId: number, imageUrl?: string) => {
       if (imageUrl) {
@@ -135,18 +125,14 @@ const GeneratedImagesSection = () => {
     [primaryImageId, scheduleDetectionPrefetch]
   );
 
-  // 로딩 중
   if (isPending) {
     return <Loading />;
   }
 
-  // 에러 또는 데이터 없음
   if (isError || !imagesListData) {
     return <EmptyStateSection type="generatedImages" />;
   }
 
-  // 이미지가 없을 때
-  const groups = imagesListData.groups ?? [];
   if (groups.length === 0) {
     return <EmptyStateSection type="generatedImages" />;
   }
@@ -169,11 +155,20 @@ const GeneratedImagesSection = () => {
                     key={item.imageId}
                     cardType={isCurationCard ? 'curation' : 'list'}
                     productSummaryText={item.productSummaryText}
+                    bannerTitle={item.bannerTitle}
+                    viewType={item.viewType}
                     imageId={item.imageId}
                     imageUrl={item.generatedImageUrl}
                     isMirror={item.isMirror}
                     usedProducts={item.usedProducts}
-                    onCurationClick={() => handleViewResult(item)}
+                    onCardGenImgClick={() => {
+                      trackCardGenImgClick(item);
+                      handleViewResult(item);
+                    }}
+                    onBtnMoreGenImgClick={() => {
+                      trackMoreGenImgClick(item);
+                      handleViewResult(item);
+                    }}
                     onImageLoad={() =>
                       handleImageLoad(item.imageId!, item.generatedImageUrl)
                     }

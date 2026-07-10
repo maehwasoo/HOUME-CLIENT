@@ -14,6 +14,7 @@ interface TextFieldProps
   maxLength?: number;
   onRefresh?: () => void;
   onEnter?: () => void;
+  onClear?: () => void;
 }
 
 const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
@@ -26,6 +27,9 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
       maxLength,
       onRefresh,
       onEnter,
+      onClear,
+      onFocus,
+      onBlur,
       ...props
     },
     ref
@@ -52,6 +56,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
         setInternalValue('');
       }
       onChange?.('');
+      onClear?.();
       inputRef.current?.focus(); // clear 클릭 시 포커스 복구
     };
 
@@ -75,8 +80,14 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
             type="text"
             value={value}
             onChange={handleChange}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+            onFocus={(e) => {
+              setIsFocused(true);
+              onFocus?.(e);
+            }}
+            onBlur={(e) => {
+              setIsFocused(false);
+              onBlur?.(e);
+            }}
             onKeyDown={handleKeyDown}
             maxLength={maxLength}
             aria-label="닉네임"

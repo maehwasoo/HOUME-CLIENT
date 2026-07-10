@@ -1,16 +1,26 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { overlay } from 'overlay-kit';
 
+import {
+  trackShopFeedCardDetailClick,
+  trackShopFeedCardSelectClick,
+  trackShopFeedCardUnselectClick,
+  trackShopListEmptyView,
+  trackShopListProductView,
+  type ShopListContext,
+} from '@pages/home/analytics/shopAnalytics';
 import ProductDetailOverlay from '@pages/home/components/product/ProductPopup/ProductDetailOverlay';
 import RecommendSection from '@pages/home/components/product/RecommendSection/RecommendSection';
 import { useProductHeaderScroll } from '@pages/home/hooks/useProductHeaderScroll';
-import { useProductSearch } from '@pages/home/hooks/useProductSearch';
+import type { ProductSearchCardItem } from '@pages/home/hooks/useProductSearch';
+import { MAX_SELECTED_PRODUCTS } from '@pages/home/hooks/useProductSelection';
 import type {
   AppliedFilterChip,
   ProductFilterChipCategory,
   SelectedProduct,
 } from '@pages/home/types/productTab';
+import { withProductSubCategory } from '@pages/home/utils/productFilterUtils';
 
 import IconButton from '@shared/components/v2/button/IconButton';
 import EmptyView from '@shared/components/v2/emptyView/EmptyView';
@@ -21,8 +31,6 @@ import { EMPTY_VIEW_TEXT } from '@shared/constants/emptyViewText';
 import InlineError from '@components/inlineError/InlineError';
 import Loading from '@components/loading/Loading';
 import Chip from '@components/v2/chip/Chip';
-
-import type { ProductListQueryVariables } from '@constants/queryKey';
 
 import Icon from '@/shared/components/v2/icon/Icon';
 
@@ -38,7 +46,23 @@ interface SearchSectionProps {
   ) => void;
   selectedProductIds: number[];
   onSelectProduct: (product: SelectedProduct) => void;
-  productListQueryParams: ProductListQueryVariables;
+  onSelectProductFromDetailModal: (product: SelectedProduct) => void;
+  furnitureSubCategoryByNameKr: Record<string, string>;
+  keyword: string;
+  products: ProductSearchCardItem[];
+  recommendedProducts: ProductSearchCardItem[];
+  isRecommended: boolean;
+  showEmptyState: boolean;
+  isPending: boolean;
+  isError: boolean;
+  refetch: () => void;
+  loadMoreRef: React.RefObject<HTMLDivElement | null>;
+  shopListContext: ShopListContext;
+  onSearchKeywordChange: (value: string) => void;
+  onSearchBarClick: () => void;
+  onSearchSubmit: () => void;
+  onSearchClear: () => void;
+  onProductListRender?: (productCountViewed: number) => void;
 }
 
 const SearchSection = ({
@@ -48,25 +72,55 @@ const SearchSection = ({
   onAppliedFilterChipRemove,
   selectedProductIds,
   onSelectProduct,
-  productListQueryParams,
+  onSelectProductFromDetailModal,
+  furnitureSubCategoryByNameKr,
+  keyword,
+  products,
+  recommendedProducts,
+  isRecommended,
+  showEmptyState,
+  isPending,
+  isError,
+  refetch,
+  loadMoreRef,
+  shopListContext,
+  onSearchKeywordChange,
+  onSearchBarClick,
+  onSearchSubmit,
+  onSearchClear,
+  onProductListRender,
 }: SearchSectionProps) => {
   const searchBarRef = useRef<HTMLDivElement>(null);
   const filterListRef = useRef<HTMLDivElement>(null);
+  const hasTrackedEmptyViewRef = useRef(false);
   const { isFilterSticky, showStickySearchBar, showScrollTopFloatingButton } =
     useProductHeaderScroll({ searchBarRef, filterListRef });
 
-  const {
-    loadMoreRef,
-    keyword,
-    products,
-    recommendedProducts,
-    isRecommended,
-    showEmptyState,
-    isPending,
-    isError,
-    refetch,
-    handleSearchKeywordChange,
-  } = useProductSearch(productListQueryParams);
+  const listContextRef = useRef(shopListContext);
+  listContextRef.current = shopListContext;
+
+  useEffect(() => {
+    if (!showEmptyState) {
+      hasTrackedEmptyViewRef.current = false;
+      return;
+    }
+
+    if (hasTrackedEmptyViewRef.current) return;
+
+    hasTrackedEmptyViewRef.current = true;
+    trackShopListEmptyView(shopListContext);
+  }, [showEmptyState, shopListContext]);
+
+  useEffect(() => {
+    if (isPending || isError || showEmptyState) return;
+
+    trackShopListProductView({
+      ...listContextRef.current,
+      productCount: products.length,
+      productCountViewed: products.length,
+    });
+    onProductListRender?.(products.length);
+  }, [isError, isPending, onProductListRender, products, showEmptyState]);
 
   const handleFilterChipCategoryClick = useCallback(
     (category: ProductFilterChipCategory) => {
@@ -84,16 +138,156 @@ const SearchSection = ({
 
   const handleSaveToggleNoop = useCallback(() => {}, []);
 
-  const handleSelectProduct = useCallback(
-    (product: SelectedProduct) => {
-      onSelectProduct(product);
-    },
-    [onSelectProduct]
-  );
-
   const handleScrollToTopClick = useCallback(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+
+  const openProductDetail = useCallback(
+    (
+      id: number,
+      cardProduct: {
+        title: string;
+        brand: string;
+        imageUrl: string;
+        colorHexes: string[];
+      },
+      cardPrice: {
+        original: number;
+        discountRate: number;
+        discount: number;
+      },
+      cardSave: { isSaved: false; onToggle: () => void; count: number },
+      cardLink: { href: string },
+      confirmAction: {
+        label: string;
+        disabled?: boolean;
+        onConfirmSelect: () => void;
+      },
+      analyticsProduct: SelectedProduct
+    ) => {
+      trackShopFeedCardDetailClick(
+        analyticsProduct,
+        selectedProductIds.join(', ') || undefined
+      );
+
+      overlay.open(({ unmount }) => (
+        <ProductDetailOverlay
+          unmount={unmount}
+          id={id}
+          link={cardLink}
+          price={cardPrice}
+          product={cardProduct}
+          save={cardSave}
+          shoppingAction={{
+            label: confirmAction.label,
+            disabled: confirmAction.disabled,
+          }}
+          onConfirmSelect={confirmAction.onConfirmSelect}
+          selectedProductIds={selectedProductIds.join(', ') || undefined}
+          listCategoryName={analyticsProduct.categoryName}
+        />
+      ));
+    },
+    [selectedProductIds]
+  );
+
+  const renderProductCard = (item: ProductSearchCardItem) => {
+    const {
+      id,
+      title,
+      brand,
+      categoryName,
+      imageUrl,
+      discountRate,
+      originalPrice,
+      discountPrice,
+      colorHexes,
+      saveCount,
+      linkUrl,
+    } = item;
+    const isSelected = selectedProductIds.includes(id);
+    const cardProduct = {
+      title,
+      brand,
+      imageUrl,
+      colorHexes,
+    };
+    const cardPrice = {
+      original: originalPrice,
+      discountRate,
+      discount: discountPrice,
+    };
+    const cardSave = {
+      isSaved: false as const,
+      onToggle: handleSaveToggleNoop,
+      count: saveCount,
+    };
+    const cardLink = { href: linkUrl };
+    const selectedProduct = withProductSubCategory(
+      {
+        id,
+        title,
+        brand,
+        categoryName,
+        imageUrl,
+        originalPrice,
+        discountPrice,
+        discountRate,
+      },
+      furnitureSubCategoryByNameKr
+    );
+    const cardShoppingAction = {
+      label: isSelected ? '선택됨' : '선택',
+      visualDisabled: isSelected,
+      onClick: () => {
+        if (isSelected) {
+          trackShopFeedCardUnselectClick();
+          return;
+        }
+
+        // cap 도달 시 선택은 거부(토스트)되므로, 실제 선택되는 경우에만 select 이벤트 발사
+        if (selectedProductIds.length < MAX_SELECTED_PRODUCTS) {
+          trackShopFeedCardSelectClick(
+            selectedProduct,
+            [...selectedProductIds, id].join(', ')
+          );
+        }
+        onSelectProduct(selectedProduct);
+      },
+    };
+    const detailConfirmAction = {
+      label: isSelected ? '선택됨' : '선택',
+      disabled: isSelected,
+      onConfirmSelect: () => {
+        if (isSelected) return;
+        onSelectProductFromDetailModal(selectedProduct);
+      },
+    };
+
+    return (
+      <div key={id}>
+        <ProductCard
+          cardType="shopping"
+          product={cardProduct}
+          price={cardPrice}
+          save={cardSave}
+          link={cardLink}
+          shoppingAction={cardShoppingAction}
+          onShoppingViewDetailClick={() =>
+            openProductDetail(
+              id,
+              cardProduct,
+              cardPrice,
+              cardSave,
+              cardLink,
+              detailConfirmAction,
+              selectedProduct
+            )
+          }
+        />
+      </div>
+    );
+  };
 
   const filterChips = useMemo(
     () =>
@@ -130,6 +324,17 @@ const SearchSection = ({
     ]
   );
 
+  const searchBarProps = {
+    value: keyword,
+    onChange: onSearchKeywordChange,
+    onFocus: onSearchBarClick,
+    onClear: onSearchClear,
+    onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key !== 'Enter' || event.nativeEvent.isComposing) return;
+      onSearchSubmit();
+    },
+  };
+
   return (
     <section className={styles.section}>
       {isFilterSticky ? (
@@ -140,7 +345,7 @@ const SearchSection = ({
             }`}
           >
             <div className={styles.searchBarContainer}>
-              <SearchBar value={keyword} onChange={handleSearchKeywordChange} />
+              <SearchBar {...searchBarProps} />
             </div>
           </div>
           <div className={styles.filterList}>
@@ -150,7 +355,7 @@ const SearchSection = ({
       ) : null}
       <div className={styles.searchHeader}>
         <div ref={searchBarRef} className={styles.searchBarContainer}>
-          <SearchBar value={keyword} onChange={handleSearchKeywordChange} />
+          <SearchBar {...searchBarProps} />
         </div>
         <div ref={filterListRef} className={styles.filterList}>
           <div className={styles.filterScroll}>{filterChips}</div>
@@ -182,7 +387,12 @@ const SearchSection = ({
                   <RecommendSection
                     products={recommendedProducts}
                     selectedProductIds={selectedProductIds}
-                    onSelectProduct={handleSelectProduct}
+                    onSelectProduct={onSelectProduct}
+                    onSelectProductFromDetailModal={
+                      onSelectProductFromDetailModal
+                    }
+                    furnitureSubCategoryByNameKr={furnitureSubCategoryByNameKr}
+                    onOpenProductDetail={openProductDetail}
                   />
                 </>
               ) : null}
@@ -191,78 +401,7 @@ const SearchSection = ({
         </div>
       ) : (
         <div className={styles.productList}>
-          {products.map(
-            ({
-              id,
-              title,
-              brand,
-              imageUrl,
-              discountRate,
-              originalPrice,
-              discountPrice,
-              colorHexes,
-              saveCount,
-              linkUrl,
-            }) => {
-              const isSelected = selectedProductIds.includes(id);
-              const cardProduct = {
-                title,
-                brand,
-                imageUrl,
-                colorHexes,
-              };
-              const cardPrice = {
-                original: originalPrice,
-                discountRate,
-                discount: discountPrice,
-              };
-              const cardSave = {
-                isSaved: false as const,
-                onToggle: handleSaveToggleNoop,
-                count: saveCount,
-              };
-              const cardLink = { href: linkUrl };
-              const cardShoppingAction = {
-                label: isSelected ? '선택됨' : '선택',
-                disabled: isSelected,
-                onClick: () =>
-                  handleSelectProduct({
-                    id,
-                    title,
-                    brand,
-                    imageUrl,
-                    originalPrice,
-                    discountPrice,
-                    discountRate,
-                  }),
-              };
-
-              return (
-                <ProductCard
-                  key={id}
-                  cardType="shopping"
-                  product={cardProduct}
-                  price={cardPrice}
-                  save={cardSave}
-                  link={cardLink}
-                  shoppingAction={cardShoppingAction}
-                  onShoppingViewDetailClick={() => {
-                    overlay.open(({ unmount }) => (
-                      <ProductDetailOverlay
-                        unmount={unmount}
-                        id={id}
-                        link={cardLink}
-                        price={cardPrice}
-                        product={cardProduct}
-                        save={cardSave}
-                        shoppingAction={cardShoppingAction}
-                      />
-                    ));
-                  }}
-                />
-              );
-            }
-          )}
+          {products.map((item) => renderProductCard(item))}
           <div ref={loadMoreRef} />
         </div>
       )}

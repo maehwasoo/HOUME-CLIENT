@@ -22,12 +22,13 @@ interface DateFieldProps {
   onChange: (value: DateValue) => void;
   error?: DateError;
   errorMessage?: string;
+  onFocus?: () => void;
 }
 
 const onlyNumber = (value: string) => value.replace(/\D/g, '');
 
 const DateField = forwardRef<HTMLInputElement, DateFieldProps>(
-  ({ value, onChange, error, errorMessage }, ref) => {
+  ({ value, onChange, error, errorMessage, onFocus }, ref) => {
     const [focusedPart, setFocusedPart] = useState<
       'year' | 'month' | 'day' | null
     >(null);
@@ -36,6 +37,7 @@ const DateField = forwardRef<HTMLInputElement, DateFieldProps>(
     const isError = !!(error?.year || error?.month || error?.day);
 
     const yearInputRef = useRef<HTMLInputElement>(null);
+    const hasEmittedFocusRef = useRef(false);
     useImperativeHandle(ref, () => yearInputRef.current! as HTMLInputElement);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,13 +75,31 @@ const DateField = forwardRef<HTMLInputElement, DateFieldProps>(
       }
     };
 
+    const handleDateRowFocusIn = () => {
+      if (hasEmittedFocusRef.current) return;
+
+      hasEmittedFocusRef.current = true;
+      onFocus?.();
+    };
+
+    const handleDateRowFocusOut = (e: React.FocusEvent<HTMLDivElement>) => {
+      const next = e.relatedTarget;
+      if (next instanceof Node && e.currentTarget.contains(next)) return;
+
+      hasEmittedFocusRef.current = false;
+    };
+
     return (
       <TextFieldContainer
         isFocused={isFocused}
         isError={isError}
         errorMessage={errorMessage}
       >
-        <div className={styles.dateRow}>
+        <div
+          className={styles.dateRow}
+          onFocus={handleDateRowFocusIn}
+          onBlur={handleDateRowFocusOut}
+        >
           <input
             name="year"
             ref={yearInputRef}

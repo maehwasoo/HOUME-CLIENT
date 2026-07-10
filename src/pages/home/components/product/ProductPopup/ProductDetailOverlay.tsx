@@ -1,7 +1,15 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { useLocation, useNavigate } from 'react-router-dom';
 
+import {
+  trackShopFeedDetailMdCloseClick,
+  trackShopFeedDetailMdGoSiteClick,
+  trackShopFeedDetailMdSaveClick,
+  trackShopFeedDetailMdSelectClick,
+  trackShopFeedDetailMdUnsaveClick,
+  trackShopFeedDetailMdView,
+} from '@pages/home/analytics/shopAnalytics';
 import { useProductDetailQuery } from '@pages/home/apis/queries/useProductDetailQuery';
 import { setReopenProduct } from '@pages/home/utils/productDetailOverlayReopen';
 
@@ -9,6 +17,7 @@ import { ROUTES } from '@routes/paths';
 
 import { useSavedItemsStore } from '@store/useSavedItemsStore';
 
+import { LOGIN_ENTRY_ROUTE } from '@shared/analytics/params/gate';
 import type { ProductColorDetail } from '@shared/apis/__generated__/data-contracts';
 import Popup from '@shared/components/v2/popup/Popup';
 import type {
@@ -31,9 +40,11 @@ interface ProductDetailOverlayProps {
   link?: LinkInfo;
   shoppingAction?: {
     label?: string;
-    onClick: () => void;
     disabled?: boolean;
   };
+  onConfirmSelect?: () => void;
+  selectedProductIds?: string;
+  listCategoryName?: string;
 }
 
 const ProductDetailOverlay = ({
@@ -44,11 +55,15 @@ const ProductDetailOverlay = ({
   save,
   link,
   shoppingAction,
+  onConfirmSelect,
+  selectedProductIds,
+  listCategoryName,
 }: ProductDetailOverlayProps) => {
   const navigate = useNavigate();
   const { data, isPending } = useProductDetailQuery(id);
   const detail = data?.product;
   const { mutate: toggleJjym } = useJjymMutation({
+    loginEntryRoute: LOGIN_ENTRY_ROUTE.PRODUCT_CARD_SAVE,
     onSavedAction: () => {
       navigate(ROUTES.MYPAGE, { state: { activeTab: 'savedItems' } });
     },
@@ -56,7 +71,6 @@ const ProductDetailOverlay = ({
   const getSavedState = useSavedItemsStore((s) => s.getSavedState);
   const location = useLocation();
   const openedPathRef = useRef(location.pathname);
-
   const merged = useMemo(() => {
     const detailColorHexes =
       detail?.colors
@@ -91,22 +105,75 @@ const ProductDetailOverlay = ({
     return { product, price, linkHrefOverride, saveCount };
   }, [detail, link?.href, listPrice, listProduct, save.count]);
 
-  // nav effect가 매 렌더 새 merged 객체 때문에 재구독되지 않도록 최신값을 ref로 읽음
   const mergedRef = useRef(merged);
   mergedRef.current = merged;
 
+  const categoryName = detail?.categoryName ?? listCategoryName;
+
+  const isAlreadySelected =
+    selectedProductIds
+      ?.split(',')
+      .some((productId) => productId.trim() === String(id)) ?? false;
+  const isConfirmDisabled =
+    shoppingAction?.disabled === true || isAlreadySelected;
+  const confirmLabel =
+    shoppingAction?.label ?? (isAlreadySelected ? '선택됨' : '선택');
+
   const isSaved = getSavedState(id, detail?.isLiked ?? save.isSaved);
 
+  useEffect(() => {
+    trackShopFeedDetailMdView();
+  }, []);
+
   const handleSaveToggle = () => {
-    toggleJjym(id);
+    if (isSaved) {
+      trackShopFeedDetailMdUnsaveClick({
+        id,
+        title: merged.product.title,
+      });
+    } else {
+      trackShopFeedDetailMdSaveClick({
+        id,
+        title: merged.product.title,
+      });
+    }
+
+    toggleJjym(id, { productName: merged.product.title });
   };
 
-  // 라우트가 바뀌면(ex: 로그인 게이트) 상품상세 오버레이 닫기
-  // overlay-kit은 라우트 변경 시 자동으로 닫히지 않으므로 직접 unmount
+  const handleClose = useCallback(() => {
+    trackShopFeedDetailMdCloseClick();
+    unmount();
+  }, [unmount]);
+
+  const handleConfirm = useCallback(() => {
+    if (isConfirmDisabled) return;
+
+    trackShopFeedDetailMdSelectClick(
+      {
+        id,
+        title: merged.product.title,
+        brand: merged.product.brand,
+        discountPrice: merged.price?.discount,
+        categoryName,
+      },
+      selectedProductIds
+    );
+    onConfirmSelect?.();
+    unmount();
+  }, [
+    categoryName,
+    id,
+    isConfirmDisabled,
+    merged,
+    onConfirmSelect,
+    selectedProductIds,
+    unmount,
+  ]);
+
   useEffect(() => {
     if (location.pathname === openedPathRef.current) return;
 
-    // 로그인 게이트 플로우로 진입하는 경우 복귀 후 이 상품 모달을 다시 띄우기 위해 정보 저장
     if (location.pathname === ROUTES.LOGIN) {
       const { product, price, linkHrefOverride } = mergedRef.current;
       setReopenProduct({ id, product, price, linkHref: linkHrefOverride });
@@ -117,14 +184,11 @@ const ProductDetailOverlay = ({
   return (
     <Popup
       btnStyle="solid"
-      btnText={shoppingAction?.label ?? '선택'}
-      confirmDisabled={shoppingAction?.disabled}
-      onClose={unmount}
+      btnText={confirmLabel}
+      confirmDisabled={isConfirmDisabled}
+      onClose={handleClose}
       onCancel={handleSaveToggle}
-      onConfirm={() => {
-        shoppingAction?.onClick();
-        unmount();
-      }}
+      onConfirm={handleConfirm}
       showCloseButton
       sideIconName={isSaved ? 'HeartFillColor' : 'HeartStrokeGray'}
       content={
@@ -132,7 +196,23 @@ const ProductDetailOverlay = ({
           product={merged.product}
           price={merged.price}
           saveCount={merged.saveCount}
-          link={link}
+          link={
+            link
+              ? {
+                  ...link,
+                  onClick: () => {
+                    trackShopFeedDetailMdGoSiteClick({
+                      id,
+                      title: merged.product.title,
+                      brand: merged.product.brand,
+                      categoryName,
+                      discountPrice: merged.price?.discount,
+                    });
+                    link.onClick?.();
+                  },
+                }
+              : undefined
+          }
           linkHrefOverride={merged.linkHrefOverride}
           isLoading={isPending}
         />

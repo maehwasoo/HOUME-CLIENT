@@ -1,3 +1,4 @@
+import { LOGIN_ENTRY_ROUTE } from '@shared/analytics/params/gate';
 import type {
   LinkInfo,
   PriceInfo,
@@ -39,6 +40,7 @@ interface ProductCardProps {
     label?: string;
     onClick: () => void;
     disabled?: boolean;
+    visualDisabled?: boolean;
   };
   onShoppingViewDetailClick?: () => void;
 }
@@ -68,13 +70,21 @@ const ProductCard = ({
   const { originalPriceText, discountPriceText, discountRateText } =
     getPriceTexts(price?.original, price?.discount, price?.discountRate);
 
-  const handleLinkClick = () => openProductLink(linkHref, link?.onClick);
+  const handleCardNavigate = () =>
+    openProductLink(linkHref, undefined, LOGIN_ENTRY_ROUTE.PRODUCT_CARD_SITE);
+
+  const handleLinkButtonClick = () =>
+    openProductLink(
+      linkHref,
+      link?.onClick,
+      LOGIN_ENTRY_ROUTE.PRODUCT_CARD_SITE
+    );
 
   const { handleWrapperClick, handleWrapperKeyDown } = createCardClickHandler({
     onCardClick,
     enableWholeCardLink,
     linkHref,
-    onNavigate: handleLinkClick,
+    onNavigate: handleCardNavigate,
     onShoppingViewDetailClick: isShoppingDetailClickable
       ? onShoppingViewDetailClick
       : undefined,
@@ -123,7 +133,7 @@ const ProductCard = ({
               size="XS"
               leftIcon="Link"
               aria-label={'공식 사이트로 이동'}
-              onClick={handleLinkClick}
+              onClick={handleLinkButtonClick}
             >
               {link?.label || '사이트'}
             </ActionButton>
@@ -234,6 +244,7 @@ const ProductCard = ({
               size="S"
               fullWidth
               disabled={shoppingAction?.disabled}
+              visualDisabled={shoppingAction?.visualDisabled}
               onClick={shoppingAction?.onClick}
             >
               {shoppingAction?.label ?? '선택'}

@@ -5,7 +5,14 @@ import { Navigate, useNavigate } from 'react-router-dom';
 
 import { ROUTES } from '@routes/paths';
 
-import { getNextFunnelStep, useImageFlowStore } from '@store/useImageFlowStore';
+import {
+  consumeEntryRouteHold,
+  getNextFunnelStep,
+  holdEntryRoute,
+  useImageFlowStore,
+} from '@store/useImageFlowStore';
+
+import { mapEntryRouteToLoginEntry } from '@shared/analytics/utils/loginEntryRoute';
 
 import FeatureErrorFallback from '@components/errorFallback/FeatureErrorFallback';
 
@@ -65,8 +72,11 @@ const ImageSetupPage = () => {
       if (!loginRedirect) {
         // useFloorPlanStore(도면 시트 UI 상태) + entryRoute(가드용)만 cleanup에서 정리
         // useImageFlowStore의 preset/resultType은 LoadingPage/ResultPage에서 사용하므로 유지
+        // /generate 정상 이동 시 entryRoute도 유지 (GA image_entry_route)
         useFloorPlanStore.getState().reset();
-        useImageFlowStore.setState({ entryRoute: null });
+        if (!consumeEntryRouteHold()) {
+          useImageFlowStore.setState({ entryRoute: null });
+        }
       }
     };
   }, []);
@@ -104,13 +114,17 @@ const ImageSetupPage = () => {
                 if (nextStep === 'INTERIOR_STYLE') {
                   // 풀퍼널 (경로 1, 3): 로그인 게이트 통과 후 다음 스텝(InteriorStyle)으로 이동
                   // 미로그인 시 도면 선택값은 useFunnelStore persist로 유지됨
-                  requireLogin(() => history.push('InteriorStyle', data));
+                  requireLogin(
+                    () => history.push('InteriorStyle', data),
+                    mapEntryRouteToLoginEntry(entryRoute)
+                  );
                 } else {
                   // 숏퍼널(경로 2, 4, 5): FloorPlanSelect가 마지막 스텝 → 바로 이미지 생성으로 이동
                   // payload는 LoadingPage가 useImageFlowStore.preset + useFunnelStore.floorPlan으로 조립
                   const hasCredit = await checkCredit();
                   if (!hasCredit) return;
 
+                  holdEntryRoute();
                   navigate(ROUTES.GENERATE);
                 }
               },

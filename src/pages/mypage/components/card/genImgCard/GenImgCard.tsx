@@ -1,12 +1,17 @@
 import { useNavigate } from 'react-router-dom';
 
-import { logMyPageClickBtnFurnitureCard } from '@pages/mypage/utils/analytics';
+import { useMypageGenImgCardAnalytics } from '@pages/mypage/analytics/useMypageAnalytics';
 
 import { ROUTES } from '@routes/paths';
 
 import { useSavedItemsStore } from '@store/useSavedItemsStore';
 
-import type { UsedProductResponse } from '@apis/__generated__/data-contracts';
+import { LOGIN_ENTRY_ROUTE } from '@shared/analytics/params/gate';
+
+import type {
+  ItemResponse,
+  UsedProductResponse,
+} from '@apis/__generated__/data-contracts';
 import { useJjymMutation } from '@apis/mutations/useJjymMutation';
 
 import emptyImage from '@assets/v2/images/ImgEmpty.png';
@@ -20,22 +25,28 @@ import * as styles from './GenImgCard.css';
 interface GenImgCardProps {
   cardType?: 'list' | 'curation';
   productSummaryText?: string | null;
+  bannerTitle?: string | null;
+  viewType?: ItemResponse['viewType'];
   imageId: number;
   imageUrl?: string;
   isMirror?: boolean;
   usedProducts?: UsedProductResponse[];
-  onCurationClick?: () => void;
+  onCardGenImgClick?: () => void;
+  onBtnMoreGenImgClick?: () => void;
   onImageLoad?: (imageId: number, imageUrl?: string) => void;
 }
 
 const GenImgCard = ({
   cardType = 'list',
   productSummaryText,
+  bannerTitle,
+  viewType,
   imageId,
   imageUrl,
   isMirror = false,
   usedProducts = [],
-  onCurationClick,
+  onCardGenImgClick,
+  onBtnMoreGenImgClick,
   onImageLoad,
 }: GenImgCardProps) => {
   const isListType = cardType === 'list';
@@ -45,20 +56,44 @@ const GenImgCard = ({
     (state) => state.touchedProductIds
   );
 
+  const {
+    handleListCardClick,
+    handleListCardGoSiteClick,
+    handleListCardSaveToggle,
+    handleSlideScroll,
+  } = useMypageGenImgCardAnalytics({
+    item: {
+      imageId,
+      viewType,
+      bannerTitle,
+      productSummaryText,
+    },
+    isListType,
+    usedProducts,
+  });
+
   const handleImageLoad = () => {
     onImageLoad?.(imageId, imageUrl);
   };
 
-  // 찜 토글
   const { mutate: toggleJjym } = useJjymMutation({
     savedToastType: 'stored',
+    loginEntryRoute: LOGIN_ENTRY_ROUTE.PRODUCT_LIST_SAVE,
     onSavedAction: () => {
       navigate(ROUTES.MYPAGE, { state: { activeTab: 'savedItems' } });
     },
   });
 
-  const handleToggleSave = (id: number) => {
-    toggleJjym(id);
+  const handleToggleSave = (item: UsedProductResponse, isSaved: boolean) => {
+    handleListCardSaveToggle(item, isSaved);
+    toggleJjym(item.rawProductId!, { productName: item.productName });
+  };
+
+  const handleCardGenImgKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+    if ((e.key === 'Enter' || e.key === ' ') && onCardGenImgClick) {
+      e.preventDefault();
+      onCardGenImgClick();
+    }
   };
 
   return (
@@ -67,13 +102,8 @@ const GenImgCard = ({
         className={styles.textContainer}
         role="button"
         tabIndex={0}
-        onClick={onCurationClick}
-        onKeyDown={(e) => {
-          if ((e.key === 'Enter' || e.key === ' ') && onCurationClick) {
-            e.preventDefault();
-            onCurationClick();
-          }
-        }}
+        onClick={onCardGenImgClick}
+        onKeyDown={handleCardGenImgKeyDown}
       >
         <span className={styles.headingText}>{productSummaryText}</span>
         <TextButton
@@ -82,13 +112,19 @@ const GenImgCard = ({
           rightIcon={'ArrowRight'}
           onClick={(e) => {
             e.stopPropagation();
-            onCurationClick?.();
+            onBtnMoreGenImgClick?.();
           }}
         >
           더보기
         </TextButton>
       </section>
-      <section className={styles.imgContainer} onClick={onCurationClick}>
+      <section
+        className={styles.imgContainer}
+        role="button"
+        tabIndex={0}
+        onClick={onCardGenImgClick}
+        onKeyDown={handleCardGenImgKeyDown}
+      >
         <OptimizedImage
           src={imageUrl || emptyImage}
           fallbackSrc={emptyImage}
@@ -100,9 +136,13 @@ const GenImgCard = ({
       </section>
 
       {isListType && (
-        <section className={styles.listCardContainer}>
+        <section
+          className={styles.listCardContainer}
+          onScroll={handleSlideScroll}
+        >
           {usedProducts.map((item) => {
             if (item.rawProductId == null) return null;
+            const href = item.productSiteUrl?.trim() ?? '';
             const isSaved = touchedProductIds.has(item.rawProductId)
               ? savedProductIds.has(item.rawProductId)
               : (item.isJjym ?? false);
@@ -111,6 +151,8 @@ const GenImgCard = ({
               <ListProductCard
                 key={item.rawProductId}
                 cardSize="s"
+                enableWholeCardLink={Boolean(href)}
+                onCardClick={() => handleListCardClick(item)}
                 product={{
                   title: item.productName ?? '',
                   imageUrl: item.productImageUrl ?? '',
@@ -122,13 +164,16 @@ const GenImgCard = ({
                 }}
                 save={{
                   isSaved,
-                  onToggle: () => handleToggleSave(item.rawProductId!),
+                  onToggle: () => handleToggleSave(item, isSaved),
                 }}
-                link={{
-                  href: item.productSiteUrl ?? '',
-                  onClick: logMyPageClickBtnFurnitureCard,
-                }}
-                enableWholeCardLink={true}
+                link={
+                  href
+                    ? {
+                        href,
+                        onClick: () => handleListCardGoSiteClick(item),
+                      }
+                    : undefined
+                }
               />
             );
           })}

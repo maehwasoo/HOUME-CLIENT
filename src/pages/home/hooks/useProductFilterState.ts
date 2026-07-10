@@ -6,6 +6,7 @@ import {
   ALL_FILTER_SENTINEL,
   buildAppliedFilterChips,
   buildFilterMeta,
+  buildFurnitureSubCategoryByNameKr,
   isSelectedForRender,
   toDraftFromExternal,
   toExternalFromDraft,
@@ -101,6 +102,11 @@ const useProductFilterState = () => {
     );
   }, [filterData?.furnitureTypes]);
 
+  const furnitureSubCategoryByNameKr = useMemo(
+    () => buildFurnitureSubCategoryByNameKr(filterData?.furnitureTypes ?? []),
+    [filterData?.furnitureTypes]
+  );
+
   const priceMeta = useMemo<FilterSummaryMeta>(() => {
     return buildFilterMeta(
       (filterData?.priceRanges ?? []).map((item) => ({
@@ -171,7 +177,17 @@ const useProductFilterState = () => {
   const applyDraft = useCallback(() => {
     const nextValues = toExternalFromDraft(draftValues, allIds);
     setAppliedValues(nextValues);
-  }, [allIds, draftValues]);
+    // 방금 적용한 값을 반환 — setState 직후 appliedValues는 stale이라, 호출부(GA submit 등)가 최신 값을 쓰도록
+    return {
+      appliedValues: nextValues,
+      appliedFilterChips: buildAppliedFilterChips(
+        nextValues,
+        furnitureMeta,
+        priceMeta,
+        colorMeta
+      ),
+    };
+  }, [allIds, draftValues, furnitureMeta, priceMeta, colorMeta]);
 
   /** 상단 적용칩 X 클릭 시 해당 카테고리만 전체로 복귀 */
   const removeAppliedChip = useCallback(
@@ -242,6 +258,10 @@ const useProductFilterState = () => {
     colorOptions,
     appliedFilterChips,
     appliedValues,
+    furnitureLabels: furnitureMeta.labels,
+    furnitureSubCategoryByNameKr,
+    priceLabels: priceMeta.labels,
+    colorLabels: colorMeta.labels,
     syncDraftFromApplied,
     resetDraft,
     clearAllFilters,

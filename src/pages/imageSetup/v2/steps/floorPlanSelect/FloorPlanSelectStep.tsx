@@ -1,7 +1,8 @@
+import { useRoomTypeAnalytics } from '@pages/imageSetup/analytics/useRoomTypeAnalytics';
+
 import FilterSheet from './FilterSheet';
 import FloorPlanSelectGrid from './FloorPlanSelectGrid';
 import FloorPlanSheet from './FloorPlanSheet';
-import { useFloorPlanSelect } from '../../hooks/useFloorPlanSelect';
 
 import type {
   CompletedFloorPlanSelect,
@@ -29,11 +30,13 @@ const FloorPlanSelectStep = ({ context, onNext }: FloorPlanSelectStepProps) => {
     filterSheet,
     floorPlanSheet,
     recentSheet,
-  } = useFloorPlanSelect(context, onNext);
+    setGridScrollRef,
+  } = useRoomTypeAnalytics(context, onNext);
 
   return (
     <>
       <FloorPlanSelectGrid
+        gridScrollRef={setGridScrollRef}
         filterCategories={filterCategories}
         floorPlans={floorPlans}
         isExact={isExact}
@@ -53,6 +56,7 @@ const FloorPlanSelectStep = ({ context, onNext }: FloorPlanSelectStepProps) => {
         onFilterChange={filterSheet.onFilterChange}
         onApply={filterSheet.onApply}
         onReset={filterSheet.onReset}
+        onOverlayClose={filterSheet.onOverlayClose}
       />
 
       {/* TODO: overlay-kit에 상태관리 위임, use-funnel에 등록 */}

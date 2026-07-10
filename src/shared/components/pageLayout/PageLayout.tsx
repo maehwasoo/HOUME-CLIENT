@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import type { ScreenName } from '@shared/analytics/screenNames';
+
 import LogoNavBar from '@components/v2/navBar/LogoNavBar';
 import TitleNavBar from '@components/v2/navBar/TitleNavBar';
 
@@ -14,6 +16,7 @@ type HeaderConfig =
     }
   | {
       type: 'logo';
+      screenName: ScreenName;
       page?: 'landing' | 'home';
       showGenerateButton?: boolean;
       authSlot?: 'none' | 'login' | 'profile';
@@ -43,6 +46,7 @@ const PageLayout = ({ header, children, className }: PageLayoutProps) => {
       case 'logo':
         return (
           <LogoNavBar
+            screenName={header.screenName}
             page={header.page}
             showGenerateButton={header.showGenerateButton}
             authSlot={header.authSlot}

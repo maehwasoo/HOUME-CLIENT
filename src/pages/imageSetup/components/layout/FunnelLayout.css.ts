@@ -8,12 +8,23 @@ export const wrapper = style({
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
+  minHeight: 0,
 });
 
 export const content = style({
   display: 'flex',
   flex: 1,
   flexDirection: 'column',
+  minHeight: 0,
+  overflow: 'hidden',
+});
+
+export const contentInner = style({
+  display: 'flex',
+  flex: 1,
+  flexDirection: 'column',
+  minHeight: 0,
+  overflow: 'hidden',
 });
 
 // 이탈 방지 팝업 콘텐츠 영역

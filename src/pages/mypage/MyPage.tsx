@@ -7,12 +7,18 @@ import { ROUTES } from '@routes/paths';
 
 import { useUserStore } from '@store/useUserStore';
 
+import { LOGIN_ENTRY_ROUTE } from '@shared/analytics/params/gate';
+import { persistLoginEntryRoute } from '@shared/analytics/utils/loginEntryRoute';
+
 import FeatureErrorFallback from '@components/errorFallback/FeatureErrorFallback';
 import InlineError from '@components/inlineError/InlineError';
 import Loading from '@components/loading/Loading';
 import MenuTab from '@components/v2/menuTab/MenuTab';
 import TitleNavBar from '@components/v2/navBar/TitleNavBar';
 
+import { setLoginRedirect } from '@utils/loginRedirect';
+
+import { useMypageAnalytics } from './analytics/useMypageAnalytics';
 import { useMyPageProfileQuery } from './apis/queries/useEditProfileQuery';
 import { useMyPageUserQuery } from './apis/queries/useMyPageUserQuery';
 import GeneratedImagesSection from './components/section/generatedImages/GeneratedImagesSection';
@@ -81,9 +87,17 @@ const MyPage = () => {
     enabled: isLoggedIn,
   });
 
+  const { handleTabChange, handleBackClick, handleSettingClick } =
+    useMypageAnalytics({
+      activeMenuTab,
+      setActiveMenuTab,
+    });
+
   useEffect(() => {
     // 로그인되지 않았으면 로그인 페이지로 리디렉션
     if (!isLoggedIn) {
+      setLoginRedirect(ROUTES.MYPAGE);
+      persistLoginEntryRoute(LOGIN_ENTRY_ROUTE.TOP_NAV_LOGIN);
       navigate(ROUTES.LOGIN);
     }
   }, [isLoggedIn, navigate]);
@@ -102,7 +116,8 @@ const MyPage = () => {
         title="마이페이지"
         backLabel="이전"
         isSettingBtn={true}
-        onBackClick={() => navigate(-1)}
+        onBackClick={handleBackClick}
+        onSettingClick={handleSettingClick}
       />
 
       {isUserError ? (
@@ -123,7 +138,7 @@ const MyPage = () => {
                 { value: 'savedItems', label: '찜한 상품' },
               ]}
               activeTab={activeMenuTab}
-              onTabChange={setActiveMenuTab}
+              onTabChange={handleTabChange}
             />
           </div>
           {activeMenuTab === 'generatedImages' && <GeneratedImagesSection />}

@@ -1,7 +1,20 @@
+import { useEffect } from 'react';
+
 import { overlay } from 'overlay-kit';
 import { useNavigate } from 'react-router-dom';
 
+import {
+  trackRoomTypeBtnBackClick,
+  trackRoomTypeMdResetInfoView,
+} from '@pages/imageSetup/analytics/roomTypeAnalytics';
+
 import { ROUTES } from '@routes/paths';
+
+import {
+  trackResetInfoMdKeepClick,
+  trackResetInfoMdQuitClick,
+} from '@shared/analytics/componentAnalytics';
+import { SCREEN_NAME } from '@shared/analytics/screenNames';
 
 import Popup from '@components/v2/popup/Popup';
 
@@ -11,11 +24,6 @@ import TitleNavBar from '@/shared/components/v2/navBar/TitleNavBar';
 
 import * as styles from './FunnelLayout.css';
 import { FUNNEL_STEP_PARAM } from '../../constants/funnel';
-import {
-  logSelectHouseInfoClickModalContinue,
-  logSelectHouseInfoClickModalExit,
-  logSelectHouseInfoViewModal,
-} from '../../utils/analytics';
 import { useFloorPlanStore } from '../../v2/stores/useFloorPlanStore';
 
 type FunnelStepKey = 'FloorPlanSelect' | 'InteriorStyle' | 'ActivityInfo';
@@ -31,6 +39,51 @@ const NAVBAR_TITLE_BY_STEP: Record<FunnelStepKey, string> = {
 // - LOGIN: 미로그인 사용자가 도면 선택 시 로그인 게이트로 이동하는 케이스
 // - GENERATE: 숏퍼널(경로2/4/5)에서 도면 선택 후 바로 이미지 생성으로 이동하는 케이스
 const ALLOWED_NEXT_PATHS: string[] = [ROUTES.LOGIN, ROUTES.GENERATE];
+
+interface RoomTypeResetInfoPopupProps {
+  onStay: () => void;
+  onExit: () => void;
+}
+
+const RoomTypeResetInfoPopup = ({
+  onStay,
+  onExit,
+}: RoomTypeResetInfoPopupProps) => {
+  useEffect(() => {
+    trackRoomTypeMdResetInfoView();
+  }, []);
+
+  return (
+    <Popup
+      btnStyle="text"
+      btnText="계속하기"
+      weakBtnText="나가기"
+      onClose={() => {
+        trackResetInfoMdKeepClick();
+        onStay();
+      }}
+      onConfirm={() => {
+        trackResetInfoMdKeepClick();
+        onStay();
+      }}
+      onCancel={onExit}
+      content={
+        <div className={styles.popupContent}>
+          <h3 className={styles.popupTitle}>
+            지금 나가면 선택한
+            <br />
+            정보가 모두 사라져요.
+          </h3>
+          <p className={styles.popupDetail}>
+            거의 다왔어요! 공간을 선택하고
+            <br />
+            원하는 AI 이미지를 받아보세요.
+          </p>
+        </div>
+      }
+    />
+  );
+};
 
 interface FunnelLayoutProps {
   children: React.ReactNode;
@@ -68,8 +121,6 @@ const FunnelLayout = ({ children, currentStep }: FunnelLayoutProps) => {
       return true;
     },
     onBlocked: ({ proceed, reset }) => {
-      logSelectHouseInfoViewModal();
-
       // vaul Drawer의 modal=true가 이탈방지 Popup의 pointer-events를 차단하므로,
       // popup이 떠 있는 동안에는 시트들을 일시 close하고, 계속 입력 시 원상 복구
       // 선택/필터 상태는 useFloorPlanStore가 보존하므로 시트만 다시 열면 사용자 작업이 그대로 이어짐
@@ -86,44 +137,18 @@ const FunnelLayout = ({ children, currentStep }: FunnelLayoutProps) => {
       overlay.open(({ unmount }) => {
         // '계속하기' / backdrop 클릭 -> blocker의 'blocked' 상태 해제, 현재 step에 머무름
         const stay = () => {
-          logSelectHouseInfoClickModalContinue();
           useFloorPlanStore.getState().restoreSheets(sheetsSnapshot);
           reset();
           unmount();
         };
 
-        // '나가기' -> 막혔던 navigation(뒤로가기 등)을 그대로 진행
-        // 페이지 자체를 떠나므로 시트 복원 불필요 (cleanup에서 store reset됨)
         const exit = () => {
-          logSelectHouseInfoClickModalExit();
+          trackResetInfoMdQuitClick(SCREEN_NAME.ROOM_TYPE);
           unmount();
           proceed();
         };
 
-        return (
-          <Popup
-            btnStyle="text"
-            btnText="계속하기"
-            weakBtnText="나가기"
-            onClose={stay}
-            onConfirm={stay}
-            onCancel={exit}
-            content={
-              <div className={styles.popupContent}>
-                <h3 className={styles.popupTitle}>
-                  지금 나가면 선택한
-                  <br />
-                  정보가 모두 사라져요.
-                </h3>
-                <p className={styles.popupDetail}>
-                  거의 다왔어요! 공간을 선택하고
-                  <br />
-                  원하는 AI 이미지를 받아보세요.
-                </p>
-              </div>
-            }
-          />
-        );
+        return <RoomTypeResetInfoPopup onStay={stay} onExit={exit} />;
       });
     },
   });
@@ -136,9 +161,16 @@ const FunnelLayout = ({ children, currentStep }: FunnelLayoutProps) => {
         // 모든 step에서 동일하게 navigate(-1) 호출
         // - step1: useExitBlocker가 가로채서 이탈 모달 표시 (이미지 생성 플로우 진행 중 보호)
         // - step2/step3: 이전 step 복귀
-        onBackClick={() => navigate(-1)}
+        onBackClick={() => {
+          if (isStep1) {
+            trackRoomTypeBtnBackClick();
+          }
+          navigate(-1);
+        }}
       />
-      <div className={styles.content}>{children}</div>
+      <div className={styles.content}>
+        <div className={styles.contentInner}>{children}</div>
+      </div>
     </div>
   );
 };

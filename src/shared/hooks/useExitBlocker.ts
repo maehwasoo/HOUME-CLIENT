@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { useBlocker, type BlockerFunction } from 'react-router-dom';
 
+type NavigationHistoryAction = Parameters<BlockerFunction>[0]['historyAction'];
+
 interface UseExitBlockerOptions {
   // exit 차단 활성화 여부. false면 useBlocker가 inactive 상태로 동작
   enabled: boolean;
@@ -10,7 +12,11 @@ interface UseExitBlockerOptions {
    * - proceed: 막혀있던 navigation을 진행 (ex: 사용자가 모달에서 '나가기' 선택 시)
    * - reset: blocked 상태 해제, 현재 페이지에 머무름 (ex: 모달에서 '계속하기' 선택 시)
    */
-  onBlocked: (args: { proceed: () => void; reset: () => void }) => void;
+  onBlocked: (args: {
+    proceed: () => void;
+    reset: () => void;
+    historyAction: NavigationHistoryAction;
+  }) => void;
   /**
    * 차단 여부 상세 제어 함수
    * true 반환 시 차단, false 반환 시 통과
@@ -33,6 +39,9 @@ export const useExitBlocker = ({
   // 호출부에서 inline 함수를 넘겨도 useBlocker가 매 렌더 재등록되지 않도록 ref 적용
   const onBlockedRef = useRef(onBlocked);
   const shouldBlockNavigationRef = useRef(shouldBlockNavigation);
+  const lastHistoryActionRef = useRef<NavigationHistoryAction | undefined>(
+    undefined
+  );
 
   // 매 렌더마다 ref를 최신 콜백으로 동기화
   useEffect(() => {
@@ -47,6 +56,7 @@ export const useExitBlocker = ({
   const blockerFn = useCallback<BlockerFunction>(
     (args) => {
       if (!enabled) return false;
+      lastHistoryActionRef.current = args.historyAction;
       return shouldBlockNavigationRef.current
         ? shouldBlockNavigationRef.current(args)
         : true;
@@ -71,6 +81,7 @@ export const useExitBlocker = ({
       onBlockedRef.current({
         proceed: blocker.proceed,
         reset: blocker.reset,
+        historyAction: lastHistoryActionRef.current!,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

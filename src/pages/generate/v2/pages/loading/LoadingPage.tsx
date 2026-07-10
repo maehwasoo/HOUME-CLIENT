@@ -5,6 +5,13 @@ import { overlay } from 'overlay-kit';
 import { ErrorBoundary } from 'react-error-boundary';
 import { Navigate, useNavigate } from 'react-router-dom';
 
+import {
+  trackLoadImgCardPreferenceClick,
+  trackLoadImgCardPreferenceView,
+  trackLoadImgMdGenImgQuitView,
+  trackLoadImgPageBackSwipe,
+  trackLoadImgPageRefresh,
+} from '@pages/generate/analytics/loadImgAnalytics';
 import { useStackDataQuery } from '@pages/generate/v2/apis/queries/useStackDataQuery';
 import LikeButton from '@pages/generate/v2/components/likeButton/LikeButton';
 import { useGenerateStore } from '@pages/generate/v2/stores/useGenerateStore';
@@ -14,6 +21,19 @@ import { ROUTES } from '@routes/paths';
 
 import { useImageFlowStore } from '@store/useImageFlowStore';
 
+import {
+  trackGenImgQuitMdKeepClick,
+  trackGenImgQuitMdQuitClick,
+} from '@shared/analytics/componentAnalytics';
+import { GA_EVENTS } from '@shared/analytics/events';
+import { useAnalyticsPageView } from '@shared/analytics/hooks';
+import { SCREEN_NAME } from '@shared/analytics/screenNames';
+import { getEntryRoute } from '@shared/analytics/utils/imageEntryRoute';
+import {
+  ensureShortFunnelFlowSnapshot,
+  getLoadImgReturnScreenName,
+} from '@shared/analytics/utils/imageFlow';
+import { loginStatusParams } from '@shared/analytics/utils/loginStatus';
 import { TOASTER_ID, TOAST_TYPE } from '@shared/types/toast';
 
 import type { GetCarouselResponseDTO } from '@apis/__generated__/data-contracts';
@@ -81,15 +101,20 @@ const LoadingPage = () => {
       }
       return true;
     },
-    onBlocked: ({ reset }) => {
+    onBlocked: ({ reset, historyAction }) => {
+      if (historyAction === 'POP') {
+        trackLoadImgPageBackSwipe();
+      }
+      trackLoadImgMdGenImgQuitView();
+
       overlay.open(({ unmount }) => {
         // '계속 기다리기' / backdrop 클릭 -> blocker 'blocked' 상태 해제, LoadingPage에 머무름
         const stay = () => {
           reset();
           unmount();
         };
-        // '나가기' -> store/sessionStorage 정리 후 'HOME'으로 이동 (replace: true)
         const exit = () => {
+          trackGenImgQuitMdQuitClick(SCREEN_NAME.LOAD_IMG);
           unmount();
           exitImageFlow();
           reset();
@@ -102,8 +127,14 @@ const LoadingPage = () => {
             btnText="생성 기다리기"
             weakBtnText="나가기"
             topIconName="WarningFillDanger"
-            onClose={stay}
-            onConfirm={stay}
+            onClose={() => {
+              trackGenImgQuitMdKeepClick();
+              stay();
+            }}
+            onConfirm={() => {
+              trackGenImgQuitMdKeepClick();
+              stay();
+            }}
             onCancel={exit}
             content={
               <div className={styles.popupContent}>
@@ -140,6 +171,29 @@ const LoadingPage = () => {
 
   // 이미지 생성 payload에 필요한 데이터가 정상적으로 구성되어 있으면 true
   const isRequestValid = requestState.kind !== 'invalid';
+
+  useAnalyticsPageView(
+    GA_EVENTS.loadImg.PAGE_VIEW,
+    SCREEN_NAME.LOAD_IMG,
+    {
+      ...loginStatusParams(),
+      image_entry_route: getEntryRoute(),
+      return_screen_name: getLoadImgReturnScreenName(),
+    },
+    { enabled: isRequestValid }
+  );
+
+  useEffect(() => {
+    const [navigation] = performance.getEntriesByType(
+      'navigation'
+    ) as PerformanceNavigationTiming[];
+
+    if (navigation?.type === 'reload') {
+      trackLoadImgPageRefresh();
+    }
+  }, []);
+
+  const viewedProductIdsRef = useRef<Set<number>>(new Set());
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -217,10 +271,14 @@ const LoadingPage = () => {
       onSettled: onMutationSettled,
     };
 
+    if (requestState.kind === 'invalid') {
+      console.error('invalid requestState kind');
+      return;
+    }
+
+    ensureShortFunnelFlowSnapshot();
+
     switch (requestState.kind) {
-      case 'invalid':
-        console.error('invalid requestState kind');
-        return;
       case 'fullFunnel':
         requestState.mutate(requestState.payload, mutateOptions);
         return;
@@ -276,6 +334,21 @@ const LoadingPage = () => {
   const displayCurrentImage = frontSlot === 'A' ? slotAImage : slotBImage;
   const displayNextImage = frontSlot === 'A' ? slotBImage : slotAImage;
 
+  useEffect(() => {
+    if (isPending || hasError || displayCurrentImage?.rawProductId == null) {
+      return;
+    }
+
+    const productId = displayCurrentImage.rawProductId;
+    if (viewedProductIdsRef.current.has(productId)) return;
+
+    viewedProductIdsRef.current.add(productId);
+    trackLoadImgCardPreferenceView({
+      productId,
+      loadedProductIds: Array.from(viewedProductIdsRef.current).join(', '),
+    });
+  }, [displayCurrentImage, hasError, isPending]);
+
   const handleProgressComplete = () => {
     if (!navigationData || !isApiCompleted) return;
     const { imageId, imageUrl, isMirror } = navigationData;
@@ -304,7 +377,15 @@ const LoadingPage = () => {
     if (isPending || isJjymLoading) return;
     if (!displayCurrentImage) return;
 
+    const productId = displayCurrentImage.rawProductId;
+    if (productId == null) return;
+
     setIsTooltipOpen(false);
+
+    trackLoadImgCardPreferenceClick({
+      productId,
+      isLike,
+    });
 
     if (isLike) {
       if (displayCurrentImage?.rawProductId == null) return;

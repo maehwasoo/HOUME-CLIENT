@@ -6,6 +6,12 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 
 import 'swiper/css';
 
+import {
+  trackRoomTypeViewSheetArrowLeftClick,
+  trackRoomTypeViewSheetArrowRightClick,
+  trackRoomTypeViewSheetFlipClick,
+} from '@pages/imageSetup/analytics/roomTypeAnalytics';
+
 import type { ExploreHouseTemplateDetailItemResponse } from '@apis/__generated__/data-contracts';
 
 import emptyImage from '@assets/v2/images/ImgEmpty.png';
@@ -122,14 +128,20 @@ const FloorPlanSheet = ({
                     size="M"
                     aria-label="이전"
                     className={styles.navButtonPrev}
-                    onClick={() => swiperRef.current?.slidePrev()}
+                    onClick={() => {
+                      trackRoomTypeViewSheetArrowLeftClick();
+                      swiperRef.current?.slidePrev();
+                    }}
                   />
                   <IconButton
                     name="ArrowRightFill"
                     size="M"
                     aria-label="다음"
                     className={styles.navButtonNext}
-                    onClick={() => swiperRef.current?.slideNext()}
+                    onClick={() => {
+                      trackRoomTypeViewSheetArrowRightClick();
+                      swiperRef.current?.slideNext();
+                    }}
                   />
                 </>
               )}
@@ -149,7 +161,10 @@ const FloorPlanSheet = ({
           color="inverse"
           size="2XL"
           leftIcon="FlipHorizontal"
-          onClick={toggleMirror}
+          onClick={() => {
+            trackRoomTypeViewSheetFlipClick();
+            toggleMirror();
+          }}
         >
           좌우반전
         </ActionButton>

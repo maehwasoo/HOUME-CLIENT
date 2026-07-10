@@ -5,11 +5,25 @@ import {
   useSearchParams,
 } from 'react-router-dom';
 
+import { trackResultListBtnBackClick } from '@pages/generate/analytics/resultListAnalytics';
+import { trackResultRecBtnBackClick } from '@pages/generate/analytics/resultRecAnalytics';
 import { useImageMetaQuery } from '@pages/generate/v2/apis/queries/useImageMetaQuery';
 
 import { ROUTES } from '@routes/paths';
 
 import { isCurationViewType, RESULT_TYPE } from '@store/useImageFlowStore';
+
+import { GA_EVENTS } from '@shared/analytics/events';
+import {
+  useAnalyticsPageView,
+  useScrollDepthTrack,
+} from '@shared/analytics/hooks';
+import { SCREEN_NAME } from '@shared/analytics/screenNames';
+import { getEntryRoute } from '@shared/analytics/utils/imageEntryRoute';
+import {
+  buildResultListPageViewParams,
+  buildResultRecPageViewParams,
+} from '@shared/analytics/utils/imageFlow';
 
 import InlineError from '@components/inlineError/InlineError';
 import Loading from '@components/loading/Loading';
@@ -52,6 +66,62 @@ const ResultPage = () => {
   const stateImageUrl = locationState?.imageUrl;
   const stateIsMirror = locationState?.isMirror;
   const isFromLoading = locationState?.from === 'loading';
+
+  // 퍼널 param(image_entry_route/스냅샷)은 로딩 플로우 직후에만 유효
+  // (마이페이지/연관 이미지 진입 시 store에 남은 이전 생성 플로우 값이 붙는 것 방지)
+  useAnalyticsPageView(
+    GA_EVENTS.resultList.PAGE_VIEW,
+    SCREEN_NAME.RESULT_LIST,
+    {
+      gen_img_id: parsedImageId ?? 0,
+      ...(isFromLoading && {
+        ...buildResultListPageViewParams(parsedImageId ?? 0),
+        image_entry_route: getEntryRoute(),
+      }),
+    },
+    {
+      enabled: parsedImageId !== null && isListView,
+      // 연관 이미지 클릭으로 같은 라우트에서 imageId만 바뀌면 page_view 재발사 (ResultPage remount 없음)
+      refireKey: parsedImageId ?? undefined,
+    }
+  );
+
+  useAnalyticsPageView(
+    GA_EVENTS.resultRec.PAGE_VIEW,
+    SCREEN_NAME.RESULT_REC,
+    {
+      gen_img_id: parsedImageId ?? 0,
+      ...(isFromLoading && {
+        ...buildResultRecPageViewParams(parsedImageId ?? 0),
+        image_entry_route: getEntryRoute(),
+      }),
+    },
+    {
+      enabled: parsedImageId !== null && !isListView,
+      refireKey: parsedImageId ?? undefined,
+    }
+  );
+
+  useScrollDepthTrack(GA_EVENTS.resultRec.PAGE_SCROLL, SCREEN_NAME.RESULT_REC, {
+    enabled: parsedImageId !== null && !isListView,
+  });
+
+  useScrollDepthTrack(
+    GA_EVENTS.resultList.PAGE_SCROLL,
+    SCREEN_NAME.RESULT_LIST,
+    {
+      enabled: parsedImageId !== null && isListView,
+    }
+  );
+
+  const handleBackClick = () => {
+    if (isListView) {
+      trackResultListBtnBackClick();
+    } else {
+      trackResultRecBtnBackClick();
+    }
+    navigate(-1);
+  };
 
   // 뒤로가기 가드 — LoadingPage->ResultPage이고, 사용자 액션이 POP(뒤로가기)일 때만 useExitBlocker 훅이 실행됨
   // - LoadingPage->ResultPage에서 뒤로가기 시 HOME으로 redirect (이미지 생성 플로우로 재진입 방지)
@@ -101,7 +171,7 @@ const ResultPage = () => {
         <TitleNavBar
           background="transparent"
           placement="overContent"
-          onBackClick={() => navigate(-1)}
+          onBackClick={handleBackClick}
         />
         <Loading />
       </main>
@@ -115,7 +185,7 @@ const ResultPage = () => {
         <TitleNavBar
           background="transparent"
           placement="overContent"
-          onBackClick={() => navigate(-1)}
+          onBackClick={handleBackClick}
         />
         <InlineError message="이미지를 불러올 수 없습니다" />
       </main>
@@ -134,7 +204,7 @@ const ResultPage = () => {
       <TitleNavBar
         background="gradient"
         placement="overContent"
-        onBackClick={() => navigate(-1)}
+        onBackClick={handleBackClick}
       />
       <div className={styles.content}>
         <div className={styles.resultBody}>

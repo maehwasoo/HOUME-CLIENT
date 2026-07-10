@@ -1,3 +1,4 @@
+import { LOGIN_ENTRY_ROUTE } from '@shared/analytics/params/gate';
 import ActionButton from '@shared/components/v2/button/actionButton/ActionButton';
 import Icon from '@shared/components/v2/icon/Icon';
 import type {
@@ -73,7 +74,13 @@ const ProductDetailCard = ({
               size="XS"
               leftIcon="Link"
               aria-label="공식 사이트로 이동"
-              onClick={() => openProductLink(linkHref, link?.onClick)}
+              onClick={() =>
+                openProductLink(
+                  linkHref,
+                  link?.onClick,
+                  LOGIN_ENTRY_ROUTE.PRODUCT_CARD_SITE
+                )
+              }
             >
               {link?.label || '사이트'}
             </ActionButton>

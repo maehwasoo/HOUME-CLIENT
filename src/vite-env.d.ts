@@ -2,6 +2,7 @@
 
 interface ImportMetaEnv {
   readonly VITE_ENABLE_FIREBASE_ANALYTICS?: string;
+  readonly VITE_ANALYTICS_ENV?: 'local' | 'staging' | 'production';
   readonly VITE_SENTRY_DSN?: string;
   readonly VITE_SENTRY_ENVIRONMENT?: string;
   readonly VITE_SENTRY_RELEASE?: string;

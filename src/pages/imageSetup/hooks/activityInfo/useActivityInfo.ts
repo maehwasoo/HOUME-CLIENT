@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
-import {
-  logSelectFurnitureClickBtnCTA,
-  logSelectFurnitureClickBtnCTACreditError,
-} from '@pages/imageSetup/utils/analytics';
+import { trackSelectFurnitureBtnCtaClick } from '@pages/imageSetup/analytics/selectFurnitureAnalytics';
 
 import { ROUTES } from '@routes/paths';
+
+import { holdEntryRoute } from '@store/useImageFlowStore';
+
+import {
+  buildSelectedFurnitureChips,
+  captureFullFunnelFlowSnapshot,
+} from '@shared/analytics/utils/imageFlow';
 
 import { useCreditGuard } from '@hooks/useCreditGuard';
 
@@ -18,9 +22,15 @@ import { useActivitiesQuery } from '../../apis/queries/useActivitiesQuery';
 import { useFurnitureCategoriesQuery } from '../../apis/queries/useFurnitureCategoriesQuery';
 import { useFunnelStore } from '../../stores/useFunnelStore';
 import { CATEGORY_SELECTION_MODE } from '../../types/funnel/activityInfo';
+import { useRecentFloorPlanQuery } from '../../v2/apis/queries/useRecentFloorPlanQuery';
 
+import type { CategorySelectionAnalyticsCallbacks } from './useCategorySelection';
 import type { ActivityInfoFormData } from '../../types/funnel/activityInfo';
 import type { ImageSetupSteps } from '../../types/funnel/steps';
+
+interface UseActivityInfoOptions {
+  categoryAnalytics?: CategorySelectionAnalyticsCallbacks;
+}
 
 /**
  * - 주요활동/가구 카테고리 쿼리 호출
@@ -29,7 +39,10 @@ import type { ImageSetupSteps } from '../../types/funnel/steps';
  * - 활동 변경 시 가구 초기화 + 필수 가구 자동 선택
  * - 제출(크레딧 체크 → sessionStorage → /generate)
  */
-export const useActivityInfo = (context: ImageSetupSteps['ActivityInfo']) => {
+export const useActivityInfo = (
+  context: ImageSetupSteps['ActivityInfo'],
+  options?: UseActivityInfoOptions
+) => {
   const navigate = useNavigate();
 
   // 크레딧 가드 훅 (이미지 생성 시 1크레딧 필요)
@@ -50,6 +63,8 @@ export const useActivityInfo = (context: ImageSetupSteps['ActivityInfo']) => {
     isError: isCategoriesError,
     refetch: refetchCategories,
   } = useFurnitureCategoriesQuery();
+
+  const { data: recentFloorPlanData } = useRecentFloorPlanQuery();
 
   // 둘 중 하나라도 pending/error면 전체가 pending/error
   const isPending = isActivitiesPending || isCategoriesPending;
@@ -94,47 +109,64 @@ export const useActivityInfo = (context: ImageSetupSteps['ActivityInfo']) => {
   const findByNameEng = (name: string) =>
     categories?.find((c) => c.nameEng === name) ?? null;
 
+  const buildChips = (furnitureIds: number[]) =>
+    buildSelectedFurnitureChips(furnitureIds, categories);
+
+  const categoryAnalytics = options?.categoryAnalytics;
+
   const bed = useCategorySelection(
     findByNameEng('BED'),
     CATEGORY_SELECTION_MODE.BED,
     formData,
     setFormData,
-    globalConstraints
+    globalConstraints,
+    buildChips,
+    categoryAnalytics
   );
   const sofa = useCategorySelection(
     findByNameEng('SOFA'),
     CATEGORY_SELECTION_MODE.SOFA,
     formData,
     setFormData,
-    globalConstraints
+    globalConstraints,
+    buildChips,
+    categoryAnalytics
   );
   const storage = useCategorySelection(
     findByNameEng('STORAGE'),
     CATEGORY_SELECTION_MODE.STORAGE,
     formData,
     setFormData,
-    globalConstraints
+    globalConstraints,
+    buildChips,
+    categoryAnalytics
   );
   const table = useCategorySelection(
     findByNameEng('TABLE'),
     CATEGORY_SELECTION_MODE.TABLE,
     formData,
     setFormData,
-    globalConstraints
+    globalConstraints,
+    buildChips,
+    categoryAnalytics
   );
   const selective = useCategorySelection(
     findByNameEng('SELECTIVE'),
     CATEGORY_SELECTION_MODE.SELECTIVE,
     formData,
     setFormData,
-    globalConstraints
+    globalConstraints,
+    buildChips,
+    categoryAnalytics
   );
   const lighting = useCategorySelection(
     findByNameEng('LIGHTING'),
     CATEGORY_SELECTION_MODE.LIGHTING,
     formData,
     setFormData,
-    globalConstraints
+    globalConstraints,
+    buildChips,
+    categoryAnalytics
   );
 
   // 카테고리 선택 객체 구성
@@ -189,19 +221,31 @@ export const useActivityInfo = (context: ImageSetupSteps['ActivityInfo']) => {
     // 중복 클릭 방지
     if (isChecking || isButtonDisabled) return;
 
-    // CTA 버튼 클릭 시 GA 이벤트 전송
-    logSelectFurnitureClickBtnCTA();
-
     // 이미지 생성 전 크레딧 확인
     const hasCredit = await checkCredit();
     if (!hasCredit) {
-      logSelectFurnitureClickBtnCTACreditError();
       setIsButtonDisabled(true);
       return;
     }
 
     // payload 조립 + 다음 페이지(LoadingPage)로 데이터 전달은 useGenerateImageRequest 훅이 담당
-    // 퍼널 데이터는 ImageSetupPage mount 시점에 다음 진입에서 reset
+    const funnelState = useFunnelStore.getState();
+    const furnitureChipCodes = buildChips(formData.furnitureIds);
+
+    captureFullFunnelFlowSnapshot({
+      floorPlanId: funnelState.floorPlan?.floorPlanId,
+      moodBoardIds: funnelState.moodBoardIds ?? undefined,
+      activityCode: formData.activity,
+      furnitureChipCodes,
+    });
+
+    trackSelectFurnitureBtnCtaClick({
+      chips: furnitureChipCodes,
+      activityCode: formData.activity,
+      hasPreviousImage: recentFloorPlanData?.hasRecentImage === true,
+    });
+
+    holdEntryRoute();
     navigate(ROUTES.GENERATE);
   };
 

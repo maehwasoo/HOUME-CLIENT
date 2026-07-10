@@ -94,9 +94,17 @@ const DragHandleBottomSheet = ({
 
   // ── effects (부모 expanded 동기화 / snapping 보간) ──
 
+  // 부모에 expanded 변경을 알릴 때만 호출 (onExpandedChange 참조 변경만으로 재호출하지 않음)
+  const onExpandedChangeRef = useRef(onExpandedChange);
+  onExpandedChangeRef.current = onExpandedChange;
+  const prevExpandedNotifiedRef = useRef(expanded);
+
   useEffect(() => {
-    onExpandedChange?.(expanded);
-  }, [expanded, onExpandedChange]);
+    if (prevExpandedNotifiedRef.current === expanded) return;
+
+    prevExpandedNotifiedRef.current = expanded;
+    onExpandedChangeRef.current?.(expanded);
+  }, [expanded]);
 
   // snapping phase: collapsed → expanded snap 시 콘텐츠 자연 높이 측정 + transition으로 보간
   useLayoutEffect(() => {

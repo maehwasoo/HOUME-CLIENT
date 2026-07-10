@@ -1,4 +1,9 @@
-import type { AppliedFilterChip } from '@pages/home/types/productTab';
+import type {
+  AppliedFilterChip,
+  SelectedProduct,
+} from '@pages/home/types/productTab';
+
+import type { FurnitureTypeFilterResponse } from '@shared/apis/__generated__/data-contracts';
 
 /** 외부(탭 상태/요청 파라미터)와 내부(시트 선택 상태)를 연결할 때 사용하는 표준 "전체" 센티널 값 */
 const ALL_FILTER_SENTINEL = 'ALL';
@@ -231,6 +236,57 @@ const buildAppliedFilterChips = (
     },
   ];
 };
+
+const LEGACY_CATEGORY_SUB_CATEGORY: Record<string, string> = {
+  '그 외': 'ETC',
+};
+
+/** 필터 API 로드 전에도 product_sub_category를 채우기 위한 기본 매핑 */
+const DEFAULT_FURNITURE_SUB_CATEGORY_BY_NAME_KR: Record<string, string> = {
+  ...LEGACY_CATEGORY_SUB_CATEGORY,
+  기타: 'ETC',
+  '침대/프레임': 'BED',
+  '업무용 책상': 'OFFICE_DESK',
+  식탁: 'DINING_TABLE',
+  '좌식 테이블': 'SITTING_TABLE',
+  옷장: 'CLOSET',
+  '수납/장식장': 'DISPLAY_CABINET',
+  소파: 'SOFA',
+  '의자/스툴': 'CHAIR',
+  '화장대/협탁': 'DRESSING_TABLE',
+  조명: 'LIGHTING',
+};
+
+export const buildFurnitureSubCategoryByNameKr = (
+  furnitureTypes: Pick<FurnitureTypeFilterResponse, 'nameKr' | 'nameEng'>[] = []
+) => {
+  const map: Record<string, string> = {
+    ...DEFAULT_FURNITURE_SUB_CATEGORY_BY_NAME_KR,
+  };
+
+  furnitureTypes.forEach((type) => {
+    if (type.nameKr && type.nameEng) {
+      map[type.nameKr] = type.nameEng;
+    }
+  });
+
+  return map;
+};
+
+export const resolveProductSubCategoryName = (
+  categoryName: string | undefined,
+  subCategoryByNameKr: Record<string, string>
+) => (categoryName ? subCategoryByNameKr[categoryName] : undefined);
+
+export const withProductSubCategory = (
+  product: SelectedProduct,
+  subCategoryByNameKr: Record<string, string>
+): SelectedProduct => ({
+  ...product,
+  subCategoryName:
+    product.subCategoryName ??
+    resolveProductSubCategoryName(product.categoryName, subCategoryByNameKr),
+});
 
 export {
   ALL_FILTER_SENTINEL,

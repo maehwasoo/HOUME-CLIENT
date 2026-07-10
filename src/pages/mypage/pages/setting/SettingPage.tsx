@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 
 import { overlay } from 'overlay-kit';
 import { useNavigate } from 'react-router-dom';
@@ -6,13 +6,21 @@ import { useNavigate } from 'react-router-dom';
 import { useDeleteUserMutation } from '@pages/login/apis/mutations/useDeleteUserMutation';
 import { useLogoutMutation } from '@pages/login/apis/mutations/useLogoutMutation';
 import {
-  logMyPageClickBtnLogout,
-  logMyPageClickBtnSuccession,
-  logMyPageClickSuccessionModalCancel,
-  logMyPageClickSuccessionModalOut,
-} from '@pages/mypage/utils/analytics';
+  getSettingPageViewParams,
+  trackSettingLogoutClick,
+  trackSettingSuccessionClick,
+  trackSettingSuccessionModalView,
+} from '@pages/mypage/analytics/settingAnalytics';
 
 import { ROUTES } from '@routes/paths';
+
+import {
+  trackSuccessionMdByeClick,
+  trackSuccessionMdCancelClick,
+} from '@shared/analytics/componentAnalytics';
+import { GA_EVENTS } from '@shared/analytics/events';
+import { useAnalyticsPageView } from '@shared/analytics/hooks';
+import { SCREEN_NAME } from '@shared/analytics/screenNames';
 
 import { useToast } from '@components/toast/useToast';
 import TitleNavBar from '@components/v2/navBar/TitleNavBar';
@@ -23,12 +31,56 @@ import { TOAST_TYPE } from '@/shared/types/toastLegacy';
 
 import * as styles from './SettingPage.css';
 
+interface SuccessionPopupProps {
+  onCancel: () => void;
+  onConfirm: () => void;
+  onClose: () => void;
+}
+
+const SuccessionPopup = ({
+  onCancel,
+  onConfirm,
+  onClose,
+}: SuccessionPopupProps) => {
+  useEffect(() => {
+    trackSettingSuccessionModalView();
+  }, []);
+
+  return (
+    <Popup
+      btnStyle="text"
+      topIconName="WarningFillDanger"
+      btnText="취소하기"
+      weakBtnText="탈퇴하기"
+      onConfirm={onConfirm}
+      onCancel={onCancel}
+      onClose={onClose}
+      content={
+        <div className={styles.popupContent}>
+          <h3 className={styles.popupTitle}>하우미 탈퇴 전 확인하세요</h3>
+          <p className={styles.popupDetail}>
+            탈퇴 시 생성했던 이미지와 함께
+            <br />
+            모든 정보가 삭제되며, 복구가 불가능해요.
+          </p>
+        </div>
+      }
+    />
+  );
+};
+
 const SettingPage = () => {
   const navigate = useNavigate();
   const { notify } = useToast();
   const { mutate: logout } = useLogoutMutation();
   const { mutate: deleteUser } = useDeleteUserMutation();
   const logoutTimerRef = useRef<number | null>(null);
+
+  useAnalyticsPageView(
+    GA_EVENTS.setting.PAGE_VIEW,
+    SCREEN_NAME.SETTING,
+    getSettingPageViewParams()
+  );
 
   const handleServicePolicy = () => {
     navigate(ROUTES.SETTING_SERVICE);
@@ -43,7 +95,8 @@ const SettingPage = () => {
   };
 
   const handleLogout = () => {
-    logMyPageClickBtnLogout();
+    trackSettingLogoutClick();
+
     // 1) 토스트 표시 (2.5초 유지)
     notify({
       text: '로그아웃 되었습니다',
@@ -68,34 +121,20 @@ const SettingPage = () => {
   };
 
   const handleWithdraw = () => {
-    logMyPageClickBtnSuccession();
+    trackSettingSuccessionClick();
+
     overlay.open(({ unmount }) => (
-      <Popup
-        btnStyle="text"
-        topIconName="WarningFillDanger"
-        btnText="취소하기"
-        weakBtnText="탈퇴하기"
+      <SuccessionPopup
         onConfirm={() => {
-          logMyPageClickSuccessionModalCancel();
+          trackSuccessionMdCancelClick();
           unmount();
         }}
         onCancel={() => {
-          logMyPageClickSuccessionModalOut();
-          // 모달 닫고 탈퇴 진행
+          trackSuccessionMdByeClick();
           unmount();
           deleteUser();
         }}
         onClose={unmount}
-        content={
-          <div className={styles.popupContent}>
-            <h3 className={styles.popupTitle}>하우미 탈퇴 전 확인하세요</h3>
-            <p className={styles.popupDetail}>
-              탈퇴 시 생성했던 이미지와 함께
-              <br />
-              모든 정보가 삭제되며, 복구가 불가능해요.
-            </p>
-          </div>
-        }
       />
     ));
   };

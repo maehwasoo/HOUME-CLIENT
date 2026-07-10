@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 
+import { useResultRecAnalytics } from '@pages/generate/analytics/useResultRecAnalytics';
 import { useCurationCategoriesQuery } from '@pages/generate/v2/apis/queries/useCurationCategoriesQuery';
 import { useCurationProductsQuery } from '@pages/generate/v2/apis/queries/useCurationProductsQuery';
 
@@ -9,6 +10,7 @@ import { ROUTES } from '@routes/paths';
 
 import { useSavedItemsStore } from '@store/useSavedItemsStore';
 
+import { LOGIN_ENTRY_ROUTE } from '@shared/analytics/params/gate';
 import Chip from '@shared/components/v2/chip/Chip';
 import EmptyView from '@shared/components/v2/emptyView/EmptyView';
 import ProductCard from '@shared/components/v2/productCard/ProductCard';
@@ -146,22 +148,22 @@ const CurationResult = ({
     refetch: refetchProducts,
   } = useCurationProductsQuery(currentImageId, selectedCategoryId ?? 0);
 
-  const productsRaw = productsData?.products ?? [];
-  const categories = categoriesData?.categories ?? [];
+  const productsRaw = productsData?.products;
+  const categories = categoriesData?.categories;
   const renderableCategories = useMemo(
-    () => categories.filter((category) => category.id !== undefined),
+    () => (categories ?? []).filter((category) => category.id !== undefined),
     [categories]
   );
 
   const renderableProducts = useMemo(
-    () => productsRaw.filter((wrapper) => wrapper.product?.id != null),
+    () => (productsRaw ?? []).filter((wrapper) => wrapper.product?.id != null),
     [productsRaw]
   );
 
   const categoriesState = getSectionDisplayState({
     isLoading: isCategoriesLoading,
     isError: isCategoriesError,
-    rawCount: categories.length,
+    rawCount: categories?.length ?? 0,
     renderableCount: renderableCategories.length,
   });
 
@@ -171,11 +173,31 @@ const CurationResult = ({
       : getSectionDisplayState({
           isLoading: isProductsLoading,
           isError: isProductsError,
-          rawCount: productsRaw.length,
+          rawCount: productsRaw?.length ?? 0,
           renderableCount: renderableProducts.length,
         });
 
+  const {
+    handleCategoryChipClick,
+    handleFeedCardClick,
+    handleFeedCardGoSiteClick,
+    handleFeedCardSaveToggle,
+    handleArrowLeftClick,
+    handleArrowRightClick,
+    handleMoreImgClick,
+    handlePreferenceClick,
+    handleFactorFeedbackThankYou,
+  } = useResultRecAnalytics({
+    currentImageId,
+    categoriesState,
+    productsState,
+    selectedCategoryId,
+    renderableCategories,
+    renderableProducts,
+  });
+
   const { mutate: toggleJjym } = useJjymMutation({
+    loginEntryRoute: LOGIN_ENTRY_ROUTE.PRODUCT_CARD_SAVE,
     onSavedAction: () => {
       navigate(ROUTES.MYPAGE, { state: { activeTab: 'savedItems' } });
     },
@@ -188,6 +210,9 @@ const CurationResult = ({
         images={images}
         onCurrentImgIdChange={onCurrentImgIdChange}
         onSlideChange={setSlideIndex}
+        onArrowLeftClick={handleArrowLeftClick}
+        onArrowRightClick={handleArrowRightClick}
+        onMoreImgClick={handleMoreImgClick}
       />
 
       <div className={styles.mainArea}>
@@ -227,7 +252,11 @@ const CurationResult = ({
                     <Chip
                       key={category.id}
                       selected={selectedCategoryId === category.id}
-                      onClick={() => setSelectedCategoryId(category.id!)}
+                      onClick={() => {
+                        const categoryId = category.id!;
+                        handleCategoryChipClick(categoryId);
+                        setSelectedCategoryId(categoryId);
+                      }}
                     >
                       {category.categoryName ?? ''}
                     </Chip>
@@ -251,6 +280,7 @@ const CurationResult = ({
                       <ProductCard
                         key={id}
                         enableWholeCardLink={Boolean(href)}
+                        onCardClick={() => handleFeedCardClick(p)}
                         product={{
                           brand: p.brand ?? p.mallName ?? '',
                           title: p.name ?? '',
@@ -266,9 +296,24 @@ const CurationResult = ({
                         }}
                         save={{
                           isSaved: getSavedState(id, p.isLiked),
-                          onToggle: () => toggleJjym(id),
+                          onToggle: () => {
+                            const isSaved = getSavedState(id, p.isLiked);
+                            handleFeedCardSaveToggle(p, isSaved);
+                            toggleJjym(id, {
+                              loginEntryRoute:
+                                LOGIN_ENTRY_ROUTE.PRODUCT_LIST_SAVE,
+                              productName: p.name,
+                            });
+                          },
                         }}
-                        link={href ? { href } : undefined}
+                        link={
+                          href
+                            ? {
+                                href,
+                                onClick: () => handleFeedCardGoSiteClick(p),
+                              }
+                            : undefined
+                        }
                       />
                     );
                   })
@@ -281,7 +326,11 @@ const CurationResult = ({
             className={styles.section}
             aria-label="생성 이미지 선호도 조사"
           >
-            <ImgFeedback imageId={lastImageId} />
+            <ImgFeedback
+              imageId={lastImageId}
+              onPreferenceClick={handlePreferenceClick}
+              onFactorFeedbackThankYou={handleFactorFeedbackThankYou}
+            />
           </section>
         )}
       </div>

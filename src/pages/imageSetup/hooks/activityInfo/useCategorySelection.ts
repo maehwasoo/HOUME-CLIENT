@@ -12,6 +12,12 @@ import type {
   CategorySelectionMode,
 } from '../../types/funnel/activityInfo';
 
+export type CategorySelectionAnalyticsCallbacks = {
+  onFurnitureSelect?: (chips?: string) => void;
+  onFurnitureDeselect?: (chips?: string) => void;
+  onEssentialDeselectToast?: (chips?: string) => void;
+};
+
 /**
  * 특정 카테고리의 가구 선택 로직을 관리하는 훅
  * Chip 가구 토글 인터페이스 제공
@@ -23,7 +29,9 @@ export const useCategorySelection = (
   mode: CategorySelectionMode,
   formData: ActivityInfoFormData,
   setFormData: React.Dispatch<React.SetStateAction<ActivityInfoFormData>>,
-  globalConstraints: ReturnType<typeof useGlobalConstraints>
+  globalConstraints: ReturnType<typeof useGlobalConstraints>,
+  buildChips: (furnitureIds: number[]) => string | undefined,
+  analytics?: CategorySelectionAnalyticsCallbacks
 ) => {
   // useToast는 early return 전에 호출
   const { notify } = useToast();
@@ -61,10 +69,14 @@ export const useCategorySelection = (
           type: TOAST_TYPE.INFO,
           options: { toasterId: TOASTER_ID.BOTTOM_4 },
         });
+        analytics?.onEssentialDeselectToast?.(
+          buildChips(formData.furnitureIds || [])
+        );
         return;
       }
       const updatedFurnitureIds = currentIds.filter((id) => id !== furnitureId);
       setFormData((prev) => ({ ...prev, furnitureIds: updatedFurnitureIds }));
+      analytics?.onFurnitureDeselect?.(buildChips(updatedFurnitureIds));
       return;
     }
 
@@ -79,6 +91,7 @@ export const useCategorySelection = (
         furnitureId,
       ]);
       setFormData((prev) => ({ ...prev, furnitureIds: updatedFurnitureIds }));
+      analytics?.onFurnitureSelect?.(buildChips(updatedFurnitureIds));
       return;
     }
 
@@ -88,6 +101,7 @@ export const useCategorySelection = (
       furnitureId,
     ]);
     setFormData((prev) => ({ ...prev, furnitureIds: updatedFurnitureIds }));
+    analytics?.onFurnitureSelect?.(buildChips(updatedFurnitureIds));
   };
 
   // 각 가구별 활성화 상태 정보 (Chip의 disabled 매핑)

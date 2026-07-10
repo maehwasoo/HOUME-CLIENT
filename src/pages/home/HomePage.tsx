@@ -1,7 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 
+import {
+  trackHomeTapExploreClick,
+  trackHomeTapShopClick,
+} from '@pages/home/analytics/homeAnalytics';
+import { useRecentFloorPlanQuery } from '@pages/imageSetup/v2/apis/queries/useRecentFloorPlanQuery';
 import { useMyPageUserQuery } from '@pages/mypage/apis/queries/useMyPageUserQuery';
 
 import { ROUTES } from '@routes/paths';
@@ -9,17 +14,24 @@ import { ROUTES } from '@routes/paths';
 import { useImageFlowStore, ENTRY_ROUTE } from '@store/useImageFlowStore';
 import { useUserStore } from '@store/useUserStore';
 
+import { GA_EVENTS } from '@shared/analytics/events';
+import {
+  useAnalyticsPageView,
+  useScrollDepthTrack,
+} from '@shared/analytics/hooks';
+import { LOGIN_ENTRY_ROUTE } from '@shared/analytics/params/gate';
+import { SCREEN_NAME } from '@shared/analytics/screenNames';
+import { persistLoginEntryRoute } from '@shared/analytics/utils/loginEntryRoute';
+import { loginStatusParams } from '@shared/analytics/utils/loginStatus';
+
 import MenuTab from '@components/v2/menuTab/MenuTab';
 import LogoNavBar from '@components/v2/navBar/LogoNavBar';
+
+import { setLoginRedirect } from '@utils/loginRedirect';
 
 import ExploreTab from './components/explore/ExploreTab';
 import ProductTab from './components/product/ProductTab';
 import * as styles from './HomePage.css';
-import {
-  logLandingClickBtnCTA,
-  logLandingClickBtnMypage,
-  logLandingScrollDepthTreshold,
-} from './utils/analytics';
 
 export type HomeMenuTab = 'explore' | 'product';
 
@@ -52,9 +64,33 @@ const HomePage = () => {
       : (homeState?.activeTab ??
           (presetHasProductsToBeRestored ? 'product' : 'explore'))
   );
+  const isExploreTab = activeMenuTab === 'explore';
+  const { data: recentFloorPlanData, isFetched: isRecentFloorPlanFetched } =
+    useRecentFloorPlanQuery();
+  const hasPreviousImage = recentFloorPlanData?.hasRecentImage === true;
+
+  useAnalyticsPageView(
+    GA_EVENTS.home.PAGE_VIEW,
+    SCREEN_NAME.HOME,
+    { ...loginStatusParams(), has_previous_image: hasPreviousImage },
+    { enabled: isExploreTab && isRecentFloorPlanFetched }
+  );
+
+  useScrollDepthTrack(GA_EVENTS.home.PAGE_SCROLL, SCREEN_NAME.HOME, {
+    enabled: isExploreTab,
+    extraParams: loginStatusParams(),
+  });
 
   // 탭 전환 시 URL ?tab= 에 반영 → 로그인 게이트로 이탈했다 복귀해도 같은 탭으로 돌아옴
   const handleTabChange = (tab: HomeMenuTab) => {
+    if (tab === 'explore' && activeMenuTab !== 'explore') {
+      trackHomeTapExploreClick();
+    }
+
+    if (tab === 'product' && activeMenuTab !== 'product') {
+      trackHomeTapShopClick();
+    }
+
     setActiveMenuTab(tab);
     setSearchParams(
       (prev) => {
@@ -67,50 +103,10 @@ const HomePage = () => {
     );
   };
 
-  const scrollDepth50Sent = useRef(false);
-  const scrollDepth100Sent = useRef(false);
-
   // TODO: v1에서 로그인 확인용으로 사용, v2 구현 과정에서 임시 미사용 처리함
   useMyPageUserQuery({ enabled: isLoggedIn });
 
-  // 스크롤 깊이 추적
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      const scrollHeight =
-        document.documentElement.scrollHeight -
-        document.documentElement.clientHeight;
-      const scrollPercentage =
-        scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-
-      // 50% 도달 시 이벤트 전송 (초기 1회)
-      if (scrollPercentage >= 50 && !scrollDepth50Sent.current) {
-        logLandingScrollDepthTreshold(50);
-        scrollDepth50Sent.current = true;
-      }
-
-      // 100% 도달 시 이벤트 전송 (초기 1회)
-      if (
-        (scrollPercentage >= 99.5 ||
-          scrollTop + window.innerHeight >=
-            document.documentElement.scrollHeight - 10) &&
-        !scrollDepth100Sent.current
-      ) {
-        logLandingScrollDepthTreshold(100);
-        scrollDepth100Sent.current = true;
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
   const handleGenerate = () => {
-    logLandingClickBtnCTA();
     useImageFlowStore
       .getState()
       .setFlow({ entryRoute: ENTRY_ROUTE.GENERATE_BUTTON });
@@ -118,19 +114,19 @@ const HomePage = () => {
   };
 
   const handleProfile = () => {
-    if (isLoggedIn) {
-      logLandingClickBtnMypage();
-    }
     navigate(ROUTES.MYPAGE);
   };
 
   const handleLogin = () => {
+    setLoginRedirect(location.pathname + location.search);
+    persistLoginEntryRoute(LOGIN_ENTRY_ROUTE.TOP_NAV_LOGIN);
     navigate(ROUTES.LOGIN);
   };
 
   return (
     <main className={styles.page}>
       <LogoNavBar
+        screenName={SCREEN_NAME.HOME}
         page="home"
         showGenerateButton
         authSlot={isLoggedIn ? 'profile' : 'login'}
@@ -148,7 +144,11 @@ const HomePage = () => {
         onTabChange={handleTabChange}
       />
       {activeMenuTab === 'explore' && (
-        <ExploreTab exploreSeedBannerId={homeState?.exploreSeedBannerId} />
+        <ExploreTab
+          exploreSeedBannerId={homeState?.exploreSeedBannerId}
+          hasPreviousImage={hasPreviousImage}
+          hasPreviousSpace={hasPreviousImage}
+        />
       )}
       {activeMenuTab === 'product' && <ProductTab />}
     </main>

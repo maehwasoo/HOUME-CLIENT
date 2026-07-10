@@ -3,11 +3,17 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import type { HomeLocationState } from '@pages/home/HomePage';
+import { trackLandingCtaClick } from '@pages/landing/analytics/landingAnalytics';
 import { useLandingQuery } from '@pages/landing/apis/queries/useLandingQuery';
 import { LANDING_CTA_BY_VARIANT } from '@pages/landing/constants/landingCtaAbTest';
 
 import { ROUTES } from '@routes/paths';
 
+import { GA_EVENTS } from '@shared/analytics/events';
+import { useAnalyticsPageView } from '@shared/analytics/hooks';
+import { getLandingTestType } from '@shared/analytics/params/landing';
+import { SCREEN_NAME } from '@shared/analytics/screenNames';
+import { loginStatusParams } from '@shared/analytics/utils/loginStatus';
 import ActionButton from '@shared/components/v2/button/actionButton/ActionButton';
 import LogoNavBar from '@shared/components/v2/navBar/LogoNavBar';
 
@@ -23,7 +29,7 @@ const LANDING_BANNER_AFTER_DELAY_MS = 2000;
 
 const LandingPage = () => {
   const navigate = useNavigate();
-  const { variant } = useABTest();
+  const { variant, isLoading: isABTestLoading } = useABTest();
   const { data: landingData } = useLandingQuery();
   const landingItems = landingData?.landings ?? [];
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -45,7 +51,20 @@ const LandingPage = () => {
   }, [landingItems.length]);
   const selectedLanding = landingItems[currentIndex] ?? landingItems[0];
 
+  useAnalyticsPageView(
+    GA_EVENTS.landing.PAGE_VIEW,
+    SCREEN_NAME.LANDING,
+    {
+      ...loginStatusParams(),
+      test_type: getLandingTestType(variant),
+    },
+    // A/B 배정이 확정된 뒤 발사 — 최초 방문자가 default variant로 오집계되는 것 방지
+    { enabled: !isABTestLoading }
+  );
+
   const handleNavigateHome = () => {
+    trackLandingCtaClick(selectedLanding);
+
     const bannerId = selectedLanding?.bannerId;
     const state: HomeLocationState = {
       activeTab: 'explore',
@@ -75,7 +94,7 @@ const LandingPage = () => {
           />
         ) : null
       )}
-      <LogoNavBar page="landing" />
+      <LogoNavBar screenName={SCREEN_NAME.LANDING} page="landing" />
       <section className={styles.mainSection}>
         <div className={styles.contentBlock}>
           <div className={styles.textContainer}>
