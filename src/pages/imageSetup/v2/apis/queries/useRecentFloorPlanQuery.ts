@@ -18,5 +18,12 @@ export const useRecentFloorPlanQuery = () => {
   return useQuery({
     queryKey: queryKeys.imageSetup.recentFloorPlan(),
     queryFn: getRecentFloorPlan,
+    // 이미지 생성 성공 후 '최근 생성한 도면'이 즉시 반영되어야 하므로 전역 staleTime(5분)을 override.
+    // 기존 invalidate 로직의 간헐적 실패 원인:
+    // 여러 페이지(HomePage, Style, Banner 등)가 이 쿼리를 observe하는데, 이미지 생성 후 재생성 플로우에서 사용자가 Home을 먼저 거치므로,
+    // Home이 채운 fresh 캐시를 /imageSetup이 5분간 신뢰 → 진입 시 재요청이 스킵되어 간헐적 stale이 발생하는 것으로 예상..됨
+    // => mount마다 무조건 재요청해 이를 원천 차단
+    staleTime: 0,
+    refetchOnMount: 'always',
   });
 };

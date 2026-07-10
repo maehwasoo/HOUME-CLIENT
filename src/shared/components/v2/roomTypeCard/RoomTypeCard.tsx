@@ -77,7 +77,9 @@ const RoomTypeOptionCard = ({
     >
       <OptimizedImage
         src={initialImageSrc}
-        sizes={IMAGE_SIZES.grid}
+        // 1:1 비율일 때는 도면 너비가 약 200px, 3:2 비율일 때는 거의 full-width
+        // 따라서 1:1 비율일 때와 3:2 비율일 때 OptimizedImage 컴포넌트에 보내는 sizes를 적절히 분기처리해야 각 너비에 알맞은 최적화 이미지를 가져옴
+        sizes={ratio === '3:2' ? IMAGE_SIZES.full : IMAGE_SIZES.grid}
         fallbackSrc={emptyImage}
         alt=""
         aria-hidden="true"
