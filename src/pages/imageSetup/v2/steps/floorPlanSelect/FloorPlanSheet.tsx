@@ -20,7 +20,6 @@ import OptimizedImage from '@components/image/OptimizedImage';
 import CloseBottomSheet from '@components/v2/bottomSheet/CloseBottomSheet';
 import ActionButton from '@components/v2/button/actionButton/ActionButton';
 import IconButton from '@components/v2/button/IconButton';
-import Icon from '@components/v2/icon/Icon';
 
 import { IMAGE_SIZES } from '@utils/imageVariant';
 
@@ -79,7 +78,6 @@ const FloorPlanSheet = ({
       onClose={onClose}
       titleSlot={
         <div className={styles.titleRow}>
-          <Icon name="DoubleStar" size="16" />
           <span className={styles.titleMain}>{floorPlanName}</span>
           <span className={styles.titleMeta}>·</span>
           <span className={styles.titleMeta}>{equilibrium}</span>

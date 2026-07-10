@@ -14,6 +14,7 @@ import logotypeWhite from '@assets/v2/images/LogotypeWhite.svg';
 
 import * as styles from './LogoNavBar.css';
 import TextButton from '../btnText/TextButton';
+import ActionButton from '../button/actionButton/ActionButton';
 
 type AuthSlot = 'none' | 'login' | 'profile';
 type Page = 'landing' | 'home';
@@ -84,14 +85,15 @@ const LogoNavBar = ({
       </div>
       <div className={styles.rightContainer({ hasAction })}>
         {showGenerateButton && (
-          // TODO: 공컴 button으로 교체
-          <button
-            type="button"
-            className={styles.generateButton}
+          <ActionButton
+            variant="solid"
+            size="M"
+            color="primary"
+            leftIcon="DoubleStar"
             onClick={handleGenerateClick}
           >
-            <span className={styles.generateLabel}>이미지 생성</span>
-          </button>
+            AI로 집 꾸미기
+          </ActionButton>
         )}
         {authSlot === 'login' && (
           <div className={styles.actionContainer}>

@@ -20,6 +20,7 @@ import {
 } from '@shared/analytics/utils/imageFlow';
 import { loginStatusParams } from '@shared/analytics/utils/loginStatus';
 import { getPreviousScreenName } from '@shared/analytics/utils/screenName';
+import { toAnalyticsNull } from '@shared/analytics/utils/toAnalyticsNull';
 
 import type {
   ExploreHouseTemplateDetailResponse,
@@ -48,6 +49,11 @@ const getFilterOptionLabel = (
 const joinFilterLabels = (
   categoryId: keyof FloorPlanFilters,
   values: string[]
+) => toAnalyticsNull(joinFilterLabelsRaw(categoryId, values));
+
+const joinFilterLabelsRaw = (
+  categoryId: keyof FloorPlanFilters,
+  values: string[]
 ) =>
   values
     .map((value) => getFilterOptionLabel(categoryId, value))
@@ -73,8 +79,8 @@ export const getRoomTypePreviousSpaceParams = (
   recentFloorPlan?: RecentFloorPlanResponse | null
 ) => ({
   has_previous_space: recentFloorPlan?.hasRecentImage === true,
-  previous_space_id: recentFloorPlan?.floorPlanId,
-  previous_space_name: recentFloorPlan?.floorPlanName,
+  previous_space_id: toAnalyticsNull(recentFloorPlan?.floorPlanId),
+  previous_space_name: toAnalyticsNull(recentFloorPlan?.floorPlanName),
 });
 
 export const getRoomTypePageViewParams = (
@@ -101,8 +107,6 @@ export const getRoomTypeCardRoomClickParams = (
   space_id: plan.id,
   space_name: plan.name,
   space_size: detail?.equilibrium,
-  // v2 house-template detail 스펙에 structure 필드 없음
-  space_struct: undefined,
 });
 
 export const getRoomTypeViewSheetViewParams = ({
@@ -277,11 +281,8 @@ export const trackRoomTypeViewSheetSubmit = ({
     space_name: floorPlanName,
     space_view: floorPlanView,
     space_size: equilibrium,
-    // v2 house-template detail 스펙에 structure 필드 없음
-    space_struct: undefined,
     sheet_expansion_status: toSheetExpansionStatus(true),
-    previous_space_id: recentFloorPlan?.floorPlanId,
-    previous_space_name: recentFloorPlan?.floorPlanName,
+    ...getRoomTypePreviousSpaceParams(recentFloorPlan),
   });
 };
 

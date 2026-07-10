@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import {
   Navigate,
   useLocation,
@@ -18,12 +20,11 @@ import {
   useAnalyticsPageView,
   useScrollDepthTrack,
 } from '@shared/analytics/hooks';
+import { IMAGE_ENTRY_ROUTE } from '@shared/analytics/params/gate';
 import { SCREEN_NAME } from '@shared/analytics/screenNames';
 import { getEntryRoute } from '@shared/analytics/utils/imageEntryRoute';
-import {
-  buildResultListPageViewParams,
-  buildResultRecPageViewParams,
-} from '@shared/analytics/utils/imageFlow';
+import { buildResultRecPageViewParams } from '@shared/analytics/utils/imageFlow';
+import { clarityEvent } from '@shared/config/clarity';
 
 import InlineError from '@components/inlineError/InlineError';
 import Loading from '@components/loading/Loading';
@@ -61,40 +62,24 @@ const ResultPage = () => {
   const locationState = location.state as {
     imageUrl?: string;
     isMirror?: boolean;
-    from?: 'loading';
+    from?: 'loading' | 'mypage';
   } | null;
   const stateImageUrl = locationState?.imageUrl;
   const stateIsMirror = locationState?.isMirror;
   const isFromLoading = locationState?.from === 'loading';
-
-  // 퍼널 param(image_entry_route/스냅샷)은 로딩 플로우 직후에만 유효
-  // (마이페이지/연관 이미지 진입 시 store에 남은 이전 생성 플로우 값이 붙는 것 방지)
-  useAnalyticsPageView(
-    GA_EVENTS.resultList.PAGE_VIEW,
-    SCREEN_NAME.RESULT_LIST,
-    {
-      gen_img_id: parsedImageId ?? 0,
-      ...(isFromLoading && {
-        ...buildResultListPageViewParams(parsedImageId ?? 0),
-        image_entry_route: getEntryRoute(),
-      }),
-    },
-    {
-      enabled: parsedImageId !== null && isListView,
-      // 연관 이미지 클릭으로 같은 라우트에서 imageId만 바뀌면 page_view 재발사 (ResultPage remount 없음)
-      refireKey: parsedImageId ?? undefined,
-    }
-  );
+  const isFromMypage = locationState?.from === 'mypage';
 
   useAnalyticsPageView(
     GA_EVENTS.resultRec.PAGE_VIEW,
     SCREEN_NAME.RESULT_REC,
     {
       gen_img_id: parsedImageId ?? 0,
-      ...(isFromLoading && {
-        ...buildResultRecPageViewParams(parsedImageId ?? 0),
-        image_entry_route: getEntryRoute(),
-      }),
+      ...(isFromMypage
+        ? { image_entry_route: IMAGE_ENTRY_ROUTE.MYPAGE }
+        : isFromLoading && {
+            ...buildResultRecPageViewParams(parsedImageId ?? 0),
+            image_entry_route: getEntryRoute(),
+          }),
     },
     {
       enabled: parsedImageId !== null && !isListView,
@@ -113,6 +98,14 @@ const ResultPage = () => {
       enabled: parsedImageId !== null && isListView,
     }
   );
+
+  // 이미지 생성 완료(로딩→결과 진입) 시 Clarity 전환 이벤트 1회 — Smart Events/Funnels용
+  // 마이페이지·연관 이미지 재진입(isFromLoading=false)에선 미발화
+  useEffect(() => {
+    if (isFromLoading && parsedImageId !== null) {
+      clarityEvent('image_generated');
+    }
+  }, [isFromLoading, parsedImageId]);
 
   const handleBackClick = () => {
     if (isListView) {

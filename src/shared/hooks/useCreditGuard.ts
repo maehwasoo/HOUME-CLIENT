@@ -41,10 +41,11 @@ export const useCreditGuard = (
   // 현재 크레딧 수
   const creditCount = userData?.CreditCount;
 
-  const openCreditRequestPopup = useCallback(() => {
+  const openCreditRequestPopup = useCallback((email?: string) => {
     overlay.open(({ unmount }) => {
       return createElement(CreditRequestPopup, {
         onClose: unmount,
+        email,
       });
     });
   }, []);
@@ -83,7 +84,7 @@ export const useCreditGuard = (
       if (currentCredit >= requiredCredits) {
         return true;
       } else {
-        openCreditRequestPopup();
+        openCreditRequestPopup(latestUserData.email);
         return false;
       }
     } catch (error) {

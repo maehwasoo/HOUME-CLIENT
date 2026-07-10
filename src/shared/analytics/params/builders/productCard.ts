@@ -73,6 +73,25 @@ export const getProductCardIdNameParams = (
   return { product_id, product_name };
 };
 
+/** mypage listCard / feedCard onCard — id·name·price만 */
+export const getProductCardIdNamePriceParams = (
+  product: ProductCardInput
+): Pick<ProductCardParams, 'product_id' | 'product_name' | 'product_price'> => {
+  const full = getProductCardParams(product);
+  return {
+    product_id: full.product_id,
+    product_name: full.product_name,
+    product_price: full.product_price,
+  };
+};
+
+/** resultList listCard — product_id만 */
+export const getProductCardIdOnlyParams = (
+  product: ProductCardInput
+): Pick<ProductCardParams, 'product_id'> => ({
+  product_id: product.id ?? product.productId,
+});
+
 /** 피드 onCard·view 등 카드 본문 클릭/노출 스펙 */
 export const getProductCardOnCardParams = (
   product: ProductCardInput

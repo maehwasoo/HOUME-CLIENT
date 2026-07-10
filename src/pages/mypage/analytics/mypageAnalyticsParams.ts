@@ -2,9 +2,11 @@ import type { FurnitureItem } from '@pages/mypage/types/apis/saveItemsList';
 
 import { isCurationViewType } from '@store/useImageFlowStore';
 
+import { joinAnalyticsIds } from '@shared/analytics/params/builders/productCard';
 import { IMG_RESULT_TYPE } from '@shared/analytics/params/result';
 import { SCREEN_NAME } from '@shared/analytics/screenNames';
 import { getReturnScreenNameParams } from '@shared/analytics/utils/screenName';
+import { toAnalyticsNull } from '@shared/analytics/utils/toAnalyticsNull';
 
 import type {
   DateGroupResponse,
@@ -20,30 +22,44 @@ export const mypageReturnScreenParams = () =>
 
 export const getMypageSavedItemsListParams = (
   items: Pick<FurnitureItem, 'rawProductId'>[] = []
-) => ({
-  saved_item_count: items.length,
-  saved_item_ids:
+) => {
+  const savedItemIds =
     items
       .map((item) => item.rawProductId)
       .filter((id) => Number.isFinite(id))
-      .join(', ') || undefined,
-});
+      .join(', ') || undefined;
+
+  return {
+    saved_item_count: items.length,
+    saved_item_ids: toAnalyticsNull(savedItemIds),
+  };
+};
 
 export const getMypageGenImgListParams = (groups: DateGroupResponse[] = []) => {
-  const mypage_img_count = groups
-    .flatMap((group) => group.items ?? [])
-    .filter((item) => item.imageId != null).length;
+  const items = groups.flatMap((group) => group.items ?? []);
+  const mypage_img_count = items.filter((item) => item.imageId != null).length;
+  const gen_img_ids = joinAnalyticsIds(
+    items
+      .filter((item) => item.imageId != null)
+      .map((item) => ({ id: item.imageId as number }))
+  );
 
-  return { mypage_img_count };
+  return {
+    mypage_img_count,
+    gen_img_ids: toAnalyticsNull(gen_img_ids),
+  };
 };
+
+export const getMypageEmptyGenImgListParams = () => ({
+  mypage_img_count: 0,
+  gen_img_ids: null as null,
+});
 
 const mapViewTypeToImgResultType = (
   viewType?: ItemResponse['viewType']
 ): (typeof IMG_RESULT_TYPE)[keyof typeof IMG_RESULT_TYPE] | undefined => {
   if (viewType == null) return undefined;
 
-  // 결과 레이아웃 SSOT(isCurationViewType)와 동일 분류:
-  // 추천형(FULL_FUNNEL/LEGACY)만 recommend, 나머지(PRODUCT/BANNER/STYLE)는 list
   return isCurationViewType(viewType)
     ? IMG_RESULT_TYPE.RECOMMEND
     : IMG_RESULT_TYPE.LIST;
@@ -51,6 +67,6 @@ const mapViewTypeToImgResultType = (
 
 export const getMypageGenImgItemParams = (item: ItemResponse) => ({
   gen_img_id: item.imageId,
-  gen_img_style: item.bannerTitle ?? item.productSummaryText ?? undefined,
+  gen_img_title: item.bannerTitle ?? item.productSummaryText ?? undefined,
   img_result_type: mapViewTypeToImgResultType(item.viewType),
 });

@@ -37,6 +37,8 @@ type SectionDisplayState =
 
 interface UseResultListAnalyticsOptions {
   genImgId: number;
+  /** 연관 이미지 클릭 시 gen_img_id — 결과 페이지 최초 진입 이미지 */
+  entryGenImgId: number;
   selectedState: SectionDisplayState;
   similarState: SectionDisplayState;
   relatedState: SectionDisplayState;
@@ -50,6 +52,7 @@ interface UseResultListAnalyticsOptions {
  */
 const useResultListAnalytics = ({
   genImgId,
+  entryGenImgId,
   selectedState,
   similarState,
   relatedState,
@@ -166,12 +169,12 @@ const useResultListAnalytics = ({
   const handleRelatedImageClick = useCallback(
     (othersImgId: number) => {
       trackResultListImgCardOnCardClick({
-        genImgId,
+        genImgId: entryGenImgId,
         selectedProductIds: selectedProductIdsParam,
         othersImgId,
       });
     },
-    [genImgId, selectedProductIdsParam]
+    [entryGenImgId, selectedProductIdsParam]
   );
 
   return {

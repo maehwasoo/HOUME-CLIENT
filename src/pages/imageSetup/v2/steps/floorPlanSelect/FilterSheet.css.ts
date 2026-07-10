@@ -32,5 +32,5 @@ export const sectionTitle = style({
 export const chipGroup = style({
   display: 'flex',
   flexWrap: 'wrap',
-  gap: unitVars.unit.gapPadding['200'],
+  gap: unitVars.unit.gapPadding['100'],
 });

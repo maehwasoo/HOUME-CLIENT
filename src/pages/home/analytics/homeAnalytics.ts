@@ -14,7 +14,6 @@ import type { ExploreHouseTemplateDetailResponse } from '@apis/__generated__/dat
 interface HomeSpaceCardInput {
   spaceId?: number;
   spaceName?: string;
-  spaceStruct?: string;
   spaceSize?: string;
   spaceView?: string;
   hasPreviousSpace?: boolean;
@@ -27,8 +26,6 @@ export const getHomeSpaceCardParamsFromDetail = (
 ) => ({
   spaceSize: detail?.equilibrium,
   spaceView: detail?.floorPlans?.[0]?.view,
-  // v2 house-template detail 스펙에 structure 필드 없음
-  spaceStruct: undefined,
 });
 
 const homeScreenParams = () => ({
@@ -46,6 +43,10 @@ export const trackHomeTapExploreClick = () => {
 
 export const trackHomeTapShopClick = () => {
   trackEvent(GA_EVENTS.home.TAP_SHOP_CLICK, homeScreenWithLoginParams());
+};
+
+export const trackHomeWebBannerClick = () => {
+  trackEvent(GA_EVENTS.home.WEB_BANNER_CLICK, homeScreenWithLoginParams());
 };
 
 export const trackHomeSpaceMoreClick = () => {
@@ -69,21 +70,27 @@ export const trackHomeBannerSlideEvent = (
 ) => {
   if (!slide) return;
 
+  if (
+    eventName === GA_EVENTS.home.BANNER_LEFT_SWIPE ||
+    eventName === GA_EVENTS.home.BANNER_RIGHT_SWIPE
+  ) {
+    trackEvent(eventName, {
+      ...homeScreenParams(),
+      ...getHomeBannerParams({ bannerId: slide.id, bannerName: slide.title }),
+    });
+    return;
+  }
+
   trackEvent(eventName, {
-    ...(eventName === GA_EVENTS.home.BANNER_BG_IMG_CLICK
-      ? homeScreenWithLoginParams()
-      : homeScreenParams()),
+    ...homeScreenWithLoginParams(),
     ...getHomeBannerParams({ bannerId: slide.id, bannerName: slide.title }),
-    ...(eventName === GA_EVENTS.home.BANNER_BG_IMG_CLICK && {
-      selected_banner_chip: '',
-    }),
+    selected_banner_chip: '',
   });
 };
 
 export const trackHomeSpaceCardClick = ({
   spaceId,
   spaceName,
-  spaceStruct,
   spaceSize,
   spaceView,
   hasPreviousSpace,
@@ -95,17 +102,13 @@ export const trackHomeSpaceCardClick = ({
     has_previous_image: hasPreviousImage,
     space_id: spaceId,
     space_name: spaceName,
-    space_struct: spaceStruct,
     space_size: spaceSize,
     space_view: spaceView,
   });
 };
 
-export const trackHomeSpaceCardSlideScroll = (spaceId?: number) => {
-  trackEvent(GA_EVENTS.home.SPACE_CARD_SLIDE_SCROLL, {
-    ...homeScreenParams(),
-    ...(spaceId !== undefined && { space_id: spaceId }),
-  });
+export const trackHomeSpaceCardSlideScroll = () => {
+  trackEvent(GA_EVENTS.home.SPACE_CARD_SLIDE_SCROLL, homeScreenParams());
 };
 
 export const trackHomeStyleCardClick = (style: {

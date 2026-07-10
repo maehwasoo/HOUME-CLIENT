@@ -23,10 +23,8 @@ const isAnalyticsEnabled =
 const buildEventParams = (
   params?: TrackEventParams
 ): Record<string, AnalyticsParamValue> => {
-  if (!params) return {};
-
   return Object.fromEntries(
-    Object.entries(params).filter(([, value]) => value !== undefined)
+    Object.entries(params ?? {}).filter(([, value]) => value !== undefined)
   ) as Record<string, AnalyticsParamValue>;
 };
 
@@ -36,17 +34,16 @@ const buildEventParams = (
  * - `VITE_ENABLE_FIREBASE_ANALYTICS=true` → Firebase Analytics 전송
  * - `false` → 콘솔 로그만 (로컬 개발용)
  *
- * 콘솔·Firebase 모두 호출부에서 넘긴 params만 사용합니다.
+ * Firebase 전송·콘솔 로그 모두 호출부 params만 사용 (Parameter.csv 스펙 준수).
  */
 export const trackEvent = (
   eventName: GaEventName,
   params?: TrackEventParams
 ): void => {
-  const logParams = params ?? {};
   const eventParams = buildEventParams(params);
 
   if (!isAnalyticsEnabled) {
-    console.info('[Analytics]', eventName, logParams);
+    console.info('[Analytics]', eventName, params);
     return;
   }
 

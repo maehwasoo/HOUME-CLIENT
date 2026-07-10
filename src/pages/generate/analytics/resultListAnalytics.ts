@@ -1,8 +1,7 @@
 import { GA_EVENTS } from '@shared/analytics/events';
 import {
   getProductCardIdNameParams,
-  getProductCardListCardParams,
-  getProductCardOnCardParams,
+  getProductCardIdNamePriceParams,
 } from '@shared/analytics/params/builders/productCard';
 import type { ProductCardInput } from '@shared/analytics/params/builders/productCard';
 import { SCREEN_NAME } from '@shared/analytics/screenNames';
@@ -23,7 +22,7 @@ export const trackResultListBtnBackClick = () => {
 export const trackResultListListCardClick = (product: ProductCardInput) => {
   trackEvent(GA_EVENTS.resultList.LIST_CARD_CLICK, {
     ...resultListScreenParams(),
-    ...getProductCardListCardParams(product),
+    ...getProductCardIdNameParams(product),
   });
 };
 
@@ -32,7 +31,7 @@ export const trackResultListListCardGoSiteClick = (
 ) => {
   trackEvent(GA_EVENTS.resultList.LIST_CARD_GO_SITE_CLICK, {
     ...resultListScreenParams(),
-    ...getProductCardListCardParams(product),
+    ...getProductCardIdNameParams(product),
   });
 };
 
@@ -66,7 +65,7 @@ export const trackResultListFeedCardOnCardClick = (
 ) => {
   trackEvent(GA_EVENTS.resultList.FEED_CARDON_CARD_CLICK, {
     ...resultListScreenParams(),
-    ...getProductCardOnCardParams(product),
+    ...getProductCardIdNamePriceParams(product),
   });
 };
 
@@ -118,19 +117,16 @@ export const trackResultListImgCardOnCardClick = ({
   genImgId,
   selectedProductIds,
   othersImgId,
-  othersImgProductIds,
 }: {
   genImgId: number;
   selectedProductIds?: string;
   othersImgId: number;
-  othersImgProductIds?: string;
 }) => {
   trackEvent(GA_EVENTS.resultList.IMG_CARDON_CARD_CLICK, {
     ...resultListScreenParams(),
     gen_img_id: genImgId,
     selected_product_ids: selectedProductIds,
     others_img_id: othersImgId,
-    others_img_product_ids: othersImgProductIds,
     ...getReturnScreenNameParams(SCREEN_NAME.HOME),
   });
 };

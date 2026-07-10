@@ -60,7 +60,6 @@ interface SearchSectionProps {
   shopListContext: ShopListContext;
   onSearchKeywordChange: (value: string) => void;
   onSearchBarClick: () => void;
-  onSearchSubmit: () => void;
   onSearchClear: () => void;
   onProductListRender?: (productCountViewed: number) => void;
 }
@@ -86,7 +85,6 @@ const SearchSection = ({
   shopListContext,
   onSearchKeywordChange,
   onSearchBarClick,
-  onSearchSubmit,
   onSearchClear,
   onProductListRender,
 }: SearchSectionProps) => {
@@ -329,10 +327,6 @@ const SearchSection = ({
     onChange: onSearchKeywordChange,
     onFocus: onSearchBarClick,
     onClear: onSearchClear,
-    onKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => {
-      if (event.key !== 'Enter' || event.nativeEvent.isComposing) return;
-      onSearchSubmit();
-    },
   };
 
   return (

@@ -8,6 +8,7 @@ import {
   trackSaveToastCancelClick,
   trackSaveToastToSeeClick,
   trackToastSaveView,
+  trackToastUnsaveView,
 } from '@shared/analytics/componentAnalytics';
 import type { LoginEntryRoute } from '@shared/analytics/params/gate';
 import { resolveScreenName } from '@shared/analytics/utils/screenName';
@@ -148,6 +149,8 @@ export const useJjymMutation = (options?: UseJjymMutationOptions) => {
           rawProductId,
           productName,
         };
+
+        trackToastUnsaveView(toastInput);
 
         notify({
           text: TOAST_MESSAGE.SAVED_ITEM_REMOVED,

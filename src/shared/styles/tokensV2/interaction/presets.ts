@@ -134,6 +134,8 @@ export const tooltipFadeInSpec = {
   property: 'opacity',
 } as const satisfies InteractionSpec;
 
+export const TOOLTIP_AFTER_DELAY_MS = 1000;
+
 // --- Landing ---
 
 const landingBgTransitionSpec = {

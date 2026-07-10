@@ -9,13 +9,7 @@ import {
 import type {
   DateGroupResponse,
   ItemResponse,
-  UsedProductResponse,
 } from '@apis/__generated__/data-contracts';
-
-const getPrimaryUsedProduct = (
-  item: ItemResponse
-): UsedProductResponse | undefined =>
-  item.usedProducts?.find((product) => product.rawProductId != null);
 
 interface UseMypageGeneratedImagesAnalyticsOptions {
   groups: DateGroupResponse[];
@@ -42,11 +36,11 @@ export const useMypageGeneratedImagesAnalytics = ({
   }, [groups, isListReady]);
 
   const trackCardGenImgClick = useCallback((item: ItemResponse) => {
-    trackMypageCardGenImgClick(item, getPrimaryUsedProduct(item));
+    trackMypageCardGenImgClick(item);
   }, []);
 
   const trackMoreGenImgClick = useCallback((item: ItemResponse) => {
-    trackMypageBtnMoreGenImgClick(item, getPrimaryUsedProduct(item));
+    trackMypageBtnMoreGenImgClick(item);
   }, []);
 
   return {

@@ -146,6 +146,17 @@ const HomePage = () => {
       {activeMenuTab === 'explore' && (
         <ExploreTab
           exploreSeedBannerId={homeState?.exploreSeedBannerId}
+          onPromoBannerClick={() => {
+            setActiveMenuTab('product');
+            setSearchParams(
+              (prev) => {
+                const next = new URLSearchParams(prev);
+                next.set('tab', 'product');
+                return next;
+              },
+              { replace: true }
+            );
+          }}
           hasPreviousImage={hasPreviousImage}
           hasPreviousSpace={hasPreviousImage}
         />

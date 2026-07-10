@@ -26,7 +26,7 @@ import type { SpaceParams } from '@shared/analytics/params/space';
 import type { GaToastType } from '@shared/analytics/params/toast';
 
 /** Firebase logEvent에 허용되는 파라미터 값 타입 */
-export type AnalyticsParamValue = string | number | boolean;
+export type AnalyticsParamValue = string | number | boolean | null;
 
 /**
  * GA4 이벤트별 추가 파라미터 (노션 Parameter 컬럼 v2.0.0)
@@ -39,6 +39,8 @@ export type TrackEventParams = {
   screen_name?: AnalyticsScreenName;
   return_screen_name?: AnalyticsScreenName;
   previous_screen_name?: AnalyticsScreenName;
+  page_path?: string;
+  analytics_environment?: string;
   login_status?: LoginStatus;
   is_new_user?: boolean;
   scroll_depth?: ScrollDepth;

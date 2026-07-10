@@ -362,7 +362,7 @@ const LoadingPage = () => {
       `${ROUTES.GENERATE_RESULT}?houseId=${imageId}&viewType=${viewType}`,
       {
         replace: true,
-        state: { imageUrl, isMirror, from: 'loading' },
+        state: { imageUrl, isMirror, from: 'loading', entryGenImgId: imageId },
       }
     );
   };

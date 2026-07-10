@@ -81,6 +81,7 @@ export const popupTitle = style({
 export const popupDetail = style({
   ...fontVars.font.body_r_14,
   textAlign: 'center',
+  wordBreak: 'keep-all',
   color: colorVars.color.text.secondary,
 });
 

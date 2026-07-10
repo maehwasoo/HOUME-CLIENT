@@ -105,6 +105,8 @@ const GeneratedImagesSection = () => {
         state: {
           imageUrl: item.generatedImageUrl,
           isMirror: item.isMirror,
+          from: 'mypage',
+          entryGenImgId: item.imageId,
         },
       }
     );

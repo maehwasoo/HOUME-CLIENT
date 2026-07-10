@@ -32,7 +32,7 @@ export const useMypageEmptyStateAnalytics = ({
 
     trackedViewRef.current = true;
     if (type === 'generatedImages') {
-      trackMypageListEmptyGenImgView(savedItemsForParams);
+      trackMypageListEmptyGenImgView();
     } else {
       trackMypageListEmptySavedItemView(savedItemsForParams);
     }
@@ -41,25 +41,25 @@ export const useMypageEmptyStateAnalytics = ({
   const wrapPrimaryClick = useCallback(
     (onClick: () => void) => () => {
       if (type === 'generatedImages') {
-        trackMypageBtnCtaEmptyGenImgClick(savedItemsForParams);
+        trackMypageBtnCtaEmptyGenImgClick();
       } else {
-        trackMypageBtnCtaEmptySavedItemClick(savedItemsForParams);
+        trackMypageBtnCtaEmptySavedItemClick();
       }
       onClick();
     },
-    [savedItemsForParams, type]
+    [type]
   );
 
   const wrapSecondaryClick = useCallback(
     (onClick: () => void) => () => {
       if (type === 'generatedImages') {
-        trackMypageBtnTextEmptyGenImgClick(savedItemsForParams);
+        trackMypageBtnTextEmptyGenImgClick();
       } else {
-        trackMypageBtnTextEmptySavedItemClick(savedItemsForParams);
+        trackMypageBtnTextEmptySavedItemClick();
       }
       onClick();
     },
-    [savedItemsForParams, type]
+    [type]
   );
 
   return {

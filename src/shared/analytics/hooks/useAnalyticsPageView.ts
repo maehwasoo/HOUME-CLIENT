@@ -16,8 +16,7 @@ interface UseAnalyticsPageViewOptions {
 
 /**
  * page_view 1회 전송 (마운트 시)
- * - 호출부 `params`만 전송 (`track.ts`와 동일, 자동 주입 없음)
- * - `previous_screen_name`은 스펙에 있는 이벤트(`roomType_page_view`)만 호출부에서 명시
+ * - `previous_screen_name` 등 추가 params는 호출부에서 스펙에 맞게 전달
  */
 export const useAnalyticsPageView = (
   eventName: GaEventName,

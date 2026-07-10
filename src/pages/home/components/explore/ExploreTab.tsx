@@ -2,7 +2,10 @@ import { useMemo } from 'react';
 
 import { generatePath, useNavigate } from 'react-router-dom';
 
-import { trackHomeBannerSlideEvent } from '@pages/home/analytics/homeAnalytics';
+import {
+  trackHomeBannerSlideEvent,
+  trackHomeWebBannerClick,
+} from '@pages/home/analytics/homeAnalytics';
 import Banner, {
   type BannerSlide,
 } from '@pages/home/components/explore/banner/Banner';
@@ -12,18 +15,22 @@ import { ROUTES } from '@routes/paths';
 
 import { GA_EVENTS } from '@shared/analytics/events';
 
+import promoBanner from '@assets/v2/svg/PromoBanner.svg?url';
+
 import * as styles from './ExploreTab.css';
 import RoomTypeSection from './RoomTypeSection/RoomTypeSection';
 import StyleSection from './StyleSection/StyleSection';
 
 type ExploreTabProps = {
   exploreSeedBannerId?: number;
+  onPromoBannerClick?: () => void;
   hasPreviousImage?: boolean;
   hasPreviousSpace?: boolean;
 };
 
 const ExploreTab = ({
   exploreSeedBannerId,
+  onPromoBannerClick,
   hasPreviousImage = false,
   hasPreviousSpace = false,
 }: ExploreTabProps) => {
@@ -40,6 +47,11 @@ const ExploreTab = ({
     }
     return 0;
   }, [exploreSeedBannerId, landingData?.landings]);
+
+  const handlePromoBannerClick = () => {
+    trackHomeWebBannerClick();
+    onPromoBannerClick?.();
+  };
 
   const handleBannerSlideClick = (slide: BannerSlide) => {
     trackHomeBannerSlideEvent(GA_EVENTS.home.BANNER_BG_IMG_CLICK, slide);
@@ -69,6 +81,18 @@ const ExploreTab = ({
           hasPreviousImage={hasPreviousImage}
           hasPreviousSpace={hasPreviousSpace}
         />
+      </div>
+      <div className={styles.promoBannerSection}>
+        <button
+          type="button"
+          className={styles.promoBannerButton}
+          aria-label="상품 탭으로 이동"
+          onClick={handlePromoBannerClick}
+        >
+          <img src={promoBanner} alt="" className={styles.promoBannerImage} />
+        </button>
+      </div>
+      <div className={styles.content}>
         <StyleSection />
       </div>
     </div>

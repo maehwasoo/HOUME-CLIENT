@@ -20,7 +20,7 @@ export const useMypageSavedItemsAnalytics = ({
   isFetched,
 }: UseMypageSavedItemsAnalyticsOptions) => {
   const trackedListViewRef = useRef(false);
-  const trackedFeedCardIdsRef = useRef<Set<number>>(new Set());
+  const trackedFeedCardViewRef = useRef(false);
 
   useEffect(() => {
     if (!isFetched || savedItems.length === 0 || trackedListViewRef.current) {
@@ -32,13 +32,16 @@ export const useMypageSavedItemsAnalytics = ({
   }, [isFetched, savedItems]);
 
   useEffect(() => {
-    if (!isFetched || savedItems.length === 0) return;
+    if (
+      !isFetched ||
+      savedItems.length === 0 ||
+      trackedFeedCardViewRef.current
+    ) {
+      return;
+    }
 
-    savedItems.forEach((item) => {
-      if (trackedFeedCardIdsRef.current.has(item.rawProductId)) return;
-      trackedFeedCardIdsRef.current.add(item.rawProductId);
-      trackMypageFeedCardView(item);
-    });
+    trackedFeedCardViewRef.current = true;
+    trackMypageFeedCardView(savedItems);
   }, [isFetched, savedItems]);
 
   const handleFeedCardClick = useCallback((item: FurnitureItem) => {

@@ -119,8 +119,7 @@ const RoomTypeSection = ({
     }
 
     scrollDebounceRef.current = setTimeout(() => {
-      const firstFloorPlanId = floorPlans[0]?.id;
-      trackHomeSpaceCardSlideScroll(firstFloorPlanId);
+      trackHomeSpaceCardSlideScroll();
     }, 300);
   };
 

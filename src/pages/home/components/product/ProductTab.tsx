@@ -58,7 +58,6 @@ const ProductTab = () => {
     handleAddProductClick,
     handleDecorateWithProductsClick,
     handleSearchBarClick,
-    handleSearchSubmit,
     handleSearchClear,
     handleSelectSheetItemClick,
   } = useProductShopAnalytics(controller, {
@@ -146,7 +145,6 @@ const ProductTab = () => {
         shopListContext={shopListContext}
         onSearchKeywordChange={handleSearchKeywordChange}
         onSearchBarClick={handleSearchBarClick}
-        onSearchSubmit={handleSearchSubmit}
         onSearchClear={handleSearchClear}
         onProductListRender={handleProductListRender}
       />

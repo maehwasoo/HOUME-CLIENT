@@ -64,12 +64,12 @@ const ActivityInfo = ({ context }: ActivityInfoProps) => {
   });
 
   const handleActivityTriggerClick = () => {
-    trackDropDownActivityClick();
     sheetIdRef.current = overlay.open(() => (
       <ActivityTypeSheet
         open
         activities={activities}
         selectedActivityCode={activitySelection.selectedActivityItem?.code}
+        onActivityChipClick={trackDropDownActivityClick}
         onConfirm={(activityCode) => {
           trackActivitySheetCtaClick(activityCode);
           setFormData((prev) => ({ ...prev, activity: activityCode }));
