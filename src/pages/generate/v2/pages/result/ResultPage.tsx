@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+
 import {
   Navigate,
   useLocation,
@@ -24,6 +26,7 @@ import {
   buildResultListPageViewParams,
   buildResultRecPageViewParams,
 } from '@shared/analytics/utils/imageFlow';
+import { clarityEvent } from '@shared/config/clarity';
 
 import InlineError from '@components/inlineError/InlineError';
 import Loading from '@components/loading/Loading';
@@ -113,6 +116,14 @@ const ResultPage = () => {
       enabled: parsedImageId !== null && isListView,
     }
   );
+
+  // 이미지 생성 완료(로딩→결과 진입) 시 Clarity 전환 이벤트 1회 — Smart Events/Funnels용
+  // 마이페이지·연관 이미지 재진입(isFromLoading=false)에선 미발화
+  useEffect(() => {
+    if (isFromLoading && parsedImageId !== null) {
+      clarityEvent('image_generated');
+    }
+  }, [isFromLoading, parsedImageId]);
 
   const handleBackClick = () => {
     if (isListView) {

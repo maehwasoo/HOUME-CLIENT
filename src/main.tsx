@@ -6,7 +6,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { HelmetProvider } from 'react-helmet-async';
 import 'sonner/dist/styles.css';
 
-import { initClarity } from '@shared/config/clarity';
+import { initClarity, upgradeClaritySession } from '@shared/config/clarity';
 import {
   getSentryReactErrorHandlerOptions,
   initSentry,
@@ -47,7 +47,10 @@ if (!rootElement) {
 
 createRoot(rootElement, getSentryReactErrorHandlerOptions()).render(
   // <StrictMode>
-  <ErrorBoundary FallbackComponent={AppErrorFallback}>
+  <ErrorBoundary
+    FallbackComponent={AppErrorFallback}
+    onError={() => upgradeClaritySession('error')}
+  >
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <App />
