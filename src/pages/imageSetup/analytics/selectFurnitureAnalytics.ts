@@ -13,7 +13,7 @@ const selectFurnitureScreenParams = () => ({
 const activityChipParams = (activityCode?: string) => ({
   selected_activity_chip: activityCode
     ? mapActivityCodeToChip(activityCode)
-    : undefined,
+    : null,
 });
 
 const furnitureChipsParams = (chips?: string) => ({
@@ -21,7 +21,7 @@ const furnitureChipsParams = (chips?: string) => ({
 });
 
 export const trackSelectFurnitureDropDownActivityClick = (
-  activityCode?: string
+  activityCode: string
 ) => {
   trackEvent(GA_EVENTS.selectFurniture.DROP_DOWN_ACTIVITY_CLICK, {
     ...selectFurnitureScreenParams(),

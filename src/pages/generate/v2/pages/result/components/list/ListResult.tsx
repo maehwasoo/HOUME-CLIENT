@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import { useResultListAnalytics } from '@pages/generate/analytics/useResultListAnalytics';
 import { useGenerateListResultQuery } from '@pages/generate/v2/apis/queries/useGenerateListResultQuery';
@@ -13,7 +13,15 @@ import { ROUTES } from '@routes/paths';
 import { ENTRY_ROUTE, useImageFlowStore } from '@store/useImageFlowStore';
 import { useSavedItemsStore } from '@store/useSavedItemsStore';
 
-import { LOGIN_ENTRY_ROUTE } from '@shared/analytics/params/gate';
+import { GA_EVENTS } from '@shared/analytics/events';
+import { useAnalyticsPageView } from '@shared/analytics/hooks';
+import { joinAnalyticsIds } from '@shared/analytics/params/builders/productCard';
+import {
+  LOGIN_ENTRY_ROUTE,
+  IMAGE_ENTRY_ROUTE,
+} from '@shared/analytics/params/gate';
+import { SCREEN_NAME } from '@shared/analytics/screenNames';
+import { getEntryRoute } from '@shared/analytics/utils/imageEntryRoute';
 import ActionButton from '@shared/components/v2/button/actionButton/ActionButton';
 import EmptyView from '@shared/components/v2/emptyView/EmptyView';
 import { EMPTY_VIEW_TEXT } from '@shared/constants/emptyViewText';
@@ -131,6 +139,14 @@ const SectionFallback = ({
 
 const ListResult = ({ image, isProductView }: ListResultProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationState = location.state as {
+    from?: 'loading' | 'mypage';
+    entryGenImgId?: number;
+  } | null;
+  const isFromLoading = locationState?.from === 'loading';
+  const isFromMypage = locationState?.from === 'mypage';
+  const entryGenImgId = locationState?.entryGenImgId ?? image.imageId;
 
   const {
     data: listData,
@@ -169,6 +185,37 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
   const renderableSelectedProducts = useMemo(
     () => selectedProductsRaw.filter((product) => product.id != null),
     [selectedProductsRaw]
+  );
+
+  const selectedProductIdsParam = useMemo(
+    () => joinAnalyticsIds(renderableSelectedProducts),
+    [renderableSelectedProducts]
+  );
+
+  const resultListPageViewParams = useMemo(() => {
+    if (isFromMypage) {
+      return { image_entry_route: IMAGE_ENTRY_ROUTE.MYPAGE };
+    }
+
+    if (isFromLoading) {
+      return { image_entry_route: getEntryRoute() };
+    }
+
+    return {};
+  }, [isFromMypage, isFromLoading]);
+
+  useAnalyticsPageView(
+    GA_EVENTS.resultList.PAGE_VIEW,
+    SCREEN_NAME.RESULT_LIST,
+    {
+      gen_img_id: image.imageId,
+      selected_product_ids: selectedProductIdsParam,
+      ...resultListPageViewParams,
+    },
+    {
+      enabled: !isSelectedLoading,
+      refireKey: image.imageId,
+    }
   );
 
   const renderableSimilarProducts = useMemo(
@@ -221,6 +268,7 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
     handleRelatedImageClick,
   } = useResultListAnalytics({
     genImgId: image.imageId,
+    entryGenImgId,
     selectedState,
     similarState,
     relatedState,
@@ -441,7 +489,11 @@ const ListResult = ({ image, isProductView }: ListResultProps) => {
                         navigate(
                           getGenerateResultPath(item.id, item.resultType),
                           {
-                            state: { imageUrl: item.imageUrl },
+                            state: {
+                              imageUrl: item.imageUrl,
+                              ...(isFromMypage && { from: 'mypage' as const }),
+                              entryGenImgId,
+                            },
                           }
                         );
                       }}

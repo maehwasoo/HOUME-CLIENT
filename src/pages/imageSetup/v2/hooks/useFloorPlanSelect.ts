@@ -13,7 +13,10 @@ import { TOAST_MESSAGE } from '@constants/toastMessage';
 import { useFunnelStore } from '../../stores/useFunnelStore';
 import { useHouseTemplateDetailQuery } from '../apis/queries/useHouseTemplateDetailQuery';
 import { useHouseTemplatesQuery } from '../apis/queries/useHouseTemplatesQuery';
-import { useRecentFloorPlanQuery } from '../apis/queries/useRecentFloorPlanQuery';
+import {
+  getRecentFloorPlanForAnalytics,
+  useRecentFloorPlanQuery,
+} from '../apis/queries/useRecentFloorPlanQuery';
 import { FILTER_CATEGORIES } from '../constants/floorPlanFilters';
 import { useFloorPlanRatioStore } from '../stores/useFloorPlanRatioStore';
 import { useFloorPlanStore } from '../stores/useFloorPlanStore';
@@ -53,9 +56,7 @@ export const useFloorPlanSelect = (
   // 최근 사용 도면 조회 (RecentSheet 용도)
   const { data: recentFloorPlanData, isFetched: isRecentFloorPlanFetched } =
     useRecentFloorPlanQuery();
-  const recentFloorPlan = recentFloorPlanData?.hasRecentImage
-    ? recentFloorPlanData
-    : null;
+  const recentFloorPlan = getRecentFloorPlanForAnalytics(recentFloorPlanData);
 
   // 시트 자동 오픈 우선순위 (마운트 시 1회 평가):
   // 1순위: useFunnelStore.floorPlan 있음 → FloorPlanSheet 복원 (로그인 게이트 복귀)

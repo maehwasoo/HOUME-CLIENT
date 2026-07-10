@@ -1,6 +1,7 @@
 import {
   getMypageGenImgItemParams,
   getMypageGenImgListParams,
+  getMypageEmptyGenImgListParams,
   getMypageSavedItemsListParams,
   mypageReturnScreenParams,
   mypageScreenParams,
@@ -10,9 +11,8 @@ import type { FurnitureItem } from '@pages/mypage/types/apis/saveItemsList';
 import { GA_EVENTS } from '@shared/analytics/events';
 import {
   getProductCardIdNameParams,
-  getProductCardListCardParams,
-  getProductCardOnCardParams,
-  getProductCardParams,
+  getProductCardIdNamePriceParams,
+  joinAnalyticsIds,
   toProductCardInputFromJjymFeed,
   toProductCardInputFromUsedListProduct,
 } from '@shared/analytics/params/builders/productCard';
@@ -24,10 +24,12 @@ import type {
   UsedProductResponse,
 } from '@apis/__generated__/data-contracts';
 
-export const trackMypageFeedCardView = (item: FurnitureItem) => {
+export const trackMypageFeedCardView = (
+  items: Pick<FurnitureItem, 'rawProductId'>[] = []
+) => {
   trackEvent(GA_EVENTS.mypage.FEED_CARD_VIEW, {
     ...mypageScreenParams(),
-    ...getProductCardOnCardParams(toProductCardInputFromJjymFeed(item)),
+    ...getMypageSavedItemsListParams(items),
   });
 };
 
@@ -55,14 +57,14 @@ export const trackMypageFeedCardUnsaveClick = (item: FurnitureItem) => {
 export const trackMypageFeedCardOnCardClick = (item: FurnitureItem) => {
   trackEvent(GA_EVENTS.mypage.FEED_CARDON_CARD_CLICK, {
     ...mypageScreenParams(),
-    ...getProductCardOnCardParams(toProductCardInputFromJjymFeed(item)),
+    ...getProductCardIdNamePriceParams(toProductCardInputFromJjymFeed(item)),
   });
 };
 
 export const trackMypageListCardClick = (item: UsedProductResponse) => {
   trackEvent(GA_EVENTS.mypage.LIST_CARD_CLICK, {
     ...mypageScreenParams(),
-    ...getProductCardListCardParams(
+    ...getProductCardIdNamePriceParams(
       toProductCardInputFromUsedListProduct(item)
     ),
   });
@@ -71,7 +73,7 @@ export const trackMypageListCardClick = (item: UsedProductResponse) => {
 export const trackMypageListCardGoSiteClick = (item: UsedProductResponse) => {
   trackEvent(GA_EVENTS.mypage.LIST_CARD_GO_SITE_CLICK, {
     ...mypageScreenParams(),
-    ...getProductCardListCardParams(
+    ...getProductCardIdNamePriceParams(
       toProductCardInputFromUsedListProduct(item)
     ),
   });
@@ -91,10 +93,6 @@ export const trackMypageListCardUnsaveClick = (item: UsedProductResponse) => {
   });
 };
 
-export const trackMypageListCardView = () => {
-  trackEvent(GA_EVENTS.mypage.LIST_CARD_VIEW, mypageScreenParams());
-};
-
 export const trackMypageTabSavedItemClick = () => {
   trackEvent(GA_EVENTS.mypage.TAB_SAVED_ITEM_CLICK);
 };
@@ -110,17 +108,11 @@ export const trackMypageBtnBackClick = () => {
   });
 };
 
-export const trackMypageCardGenImgClick = (
-  item: ItemResponse,
-  product?: UsedProductResponse
-) => {
+export const trackMypageCardGenImgClick = (item: ItemResponse) => {
   trackEvent(GA_EVENTS.mypage.CARD_GEN_IMG_CLICK, {
     ...mypageScreenParams(),
     ...mypageReturnScreenParams(),
     ...getMypageGenImgItemParams(item),
-    ...getProductCardListCardParams(
-      toProductCardInputFromUsedListProduct(product ?? {})
-    ),
   });
 };
 
@@ -138,32 +130,30 @@ export const trackMypageListSavedItemView = (items: FurnitureItem[]) => {
   });
 };
 
-export const trackMypageBtnMoreGenImgClick = (
-  item: ItemResponse,
-  product?: UsedProductResponse
-) => {
+export const trackMypageBtnMoreGenImgClick = (item: ItemResponse) => {
   trackEvent(GA_EVENTS.mypage.BTN_MORE_GEN_IMG_CLICK, {
     ...mypageScreenParams(),
     ...mypageReturnScreenParams(),
     ...getMypageGenImgItemParams(item),
-    ...getProductCardListCardParams(
-      toProductCardInputFromUsedListProduct(product ?? {})
-    ),
   });
 };
 
 export const trackMypageSlideGenImgItemScroll = ({
   item,
-  product,
+  usedProducts,
 }: {
   item: ItemResponse;
-  product?: UsedProductResponse;
+  usedProducts: UsedProductResponse[];
 }) => {
+  const selectedProductIds = joinAnalyticsIds(
+    usedProducts
+      .filter((product) => product.rawProductId != null)
+      .map((product) => ({ id: product.rawProductId as number }))
+  );
+
   trackEvent(GA_EVENTS.mypage.SLIDE_GEN_IMG_ITEM_SCROLL, {
     ...getMypageGenImgItemParams(item),
-    ...getProductCardParams(
-      product ? toProductCardInputFromUsedListProduct(product) : {}
-    ),
+    selected_product_ids: selectedProductIds,
   });
 };
 
@@ -171,12 +161,10 @@ export const trackMypageBtnSettingClick = () => {
   trackEvent(GA_EVENTS.mypage.BTN_SETTING_CLICK);
 };
 
-export const trackMypageListEmptyGenImgView = (
-  items: Pick<FurnitureItem, 'rawProductId'>[] = []
-) => {
+export const trackMypageListEmptyGenImgView = () => {
   trackEvent(GA_EVENTS.mypage.LIST_EMPTY_GEN_IMG_VIEW, {
     ...mypageScreenParams(),
-    ...getMypageSavedItemsListParams(items),
+    ...getMypageEmptyGenImgListParams(),
   });
 };
 
@@ -189,46 +177,38 @@ export const trackMypageListEmptySavedItemView = (
   });
 };
 
-export const trackMypageBtnCtaEmptyGenImgClick = (
-  items: Pick<FurnitureItem, 'rawProductId'>[] = []
-) => {
+export const trackMypageBtnCtaEmptyGenImgClick = () => {
   trackEvent(GA_EVENTS.mypage.BTN_CTA_EMPTY_GEN_IMG_CLICK, {
     ...mypageScreenParams(),
-    ...getMypageSavedItemsListParams(items),
+    ...mypageReturnScreenParams(),
   });
 };
 
-export const trackMypageBtnTextEmptyGenImgClick = (
-  items: Pick<FurnitureItem, 'rawProductId'>[] = []
-) => {
+export const trackMypageBtnTextEmptyGenImgClick = () => {
   trackEvent(GA_EVENTS.mypage.BTN_TEXT_EMPTY_GEN_IMG_CLICK, {
     ...mypageScreenParams(),
-    ...getMypageSavedItemsListParams(items),
+    ...mypageReturnScreenParams(),
   });
 };
 
-export const trackMypageBtnCtaEmptySavedItemClick = (
-  items: Pick<FurnitureItem, 'rawProductId'>[] = []
-) => {
+export const trackMypageBtnCtaEmptySavedItemClick = () => {
   trackEvent(GA_EVENTS.mypage.BTN_CTA_EMPTY_SAVED_ITEM_CLICK, {
     ...mypageScreenParams(),
-    ...getMypageSavedItemsListParams(items),
+    ...mypageReturnScreenParams(),
   });
 };
 
-export const trackMypageBtnTextEmptySavedItemClick = (
-  items: Pick<FurnitureItem, 'rawProductId'>[] = []
-) => {
+export const trackMypageBtnTextEmptySavedItemClick = () => {
   trackEvent(GA_EVENTS.mypage.BTN_TEXT_EMPTY_SAVED_ITEM_CLICK, {
     ...mypageScreenParams(),
-    ...getMypageSavedItemsListParams(items),
+    ...mypageReturnScreenParams(),
   });
 };
 
-// 기존 import 경로 호환 — params 빌더 재노출
 export {
   getMypageGenImgItemParams,
   getMypageGenImgListParams,
+  getMypageEmptyGenImgListParams,
   getMypageSavedItemsListParams,
   mypageReturnScreenParams,
   mypageScreenParams,

@@ -5,7 +5,7 @@ import {
   trackResultRecBtnArrowRightClick,
   trackResultRecBtnMoreImgClick,
   trackResultRecBtnPreferenceClick,
-  trackResultRecChipFilterClick,
+  trackResultRecChipFilterSelected,
   trackResultRecFeedCardGoSiteClick,
   trackResultRecFeedCardOnCardClick,
   trackResultRecFeedCardSaveClick,
@@ -78,7 +78,7 @@ const useResultRecAnalytics = ({
     trackedFilterCombRef.current = true;
     trackResultRecSlideFilterCombView({
       categories: renderableCategories,
-      products: resolvedProducts,
+      selectedCategoryId,
     });
   }, [categoriesState, renderableCategories, resolvedProducts]);
 
@@ -104,7 +104,7 @@ const useResultRecAnalytics = ({
   const handleCategoryChipClick = useCallback(
     (categoryId: number) => {
       if (selectedCategoryId !== categoryId) {
-        trackResultRecChipFilterClick({
+        trackResultRecChipFilterSelected({
           categories: renderableCategories,
           selectedCategoryId: categoryId,
         });

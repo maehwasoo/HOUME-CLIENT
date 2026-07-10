@@ -28,10 +28,11 @@ export type ResultPreferenceType =
 /** 결과·마이페이지·로딩 파라미터 */
 export interface ResultParams {
   img_result_type?: ImgResultType;
-  gen_img_style?: string;
+  gen_img_title?: string;
+  gen_img_ids?: string | null;
   gen_img_id?: number;
   mypage_img_count?: number;
-  saved_item_ids?: string;
+  saved_item_ids?: string | null;
   saved_item_count?: number;
   load_preference_type?: LoadPreferenceType;
   loaded_product_ids?: string;

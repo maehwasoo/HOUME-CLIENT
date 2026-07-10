@@ -22,6 +22,7 @@ import type {
   ImageSetupSteps,
 } from '@pages/imageSetup/types/funnel/steps';
 import { fetchHouseTemplateDetail } from '@pages/imageSetup/v2/apis/queries/useHouseTemplateDetailQuery';
+import { ensureRecentFloorPlanForAnalytics } from '@pages/imageSetup/v2/apis/queries/useRecentFloorPlanQuery';
 import { useFloorPlanSelect } from '@pages/imageSetup/v2/hooks/useFloorPlanSelect';
 import { useFloorPlanStore } from '@pages/imageSetup/v2/stores/useFloorPlanStore';
 
@@ -183,31 +184,34 @@ export const useRoomTypeAnalytics = (
     [floorPlans, grid.appliedFilters, handleCardClick, queryClient]
   );
 
-  const handleConfirmFloorPlanWithAnalytics = useCallback(() => {
+  const handleConfirmFloorPlanWithAnalytics = useCallback(async () => {
     if (selectedFloorPlanId === null) return;
 
     const floorPlanView =
       selectedDetailViews[useFloorPlanStore.getState().selectedViewIndex]
         ?.view ?? '';
 
+    const recentForAnalytics =
+      await ensureRecentFloorPlanForAnalytics(queryClient);
+
     trackRoomTypeViewSheetSubmit({
       floorPlanId: selectedFloorPlanId,
       floorPlanName: selectedFloorPlanName,
       floorPlanView,
       equilibrium: selectedEquilibrium,
-      recentFloorPlan,
+      recentFloorPlan: recentForAnalytics,
     });
     handleConfirmFloorPlan();
   }, [
     handleConfirmFloorPlan,
-    recentFloorPlan,
+    queryClient,
     selectedDetailViews,
     selectedEquilibrium,
     selectedFloorPlanId,
     selectedFloorPlanName,
   ]);
 
-  const handleConfirmRecentFloorPlanWithAnalytics = useCallback(() => {
+  const handleConfirmRecentFloorPlanWithAnalytics = useCallback(async () => {
     if (!recentFloorPlan?.floorPlanId) return;
 
     const floorPlanView =
@@ -215,15 +219,18 @@ export const useRoomTypeAnalytics = (
         useFloorPlanStore.getState().selectedViewIndex
       ]?.view ?? '';
 
+    const recentForAnalytics =
+      await ensureRecentFloorPlanForAnalytics(queryClient);
+
     trackRoomTypeViewSheetSubmit({
       floorPlanId: recentFloorPlan.floorPlanId,
       floorPlanName: recentFloorPlan.floorPlanName ?? '',
       floorPlanView,
       equilibrium: recentFloorPlan.equilibrium,
-      recentFloorPlan,
+      recentFloorPlan: recentForAnalytics,
     });
     handleConfirmRecentFloorPlan();
-  }, [handleConfirmRecentFloorPlan, recentFloorPlan]);
+  }, [handleConfirmRecentFloorPlan, queryClient, recentFloorPlan]);
 
   const handleFilterApplyWithAnalytics = useCallback(() => {
     const nextFilters = useFloorPlanStore.getState().pendingFilters;

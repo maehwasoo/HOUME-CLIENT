@@ -35,11 +35,11 @@ export interface SpaceParams {
   /** ex. "3, 15, 16" */
   alternative_space_ids?: string;
   has_previous_space?: boolean;
-  previous_space_id?: number;
-  previous_space_name?: string;
+  previous_space_id?: number | null;
+  previous_space_name?: string | null;
   previous_space_reuse?: PreviousSpaceReuse;
   filter_type?: FilterType;
-  filter_space_roomType?: string;
-  filter_space_struct?: string;
-  filter_space_size?: string;
+  filter_space_roomType?: string | null;
+  filter_space_struct?: string | null;
+  filter_space_size?: string | null;
 }

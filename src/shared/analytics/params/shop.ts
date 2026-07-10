@@ -28,11 +28,11 @@ export type ShopFilterCategory =
 
 /** 상품 탭 — 검색·필터·선택 시트 파라미터 */
 export interface ShopParams {
-  search_keyword?: string;
-  selected_shop_keyword_filters?: string;
-  filter_shop_furniture_type?: string;
-  filter_shop_price?: string;
-  filter_shop_color?: string;
+  search_keyword?: string | null;
+  selected_shop_keyword_filters?: string | null;
+  filter_shop_furniture_type?: string | null;
+  filter_shop_price?: string | null;
+  filter_shop_color?: string | null;
   alternative_product_count?: number;
   /** ex. "385, 394, 208" */
   alternative_product_ids?: string;
@@ -40,9 +40,9 @@ export interface ShopParams {
   product_count_viewed?: number;
   selected_count?: number;
   /** ex. "345, 369, 102" */
-  selected_product_ids?: string;
+  selected_product_ids?: string | null;
   /** ex. "chair, table, lighting" */
-  selected_sub_category_types?: string;
+  selected_sub_category_types?: string | null;
   count_trigger_event?: CountTriggerEvent;
   sheet_expansion_status?: SheetExpansionStatus;
 }

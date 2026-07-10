@@ -3,7 +3,6 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   COUNT_TRIGGER_EVENT,
   getShopListContextParams,
-  getShopListProductScrollParams,
   trackShopFilterListClick,
   trackShopFilterSheetResetClick,
   trackShopFilterSheetSubmit,
@@ -17,7 +16,6 @@ import {
   trackShopSelectSheetItemCountChange,
   trackShopSelectSheetRemoveClick,
   trackShopSelectSheetSwipe,
-  trackShopSelectSheetView,
 } from '@pages/home/analytics/shopAnalytics';
 import { useShopAnalyticsContext } from '@pages/home/analytics/useShopAnalyticsContext';
 import {
@@ -28,10 +26,7 @@ import type { SelectedProduct } from '@pages/home/types/productTab';
 import { useRecentFloorPlanQuery } from '@pages/imageSetup/v2/apis/queries/useRecentFloorPlanQuery';
 
 import { GA_EVENTS } from '@shared/analytics/events';
-import {
-  useAnalyticsPageView,
-  useScrollDepthTrack,
-} from '@shared/analytics/hooks';
+import { useAnalyticsPageView } from '@shared/analytics/hooks';
 import { SCREEN_NAME } from '@shared/analytics/screenNames';
 import { resolveShopImageEntryRoute } from '@shared/analytics/utils/shop/resolveShopEntryRoute';
 
@@ -51,14 +46,14 @@ const useProductShopAnalytics = (
   }: UseProductShopAnalyticsOptions
 ) => {
   const { data: recentFloorPlanData } = useRecentFloorPlanQuery();
-  const hasTrackedSelectSheetViewRef = useRef(false);
 
   const {
     sheetExpanded,
     setSheetExpanded: setSheetExpandedState,
-    filterSheetOpen,
     selectedProducts,
-    keyword,
+    debouncedKeyword,
+    isPending,
+    isError,
     handleFilterChipClick,
     handleFilterApply,
     handleFilterResetClick,
@@ -78,11 +73,6 @@ const useProductShopAnalytics = (
     shopListContext,
   } = useShopAnalyticsContext({ controller, productCountViewed });
 
-  const listProductScrollParams = useMemo(
-    () => getShopListProductScrollParams(shopListContext),
-    [shopListContext]
-  );
-
   const shopPageParams = useMemo(
     () =>
       getShopListContextParams(shopListContext, {
@@ -98,31 +88,21 @@ const useProductShopAnalytics = (
     shopPageParams
   );
 
-  const pageScrollParams = useMemo(
-    () =>
-      getShopListContextParams(shopListContext, {
-        includeLoginStatus: true,
-        includeProductCountViewed: true,
-      }),
-    [shopListContext]
-  );
+  // 검색어 디바운스 후 결과가 표시될 때마다 search_submit (Enter 키에만 의존하지 않음)
+  const lastTrackedSearchKeywordRef = useRef<string | null>(null);
 
-  useScrollDepthTrack(GA_EVENTS.shop.PAGE_SCROLL, SCREEN_NAME.SHOP, {
-    extraParams: pageScrollParams,
-  });
-
-  useScrollDepthTrack(GA_EVENTS.shop.LIST_PRODUCT_SCROLL, SCREEN_NAME.SHOP, {
-    extraParams: listProductScrollParams,
-  });
-
-  // 선택 바텀시트(DragHandleBottomSheet open={!filterSheetOpen}) 최초 노출 시 1회
   useEffect(() => {
-    if (filterSheetOpen) return;
-    if (hasTrackedSelectSheetViewRef.current) return;
+    const trimmed = debouncedKeyword.trim();
+    if (!trimmed) {
+      lastTrackedSearchKeywordRef.current = null;
+      return;
+    }
+    if (isPending || isError) return;
+    if (lastTrackedSearchKeywordRef.current === trimmed) return;
 
-    hasTrackedSelectSheetViewRef.current = true;
-    trackShopSelectSheetView(getSelectSheetContext());
-  }, [filterSheetOpen, getSelectSheetContext]);
+    lastTrackedSearchKeywordRef.current = trimmed;
+    trackShopSearchSubmit(getShopListContext());
+  }, [debouncedKeyword, getShopListContext, isError, isPending]);
 
   const trackSelectSheetCountChange = useCallback(
     (
@@ -254,13 +234,6 @@ const useProductShopAnalytics = (
     trackShopSearchBarClick();
   }, []);
 
-  const handleSearchSubmit = useCallback(() => {
-    trackShopSearchSubmit({
-      ...getShopListContext(),
-      searchKeyword: keyword,
-    });
-  }, [getShopListContext, keyword]);
-
   const handleSearchClear = useCallback(() => {
     trackShopSearchClear(getShopListContext());
     handleSearchKeywordChange('');
@@ -316,7 +289,6 @@ const useProductShopAnalytics = (
     handleDecorateWithProductsClick:
       handleDecorateWithProductsClickWithAnalytics,
     handleSearchBarClick,
-    handleSearchSubmit,
     handleSearchClear,
     handleSelectSheetItemClick,
   };

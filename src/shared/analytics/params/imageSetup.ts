@@ -13,7 +13,7 @@ export type ActivityChip = (typeof ACTIVITY_CHIP)[keyof typeof ACTIVITY_CHIP];
 export interface ImageSetupParams {
   selected_moodBoard_ids?: string;
   count_moodBoard?: number;
-  selected_activity_chip?: ActivityChip;
+  selected_activity_chip?: ActivityChip | null;
   /** ex. "bed_single, sofa_1seater, desk, mirror" */
   selected_furniture_chips?: string;
   count_furniture_chips?: number;

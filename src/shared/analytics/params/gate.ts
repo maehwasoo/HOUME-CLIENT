@@ -23,6 +23,8 @@ export const IMAGE_ENTRY_ROUTE = {
   HOME_STYLE: 'home_style',
   SHOP: 'shop',
   SHOP_REGENERATE: 'shop_regenerate',
+  /** 마이페이지 생성 이미지 목록 → 결과 페이지 (퍼널 스냅샷 없음) */
+  MYPAGE: 'mypage',
 } as const;
 
 export type ImageEntryRoute =

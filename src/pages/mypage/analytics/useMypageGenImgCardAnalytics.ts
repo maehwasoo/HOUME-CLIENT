@@ -5,7 +5,6 @@ import {
   trackMypageListCardGoSiteClick,
   trackMypageListCardSaveClick,
   trackMypageListCardUnsaveClick,
-  trackMypageListCardView,
   trackMypageSlideGenImgItemScroll,
 } from '@pages/mypage/analytics/mypageAnalytics';
 
@@ -25,10 +24,9 @@ interface UseMypageGenImgCardAnalyticsOptions {
 
 export const useMypageGenImgCardAnalytics = ({
   item,
-  isListType,
+  isListType: _isListType,
   usedProducts,
 }: UseMypageGenImgCardAnalyticsOptions) => {
-  const trackedListCardViewRef = useRef(false);
   const scrollDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -38,23 +36,6 @@ export const useMypageGenImgCardAnalytics = ({
       }
     };
   }, []);
-
-  useEffect(() => {
-    trackedListCardViewRef.current = false;
-  }, [item.imageId, usedProducts]);
-
-  useEffect(() => {
-    if (
-      !isListType ||
-      usedProducts.length === 0 ||
-      trackedListCardViewRef.current
-    ) {
-      return;
-    }
-
-    trackedListCardViewRef.current = true;
-    trackMypageListCardView();
-  }, [isListType, usedProducts]);
 
   const handleListCardClick = useCallback((product: UsedProductResponse) => {
     trackMypageListCardClick(product);
@@ -84,12 +65,9 @@ export const useMypageGenImgCardAnalytics = ({
     }
 
     scrollDebounceRef.current = setTimeout(() => {
-      const firstProduct = usedProducts.find(
-        (product) => product.rawProductId != null
-      );
       trackMypageSlideGenImgItemScroll({
         item,
-        product: firstProduct,
+        usedProducts,
       });
     }, 300);
   }, [item, usedProducts]);

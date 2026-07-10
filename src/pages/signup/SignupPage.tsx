@@ -112,14 +112,13 @@ const SignupPage = () => {
     !monthFieldError &&
     !dayFieldError;
 
-  const { signupStep, trackBrowserBack, trackBrowserBackPop } =
+  const { signupStep, trackBrowserBackPop, trackNicknameChange } =
     useSignupFormAnalytics({
       enabled: !!signupToken,
+      handleNicknameChange,
       isNameSectionValid,
       isNameSubmitted,
       isBirthSectionValid,
-      isNameFormatInvalid,
-      isNameLengthInvalid,
       yearFormatError,
       yearAgeError,
       monthFieldError,
@@ -127,10 +126,20 @@ const SignupPage = () => {
     });
 
   const isExitModalOpenRef = useRef(false);
+  const isIntentionalQuitRef = useRef(false);
+  const allowBrowserBackExitRef = useRef<() => void>(() => {});
 
   const clearSignupSession = useCallback(() => {
     sessionStorage.removeItem('signupToken');
+    sessionStorage.removeItem(SIGNUP_EXIT_MODAL_PENDING_KEY);
   }, []);
+
+  const quitSignup = useCallback(() => {
+    isIntentionalQuitRef.current = true;
+    allowBrowserBackExitRef.current();
+    clearSignupSession();
+    navigate(ROUTES.LOGIN, { replace: true });
+  }, [clearSignupSession, navigate]);
 
   const openSignupExitModal = useCallback(
     ({ onStay, onQuit }: { onStay?: () => void; onQuit: () => void }) => {
@@ -155,6 +164,7 @@ const SignupPage = () => {
         return (
           <Popup
             btnStyle="text"
+            containerSize="creditRequest"
             btnText="계속하기"
             weakBtnText="그만두기"
             topIconName="WarningFillDanger"
@@ -193,15 +203,13 @@ const SignupPage = () => {
     enabled: !!signupToken,
     onBack: () => {
       trackBrowserBackPop();
-      openSignupExitModal({
-        onQuit: () => {
-          allowBrowserBackExit();
-          clearSignupSession();
-          navigate(ROUTES.LOGIN, { replace: true });
-        },
-      });
+      openSignupExitModal({ onQuit: quitSignup });
     },
   });
+
+  useEffect(() => {
+    allowBrowserBackExitRef.current = allowBrowserBackExit;
+  }, [allowBrowserBackExit]);
 
   // OAuth callback으로 잠깐 이동했다 복귀한 경우 모달 복구
   useEffect(() => {
@@ -210,37 +218,25 @@ const SignupPage = () => {
 
     sessionStorage.removeItem(SIGNUP_EXIT_MODAL_PENDING_KEY);
     trackBrowserBackPop();
-    openSignupExitModal({
-      onQuit: () => {
-        allowBrowserBackExit();
-        clearSignupSession();
-        navigate(ROUTES.LOGIN, { replace: true });
-      },
-    });
-  }, [
-    signupToken,
-    trackBrowserBackPop,
-    openSignupExitModal,
-    allowBrowserBackExit,
-    clearSignupSession,
-    navigate,
-  ]);
+    openSignupExitModal({ onQuit: quitSignup });
+  }, [signupToken, trackBrowserBackPop, openSignupExitModal, quitSignup]);
 
   useExitBlocker({
     enabled: !!signupToken,
     shouldBlockNavigation: ({ nextLocation, historyAction }) => {
+      if (isIntentionalQuitRef.current) return false;
       if (nextLocation.pathname === ROUTES.WELCOME) return false;
 
       // 브라우저 뒤로가기(POP)는 useBrowserBackTrap이 처리
       if (historyAction === 'POP') return false;
 
-      trackBrowserBack(historyAction);
       return true;
     },
     onBlocked: ({ proceed, reset }) => {
       openSignupExitModal({
         onStay: reset,
         onQuit: () => {
+          isIntentionalQuitRef.current = true;
           clearSignupSession();
           proceed();
         },
@@ -249,7 +245,7 @@ const SignupPage = () => {
   });
 
   const { mutate: signUp } = usePostSignupMutation();
-  const { randomNickname, refresh } = useRandomNickname(handleNicknameChange);
+  const { randomNickname, refresh } = useRandomNickname(trackNicknameChange);
 
   useEffect(() => {
     if (!isNameSectionValid) {
@@ -259,7 +255,7 @@ const SignupPage = () => {
 
   useEffect(() => {
     if (randomNickname && !isInitialized.current && nickname === '') {
-      handleNicknameChange(randomNickname);
+      trackNicknameChange(randomNickname);
       isInitialized.current = true;
 
       const el = nicknameRef.current;
@@ -268,7 +264,7 @@ const SignupPage = () => {
         el.setSelectionRange(el.value.length, el.value.length);
       }
     }
-  }, [randomNickname, nickname, handleNicknameChange]);
+  }, [randomNickname, nickname, trackNicknameChange]);
 
   const handleNicknameEnter = () => {
     if (isNameSectionValid) {
@@ -326,7 +322,7 @@ const SignupPage = () => {
 
     if (!isFormValid || !gender || !signupToken) return;
 
-    const formattedBirthday = `${birthYear}-${birthMonth}-${birthDay}`;
+    const formattedBirthday = `${birthYear}-${birthMonth.padStart(2, '0')}-${birthDay.padStart(2, '0')}`;
 
     trackSignupCtaClick();
     signUp({
@@ -378,7 +374,7 @@ const SignupPage = () => {
             <TextField
               value={nickname}
               ref={nicknameRef}
-              onChange={handleNicknameChange}
+              onChange={trackNicknameChange}
               isError={isNameFormatInvalid || isNameLengthInvalid}
               errorMessage={nameErrorMessage}
               maxLength={18}

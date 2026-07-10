@@ -36,6 +36,9 @@ import { useErrorHandler } from '@hooks/useErrorHandler';
 import { useKakaoLoginMutation } from './apis/mutations/useKakaoLoginMutation';
 import { getAuthEnvironment } from './utils/environment';
 
+/** 백엔드로 전달해 이미 소비한 인가 코드 — 뒤로가기 재진입(재사용 403) 판별용 */
+export const KAKAO_USED_AUTH_CODE_KEY = 'kakaoUsedAuthCode';
+
 const KakaoCallbackPage = () => {
   const navigate = useNavigate();
   // 오류 핸들러 (인가 코드 없음 케이스 전용)
@@ -45,9 +48,16 @@ const KakaoCallbackPage = () => {
   const { mutate: kakaoLogin, isPending } = useKakaoLoginMutation();
 
   useEffect(() => {
-    // 회원가입 진행 중 뒤로가기로 callback URL에 도달한 경우 — 인가 코드 재사용(403) 방지
+    const url = new URL(window.location.href);
+    const code = url.searchParams.get('code');
+    const isReusedCode =
+      code !== null &&
+      code === sessionStorage.getItem(KAKAO_USED_AUTH_CODE_KEY);
+
+    // 회원가입 진행 중 뒤로가기로 callback URL에 도달한 경우(새 인가 코드 아님)
+    // — 인가 코드 재사용(403) 방지 및 이탈 확인 모달 복구
     const signupToken = sessionStorage.getItem('signupToken');
-    if (signupToken) {
+    if (signupToken && (!code || isReusedCode)) {
       sessionStorage.setItem(SIGNUP_EXIT_MODAL_PENDING_KEY, '1');
       navigate(ROUTES.SIGNUP, {
         replace: true,
@@ -56,13 +66,20 @@ const KakaoCallbackPage = () => {
       return;
     }
 
-    const url = new URL(window.location.href);
-    const code = url.searchParams.get('code');
+    // 회원가입 완료/로그인 완료 후 뒤로가기로 재진입한 경우 — 재호출하면 403이므로 홈으로
+    if (isReusedCode) {
+      navigate(ROUTES.HOME, { replace: true });
+      return;
+    }
 
     const hostname = window.location.hostname;
     const env = getAuthEnvironment(hostname);
 
     if (code) {
+      // 새 OAuth 콜백: 이전 회원가입 세션 잔여물 정리 (신규 회원이면 mutation이 새로 세팅)
+      sessionStorage.removeItem('signupToken');
+      sessionStorage.removeItem(SIGNUP_EXIT_MODAL_PENDING_KEY);
+      sessionStorage.setItem(KAKAO_USED_AUTH_CODE_KEY, code);
       // 로그인 성공/실패 핸들링 로직은 mutation 선언부에서 처리
       kakaoLogin({ code, env });
     } else {

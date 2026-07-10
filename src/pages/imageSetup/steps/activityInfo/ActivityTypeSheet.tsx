@@ -14,6 +14,7 @@ interface ActivityTypeSheetProps {
   open: boolean;
   activities: ActivityWithFurnitureResponse[];
   selectedActivityCode?: string;
+  onActivityChipClick: (activityCode: string) => void;
   onConfirm: (activityCode: string) => void;
   onClose: () => void;
 }
@@ -22,6 +23,7 @@ const ActivityTypeSheet = ({
   open,
   activities,
   selectedActivityCode,
+  onActivityChipClick,
   onConfirm,
   onClose,
 }: ActivityTypeSheetProps) => {
@@ -60,7 +62,11 @@ const ActivityTypeSheet = ({
                   key={activity.code}
                   type="button"
                   className={styles.radioItem({ selected: isSelected })}
-                  onClick={() => setLocalSelected(activity.code)}
+                  onClick={() => {
+                    if (!activity.code) return;
+                    setLocalSelected(activity.code);
+                    onActivityChipClick(activity.code);
+                  }}
                 >
                   <div className={styles.radioContents}>
                     {iconName && <Icon name={iconName} size="20" />}

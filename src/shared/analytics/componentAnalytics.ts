@@ -91,6 +91,10 @@ export const trackToastSaveView = (input: SaveToastInput) => {
   trackEvent(GA_EVENTS.component.TOAST_SAVE_VIEW, getSaveToastParams(input));
 };
 
+export const trackToastUnsaveView = (input: SaveToastInput) => {
+  trackEvent(GA_EVENTS.component.TOAST_UNSAVE_VIEW, getSaveToastParams(input));
+};
+
 export const trackSaveToastToSeeClick = (input: SaveToastInput) => {
   trackEvent(
     GA_EVENTS.component.SAVE_TOAST_TO_SEE_CLICK,

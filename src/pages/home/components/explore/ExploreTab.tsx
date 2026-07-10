@@ -2,7 +2,10 @@ import { useMemo } from 'react';
 
 import { generatePath, useNavigate } from 'react-router-dom';
 
-import { trackHomeBannerSlideEvent } from '@pages/home/analytics/homeAnalytics';
+import {
+  trackHomeBannerSlideEvent,
+  trackHomeWebBannerClick,
+} from '@pages/home/analytics/homeAnalytics';
 import Banner, {
   type BannerSlide,
 } from '@pages/home/components/explore/banner/Banner';
@@ -45,6 +48,11 @@ const ExploreTab = ({
     return 0;
   }, [exploreSeedBannerId, landingData?.landings]);
 
+  const handlePromoBannerClick = () => {
+    trackHomeWebBannerClick();
+    onPromoBannerClick?.();
+  };
+
   const handleBannerSlideClick = (slide: BannerSlide) => {
     trackHomeBannerSlideEvent(GA_EVENTS.home.BANNER_BG_IMG_CLICK, slide);
 
@@ -79,7 +87,7 @@ const ExploreTab = ({
           type="button"
           className={styles.promoBannerButton}
           aria-label="상품 탭으로 이동"
-          onClick={onPromoBannerClick}
+          onClick={handlePromoBannerClick}
         >
           <img src={promoBanner} alt="" className={styles.promoBannerImage} />
         </button>

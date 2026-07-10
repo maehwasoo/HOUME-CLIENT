@@ -29,19 +29,18 @@ export const joinProductNames = (products: Pick<ProductInfo, 'name'>[]) =>
     .filter((name): name is string => Boolean(name))
     .join(', ') || undefined;
 
-const categoryFilterParams = ({
+const categoryChipParams = ({
   categories,
   selectedCategoryId,
 }: {
   categories: FurnitureCategoryResponse[];
   selectedCategoryId?: number | null;
 }) => {
-  const selectedCategory = categories.find(
-    (category) => category.id === selectedCategoryId
-  );
+  const selectedCategory =
+    categories.find((category) => category.id === selectedCategoryId) ??
+    categories[0];
 
   return {
-    result_category_ids: joinCategoryIds(categories),
     result_category_chip: selectedCategory?.categoryName,
   };
 };
@@ -78,8 +77,8 @@ export const trackResultRecListRecView = ({
 }) => {
   trackEvent(GA_EVENTS.resultRec.LIST_REC_VIEW, {
     ...resultRecScreenParams(),
-    look_around_product_ids: joinAnalyticsIds(products),
-    ...categoryFilterParams({ categories, selectedCategoryId }),
+    ...recommendedProductParams(products),
+    ...categoryChipParams({ categories, selectedCategoryId }),
   });
 };
 
@@ -118,28 +117,29 @@ export const trackResultRecBtnArrowLeftClick = () => {
 
 export const trackResultRecSlideFilterCombView = ({
   categories,
-  products,
+  selectedCategoryId,
 }: {
   categories: FurnitureCategoryResponse[];
-  products: ProductInfo[];
+  selectedCategoryId?: number | null;
 }) => {
   trackEvent(GA_EVENTS.resultRec.SLIDE_FILTER_COMB_VIEW, {
     ...resultRecScreenParams(),
     result_category_ids: joinCategoryIds(categories),
-    ...recommendedProductParams(products),
+    ...categoryChipParams({ categories, selectedCategoryId }),
   });
 };
 
-export const trackResultRecChipFilterClick = ({
+export const trackResultRecChipFilterSelected = ({
   categories,
   selectedCategoryId,
 }: {
   categories: FurnitureCategoryResponse[];
   selectedCategoryId: number;
 }) => {
-  trackEvent(GA_EVENTS.resultRec.CHIP_FILTER_CLICK, {
+  trackEvent(GA_EVENTS.resultRec.CHIP_FILTER_SELECTED, {
     ...resultRecScreenParams(),
-    ...categoryFilterParams({ categories, selectedCategoryId }),
+    result_category_ids: joinCategoryIds(categories),
+    ...categoryChipParams({ categories, selectedCategoryId }),
   });
 };
 

@@ -28,6 +28,7 @@ import { type ScreenName } from '@shared/analytics/screenNames';
 import { trackEvent } from '@shared/analytics/track';
 import { toSheetExpansionStatus } from '@shared/analytics/utils/imageFlow';
 import { loginStatusParams } from '@shared/analytics/utils/loginStatus';
+import { toAnalyticsNull } from '@shared/analytics/utils/toAnalyticsNull';
 
 export const trackShopFilterListClick = (
   category: ProductFilterChipCategory
@@ -44,8 +45,8 @@ export const trackShopFilterSheetView = (
   sheetExpanded: boolean
 ) => {
   trackEvent(GA_EVENTS.shop.FILTER_SHT_VIEW, {
-    ...shopScreenParams(),
     ...loginStatusParams(),
+    ...shopScreenParams(),
     selected_shop_keyword_filters: formatSelectedShopKeywordFilters(
       listContext.appliedFilterChips
     ),
@@ -110,10 +111,7 @@ export const trackShopSelectSheetAddItemClick = (
 ) => {
   trackEvent(
     GA_EVENTS.shop.SELECT_SHEET_ADD_ITEM_CLICK,
-    getShopSelectSheetParams(context, {
-      includeLoginStatus: true,
-      includeSelectedSubCategoryTypes: true,
-    })
+    getShopSelectSheetParams(context, { includeLoginStatus: true })
   );
 };
 
@@ -193,7 +191,7 @@ export const trackShopFeedCardDetailClick = (
   trackEvent(GA_EVENTS.shop.FEED_CARD_DETAIL_CLICK, {
     ...shopScreenParams(),
     ...getShopProductCardParams(product),
-    selected_product_ids: selectedProductIds,
+    selected_product_ids: toAnalyticsNull(selectedProductIds),
   });
 };
 
@@ -289,16 +287,6 @@ export const trackShopFeedDetailMdCloseClick = () => {
   trackEvent(GA_EVENTS.shop.FEED_DETAIL_MD_CLOSE_CLICK, shopScreenParams());
 };
 
-export const trackShopSelectSheetView = (context: ShopSelectSheetContext) => {
-  trackEvent(
-    GA_EVENTS.shop.SELECT_SHEET_VIEW,
-    getShopSelectSheetParams(context, {
-      includeLoginStatus: true,
-      includeSelectedSubCategoryTypes: true,
-    })
-  );
-};
-
 export const trackShopSelectSheetSwipe = (
   eventName:
     | typeof GA_EVENTS.shop.SELECT_SHEET_SWIPE_UP
@@ -320,7 +308,6 @@ export const trackShopSelectSheetItemCountChange = (
 // 기존 import 경로 호환 — params 빌더/타입·shop enum 재노출
 export {
   getShopListContextParams,
-  getShopListProductScrollParams,
   getShopProductCardParams,
   getShopSelectSheetParams,
   shopScreenParams,

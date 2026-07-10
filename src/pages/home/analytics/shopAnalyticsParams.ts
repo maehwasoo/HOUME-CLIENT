@@ -11,6 +11,7 @@ import { SCREEN_NAME } from '@shared/analytics/screenNames';
 import { toSheetExpansionStatus } from '@shared/analytics/utils/imageFlow';
 import { loginStatusParams } from '@shared/analytics/utils/loginStatus';
 import { resolveShopTriggerContext } from '@shared/analytics/utils/shop/resolveShopTriggerContext';
+import { toAnalyticsNull } from '@shared/analytics/utils/toAnalyticsNull';
 
 type FilterLabelMap = Record<string, string>;
 
@@ -36,7 +37,7 @@ export const shopScreenParams = () => ({
 });
 
 const labelsFromIds = (ids: string[] | undefined, labels: FilterLabelMap) => {
-  if (!ids?.length) return undefined;
+  if (!ids?.length) return null;
 
   const formatted = ids
     .filter((id) => id !== ALL_FILTER_SENTINEL)
@@ -44,7 +45,7 @@ const labelsFromIds = (ids: string[] | undefined, labels: FilterLabelMap) => {
     .filter(Boolean)
     .join(', ');
 
-  return formatted || undefined;
+  return formatted || null;
 };
 
 type ShopListParamsOptions = {
@@ -60,15 +61,6 @@ export const formatSelectedProductIds = (products: SelectedProduct[]) =>
     ? products.map((product) => product.id).join(', ')
     : undefined;
 
-const formatSelectedSubCategoryTypes = (products: SelectedProduct[]) => {
-  const subCategoryTypes = products
-    .map((product) => product.subCategoryName)
-    .filter(Boolean)
-    .join(', ');
-
-  return subCategoryTypes || undefined;
-};
-
 export const formatSelectedShopKeywordFilters = (
   appliedFilterChips?: AppliedFilterChip[]
 ) => {
@@ -77,7 +69,7 @@ export const formatSelectedShopKeywordFilters = (
     .map((chip) => chip.label)
     .join(', ');
 
-  return selected || undefined;
+  return toAnalyticsNull(selected);
 };
 
 export const getShopListContextParams = (
@@ -96,7 +88,7 @@ export const getShopListContextParams = (
   return {
     ...(options?.includeLoginStatus ? loginStatusParams() : {}),
     ...shopScreenParams(),
-    search_keyword: searchKeyword?.trim() || undefined,
+    search_keyword: toAnalyticsNull(searchKeyword?.trim()),
     selected_shop_keyword_filters:
       formatSelectedShopKeywordFilters(appliedFilterChips),
     filter_shop_furniture_type: labelsFromIds(
@@ -127,20 +119,6 @@ export const getShopListContextParams = (
   };
 };
 
-export const getShopListProductScrollParams = ({
-  productCount,
-  productCountViewed,
-}: Pick<ShopListContext, 'productCount' | 'productCountViewed'> = {}) => ({
-  ...shopScreenParams(),
-  product_count: productCount,
-  product_count_viewed: productCountViewed,
-});
-
-type ShopSelectSheetParamsOptions = {
-  includeLoginStatus?: boolean;
-  includeSelectedSubCategoryTypes?: boolean;
-};
-
 export const getShopSelectSheetBaseParams = (
   {
     sheetExpanded,
@@ -150,27 +128,21 @@ export const getShopSelectSheetBaseParams = (
     ShopSelectSheetContext,
     'sheetExpanded' | 'selectedProducts' | 'countTriggerEvent'
   >,
-  options?: ShopSelectSheetParamsOptions
+  options?: Pick<ShopListParamsOptions, 'includeLoginStatus'>
 ) => {
-  const selectedSubCategoryTypes =
-    formatSelectedSubCategoryTypes(selectedProducts);
-
   return {
     ...(options?.includeLoginStatus ? loginStatusParams() : {}),
     ...shopScreenParams(),
     sheet_expansion_status: toSheetExpansionStatus(sheetExpanded),
     selected_count: selectedProducts.length,
     selected_product_ids: formatSelectedProductIds(selectedProducts),
-    ...(options?.includeSelectedSubCategoryTypes && selectedSubCategoryTypes
-      ? { selected_sub_category_types: selectedSubCategoryTypes }
-      : {}),
     ...(countTriggerEvent ? { count_trigger_event: countTriggerEvent } : {}),
   };
 };
 
 export const getShopSelectSheetParams = (
   context: ShopSelectSheetContext,
-  options?: ShopSelectSheetParamsOptions
+  options?: Pick<ShopListParamsOptions, 'includeLoginStatus'>
 ) => getShopSelectSheetBaseParams(context, options);
 
 export const getShopSelectedProductFields = (

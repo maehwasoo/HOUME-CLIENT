@@ -46,13 +46,11 @@ export const useSelectFurnitureAnalytics = (
   useScrollDepthTrack(
     GA_EVENTS.selectFurniture.PAGE_SCROLL,
     SCREEN_NAME.SELECT_FURNITURE,
-    {
-      extraParams: loginStatusParams(),
-    }
+    { extraParams: loginStatusParams() }
   );
 
-  const trackDropDownActivityClick = () => {
-    trackSelectFurnitureDropDownActivityClick(activityInfo.formData.activity);
+  const trackDropDownActivityClick = (activityCode: string) => {
+    trackSelectFurnitureDropDownActivityClick(activityCode);
   };
 
   const trackActivitySheetView = () => {

@@ -52,7 +52,7 @@ const SavedItemsSection = () => {
     item: (typeof savedItems)[number]
   ) => {
     handleFeedCardSaveToggle(item, isSaved);
-    toggleJjym(id);
+    toggleJjym(id, { productName: item.productName });
   };
 
   const itemFocusRef = useRef<HTMLDivElement | null>(null);

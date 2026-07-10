@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 import { ROUTES } from '@routes/paths';
@@ -64,7 +65,15 @@ export const usePostSignupMutation = () => {
       });
     },
     onError: (error) => {
-      console.error('[usePostSignupMutation] 회원가입 실패:', error);
+      if (import.meta.env.DEV && isAxiosError(error)) {
+        console.error('[usePostSignupMutation] 회원가입 실패:', {
+          status: error.response?.status,
+          message: error.response?.data?.message,
+          data: error.response?.data,
+        });
+      } else {
+        console.error('[usePostSignupMutation] 회원가입 실패:', error);
+      }
 
       // 가입 실패 시 시작점 복귀 + 에러 토스트
       navigate(consumeLoginRedirect() ?? ROUTES.HOME);
