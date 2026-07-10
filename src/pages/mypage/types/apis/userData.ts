@@ -6,6 +6,7 @@ export interface MyPageUserData {
   userId: number;
   name: string;
   CreditCount: number; // 서버 응답과 동일하게 CreditCount 사용
+  email?: string;
 }
 
 export type MyPageUserResponse = BaseResponse<MyPageUserData>;

@@ -1,15 +1,24 @@
 import * as styles from './CreditRequestPopup.css';
 import Popup from './Popup';
 
-const CREDIT_REQUEST_URL = 'https://tally.so/r/gDrdYO';
+const CREDIT_REQUEST_BASE_URL = 'https://tally.so/r/gDrdYO';
+
+const getCreditRequestUrl = (email?: string) => {
+  if (!email) return CREDIT_REQUEST_BASE_URL;
+
+  const url = new URL(CREDIT_REQUEST_BASE_URL);
+  url.searchParams.set('email', email);
+  return url.toString();
+};
 
 interface CreditRequestPopupProps {
   onClose: () => void;
+  email?: string;
 }
 
-const CreditRequestPopup = ({ onClose }: CreditRequestPopupProps) => {
+const CreditRequestPopup = ({ onClose, email }: CreditRequestPopupProps) => {
   const handleRequestCredit = () => {
-    window.open(CREDIT_REQUEST_URL, '_blank', 'noopener,noreferrer');
+    window.open(getCreditRequestUrl(email), '_blank', 'noopener,noreferrer');
     onClose();
   };
 

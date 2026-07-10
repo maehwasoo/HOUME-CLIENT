@@ -17,7 +17,7 @@ export const container = style({
 export const chipBar = style({
   display: 'flex',
   flexShrink: 0,
-  gap: unitVars.unit.gapPadding['200'],
+  gap: unitVars.unit.gapPadding['100'],
   padding: `${unitVars.unit.gapPadding['200']} ${unitVars.unit.gapPadding['500']}`,
   overflowX: 'auto',
   overflowY: 'hidden',

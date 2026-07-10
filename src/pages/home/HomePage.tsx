@@ -146,6 +146,7 @@ const HomePage = () => {
       {activeMenuTab === 'explore' && (
         <ExploreTab
           exploreSeedBannerId={homeState?.exploreSeedBannerId}
+          onPromoBannerClick={() => handleTabChange('product')}
           hasPreviousImage={hasPreviousImage}
           hasPreviousSpace={hasPreviousImage}
         />

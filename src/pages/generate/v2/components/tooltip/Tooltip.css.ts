@@ -1,6 +1,9 @@
 import { keyframes, style } from '@vanilla-extract/css';
 
-import { tooltipFadeInSpec } from '@styles/tokensV2/interaction/presets';
+import {
+  TOOLTIP_AFTER_DELAY_MS,
+  tooltipFadeInSpec,
+} from '@styles/tokensV2/interaction/presets';
 import {
   interactionDurationMs,
   interactionEasing,
@@ -46,7 +49,7 @@ export const tooltipContent = style({
   width: '100%',
   minWidth: 'max-content',
   maxWidth: '27.7rem',
-  animation: `${tooltipFadeInKeyframes} ${interactionDurationMs(tooltipFadeInSpec)}ms ${interactionEasing(tooltipFadeInSpec)} both`,
+  animation: `${tooltipFadeInKeyframes} ${interactionDurationMs(tooltipFadeInSpec)}ms ${interactionEasing(tooltipFadeInSpec)} ${TOOLTIP_AFTER_DELAY_MS}ms both`,
   whiteSpace: 'nowrap',
 });
 

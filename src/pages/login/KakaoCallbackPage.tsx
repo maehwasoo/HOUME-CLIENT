@@ -22,16 +22,22 @@
  */
 import { useEffect } from 'react';
 
+import { useNavigate } from 'react-router-dom';
+
+import { ROUTES } from '@routes/paths';
+
 import Loading from '@components/loading/Loading';
 
 import { RESPONSE_MESSAGE, HTTP_STATUS } from '@constants/response';
 
+import { SIGNUP_EXIT_MODAL_PENDING_KEY } from '@hooks/useBrowserBackTrap';
 import { useErrorHandler } from '@hooks/useErrorHandler';
 
 import { useKakaoLoginMutation } from './apis/mutations/useKakaoLoginMutation';
 import { getAuthEnvironment } from './utils/environment';
 
 const KakaoCallbackPage = () => {
+  const navigate = useNavigate();
   // 오류 핸들러 (인가 코드 없음 케이스 전용)
   const { handleError } = useErrorHandler('login');
 
@@ -39,6 +45,17 @@ const KakaoCallbackPage = () => {
   const { mutate: kakaoLogin, isPending } = useKakaoLoginMutation();
 
   useEffect(() => {
+    // 회원가입 진행 중 뒤로가기로 callback URL에 도달한 경우 — 인가 코드 재사용(403) 방지
+    const signupToken = sessionStorage.getItem('signupToken');
+    if (signupToken) {
+      sessionStorage.setItem(SIGNUP_EXIT_MODAL_PENDING_KEY, '1');
+      navigate(ROUTES.SIGNUP, {
+        replace: true,
+        state: { signupToken },
+      });
+      return;
+    }
+
     const url = new URL(window.location.href);
     const code = url.searchParams.get('code');
 
@@ -57,7 +74,7 @@ const KakaoCallbackPage = () => {
         '로그인 처리 중 오류가 발생했습니다.'
       );
     }
-  }, [kakaoLogin, handleError]);
+  }, [kakaoLogin, handleError, navigate]);
 
   if (isPending) {
     return <Loading />;

@@ -27,6 +27,10 @@ import TextField from '@components/v2/userFormField/TextField';
 
 import { ERROR_MESSAGES } from '@constants/clientErrorMessage';
 
+import {
+  SIGNUP_EXIT_MODAL_PENDING_KEY,
+  useBrowserBackTrap,
+} from '@hooks/useBrowserBackTrap';
 import { useExitBlocker } from '@hooks/useExitBlocker';
 import { useRandomNickname } from '@hooks/useGetRandomNickname';
 import useUserForm from '@hooks/useUserForm';
@@ -108,34 +112,44 @@ const SignupPage = () => {
     !monthFieldError &&
     !dayFieldError;
 
-  const { signupStep, trackBrowserBack } = useSignupFormAnalytics({
-    enabled: !!signupToken,
-    isNameSectionValid,
-    isNameSubmitted,
-    isBirthSectionValid,
-    isNameFormatInvalid,
-    isNameLengthInvalid,
-    yearFormatError,
-    yearAgeError,
-    monthFieldError,
-    dayFieldError,
-  });
+  const { signupStep, trackBrowserBack, trackBrowserBackPop } =
+    useSignupFormAnalytics({
+      enabled: !!signupToken,
+      isNameSectionValid,
+      isNameSubmitted,
+      isBirthSectionValid,
+      isNameFormatInvalid,
+      isNameLengthInvalid,
+      yearFormatError,
+      yearAgeError,
+      monthFieldError,
+      dayFieldError,
+    });
 
-  useExitBlocker({
-    enabled: !!signupToken,
-    shouldBlockNavigation: ({ nextLocation, historyAction }) => {
-      if (nextLocation.pathname === ROUTES.WELCOME) return false;
+  const isExitModalOpenRef = useRef(false);
 
-      trackBrowserBack(historyAction);
-      return true;
-    },
-    onBlocked: ({ proceed, reset }) => {
+  const clearSignupSession = useCallback(() => {
+    sessionStorage.removeItem('signupToken');
+  }, []);
+
+  const openSignupExitModal = useCallback(
+    ({ onStay, onQuit }: { onStay?: () => void; onQuit: () => void }) => {
+      if (isExitModalOpenRef.current) return;
+      isExitModalOpenRef.current = true;
+
       trackSignupNotCompModalView(signupStep);
 
       overlay.open(({ unmount }) => {
-        const close = () => {
-          reset();
+        const stay = () => {
+          isExitModalOpenRef.current = false;
+          onStay?.();
           unmount();
+        };
+
+        const quit = () => {
+          isExitModalOpenRef.current = false;
+          unmount();
+          onQuit();
         };
 
         return (
@@ -146,16 +160,15 @@ const SignupPage = () => {
             topIconName="WarningFillDanger"
             onClose={() => {
               trackSignupNotCompModalKeepClick(signupStep);
-              close();
+              stay();
             }}
             onConfirm={() => {
               trackSignupNotCompModalKeepClick(signupStep);
-              close();
+              stay();
             }}
             onCancel={() => {
               trackSignupNotCompModalQuitClick(signupStep);
-              unmount();
-              proceed();
+              quit();
             }}
             content={
               <div className={styles.popupContent}>
@@ -171,6 +184,66 @@ const SignupPage = () => {
             }
           />
         );
+      });
+    },
+    [signupStep]
+  );
+
+  const { allowExit: allowBrowserBackExit } = useBrowserBackTrap({
+    enabled: !!signupToken,
+    onBack: () => {
+      trackBrowserBackPop();
+      openSignupExitModal({
+        onQuit: () => {
+          allowBrowserBackExit();
+          clearSignupSession();
+          navigate(ROUTES.LOGIN, { replace: true });
+        },
+      });
+    },
+  });
+
+  // OAuth callback으로 잠깐 이동했다 복귀한 경우 모달 복구
+  useEffect(() => {
+    if (!signupToken) return;
+    if (sessionStorage.getItem(SIGNUP_EXIT_MODAL_PENDING_KEY) !== '1') return;
+
+    sessionStorage.removeItem(SIGNUP_EXIT_MODAL_PENDING_KEY);
+    trackBrowserBackPop();
+    openSignupExitModal({
+      onQuit: () => {
+        allowBrowserBackExit();
+        clearSignupSession();
+        navigate(ROUTES.LOGIN, { replace: true });
+      },
+    });
+  }, [
+    signupToken,
+    trackBrowserBackPop,
+    openSignupExitModal,
+    allowBrowserBackExit,
+    clearSignupSession,
+    navigate,
+  ]);
+
+  useExitBlocker({
+    enabled: !!signupToken,
+    shouldBlockNavigation: ({ nextLocation, historyAction }) => {
+      if (nextLocation.pathname === ROUTES.WELCOME) return false;
+
+      // 브라우저 뒤로가기(POP)는 useBrowserBackTrap이 처리
+      if (historyAction === 'POP') return false;
+
+      trackBrowserBack(historyAction);
+      return true;
+    },
+    onBlocked: ({ proceed, reset }) => {
+      openSignupExitModal({
+        onStay: reset,
+        onQuit: () => {
+          clearSignupSession();
+          proceed();
+        },
       });
     },
   });

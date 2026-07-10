@@ -49,6 +49,12 @@ export const optionCard = recipe({
       '3:2': { aspectRatio: '3 / 2' },
     },
   },
+  compoundVariants: [
+    {
+      variants: { size: 'm', ratio: '3:2' },
+      style: { padding: unitVars.unit.gapPadding['400'] },
+    },
+  ],
   defaultVariants: {
     ratio: '1:1',
   },
@@ -89,24 +95,39 @@ export const optionInfoRow = style({
   position: 'relative',
   display: 'flex',
   alignItems: 'flex-start',
-  gap: unitVars.unit.gapPadding['100'],
-  paddingRight: unitVars.unit.gapPadding['100'],
+  padding: `0 ${unitVars.unit.gapPadding['100']}`,
   width: '100%',
   color: colorVars.color.text.inverse,
 });
 
 // 최대 2줄까지 노출하고, 넘어가면 말줄임(...) 처리
-export const optionTitle = style({
-  display: '-webkit-box',
-  flex: 1,
-  margin: 0,
-  maxHeight: '4rem',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  color: colorVars.color.text.inverse,
-  WebkitBoxOrient: 'vertical',
-  WebkitLineClamp: 2,
-  ...fontVars.font.body_m_13,
+export const optionTitle = recipe({
+  base: {
+    display: '-webkit-box',
+    flex: 1,
+    margin: 0,
+    maxHeight: '4rem',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    color: colorVars.color.text.inverse,
+    WebkitBoxOrient: 'vertical',
+    WebkitLineClamp: 2,
+    ...fontVars.font.body_m_13,
+  },
+  variants: {
+    size: { s: {}, m: {} },
+    ratio: { '1:1': {}, '3:2': {} },
+  },
+  compoundVariants: [
+    {
+      variants: { size: 'm', ratio: '3:2' },
+      style: { ...fontVars.font.title_m_15 },
+    },
+  ],
+  defaultVariants: {
+    size: 's',
+    ratio: '1:1',
+  },
 });
 
 export const optionFooter = style({

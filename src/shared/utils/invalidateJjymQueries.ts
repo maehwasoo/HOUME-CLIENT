@@ -10,7 +10,7 @@ export const invalidateJjymRelatedQueries = (
   const relatedKeys: QueryKey[] = [
     queryKeys.product.all,
     queryKeys.styles.all,
-    queryKeys.generate.all,
+
     queryKeys.mypage.images(),
   ];
 

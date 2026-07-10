@@ -1283,6 +1283,7 @@ export interface MyPageInfoResponse {
   name?: string;
   /** @format int64 */
   CreditCount?: number;
+  email?: string;
 }
 
 export interface ApiResponseUserImageHistoryListResponse {

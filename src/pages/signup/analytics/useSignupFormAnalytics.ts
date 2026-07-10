@@ -163,8 +163,22 @@ export const useSignupFormAnalytics = ({
     trackSignupBrowserBackClick(signupStep);
   };
 
+  /** useBrowserBackTrap 등 브라우저 뒤로가기 직접 가로채기 시 사용 */
+  const trackBrowserBackPop = () => {
+    const gesture = backGestureRef.current ?? 'click';
+    backGestureRef.current = null;
+
+    if (gesture === 'swipe') {
+      trackSignupBrowserBackSwipe(signupStep);
+      return;
+    }
+
+    trackSignupBrowserBackClick(signupStep);
+  };
+
   return {
     signupStep,
     trackBrowserBack,
+    trackBrowserBackPop,
   };
 };
