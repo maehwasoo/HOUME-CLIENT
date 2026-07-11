@@ -56,8 +56,3 @@ export function clarityEvent(name: string): void {
 export function upgradeClaritySession(reason: string): void {
   window.clarity?.('upgrade', reason);
 }
-
-/** 유저 식별: 내부 식별자로 세션을 유저와 연결 (이메일/이름 등 원시 PII 전달 금지) */
-export function identifyClarityUser(customId: string): void {
-  window.clarity?.('identify', customId);
-}
