@@ -58,7 +58,10 @@ export const useShopAnalyticsContext = ({
 
   const getShopListContext = useCallback(
     (
-      overrides?: Pick<ShopListContext, 'appliedValues' | 'appliedFilterChips'>
+      overrides?: Pick<
+        ShopListContext,
+        'appliedValues' | 'appliedFilterChips' | 'productCount'
+      >
     ): ShopListContext => ({
       searchKeyword: debouncedKeyword,
       appliedValues: overrides?.appliedValues ?? appliedValues,
@@ -66,7 +69,10 @@ export const useShopAnalyticsContext = ({
       furnitureLabels,
       priceLabels,
       colorLabels,
-      productCount,
+      productCount:
+        overrides && 'productCount' in overrides
+          ? overrides.productCount
+          : productCount,
       productCountViewed: productCountViewedRef.current,
     }),
     [

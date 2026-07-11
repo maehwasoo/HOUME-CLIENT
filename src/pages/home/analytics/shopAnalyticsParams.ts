@@ -22,7 +22,7 @@ export interface ShopListContext {
   furnitureLabels?: FilterLabelMap;
   priceLabels?: FilterLabelMap;
   colorLabels?: FilterLabelMap;
-  productCount?: number;
+  productCount?: number | null;
   productCountViewed?: number;
 }
 

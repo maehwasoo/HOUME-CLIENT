@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   COUNT_TRIGGER_EVENT,
   getShopListContextParams,
+  type ShopListContext,
   trackShopFilterListClick,
   trackShopFilterSheetResetClick,
   trackShopFilterSheetSubmit,
@@ -53,7 +54,10 @@ const useProductShopAnalytics = (
     selectedProducts,
     debouncedKeyword,
     isPending,
+    isFetching,
     isError,
+    isRecommended,
+    products,
     handleFilterChipClick,
     handleFilterApply,
     handleFilterResetClick,
@@ -103,6 +107,38 @@ const useProductShopAnalytics = (
     lastTrackedSearchKeywordRef.current = trimmed;
     trackShopSearchSubmit(getShopListContext());
   }, [debouncedKeyword, getShopListContext, isError, isPending]);
+
+  const pendingFilterSubmitRef = useRef<{
+    applied: Pick<ShopListContext, 'appliedValues' | 'appliedFilterChips'>;
+    sheetExpanded: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    const pending = pendingFilterSubmitRef.current;
+    if (!pending) return;
+    if (isPending || isFetching) return;
+    if (isError) {
+      pendingFilterSubmitRef.current = null;
+      return;
+    }
+
+    pendingFilterSubmitRef.current = null;
+    trackShopFilterSheetSubmit(
+      getShopListContext({
+        ...pending.applied,
+        // isRecommended=true면 필터 결과 없음(추천 섹션만 노출) → 추천 상품 수 제외
+        productCount: isRecommended ? null : products.length,
+      }),
+      pending.sheetExpanded
+    );
+  }, [
+    getShopListContext,
+    isError,
+    isFetching,
+    isPending,
+    isRecommended,
+    products.length,
+  ]);
 
   const trackSelectSheetCountChange = useCallback(
     (
@@ -165,10 +201,10 @@ const useProductShopAnalytics = (
   );
 
   const handleFilterApplyWithAnalytics = useCallback(() => {
-    // apply 직후 appliedValues는 아직 stale → 방금 적용한 값을 명시 전달해 filterSht_submit이 올바른 필터를 기록
+    // apply 직후 appliedValues·products는 stale → fetch settle 후 filterSht_submit 발화
     const applied = handleFilterApply();
-    trackShopFilterSheetSubmit(getShopListContext(applied), sheetExpanded);
-  }, [getShopListContext, handleFilterApply, sheetExpanded]);
+    pendingFilterSubmitRef.current = { applied, sheetExpanded };
+  }, [handleFilterApply, sheetExpanded]);
 
   const handleFilterResetClickWithAnalytics = useCallback(() => {
     handleFilterResetClick();

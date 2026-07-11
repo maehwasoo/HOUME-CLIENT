@@ -1,6 +1,6 @@
 import {
   ENTRY_ROUTE,
-  getNextFunnelStep,
+  RESULT_TYPE,
   useImageFlowStore,
 } from '@store/useImageFlowStore';
 
@@ -27,12 +27,21 @@ export const getReturnScreenNameFromImageEntry = (): ScreenName | undefined => {
   }
 };
 
-/** loadImg_page_view `return_screen_name` — generate 직전 퍼널 스텝 */
+/** loadImg `return_screen_name` — 이 생성 플로우가 도달할 결과 화면 */
 export const getLoadImgReturnScreenName = (): ScreenName => {
-  const entryRoute = useImageFlowStore.getState().entryRoute;
-  if (!entryRoute) return SCREEN_NAME.ROOM_TYPE;
+  const resultType = useImageFlowStore.getState().resultType;
 
-  return getNextFunnelStep(entryRoute) === 'INTERIOR_STYLE'
-    ? SCREEN_NAME.SELECT_FURNITURE
-    : SCREEN_NAME.ROOM_TYPE;
+  if (resultType === RESULT_TYPE.PRODUCT) {
+    return SCREEN_NAME.RESULT_LIST;
+  }
+
+  if (
+    resultType === RESULT_TYPE.FULL_FUNNEL ||
+    resultType === RESULT_TYPE.BANNER ||
+    resultType === RESULT_TYPE.STYLE
+  ) {
+    return SCREEN_NAME.RESULT_REC;
+  }
+
+  return SCREEN_NAME.ROOM_TYPE;
 };

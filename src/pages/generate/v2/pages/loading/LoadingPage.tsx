@@ -33,6 +33,7 @@ import {
   ensureShortFunnelFlowSnapshot,
   getLoadImgReturnScreenName,
 } from '@shared/analytics/utils/imageFlow';
+import { isDocumentReloadOnPath } from '@shared/analytics/utils/isDocumentReloadOnPath';
 import { loginStatusParams } from '@shared/analytics/utils/loginStatus';
 import { TOASTER_ID, TOAST_TYPE } from '@shared/types/toast';
 
@@ -183,14 +184,14 @@ const LoadingPage = () => {
     { enabled: isRequestValid }
   );
 
-  useEffect(() => {
-    const [navigation] = performance.getEntriesByType(
-      'navigation'
-    ) as PerformanceNavigationTiming[];
+  const hasTrackedPageRefreshRef = useRef(false);
 
-    if (navigation?.type === 'reload') {
-      trackLoadImgPageRefresh();
-    }
+  useEffect(() => {
+    if (hasTrackedPageRefreshRef.current) return;
+    if (!isDocumentReloadOnPath(ROUTES.GENERATE)) return;
+
+    hasTrackedPageRefreshRef.current = true;
+    trackLoadImgPageRefresh();
   }, []);
 
   const viewedProductIdsRef = useRef<Set<number>>(new Set());
