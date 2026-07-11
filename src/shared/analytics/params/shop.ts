@@ -36,7 +36,7 @@ export interface ShopParams {
   alternative_product_count?: number;
   /** ex. "385, 394, 208" */
   alternative_product_ids?: string;
-  product_count?: number;
+  product_count?: number | null;
   product_count_viewed?: number;
   selected_count?: number;
   /** ex. "345, 369, 102" */
