@@ -6,17 +6,17 @@ import { useUserStore } from '@store/useUserStore';
 
 import { getLoginStatus } from '@shared/analytics/utils/loginStatus';
 import { resolveScreenName } from '@shared/analytics/utils/screenName';
-import { identifyClarityUser, setClarityTag } from '@shared/config/clarity';
+import { setClarityTag } from '@shared/config/clarity';
 import { AB_TEST_STORAGE_KEY, isABTestGroup } from '@shared/types/abTest';
 
 /**
- * GA4 세그먼트 소스를 Clarity 커스텀 태그/식별로 미러링하는 훅
+ * GA4 세그먼트 소스를 Clarity 커스텀 태그로 미러링하는 훅
  * RootLayout에서 1회 마운트 — 세션 레코딩·히트맵을 GA4와 같은 축으로 필터링 가능하게 함
+ * +) 개인 식별(identify)은 하지 않는다 — Sentry·GA와 동일하게 비식별 원칙 유지 (개인정보처리방침과 정합)
  */
 export const useClaritySync = (): void => {
   const location = useLocation();
   const accessToken = useUserStore((state) => state.accessToken);
-  const userId = useUserStore((state) => state.userId);
 
   // 화면 단위 세그먼트 — SPA 탭 화면(예: home ?tab=product)처럼 pathname이 안 바뀌는 화면을
   // 히트맵/레코딩에서 구분하는 핵심 태그
@@ -45,11 +45,4 @@ export const useClaritySync = (): void => {
       // localStorage 접근 실패 시 무시
     }
   }, [location.pathname, location.search]);
-
-  // 유저 식별 — userId 확정 시 (boot 시 localStorage 하이드레이션 또는 로그인 후 useUserSync)
-  useEffect(() => {
-    if (userId != null) {
-      identifyClarityUser(String(userId));
-    }
-  }, [userId]);
 };
