@@ -27,6 +27,12 @@ interface DragHandleBottomSheetProps {
   collapsedHeight?: string;
   /** Dismissible 모드에서 바텀시트가 닫혀야 할 때 부모에게 알리는 콜백 */
   onDismiss?: () => void;
+  /** 스크롤 다운 시 최소화 상태(핸들 + 썸네일만). Persistent 모드에서만 유효 (기본: false) */
+  minimized?: boolean;
+  /** 최소화 시 패널 높이 (rem 문자열). minimized일 때만 사용 */
+  minimizedHeight?: string;
+  /** 최소화 상태에서 드래그가 시작될 때 부모에게 복원을 알리는 콜백 */
+  onRestoreFromMinimized?: () => void;
 }
 
 // 'snapping' = collapsed → expanded snap 중 콘텐츠 자연 높이로 부드럽게 보간하는 단계
@@ -53,6 +59,9 @@ const DragHandleBottomSheet = ({
   expanded: expandedFromParent,
   collapsedHeight,
   onDismiss,
+  minimized = false,
+  minimizedHeight,
+  onRestoreFromMinimized,
 }: DragHandleBottomSheetProps) => {
   const isPersistent = collapsedHeight !== undefined;
 
@@ -142,7 +151,9 @@ const DragHandleBottomSheet = ({
         ? parsePxFromRem(collapsedHeight as string)
         : 0;
       const expandedPx = resolveExpandedPx();
-      const startHeight = panel.offsetHeight;
+      // 최소화 상태에서 드래그 시작 시엔 패널 실측(minimizedHeight)이 아니라 collapsed 높이를 기준으로 삼아, clamp 데드존/점프 없이 collapsed에서 확장 드래그가 이어지도록 함
+      const startHeight =
+        isPersistent && minimized ? collapsedPx : panel.offsetHeight;
 
       startYRef.current = clientY;
       startHeightRef.current = startHeight;
@@ -152,7 +163,7 @@ const DragHandleBottomSheet = ({
       draggedRef.current = false;
       finishedRef.current = false;
     },
-    [isPersistent, collapsedHeight]
+    [isPersistent, collapsedHeight, minimized]
   );
 
   // 드래그 이동: delta → height clamp → setDragHeight
@@ -245,11 +256,12 @@ const DragHandleBottomSheet = ({
       if (!panel) return;
 
       e.stopPropagation();
+      if (isPersistent && minimized) onRestoreFromMinimized?.();
       beginDrag(e.clientY, panel);
       pointerIdRef.current = e.pointerId;
       e.currentTarget.setPointerCapture(e.pointerId);
     },
-    [beginDrag]
+    [beginDrag, isPersistent, minimized, onRestoreFromMinimized]
   );
 
   const handlePointerMove = useCallback(
@@ -305,12 +317,20 @@ const DragHandleBottomSheet = ({
 
       // takeover: 현재 y 기준으로 드래그 시작 (점프 없이 이 지점부터 시트 이동)
       bodyTakenOverRef.current = true;
+      if (isPersistent && minimized) onRestoreFromMinimized?.();
       beginDrag(y, panel);
       draggedRef.current = true;
       setDragPhase('dragging');
       applyDragMove(y);
     },
-    [expanded, beginDrag, applyDragMove]
+    [
+      expanded,
+      beginDrag,
+      applyDragMove,
+      isPersistent,
+      minimized,
+      onRestoreFromMinimized,
+    ]
   );
 
   const handleBodyTouchEnd = useCallback(
@@ -339,12 +359,21 @@ const DragHandleBottomSheet = ({
     return Math.max(0, Math.min(1, dragHeight / expandedPx));
   };
 
-  // panel height 결정
+  // expanded일 땐 minimized 무시 (안전 가드). minimized는 항상 collapsed의 서브상태
+  const isMinimized = isPersistent && minimized && !expanded;
+
+  // panel height 결정 (dragging > expanded > minimized > collapsed 우선순위)
   const panelStyle: React.CSSProperties =
     dragPhase === 'dragging' && dragHeight !== null
       ? { height: `${dragHeight}px` }
       : isPersistent
-        ? { height: expanded ? 'auto' : collapsedHeight }
+        ? {
+            height: expanded
+              ? 'auto'
+              : isMinimized && minimizedHeight
+                ? minimizedHeight
+                : collapsedHeight,
+          }
         : {};
 
   const handleOverlayClick = () => {
@@ -360,6 +389,7 @@ const DragHandleBottomSheet = ({
       open={open}
       headerType="dragHandle"
       expanded={expanded}
+      minimized={isMinimized}
       contentSlot={contentSlot}
       primaryButton={primaryButton}
       secondaryButton={secondaryButton}

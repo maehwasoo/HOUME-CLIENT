@@ -7,7 +7,15 @@ import {
   pressInteraction,
   sheetSlideInteraction,
 } from '@styles/tokensV2/interaction/presets';
+import { transition } from '@styles/tokensV2/interaction/utils';
 import { unitVars } from '@styles/tokensV2/unit.css';
+
+// 최소화 시 actionRow가 접히는 트랜지션 (패널 height 슬라이드와 동일 duration/easing)
+// transform은 쓰지 않음 — translateY(%)가 애니메이션 중인 높이에 종속돼 버튼이 출렁이므로 maxHeight+opacity만 사용
+const collapseTransition = [
+  transition('max-height'),
+  transition('opacity'),
+].join(', ');
 // dim과 바텀시트를 동일한 모바일 프레임 폭으로 맞추기 위한 공통 폭 제한
 const mobileFrame = style({
   width: '100%',
@@ -185,7 +193,6 @@ export const body = recipe({
   base: {
     display: 'flex',
     flexDirection: 'column',
-    justifyContent: 'space-between',
     padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['600']}`,
     width: '100%',
     height: '100%',
@@ -200,6 +207,10 @@ export const body = recipe({
       true: {},
       false: {},
     },
+    minimized: {
+      true: {},
+      false: {},
+    },
   },
   compoundVariants: [
     {
@@ -210,10 +221,16 @@ export const body = recipe({
       variants: { headerType: 'dragHandle', expanded: true },
       style: { gap: unitVars.unit.gapPadding['500'] },
     },
+    // 최소화 시 접힌 버튼 자리에 남는 gap 제거 (썸네일이 핸들 바로 아래 붙도록)
+    {
+      variants: { headerType: 'dragHandle', minimized: true },
+      style: { gap: unitVars.unit.gapPadding['000'] },
+    },
   ],
   defaultVariants: {
     headerType: 'close',
     expanded: false,
+    minimized: false,
   },
 });
 
@@ -236,11 +253,32 @@ export const contentSlot = style({
 });
 
 // 버튼 래퍼 row
-export const actionRow = style({
-  display: 'flex',
-  alignItems: 'stretch',
-  gap: unitVars.unit.gapPadding['200'],
-  width: '100%',
+// minimized(스크롤 다운)일 때 maxHeight+opacity로 접혀서 사라짐
+// base maxHeight는 버튼 높이(2XL=5.6rem) 바로 위로 두어 collapse/reveal 타이밍을 패널 전환과 맞춤
+// overflow:hidden은 minimized일 때만 적용 (close 타입 버튼 포커스 링 클립 방지)
+export const actionRow = recipe({
+  base: {
+    display: 'flex',
+    alignItems: 'stretch',
+    gap: unitVars.unit.gapPadding['200'],
+    transition: collapseTransition,
+    width: '100%',
+    maxHeight: '6rem',
+  },
+  variants: {
+    minimized: {
+      true: {
+        opacity: 0,
+        pointerEvents: 'none',
+        maxHeight: 0,
+        overflow: 'hidden',
+      },
+      false: {},
+    },
+  },
+  defaultVariants: {
+    minimized: false,
+  },
 });
 
 // secondary 버튼이 자기 너비를 유지하도록 감싸는 슬롯
