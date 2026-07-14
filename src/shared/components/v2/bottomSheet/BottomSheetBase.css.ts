@@ -48,11 +48,25 @@ export const overlay = style([
 ]);
 
 // 모바일 프레임 폭으로 panel을 감싸는 컨테이너
+// ::after: 모바일 height 전환 중 시트 하단이 순간 뷰포트 바닥에서 떠 뒷배경이 비치는 것 방지 —
+// 패널 배경색을 시트 아래(뷰포트 밖)로 연장해 그 순간 갭을 가림
 export const content = style([
   mobileFrame,
   {
     position: 'relative',
     outline: 'none',
+    selectors: {
+      '&::after': {
+        position: 'absolute',
+        top: '100%',
+        right: 0,
+        left: 0,
+        backgroundColor: colorVars.color.bg.primary,
+        pointerEvents: 'none',
+        height: '6rem',
+        content: '""',
+      },
+    },
   },
 ]);
 
@@ -193,6 +207,7 @@ export const body = recipe({
   base: {
     display: 'flex',
     flexDirection: 'column',
+    justifyContent: 'space-between',
     padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['600']}`,
     width: '100%',
     height: '100%',
