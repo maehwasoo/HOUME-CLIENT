@@ -51,6 +51,8 @@ interface BottomSheetBaseProps {
   preventScroll?: boolean;
   /** dragHandle 시트의 펼침 상태. 본문↔버튼 gap을 collapsed 8px / expanded 20px로 분기 (기본: false) */
   expanded?: boolean;
+  /** 최소화 상태(스크롤 다운). actionRow(버튼)를 접어 슬라이드 아웃 (기본: false) */
+  minimized?: boolean;
   /** 콘텐츠 스크롤 컨테이너(contentSlot) ref. body 드래그 시 scrollTop 측정용 */
   contentScrollRef?: React.Ref<HTMLDivElement>;
   /** contentSlot에 부착할 body 터치 드래그 핸들러 (DragHandleBottomSheet에서 시트 expand/collapse 제어) */
@@ -80,6 +82,7 @@ const BottomSheetBase = ({
   backgroundInteractable = false,
   preventScroll = true,
   expanded = false,
+  minimized = false,
   contentScrollRef,
   contentTouchHandlers,
 }: BottomSheetBaseProps) => {
@@ -283,7 +286,7 @@ const BottomSheetBase = ({
               />
             </div>
           )}
-          <div className={styles.body({ headerType, expanded })}>
+          <div className={styles.body({ headerType, expanded, minimized })}>
             <div
               ref={contentScrollRef}
               className={styles.contentSlot}
@@ -295,7 +298,7 @@ const BottomSheetBase = ({
             >
               {contentSlot}
             </div>
-            <div className={styles.actionRow}>
+            <div className={styles.actionRow({ minimized })}>
               {secondaryButton && (
                 <div className={styles.secondaryActionSlot}>
                   {secondaryButton}

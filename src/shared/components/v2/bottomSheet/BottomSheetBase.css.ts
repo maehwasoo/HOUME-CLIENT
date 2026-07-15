@@ -7,7 +7,15 @@ import {
   pressInteraction,
   sheetSlideInteraction,
 } from '@styles/tokensV2/interaction/presets';
+import { transition } from '@styles/tokensV2/interaction/utils';
 import { unitVars } from '@styles/tokensV2/unit.css';
+
+// 최소화 시 actionRow가 접히는 트랜지션 (패널 height 슬라이드와 동일 duration/easing)
+// transform은 쓰지 않음 — translateY(%)가 애니메이션 중인 높이에 종속돼 버튼이 출렁이므로 maxHeight+opacity만 사용
+const collapseTransition = [
+  transition('max-height'),
+  transition('opacity'),
+].join(', ');
 // dim과 바텀시트를 동일한 모바일 프레임 폭으로 맞추기 위한 공통 폭 제한
 const mobileFrame = style({
   width: '100%',
@@ -40,11 +48,25 @@ export const overlay = style([
 ]);
 
 // 모바일 프레임 폭으로 panel을 감싸는 컨테이너
+// ::after: 모바일 height 전환 중 시트 하단이 순간 뷰포트 바닥에서 떠 뒷배경이 비치는 것 방지 —
+// 패널 배경색을 시트 아래(뷰포트 밖)로 연장해 그 순간 갭을 가림
 export const content = style([
   mobileFrame,
   {
     position: 'relative',
     outline: 'none',
+    selectors: {
+      '&::after': {
+        position: 'absolute',
+        top: '100%',
+        right: 0,
+        left: 0,
+        backgroundColor: colorVars.color.bg.primary,
+        pointerEvents: 'none',
+        height: '6rem',
+        content: '""',
+      },
+    },
   },
 ]);
 
@@ -200,6 +222,10 @@ export const body = recipe({
       true: {},
       false: {},
     },
+    minimized: {
+      true: {},
+      false: {},
+    },
   },
   compoundVariants: [
     {
@@ -210,10 +236,16 @@ export const body = recipe({
       variants: { headerType: 'dragHandle', expanded: true },
       style: { gap: unitVars.unit.gapPadding['500'] },
     },
+    // 최소화 시 접힌 버튼 자리에 남는 gap 제거 (썸네일이 핸들 바로 아래 붙도록)
+    {
+      variants: { headerType: 'dragHandle', minimized: true },
+      style: { gap: unitVars.unit.gapPadding['000'] },
+    },
   ],
   defaultVariants: {
     headerType: 'close',
     expanded: false,
+    minimized: false,
   },
 });
 
@@ -236,11 +268,32 @@ export const contentSlot = style({
 });
 
 // 버튼 래퍼 row
-export const actionRow = style({
-  display: 'flex',
-  alignItems: 'stretch',
-  gap: unitVars.unit.gapPadding['200'],
-  width: '100%',
+// minimized(스크롤 다운)일 때 maxHeight+opacity로 접혀서 사라짐
+// base maxHeight는 버튼 높이(2XL=5.6rem) 바로 위로 두어 collapse/reveal 타이밍을 패널 전환과 맞춤
+// overflow:hidden은 minimized일 때만 적용 (close 타입 버튼 포커스 링 클립 방지)
+export const actionRow = recipe({
+  base: {
+    display: 'flex',
+    alignItems: 'stretch',
+    gap: unitVars.unit.gapPadding['200'],
+    transition: collapseTransition,
+    width: '100%',
+    maxHeight: '6rem',
+  },
+  variants: {
+    minimized: {
+      true: {
+        opacity: 0,
+        pointerEvents: 'none',
+        maxHeight: 0,
+        overflow: 'hidden',
+      },
+      false: {},
+    },
+  },
+  defaultVariants: {
+    minimized: false,
+  },
 });
 
 // secondary 버튼이 자기 너비를 유지하도록 감싸는 슬롯

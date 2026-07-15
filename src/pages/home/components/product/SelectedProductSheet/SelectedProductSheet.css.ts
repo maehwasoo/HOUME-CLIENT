@@ -1,21 +1,57 @@
 import { style } from '@vanilla-extract/css';
+import { recipe } from '@vanilla-extract/recipes';
 
 import { colorVars } from '@styles/tokensV2/color.css';
 import { fontVars } from '@styles/tokensV2/font.css';
+import { transition } from '@styles/tokensV2/interaction/utils';
 import { unitVars } from '@styles/tokensV2/unit.css';
 
-export const container = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: unitVars.unit.gapPadding['200'],
-  width: '100%',
+// 최소화 시 헤더가 접히는 트랜지션 (패널 height 슬라이드와 동일 duration/easing)
+const collapseTransition = [
+  transition('max-height'),
+  transition('opacity'),
+].join(', ');
+
+export const container = recipe({
+  base: {
+    display: 'flex',
+    flexDirection: 'column',
+    // Figma contentSlot gap = gap/100 (4px)
+    gap: unitVars.unit.gapPadding['100'],
+    width: '100%',
+  },
+  variants: {
+    minimized: {
+      true: { gap: unitVars.unit.gapPadding['000'] },
+      false: {},
+    },
+  },
+  defaultVariants: {
+    minimized: false,
+  },
 });
 
-export const headerRow = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: unitVars.unit.gapPadding['100'],
-  padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['200']}`,
+// 최소화 시 헤더("선택한 상품 n/6")를 접어서 숨김 (양방향 트랜지션 위해 base에 유한 maxHeight)
+export const headerRow = recipe({
+  base: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: unitVars.unit.gapPadding['100'],
+    transition: collapseTransition,
+    padding: `${unitVars.unit.gapPadding['000']} ${unitVars.unit.gapPadding['100']}`,
+    // 헤더 실제 높이(~2.7rem) 바로 위 — reveal 타이밍을 버튼/패널과 맞춤
+    maxHeight: '3rem',
+    overflow: 'hidden',
+  },
+  variants: {
+    minimized: {
+      true: { opacity: 0, maxHeight: 0 },
+      false: {},
+    },
+  },
+  defaultVariants: {
+    minimized: false,
+  },
 });
 
 export const title = style({
@@ -37,7 +73,7 @@ export const compactRow = style({
   display: 'grid',
   gridTemplateColumns: 'repeat(6, 1fr)',
   gap: unitVars.unit.gapPadding['050'],
-  padding: `0 ${unitVars.unit.gapPadding['050']}`,
+  padding: `${unitVars.unit.gapPadding['050']} ${unitVars.unit.gapPadding['100']}`,
   width: '100%',
 });
 

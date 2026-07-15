@@ -12,6 +12,8 @@ import * as styles from './SelectedProductSheet.css';
 
 interface SelectedProductSheetProps {
   expanded: boolean;
+  /** 스크롤 다운 최소화 상태. 헤더를 접어서 숨김 (기본: false) */
+  minimized?: boolean;
   selectedProducts: SelectedProduct[];
   onRemoveProduct: (id: number) => void;
   onAddProductClick?: () => void;
@@ -21,6 +23,7 @@ interface SelectedProductSheetProps {
 
 const SelectedProductSheet = ({
   expanded,
+  minimized = false,
   selectedProducts,
   onRemoveProduct,
   onAddProductClick,
@@ -77,8 +80,8 @@ const SelectedProductSheet = ({
   );
 
   return (
-    <div className={styles.container}>
-      <div className={styles.headerRow}>
+    <div className={styles.container({ minimized })}>
+      <div className={styles.headerRow({ minimized })}>
         <Icon name={expanded ? 'ChevronUp' : 'ChevronDown'} size="16" />
         <p className={styles.title}>선택한 상품</p>
         <span className={styles.count}>

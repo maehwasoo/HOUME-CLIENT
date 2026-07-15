@@ -8,6 +8,7 @@ import {
   MAX_SELECTED_PRODUCTS,
   useProductTabController,
 } from '@pages/home/hooks/useProductTabController';
+import { useSheetMinimizeOnScroll } from '@pages/home/hooks/useSheetMinimizeOnScroll';
 import { consumeReopenProduct } from '@pages/home/utils/productDetailOverlayReopen';
 
 import { useImageFlowStore } from '@store/useImageFlowStore';
@@ -20,7 +21,10 @@ import ProductDetailOverlay from './ProductPopup/ProductDetailOverlay';
 import * as styles from './ProductTab.css';
 import SearchSection from './SearchSection/SearchSection';
 import SelectedProductSheet from './SelectedProductSheet/SelectedProductSheet';
-import { PRODUCT_BOTTOM_SHEET_COLLAPSED_HEIGHT } from '../../constants/productTab';
+import {
+  PRODUCT_BOTTOM_SHEET_COLLAPSED_HEIGHT,
+  PRODUCT_BOTTOM_SHEET_MINIMIZED_HEIGHT,
+} from '../../constants/productTab';
 
 const ProductTab = () => {
   const productsToBeRestored = useMemo(() => {
@@ -87,6 +91,11 @@ const ProductTab = () => {
     handleFilterSheetClose,
   } = controller;
 
+  // 스크롤 다운 시 시트 최소화(핸들+썸네일만) / 스크롤 업 시 복원
+  // collapsed & 스크롤 가능한 구간에서만 활성화
+  const { minimized: sheetMinimized, restore: restoreSheet } =
+    useSheetMinimizeOnScroll({ active: !filterSheetOpen && !sheetExpanded });
+
   useEffect(() => {
     const reopen = consumeReopenProduct();
     if (!reopen) return;
@@ -152,11 +161,15 @@ const ProductTab = () => {
       <DragHandleBottomSheet
         open={!filterSheetOpen}
         collapsedHeight={PRODUCT_BOTTOM_SHEET_COLLAPSED_HEIGHT}
+        minimizedHeight={PRODUCT_BOTTOM_SHEET_MINIMIZED_HEIGHT}
+        minimized={sheetMinimized}
+        onRestoreFromMinimized={restoreSheet}
         expanded={sheetExpanded}
         onExpandedChange={setSheetExpanded}
         contentSlot={
           <SelectedProductSheet
             expanded={sheetExpanded}
+            minimized={sheetMinimized}
             selectedProducts={selectedProducts}
             onRemoveProduct={handleRemoveSelectedProduct}
             onAddProductClick={handleAddProductClick}
