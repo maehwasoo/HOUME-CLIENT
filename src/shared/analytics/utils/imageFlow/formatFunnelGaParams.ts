@@ -71,5 +71,11 @@ export const toResultPreferenceType = (
 
 // ── sheet_expansion_status (shop) ─────────────────────────────
 
-export const toSheetExpansionStatus = (expanded: boolean) =>
-  expanded ? SHEET_EXPANSION_STATUS.EXPANDED : SHEET_EXPANSION_STATUS.DEFAULT;
+export const toSheetExpansionStatus = (
+  expanded: boolean,
+  collapsed = false
+) => {
+  if (expanded) return SHEET_EXPANSION_STATUS.EXPANDED;
+  if (collapsed) return SHEET_EXPANSION_STATUS.COLLAPSED;
+  return SHEET_EXPANSION_STATUS.DEFAULT;
+};

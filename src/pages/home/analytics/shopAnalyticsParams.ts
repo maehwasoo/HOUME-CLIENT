@@ -28,6 +28,7 @@ export interface ShopListContext {
 
 export interface ShopSelectSheetContext extends ShopListContext {
   sheetExpanded: boolean;
+  sheetCollapsed?: boolean;
   selectedProducts: SelectedProduct[];
   countTriggerEvent?: CountTriggerEvent;
 }
@@ -122,18 +123,25 @@ export const getShopListContextParams = (
 export const getShopSelectSheetBaseParams = (
   {
     sheetExpanded,
+    sheetCollapsed = false,
     selectedProducts,
     countTriggerEvent,
   }: Pick<
     ShopSelectSheetContext,
-    'sheetExpanded' | 'selectedProducts' | 'countTriggerEvent'
+    | 'sheetExpanded'
+    | 'sheetCollapsed'
+    | 'selectedProducts'
+    | 'countTriggerEvent'
   >,
   options?: Pick<ShopListParamsOptions, 'includeLoginStatus'>
 ) => {
   return {
     ...(options?.includeLoginStatus ? loginStatusParams() : {}),
     ...shopScreenParams(),
-    sheet_expansion_status: toSheetExpansionStatus(sheetExpanded),
+    sheet_expansion_status: toSheetExpansionStatus(
+      sheetExpanded,
+      sheetCollapsed
+    ),
     selected_count: selectedProducts.length,
     selected_product_ids: formatSelectedProductIds(selectedProducts),
     ...(countTriggerEvent ? { count_trigger_event: countTriggerEvent } : {}),

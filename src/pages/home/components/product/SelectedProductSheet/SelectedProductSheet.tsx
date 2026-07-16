@@ -124,7 +124,11 @@ const SelectedProductSheet = ({
             />
           ))}
           {Array.from({ length: emptyCount }).map((_, index) => (
-            <div key={`empty-${index}`} className={styles.compactSlot} />
+            <div
+              key={`empty-${index}`}
+              className={styles.compactSlot}
+              onClick={onAddProductClick}
+            />
           ))}
         </div>
       )}
