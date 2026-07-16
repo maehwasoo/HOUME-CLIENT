@@ -50,26 +50,6 @@ const ProductTab = () => {
   });
 
   const {
-    shopListContext,
-    setSheetExpanded,
-    handleProductListRender,
-    handleFilterChipClick,
-    handleFilterApply,
-    handleFilterResetClick,
-    handleSelectProduct,
-    handleSelectProductFromDetailModal,
-    handleRemoveSelectedProduct,
-    handleAddProductClick,
-    handleDecorateWithProductsClick,
-    handleSearchBarClick,
-    handleSearchClear,
-    handleSelectSheetItemClick,
-  } = useProductShopAnalytics(controller, {
-    productCountViewed,
-    onProductViewedCountChange: setProductCountViewed,
-  });
-
-  const {
     sheetExpanded,
     filterSheetOpen,
     chipSelected,
@@ -91,10 +71,31 @@ const ProductTab = () => {
     handleFilterSheetClose,
   } = controller;
 
-  // 스크롤 다운 시 시트 최소화(핸들+썸네일만) / 스크롤 업 시 복원
-  // collapsed & 스크롤 가능한 구간에서만 활성화
-  const { minimized: sheetMinimized, restore: restoreSheet } =
+  // 스크롤 다운 시 시트 축소(핸들+썸네일만) / 스크롤 업 시 복원
+  // default 높이 & 스크롤 가능한 구간에서만 활성화
+  const { minimized: sheetCollapsed, restore: restoreSheet } =
     useSheetMinimizeOnScroll({ active: !filterSheetOpen && !sheetExpanded });
+
+  const {
+    shopListContext,
+    setSheetExpanded,
+    handleProductListRender,
+    handleFilterChipClick,
+    handleFilterApply,
+    handleFilterResetClick,
+    handleSelectProduct,
+    handleSelectProductFromDetailModal,
+    handleRemoveSelectedProduct,
+    handleAddProductClick,
+    handleDecorateWithProductsClick,
+    handleSearchBarClick,
+    handleSearchClear,
+    handleSelectSheetItemClick,
+  } = useProductShopAnalytics(controller, {
+    productCountViewed,
+    onProductViewedCountChange: setProductCountViewed,
+    sheetCollapsed,
+  });
 
   useEffect(() => {
     const reopen = consumeReopenProduct();
@@ -162,14 +163,14 @@ const ProductTab = () => {
         open={!filterSheetOpen}
         collapsedHeight={PRODUCT_BOTTOM_SHEET_COLLAPSED_HEIGHT}
         minimizedHeight={PRODUCT_BOTTOM_SHEET_MINIMIZED_HEIGHT}
-        minimized={sheetMinimized}
+        minimized={sheetCollapsed}
         onRestoreFromMinimized={restoreSheet}
         expanded={sheetExpanded}
         onExpandedChange={setSheetExpanded}
         contentSlot={
           <SelectedProductSheet
             expanded={sheetExpanded}
-            minimized={sheetMinimized}
+            minimized={sheetCollapsed}
             selectedProducts={selectedProducts}
             onRemoveProduct={handleRemoveSelectedProduct}
             onAddProductClick={handleAddProductClick}

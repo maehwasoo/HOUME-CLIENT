@@ -82,6 +82,7 @@ export const compactSlot = style({
   border: `1px solid ${colorVars.color.border.tertiary}`,
   borderRadius: unitVars.unit.radius['300'],
   backgroundColor: colorVars.color.bg.primary,
+  cursor: 'pointer',
 });
 
 export const expandedGrid = style({

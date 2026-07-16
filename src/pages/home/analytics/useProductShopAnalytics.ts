@@ -34,6 +34,7 @@ import { resolveShopImageEntryRoute } from '@shared/analytics/utils/shop/resolve
 interface UseProductShopAnalyticsOptions {
   productCountViewed: number;
   onProductViewedCountChange: (count: number) => void;
+  sheetCollapsed?: boolean;
 }
 
 /**
@@ -44,6 +45,7 @@ const useProductShopAnalytics = (
   {
     productCountViewed,
     onProductViewedCountChange,
+    sheetCollapsed = false,
   }: UseProductShopAnalyticsOptions
 ) => {
   const { data: recentFloorPlanData } = useRecentFloorPlanQuery();
@@ -75,7 +77,11 @@ const useProductShopAnalytics = (
     getSelectSheetContext,
     getSelectSheetContextRef,
     shopListContext,
-  } = useShopAnalyticsContext({ controller, productCountViewed });
+  } = useShopAnalyticsContext({
+    controller,
+    productCountViewed,
+    sheetCollapsed,
+  });
 
   const shopPageParams = useMemo(
     () =>
@@ -284,6 +290,7 @@ const useProductShopAnalytics = (
     trackShopSelectSheetCtaClick({
       ...getShopListContext(),
       sheetExpanded,
+      sheetCollapsed,
       selectedProducts,
       imageEntryRoute: resolveShopImageEntryRoute(),
       // 상품 탭 CTA의 return screen은 항상 shop 고정 (진입 경로는 image_entry_route로 별도 계산)
@@ -299,6 +306,7 @@ const useProductShopAnalytics = (
     recentFloorPlanData,
     selectedProducts,
     sheetExpanded,
+    sheetCollapsed,
   ]);
 
   const handleSelectSheetItemClick = useCallback(
