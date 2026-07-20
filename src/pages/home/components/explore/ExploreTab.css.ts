@@ -17,12 +17,8 @@ export const content = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
+  gap: unitVars.unit.gapPadding['700'],
   padding: unitVars.unit.gapPadding['500'],
-  width: '100%',
-});
-
-export const promoBannerSection = style({
-  padding: `${unitVars.unit.gapPadding['500']} 0`,
   width: '100%',
 });
 
